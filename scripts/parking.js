@@ -30,14 +30,24 @@ module.exports = function (robot) {
       });
       
       var alias = {
-        "p11": "Conifer",
+        "p12": "Daycare",
+        "p11 l1": "Conifer L1 (Staff)",
+        "p11 l2": "Conifer L2 (Staff)",
+        "p11 l3": "Conifer L3 (Students)",
         "p10": "UQ Centre",
-        "p8": "Boatshed 2 Storey",
         "p9": "Boatshed Open",
-        "p7": "Dustbowl" 
+        "p8 l1": "Boatshed Bot",
+        "p8 l2": "Boatshed Top",
+        "p7": "Dustbowl",
+        "p6": "BSL Short Term",
+        "p5": "P5",
+        "p4": "Multi Level",
+        "p3": "Multi Level",
+        "p2": "P2",
+        "p1": "P1"
       };
       
-      var response = ">Parking at the University of Queensland";
+      var response = ">Available parking at the University of Queensland\r\n";
       
       var formatted = [];
       for (var i = 0; i < responses.length; i++) {
@@ -74,7 +84,7 @@ module.exports = function (robot) {
           response += " ";
         }
         
-        if (parks < parksPerRow) {
+        if (parks + 1 < parksPerRow) {
           parks++;          
         } else {
           response += "\r\n";
