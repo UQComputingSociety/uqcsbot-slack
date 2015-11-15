@@ -1,0 +1,25 @@
+{
+  "name": "uqcsbot",
+  "version": "0.0.0",
+  "private": true,
+  "author": "UQCS Committee (contact@uqcs.org.au)",
+  "description": "A bot you can contribute to",
+  "dependencies": {
+    "hubot": "^2.17.0",
+    "hubot-diagnostics": "0.0.1",
+    "hubot-google-images": "^0.2.3",
+    "hubot-google-translate": "^0.2.0",
+    "hubot-help": "^0.1.2",
+    "hubot-heroku-keepalive": "^1.0.0",
+    "hubot-maps": "0.0.2",
+    "hubot-pugme": "^0.1.0",
+    "hubot-redis-brain": "0.0.3",
+    "hubot-rules": "^0.1.1",
+    "hubot-scripts": "^2.16.2",
+    "hubot-shipit": "^0.2.0",
+    "hubot-slack": "^3.4.2"
+  },
+  "engines": {
+    "node": "0.10.x"
+  }
+}
