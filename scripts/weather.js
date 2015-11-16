@@ -5,8 +5,6 @@
 //   !weather <location (opt)> - Gets the weather for a location (Defaults to Brisbane) 
 // 
 
-var APPID = "6854f325de5158ff8020c1ea06333234";
-
 module.exports = function (robot) {
   robot.hear(/^!weather ?(.+)?/i, function (res) {
 	  var location = res.match[1] || "Brisbane";
@@ -16,7 +14,7 @@ module.exports = function (robot) {
   robot.getWeather = function(location, res) {
 	  var query = 'select * from weather.forecast where woeid in (select woeid from geo.places(1) where text="' + location + '") and u="c"';
 	  var url = "https://query.yahooapis.com/v1/public/yql?q=" + encodeURIComponent(query) + "&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
-	  console.log(url)
+	  
 	  robot.http(url).get()
 	  (function(err, resp, body) {
 		 var json = JSON.parse(body);
