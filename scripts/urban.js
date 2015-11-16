@@ -1,49 +1,25 @@
 module.exports = function (robot) {
 	robot.hear(/^!urban (.+)/i, function (res) {
-		robot.getUrban(res, res.match[1].trim().split(" "));
+		robot.getUrban(res, res.match[1].trim());
 	});
 
-	robot.getUrban = function (res, list) {
-		var completed = 0;
+	robot.getUrban = function (res, word) {
 		var responses = [];
-		var limit = 5;
 
-		var max = list.length;
-		if (list.length > limit) {
-			max = limit;
-		}
+		robot.http("http://api.urbandictionary.com/v0/define?term=" + word).get()
+		(function (err, resp, body) {
+			if (!err) {
+				responses[index] = body;
 
-		// Chain all the HTTP requests so its nice and synchronous
-		for (var i = 0; i < max; i++) {
+				var response = "";
+				var definition = robot.getUrbanDef(responses[j]);
+				var example = robot.getUrbanExample(responses[j]);
+				response += ">" + word + ": " + definition + "\r\n";
+				response += "> \t _" + example + "_ \r\n";
 
-			// Keep everything in a closure so we can access the index variable later on
-			(function (index) {
-				robot.http("http://api.urbandictionary.com/v0/define?term=" + list[index]).get()
-				(function (err, resp, body) {
-					if (!err) {
-						responses[index] = body;
-						completed++;
-
-						// Called when completing the final request
-						if (completed == max) {
-							var response = "";
-							for (var j = 0; j < responses.length; j++) {
-								var word = list[j].toUpperCase();
-								var definition = robot.getUrbanDef(responses[j]);
-								var example = robot.getUrbanExample(responses[j]);
-								response += ">" + word + ": " + definition + "\r\n";
-								response += "> \t _" + example + "_ \r\n";
-							}
-
-							if (list.length > limit) {
-								response += ">I am limited to " + limit + " searchs at once.";
-							}
-							res.send(response);
-						}
-					}
-				});
-			})(i);
-		}
+				res.send(response);
+			}
+		});
 	};
 
 	// Parses the JSON to get the first definition
