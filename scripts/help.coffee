@@ -67,8 +67,8 @@ module.exports = (robot) ->
     emit = cmds.join "\n"
 
     unless msg.message.user.name == robot.name
+      robot.send({room: msg.message.user.name}, "Here are my commands")
       robot.send({room: msg.message.user.name}, emit)
-    msg.reply "I've sent you a private message with the valid commands"
 
   robot.router.get "/#{robot.name}/help", (req, res) ->
     cmds = renamedHelpCommands(robot).map (cmd) ->
