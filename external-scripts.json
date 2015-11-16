@@ -3,5 +3,6 @@
   "hubot-maps",
   "hubot-google",
   "hubot-redis-brain",
-  "hubot-voting"
+  "hubot-voting",
+  "hubot-google-images",
 ]
