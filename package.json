@@ -17,9 +17,8 @@
     "hubot-google": "^0.1.2",
     "hubot-voting": "^1.0.0",
     "hubot-google-images": "^0.2.3",
-	"hubot-sentimental": "^1.0.7",
-	"hubot-youtube": "^1.0.1",
-	"hubot-devops-reactions": "^1.0.2"
+    "hubot-youtube": "^1.0.1",
+    "hubot-devops-reactions": "^1.0.2"
   },
   "engines": {
     "node": "0.10.x"
