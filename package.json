@@ -14,7 +14,8 @@
     "hubot-scripts": "^2.16.2",
     "hubot-slack": "^3.4.2",
     "cheerio": "^0.19.0",
-    "hubot-google": "^0.1.2"
+    "hubot-google": "^0.1.2",
+    "hubot-voting": "^1.0.0"
   },
   "engines": {
     "node": "0.10.x"
