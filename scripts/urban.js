@@ -4,16 +4,14 @@ module.exports = function (robot) {
 	});
 
 	robot.getUrban = function (res, word) {
-		var responses = [];
 
 		robot.http("http://api.urbandictionary.com/v0/define?term=" + word).get()
 		(function (err, resp, body) {
 			if (!err) {
-				responses[index] = body;
 
 				var response = "";
-				var definition = robot.getUrbanDef(responses[j]);
-				var example = robot.getUrbanExample(responses[j]);
+				var definition = robot.getUrbanDef(body);
+				var example = robot.getUrbanExample(body);
 				response += ">" + word + ": " + definition + "\r\n";
 				response += "> \t _" + example + "_ \r\n";
 
