@@ -58,11 +58,14 @@ module.exports = function (robot) {
         }
         
         var modifier = "has";
+        var after = "";
         if (avail.toLowerCase().indexOf("full") > -1) {
           modifier = "is";
+        } else {
+          after = " parks";
         }
         
-        response += ">_" + parkName + "_ " + modifier + " *" + avail + "* \r\n";
+        response += ">_" + parkName + "_ " + modifier + " *" + avail + "*" + after + "\r\n";
       }
       
       res.send(response);
