@@ -1,3 +1,10 @@
+// Description
+//   Generates help commands for Hubot.
+//
+// Commands:
+//   !urban <phrase> - Looks a phrase up on Urban Dictionary.
+// 
+
 module.exports = function (robot) {
 	robot.hear(/^!urban (.+)/i, function (res) {
 		robot.getUrban(res, res.match[1].trim());
