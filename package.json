@@ -16,7 +16,7 @@
     "cheerio": "^0.19.0",
     "hubot-google": "^0.1.2",
     "hubot-voting": "^1.0.0",
-	"hubot-google-images": "^0.2.3",
+    "hubot-google-images": "^0.2.3",
   },
   "engines": {
     "node": "0.10.x"
