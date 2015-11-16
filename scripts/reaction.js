@@ -19,14 +19,23 @@ module.exports = function (robot) {
     if(!url || !rStr) return;
     robot.storeReaction(rStr, url, res);
   }
-  
-  
 	
-   robot.showReaction = function(reactionString, res) {
-	   
-   }
-   
-   robot.storeReaction = function(reactionString, reactionURL, res) {
-	   
-   }
+  robot.showReaction = function(reactionString, res) {
+    var reactionDict = robot.brain.get('superSecretReactionKeyStoreThing');
+    if(reactionDict[reactionString]) {
+      res.send(reactionDict[reactionString]);
+      return;
+    }
+    res.reply("\""+reactionString+"\" isn't a valid reaction yet :'(");
+    res.reply("You can add it though with \"uqcsbot new reaction <reaction_string> <url to image>\"");
+  }
+  
+  robot.storeReaction = function(reactionString, reactionURL, res) {
+    var reactionDict = robot.brain.get('superSecretReactionKeyStoreThing');
+    if(reactionDict[reactionString]) {
+      res.reply("That reaction is already tied to an image!");
+      return;
+    }
+    reactionDict[reactionString] = reactionURL;
+  }
 }
