@@ -22,7 +22,10 @@ module.exports = function (robot) {
 				} else {
 					var definition = robot.getUrbanDef(body);
 					var example = robot.getUrbanExample(body);
-					response += ">" + word + ": " + definition + "\r\n";
+					response += ">" + word.toUpperCase() + ": \r\n";
+					definition.split("\r\n").forEach(function (line) {
+						response += "> " + line + "\r\n";
+					});
 					example.split("\r\n").forEach(function (line) {
 						response += "> \t _" + line + "_ \r\n";
 					});
