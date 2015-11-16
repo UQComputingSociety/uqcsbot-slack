@@ -3,7 +3,7 @@
 //
 // Commands:
 //   !urban <phrase> - Looks a phrase up on Urban Dictionary.
-// 
+//
 
 module.exports = function (robot) {
 	robot.hear(/^!urban (.+)/i, function (res) {
@@ -20,7 +20,9 @@ module.exports = function (robot) {
 				var definition = robot.getUrbanDef(body);
 				var example = robot.getUrbanExample(body);
 				response += ">" + word + ": " + definition + "\r\n";
-				response += "> \t _" + example + "_ \r\n";
+				example.split("\r\n").forEach(function(line) {
+					response += "> \t _" + line + "_ \r\n";
+				});
 
 				res.send(response);
 			}
