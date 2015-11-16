@@ -13,7 +13,7 @@ module.exports = function (robot) {
 	  robot.showReaction(rStr, res)
   });
   
-  robot.hear(/^uqcsbot new reaction (\w+\ [^ \n]+)/i, function (res) {
+  robot.respond(/new reaction (\w+\ [^ \n]+)/i, function (res) {
     var input = res.match[1].split(" ");
     var rStr = input[0];
     var url = input[1]; // should probably ensure this is a url :/
