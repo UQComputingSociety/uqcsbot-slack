@@ -53,7 +53,7 @@ module.exports = function (robot) {
                 response += ">" + acro + ": " + acronym + "\r\n";
               }
   
-              if (list.length > 5) {
+              if (list.length > limit) {
                 response += ">I am limited to " + limit + " acronyms at once.";
               }
               res.send(response);
