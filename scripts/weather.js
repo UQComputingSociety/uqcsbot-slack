@@ -14,17 +14,21 @@ module.exports = function (robot) {
   });
   
   robot.getWeather = function(location, res) {
-	  robot.http("http://api.openweathermap.org/data/2.5/weather?q=" + location + "&APPID=" + APPID).get()
+	  var query = 'select * from weather.forecast where woeid in (select woeid from geo.places(1) where text="' + location + '") and u="c"';
+	  var url = "https://query.yahooapis.com/v1/public/yql?q=" + encodeURIComponent(query) + "&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
+	  console.log(url)
+	  robot.http(url).get()
 	  (function(err, resp, body) {
 		 var json = JSON.parse(body);
-		 
-		 if (json.cod.toString().trim() == "200") {
-			 var temp = Math.round((json.main.temp - 273) * 100) / 100;
-			 var humidity = json.main.humidity;
-			 var min = Math.round((json.main.temp_min - 273) * 100) / 100;
-			 var max = Math.round((json.main.temp_max - 273) * 100) / 100;
-			 var weather = json.weather[0].description;
-			 res.send(">*" + json.name + "* is *" + temp + "°C* (min: *" + min + "°C*, max: *" + max + "°C*) with humidity at *" + humidity + "%* and *" + weather + "*");
+		 var data = json.query.results.channel;
+		 var today = data.item.forecast[0];
+		 if (err == null) {
+			 var temp = Math.round(data.item.condition.temp * 100) / 100;
+			 var humidity = data.atmosphere.humidity;
+			 var min = Math.round(today.low * 100) / 100;
+			 var max = Math.round(today.high * 100) / 100;
+			 var weather = data.item.condition.text;
+			 res.send(">*" + data.location.city + ", " + data.location.country + "* is *" + temp + "°C* (min: *" + min + "°C*, max: *" + max + "°C*) with humidity at *" + humidity + "%* and condition *" + weather + "*");
 		 } else {
 			 res.send(">Can't find " + location);
 		 }
