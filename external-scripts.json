@@ -4,5 +4,8 @@
   "hubot-google",
   "hubot-redis-brain",
   "hubot-voting",
-  "hubot-google-images"
+  "hubot-google-images",
+  "hubot-sentimental",
+  "hubot-youtube",
+  "hubot-devops-reactions
 ]
