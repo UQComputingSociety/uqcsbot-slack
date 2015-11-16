@@ -26,7 +26,7 @@ module.exports = function (robot) {
 					var definition = robot.getUrbanDef(body);
 					var example = robot.getUrbanExample(body);
 					response += ">" + word.toUpperCase() + ": ";
-					definition.split("\n").forEach(function (line) {
+					definition.split("\r\n").forEach(function (line) {
 						if (lines <= max) {
 							if (lines == 0) {
 								response += line + "\r\n";
@@ -36,7 +36,7 @@ module.exports = function (robot) {
 						}
 						lines++;
 					});
-					example.split("\n").forEach(function (line) {
+					example.split("\r\n").forEach(function (line) {
 						if (lines <= max) {
 							response += "> \t _" + line + "_ \r\n";	
 						}
