@@ -15,18 +15,27 @@ module.exports = function (robot) {
 		robot.http("http://api.urbandictionary.com/v0/define?term=" + word).get()
 		(function (err, resp, body) {
 			if (!err) {
-
 				var response = "";
-				var definition = robot.getUrbanDef(body);
-				var example = robot.getUrbanExample(body);
-				response += ">" + word + ": " + definition + "\r\n";
-				example.split("\r\n").forEach(function(line) {
-					response += "> \t _" + line + "_ \r\n";
-				});
 
+				if (robot.getUrbanResult(body) == "no_results") {
+					response += "> :( No result found for " + word;
+				} else {
+					var definition = robot.getUrbanDef(body);
+					var example = robot.getUrbanExample(body);
+					response += ">" + word + ": " + definition + "\r\n";
+					example.split("\r\n").forEach(function (line) {
+						response += "> \t _" + line + "_ \r\n";
+					});
+				}
 				res.send(response);
 			}
 		});
+	};
+
+	// Parses the JSON to get the first definition
+	robot.getUrbanResult = function (string) {
+		json = JSON.parse(string);
+		return json["result_type"];
 	};
 
 	// Parses the JSON to get the first definition
