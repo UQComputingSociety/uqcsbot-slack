@@ -15,7 +15,7 @@
     "hubot-slack": "^3.4.2",
     "cheerio": "^0.19.0",
     "hubot-google": "^0.1.2",
-    "hubot-voting": "^1.0.0"
+    "hubot-voting": "^1.0.0",
 	"hubot-google-images": "^0.2.3"
   },
   "engines": {
