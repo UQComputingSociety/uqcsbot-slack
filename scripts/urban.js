@@ -35,7 +35,7 @@ module.exports = function (robot) {
 								response += "> \t _" + example + "_ \r\n";
 							}
 
-							if (list.length > 5) {
+							if (list.length > limit) {
 								response += ">I am limited to " + limit + " searchs at once.";
 							}
 							res.send(response);
@@ -50,11 +50,11 @@ module.exports = function (robot) {
 	robot.getUrbanDef = function (string) {
 		json = JSON.parse(string);
 		return json["list"][0]["definition"];
-	}
+	};
 
 	// Parses the JSON to get the first definition
 	robot.getUrbanExample = function (string) {
 		json = JSON.parse(string);
 		return json["list"][0]["example"];
-	}
+	};
 };
