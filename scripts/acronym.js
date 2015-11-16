@@ -23,9 +23,14 @@ module.exports = function (robot) {
     }
 
     // Requested by WBO, do not remove unless you get his express permission
-    if (list.length == 1 && (list[0].toLowerCase() == ":horse:" || list[0] == "horse")) {
-      res.send(">:taco:");
-      return;
+    if(list.length == 1) {
+      if(list[0].toLowerCase() == ":horse:" || list[0] == "horse") {
+        res.send(">:taco:");
+        return;
+      } else if(list[0].toLowerCase() == ":rachel:" || list[0] == "rachel") {
+        res.send(">:older_woman:");
+        return;
+      }
     }
 
     // Chain all the HTTP requests so its nice and synchronous
