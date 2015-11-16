@@ -13,16 +13,17 @@ module.exports = function (robot) {
 	  robot.showReaction(rStr, res)
   });
   
-  robot.hear(/^uqcsbot new reaction (\w+\ [^ \n]+)/i ), function (res) {
-    var rStr = res.match[3];
-    var url = res.match[4];
-    if(!url || !rStr) return;
+  robot.hear(/^uqcsbot new reaction (\w+\ [^ \n]+)/i, function (res) {
+    var input = res.match[1].split(" ");
+    var rStr = input[0];
+    var url = input[1]; // should probably ensure this is a url :/
+    if(!url || !rStr) res.reply("lolwot");
     robot.storeReaction(rStr, url, res);
-  }
+  });
 	
   robot.showReaction = function(reactionString, res) {
     var reactionDict = robot.brain.get('superSecretReactionKeyStoreThing');
-    if(reactionDict[reactionString]) {
+    if(reactionDict && reactionDict[reactionString]) {
       res.send(reactionDict[reactionString]);
       return;
     }
@@ -32,10 +33,16 @@ module.exports = function (robot) {
   
   robot.storeReaction = function(reactionString, reactionURL, res) {
     var reactionDict = robot.brain.get('superSecretReactionKeyStoreThing');
-    if(reactionDict[reactionString]) {
-      res.reply("That reaction is already tied to an image!");
+    if(!reactionDict) {
+      reactionDict = {};
+      robot.brain.set('superSecretReactionKeyStoreThing', reactionDict);
+    }
+    
+    if(!reactionDict[reactionString]) {
+      reactionDict[reactionString] = reactionURL;
       return;
     }
-    reactionDict[reactionString] = reactionURL;
+    
+    res.reply("That reaction is already tied to an image!");
   }
 }
