@@ -19,10 +19,10 @@ module.exports = function (robot) {
 		 var json = JSON.parse(body);
 		 
 		 if (json.cod.toString().trim() == "200") {
-			 var temp = Math.round(json.main.temp - 273, 2);
+			 var temp = Math.round((json.main.temp - 273) * 100) / 100;
 			 var humidity = json.main.humidity;
-			 var min = Math.round(json.main.temp_min - 273, 2);
-			 var max = Math.round(json.main.temp_max - 273, 2);
+			 var min = Math.round((json.main.temp_min - 273) * 100) / 100;
+			 var max = Math.round((json.main.temp_max - 273) * 100) / 100;
 			 var weather = json.weather[0].description;
 			 res.send(">*" + json.name + "* is *" + temp + "°C* (min: *" + min + "°C*, max: *" + max + "°C*) with humidity at *" + humidity + "%* and *" + weather + "*");
 		 } else {
