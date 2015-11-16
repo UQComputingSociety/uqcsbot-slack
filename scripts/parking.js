@@ -49,47 +49,20 @@ module.exports = function (robot) {
       
       var response = ">Available parking at the University of Queensland\r\n";
       
-      var formatted = [];
       for (var i = 0; i < responses.length; i++) {
-        if (parks == 0) {
-          response += ">";
-        }
-        
         var avail = responses[i][1];
         var parkName = responses[i][0];
+        
         if (alias[parkName.toLowerCase()] != null) {
           parkName = alias[parkName.toLowerCase()];
         }
         
-        formatted.push("_" + parkName + "_ has *" + avail + "* ");
-      }
-      
-      var max = 0;
-      for (var i = 0; i < formatted.length; i++) {
-        if (max < formatted[i].length) {
-          max = formatted[i].length;
-        }
-      }
-      
-      var parksPerRow = 4;
-      var parks = 0;
-      for (var i = 0; i < formatted.length; i++) {
-        if (parks == 0) {
-          response += ">";
+        var modifier = "has";
+        if (avail.toLowerCase().indexOf("full") > -1) {
+          modifier = "is";
         }
         
-        response += formatted[i];
-        
-        for (var j = 0; j < max - formatted[i].length; j++) {
-          response += " ";
-        }
-        
-        if (parks + 1 < parksPerRow) {
-          parks++;          
-        } else {
-          response += "\r\n";
-          parks = 0;
-        }
+        response += ">_" + parkName + "_ " + modifier + " *" + avail + "* \r\n";
       }
       
       res.send(response);
