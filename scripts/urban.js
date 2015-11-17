@@ -16,20 +16,38 @@ module.exports = function (robot) {
 		(function (err, resp, body) {
 			if (!err) {
 				var response = "";
+				
+				var max = 2;
+				var lines = 0;
 
 				if (robot.getUrbanResult(body) == "no_results") {
 					response += "> :( No result found for " + word;
 				} else {
 					var definition = robot.getUrbanDef(body);
 					var example = robot.getUrbanExample(body);
-					response += ">" + word.toUpperCase() + ": \r\n";
+					response += ">" + word.toUpperCase() + ": ";
 					definition.split("\r\n").forEach(function (line) {
-						response += "> " + line + "\r\n";
+						if (lines <= max) {
+							if (lines == 0) {
+								response += line + "\r\n";
+							} else {
+								response += "> " + line + "\r\n";	
+							}	
+						}
+						lines++;
 					});
 					example.split("\r\n").forEach(function (line) {
-						response += "> \t _" + line + "_ \r\n";
+						if (lines <= max) {
+							response += "> \t _" + line + "_ \r\n";	
+						}
+						lines++;
 					});
 				}
+				
+				if (lines > 2) {
+					response += " - more at http://www.urbandictionary.com/define.php?term=" + word;
+				}
+				
 				res.send(response);
 			}
 		});

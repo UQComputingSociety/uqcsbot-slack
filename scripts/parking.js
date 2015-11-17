@@ -36,15 +36,15 @@ module.exports = function (robot) {
         "p11 l3": "Conifer L3 (Students)",
         "p10": "UQ Centre",
         "p9": "Boatshed Open",
-        "p8 l1": "Boatshed Bot",
+        "p8 l1": "Boatshed Bottom",
         "p8 l2": "Boatshed Top",
         "p7": "Dustbowl",
         "p6": "BSL Short Term",
         "p5": "P5",
-        "p4": "Multi Level",
-        "p3": "Multi Level",
-        "p2": "P2",
-        "p1": "P1"
+        "p4": "Multi Level 3",
+        "p3": "Multi Level 2",
+        "p2": "Multi Level 1",
+        "p1": "Warehouse"
       };
       
       var response = ">Available parking at the University of Queensland\r\n";
@@ -58,11 +58,14 @@ module.exports = function (robot) {
         }
         
         var modifier = "has";
+        var after = "";
         if (avail.toLowerCase().indexOf("full") > -1) {
           modifier = "is";
+        } else {
+          after = " parks";
         }
         
-        response += ">_" + parkName + "_ " + modifier + " *" + avail + "* \r\n";
+        response += ">_" + parkName + "_ " + modifier + " *" + avail + "*" + after + "\r\n";
       }
       
       res.send(response);

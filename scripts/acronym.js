@@ -8,7 +8,7 @@
 var cheerio = require("cheerio");
 
 module.exports = function (robot) {
-  robot.hear(/^!!acro (.+)/i, function (res) {
+  robot.hear(/^!!?acro (.+)/i, function (res) {
     robot.getAcronyms(res, res.match[1].trim().split(" "));
   });
   
