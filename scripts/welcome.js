@@ -16,7 +16,6 @@ var welcomeMessages = [
 //The time between each individual welcome message send
 var messageTime = 2500;
 
-
 module.exports = function(robot){
 	robot.enter(function(res){
 		if(res.message.room == "general"){

@@ -11,7 +11,7 @@ module.exports = function (robot) {
 	robot.hear(/^!!?acro (.+)/i, function (res) {
 		robot.getAcronyms(res, res.match[1].trim().split(" "));
 	});
-	
+
 	robot.getAcronyms = function (res, list) {
 		var completed = 0;
 		var responses = [];
@@ -35,7 +35,6 @@ module.exports = function (robot) {
 
 		// Chain all the HTTP requests so its nice and synchronous
 		for (var i = 0; i < max; i++) {
- 
 			// Keep everything in a closure so we can access the index variable later on
 			(function (index) {
 				robot.http("http://acronyms.thefreedictionary.com/" + list[index]).get()
@@ -52,7 +51,7 @@ module.exports = function (robot) {
 								var acronym = robot.getAcronym(responses[j]);
 								response += ">" + acro + ": " + acronym + "\r\n";
 							}
-	
+
 							if (list.length > limit) {
 								response += ">I am limited to " + limit + " acronyms at once.";
 							}
@@ -65,7 +64,7 @@ module.exports = function (robot) {
 			})(i);
 		}
 	}
-	
+
 	// Parses the DOM to get the acroynm expansion
 	robot.getAcronym = function (html) {
 		var $ = cheerio.load(html);

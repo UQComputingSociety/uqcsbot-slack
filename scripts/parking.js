@@ -12,7 +12,7 @@ module.exports = function (robot) {
 		robot.http("https://pg.pf.uq.edu.au/").get() (function(err, resp, body) {
 			var $ = cheerio.load(body);
 			var responses = [];
-			
+
 			$('table#parkingAvailability').children().each(function (index, element) {
 				if ($(element).find("th").length > 0) {
 					// Do nothing, its the header
@@ -28,7 +28,7 @@ module.exports = function (robot) {
 					}	
 				}
 			});
-			
+
 			var alias = {
 				"p12": "Daycare",
 				"p11 l1": "Conifer L1 (Staff)",
@@ -46,17 +46,17 @@ module.exports = function (robot) {
 				"p2": "Multi Level 1",
 				"p1": "Warehouse"
 			};
-			
+
 			var response = ">Available parking at the University of Queensland\r\n";
-			
+
 			for (var i = 0; i < responses.length; i++) {
 				var avail = responses[i][1];
 				var parkName = responses[i][0];
-				
+
 				if (alias[parkName.toLowerCase()] != null) {
 					parkName = alias[parkName.toLowerCase()];
 				}
-				
+
 				var modifier = "has";
 				var after = "";
 				if (avail.toLowerCase().indexOf("full") > -1) {
@@ -64,10 +64,10 @@ module.exports = function (robot) {
 				} else {
 					after = " parks";
 				}
-				
+
 				response += ">_" + parkName + "_ " + modifier + " *" + avail + "*" + after + "\r\n";
 			}
-			
+
 			res.send(response);
 		});
 	});
