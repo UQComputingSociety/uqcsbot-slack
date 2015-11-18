@@ -1,5 +1,9 @@
 [
   "hubot-google-translate",
   "hubot-maps",
-  "hubot-redis-brain"
+  "hubot-google",
+  "hubot-redis-brain",
+  "hubot-voting",
+  "hubot-google-images",
+  "hubot-youtube"
 ]
