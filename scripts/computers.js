@@ -34,8 +34,8 @@ module.exports = function (robot) {
 				var free_r = computers[i][2];
 				var freeOf_r = computers[i][3];
 				
-				var realPercent = parseInt(Math.round(parseInt(percent_r.substring(0, precent_r.length-1)) / 10) * 10 / 2 / 10);
-				response += ">_" + name_r + "_ *" + percent_r + "* " + (Array(5 - realPercent + 1).join(":no_entry:")) + (Array(realPrecent + 1).join(":thumbsup:")) + " " + free_r + " computers free";
+				var realPercent = parseInt(Math.round(parseInt(percent_r.substring(0, percent_r.length-1)) / 10) * 10 / 2 / 10);
+				response += ">_" + name_r + "_ *" + percent_r + "* " + (Array(5 - realPercent + 1).join(":no_entry:")) + (Array(realPercent + 1).join(":thumbsup:")) + " " + free_r + " computers free" + "\r\n";
 			}
 			
 		res.send(resposne);
