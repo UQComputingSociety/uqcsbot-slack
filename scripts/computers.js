@@ -33,7 +33,7 @@ module.exports = function (robot) {
 				computers.push([name, percent, free, freeOf]);	
 			});
 
-			var response = ">Available computers at St Lucia";
+			var response = ">Available computers at St Lucia\r\n";
 			
 			for (var i = 0; i < computers.length; i++) {
 				var name_r = computers[i][0];
