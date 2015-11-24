@@ -31,14 +31,14 @@ module.exports = function (robot) {
 							if (lines == 0) {
 								response += line + "\r\n";
 							} else {
-								response += "> " + line + "\r\n";	
-							}	
+								response += "> " + line + "\r\n";
+							}
 						}
 						lines++;
 					});
 					example.split("\r\n").forEach(function (line) {
 						if (lines <= max) {
-							response += "> \t _" + line + "_ \r\n";	
+							response += "> \t _" + line + "_ \r\n";
 						}
 						lines++;
 					});
