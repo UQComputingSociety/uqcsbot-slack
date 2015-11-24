@@ -26,7 +26,7 @@ module.exports = function (robot) {
 				var min = Math.round(today.low * 100) / 100;
 				var max = Math.round(today.high * 100) / 100;
 				var weather = data.item.condition;
-				res.send("> " + robot.getWeatherEmoji(parseInt(weather.code)) + " *" + data.location.city + ", " +
+				res.send(">" + robot.getWeatherEmoji(parseInt(weather.code)) + " *" + data.location.city + ", " +
 					data.location.country + "* is *" + temp + "°C* (min: *" + min+ "°C*, max: *" + max +
 					"°C*) with humidity at *" + humidity + "%* and condition *" + weather.text + "*");
 			} else {
