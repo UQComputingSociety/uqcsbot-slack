@@ -84,15 +84,17 @@ module.exports = function (robot) {
 					max = len;
 				}
 			}
+			max = Math.ceil(max / 4);
 
 			for (var i = 0; i < msgs.length; i++) {
 				item = msgs[i];
 				len = Math.max(item.msg.length, 0);
 				len = Math.max(len, 0);
+				len = Math.ceil(len / 4);
 				
 				response += item.msg;
 				while (len < max) {
-					response += " ";
+					response += "\t";
 					len++;
 				}
 				
@@ -105,7 +107,7 @@ module.exports = function (robot) {
 				response += "*" + item.avail + "*" + item.after;
 			}
 			
-			res.send("```" + response + "```");
+			res.send(response);
 		});
 	});
 }
