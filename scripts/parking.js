@@ -48,6 +48,8 @@ module.exports = function (robot) {
 			};
 
 			var response = ">Available parking at the University of Queensland\r\n";
+			
+			var msgs = [];
 
 			for (var i = 0; i < responses.length; i++) {
 				var avail = responses[i][1];
@@ -60,14 +62,49 @@ module.exports = function (robot) {
 				var modifier = "has";
 				var after = "";
 				if (avail.toLowerCase().indexOf("full") > -1) {
-					modifier = "is";
+					modifier = "is "; // NOTE THE SPACE
 				} else {
 					after = " parks";
 				}
 
-				response += ">_" + parkName + "_ " + modifier + " *" + avail + "*" + after + "\r\n";
+				msgs.push({
+					msg: ">_" + parkName + "_ " + modifier + " ",
+					avail: avail,
+					after: after + "\r\n"
+				});
+				
+				//response += ">_" + parkName + "_ " + modifier + " *" + avail + "*" + after + "\r\n";
+			}
+			
+			var max = 0;
+			for (var i = 0; i < msgs.length; i++) {
+				var item = msgs[i];
+				var len = item.msg.length;
+				if (len > max) {
+					max = len;
+				}
 			}
 
+			for (var i = 0; i < msgs.length; i++) {
+				item = msgs[i];
+				len = Math.max(item.msg.length, 0);
+				len = Math.max(len, 0);
+				
+				response += item.msg;
+				while (len < max) {
+					response += " ";
+					len++;
+				}
+				
+				len = Math.max(item.avail.length, 0);
+				while (len < "FULL".length) {
+					response += " ";
+					len++;
+				}
+				
+				response += "*" + item.avail + "*" + item.after;
+			}
+			
 			res.send(response);
 		});
 	});
