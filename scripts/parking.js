@@ -102,7 +102,7 @@ module.exports = function (robot) {
 					len++;
 				}
 				
-				response += "`*" + item.avail + "*" + item.after;
+				response += "` *" + item.avail + "*" + item.after;
 			}
 			
 			res.send(response);
