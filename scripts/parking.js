@@ -68,7 +68,7 @@ module.exports = function (robot) {
 				}
 
 				msgs.push({
-					msg: ">`" + parkName + "` " + modifier + " ",
+					msg: ">`" + parkName + " " + modifier + " ",
 					avail: avail,
 					after: after + "\r\n"
 				});
@@ -91,7 +91,6 @@ module.exports = function (robot) {
 				len = Math.max(len, 0);
 				
 				response += item.msg;
-				response += "`";
 				while (len < max) {
 					response += " ";
 					len++;
