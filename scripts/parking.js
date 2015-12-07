@@ -105,7 +105,7 @@ module.exports = function (robot) {
 				response += "*" + item.avail + "*" + item.after;
 			}
 			
-			res.send(response);
+			res.send("```" + response + "```");
 		});
 	});
 }
