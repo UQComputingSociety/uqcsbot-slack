@@ -68,12 +68,12 @@ module.exports = function (robot) {
 				}
 
 				msgs.push({
-					msg: ">_" + parkName + "_ " + modifier + " ",
+					msg: ">`" + parkName + "` " + modifier + " ",
 					avail: avail,
 					after: after + "\r\n"
 				});
 				
-				//response += ">_" + parkName + "_ " + modifier + " *" + avail + "*" + after + "\r\n";
+				//response += ">`" + parkName + "` " + modifier + " *" + avail + "*" + after + "\r\n";
 			}
 			
 			var max = 0;
@@ -84,17 +84,16 @@ module.exports = function (robot) {
 					max = len;
 				}
 			}
-			max = Math.ceil(max / 4);
 
 			for (var i = 0; i < msgs.length; i++) {
 				item = msgs[i];
 				len = Math.max(item.msg.length, 0);
 				len = Math.max(len, 0);
-				len = Math.ceil(len / 4);
 				
 				response += item.msg;
+				response += "`";
 				while (len < max) {
-					response += "\t";
+					response += " ";
 					len++;
 				}
 				
@@ -104,7 +103,7 @@ module.exports = function (robot) {
 					len++;
 				}
 				
-				response += "*" + item.avail + "*" + item.after;
+				response += "`*" + item.avail + "*" + item.after;
 			}
 			
 			res.send(response);
