@@ -39,20 +39,11 @@ module.exports = function (robot) {
 				var freeOf_r = computers[i][3];
 
 				var takenPercentage = Math.round(parseInt(percent_r.substring(0, percent_r.length-1)));
-				var asciiPercentage = Math.round(takenPercentage / 2 / 10);
-
-				var precentSpace = (parseInt(percent_r.substring(0, percent_r.length-1)) <= 9 ? 2 : 1);
-				var freeSpace = "  ";
-				if (free_r.toString().length == 1) {
-					freeSpace = "   ";
-				} else if (free_r.toString().length == 3) {
-					freeSpace = " ";
-				} else {}
+				var asciiPercentage = parseInt(Math.round(parseInt(percent_r.substring(0, percent_r.length-1)) / 10) * 10 / 2 / 10);
 
 				response += ">" + (Array(5 - asciiPercentage + 1).join("█"))
 				 + (Array(asciiPercentage + 1).join("▒")) + " *"
-				 + (100 - takenPercentage) + "% taken" + "*"
-				 + (Array(precentSpace).join(" ")) + " - _" + free_r + "_" + freeSpace
+				 + (100 - takenPercentage) + "% taken" + "*" + " - _" + free_r + "_"
 				 + "computers free @ " + computers[i][4] + " _" + name_r + "_" + "\r\n";
 			}
 
