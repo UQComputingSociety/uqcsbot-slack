@@ -14,7 +14,7 @@ module.exports = function (robot) {
 			var computers = [];
 
 			var emoji = [':building_construction:', ':biohazard_sign:', ':wrench:',
-									 ':office:', ':graph:', ':sparkling_heart:', ':scales:',
+									 ':office:', ':chart:', ':sparkling_heart:', ':scales:',
 									 ':speech_balloon:'];
 									 //there's no real emoji support for ☤
 
