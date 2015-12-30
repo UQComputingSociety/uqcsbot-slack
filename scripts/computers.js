@@ -30,7 +30,7 @@ module.exports = function (robot) {
 				computers.push([name, percent, free, freeOf, emoji[index]]);
 			});
 
-			var response = ">Available computers at St Lucia\r\n";
+			var response = ">Available computers :computer: at St Lucia\r\n";
 
 			for (var i = 0; i < computers.length; i++) {
 				var name_r = computers[i][0];
