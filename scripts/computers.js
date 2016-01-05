@@ -42,9 +42,8 @@ module.exports = function (robot) {
 				var asciiPercentage = parseInt(Math.round(parseInt(percent_r.substring(0, percent_r.length-1)) / 10) * 10 / 2 / 10);
 
 				response += ">" + (Array(5 - asciiPercentage + 1).join("█"))
-				 + (Array(asciiPercentage + 1).join("▒")) + " *"
-				 + (100 - takenPercentage) + "% taken" + "*" + " - _" + free_r + "_"
-				 + "computers free @ " + computers[i][4] + " _" + name_r + "_" + "\r\n";
+				 + (Array(asciiPercentage + 1).join("▒")) + " " + computers[i][4] + " *"
+				 + (100 - takenPercentage) + "% taken*" + " - _" + free_r + "_ computers free @ _" + name_r + "_\r\n";
 			}
 
 			res.send(response);
