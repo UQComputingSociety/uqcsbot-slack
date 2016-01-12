@@ -21,7 +21,7 @@
     "hubot-cronjob": "^0.2.1",
     "kd.tree": "^0.1.3",
     "cheerio": "^0.19.0",
-    "time": "^0.11.4"
+    "request": "^2.67.0"
   },
   "engines": {
     "node": "0.10.x"
