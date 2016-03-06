@@ -20,7 +20,11 @@ module.exports = function (robot) {
 			arr.sort(function(a,b) { return a.start.getTime()-b.start.getTime(); });
 			for(var k in arr) {
 				var ev = arr[k];
-				res.send("*" + months[ev.start.getMonth()] + " " + ev.start.getDate() +"*" +
+				if(ev.location == "") {ev.location = "Unkown location";}
+				res.send("*" + months[ev.start.getMonth()] + " " + ev.start.getDate() + " " + ev.start.getHours() + ":" + 
+					(ev.start.getMinutes() < 10 ? "0" : "") + ev.start.getMinutes() +
+					" - " + months[ev.end.getMonth()] + " " + ev.end.getDate() + " " + ev.end.getHours() + ":" +
+					(ev.end.getMinutes() < 10 ? "0" : "") + ev.end.getMinutes() + "*" +
 					" - _" + ev.location + "_" +
 					": `" + ev.summary + "`");
 			}
