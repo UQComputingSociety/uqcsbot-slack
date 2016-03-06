@@ -11,13 +11,18 @@ module.exports = function (robot) {
 		var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 		ical.fromURL('https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics', {}, function(err, data) {
 			var now = new Date().getTime();
+			var arr = []
 			for(var k in data) {
-				var ev = data[k];
-				if(ev.end.getTime() > now) {
-					res.send("*" + months[ev.start.getMonth()] + " " + ev.start.getDate() +"*" +
-						" - _" + ev.location + "_" +
-						": `" + ev.summary + "`");
+				if(data[k].end.getTime() > now) {
+					arr.push(data[k]);
 				}
+			}
+			arr.sort(function(a,b) { return a.start.getTime()-b.start.getTime(); });
+			for(var k in arr) {
+				var ev = arr[k];
+				res.send("*" + months[ev.start.getMonth()] + " " + ev.start.getDate() +"*" +
+					" - _" + ev.location + "_" +
+					": `" + ev.summary + "`");
 			}
 		});
 	});
