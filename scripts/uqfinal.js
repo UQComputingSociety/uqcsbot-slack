@@ -2,7 +2,7 @@
 //   UQFinal
 // 
 // Commands:
-//   uqcsbot <uqfinal|wdinotf|final> <score1> <score2> ... - (scores are the percentages) Returns the minimum mark on the final exam to pass (doesn't include hurdles)
+//   uqcsbot <uqfinal|wdinotf|final> <course> <score1> <score2> ... - (scores are the percentages) Returns the minimum mark on the final exam to pass (doesn't include hurdles)
 // 
 
 module.exports = function (robot) {
