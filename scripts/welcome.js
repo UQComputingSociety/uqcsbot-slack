@@ -8,7 +8,7 @@ var welcomeMessages = [
 	"I'm UQCSbot, your friendly (open source) robot helper",
 	"Introduce yourself on #intros, join some channels", 
 	"We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with some subject-specific ones",
-	"Your friendly admins are @trm, @svict4, @gricey, @rachcatch, @ainsleynand",
+	"Your friendly admins are @trm, @svict4, @gricey, @rachcatch, @ainsleynand, @dmarj97",
 	"Type \"help\" here, or \"uqcsbot help\" anywhere else to find out what I can do.",
 	"and again, welcome :)"
 ];
