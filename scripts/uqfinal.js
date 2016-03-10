@@ -6,7 +6,7 @@
 // 
 
 module.exports = function (robot) {
-	robot.respond(/(uqfinal|wdinotf|final) ([a-z]{4}[0-9]{4}[a-z]?) (.+)+/i, function (res) {
+	robot.respond(/!?(uqfinal|wdinotf|final) ([a-z]{4}[0-9]{4}[a-z]?) (.+)+/i, function (res) {
 		//res.match[2] is the course code
 		//res.match[3] is the space-seperated scores
 		var uqf = robot.http("http://uqfinal.com/json/" + res.match[2].toUpperCase() + ".json")

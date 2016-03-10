@@ -2,13 +2,13 @@
 //   Generates help commands for Hubot.
 // 
 // Commands:
-//   !!acro <acronym> - Finds an acronym.
+//   !acro <acronym> - Finds an acronym.
 // 
 
 var cheerio = require("cheerio");
 
 module.exports = function (robot) {
-	robot.hear(/^!!?acro (.+)/i, function (res) {
+	robot.respond(/!?acro (.+)/i, function (res) {
 		robot.getAcronyms(res, res.match[1].trim().split(" "));
 	});
 

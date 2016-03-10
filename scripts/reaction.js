@@ -7,7 +7,7 @@
 // 
 
 module.exports = function (robot) {
-	robot.hear(/^!mrw (.+)/i, function (res) {
+	robot.respond(/!?mrw (.+)/i, function (res) {
 		var rStr = res.match[1];
 		if(!rStr) return;
 		robot.showReaction(rStr, res)

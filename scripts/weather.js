@@ -1,4 +1,4 @@
-// Description
+﻿// Description:
 //   Gets the weather info or radar for st lucia by default or a specified location
 //
 //
@@ -10,12 +10,12 @@
 var kdt = require("kd.tree");
 
 module.exports = function (robot) {
-  robot.hear(/^!weather radar ?(.+)?/i, function (res) {
+  robot.respond(/!?weather radar ?(.+)?/i, function (res) {
     var location = res.match[1] || "Brisbane";
     robot.getWeatherRadar(location, res)
   });
 
-  robot.hear(/^!weather ?(.+)?/i, function (res) {
+  robot.respond(/!?weather ?(.+)?/i, function (res) {
     var location = res.match[1] || "Brisbane";
     robot.getWeather(location, res)
   });

@@ -6,7 +6,7 @@
 //
 
 module.exports = function (robot) {
-	robot.hear(/^!urban (.+)/i, function (res) {
+	robot.respond(/!?urban (.+)/i, function (res) {
 		robot.getUrban(res, res.match[1].trim());
 	});
 
