@@ -45,7 +45,7 @@ module.exports = function (robot) {
 				}
 				
 				if (lines > 2) {
-					response += " - more at http://www.urbandictionary.com/define.php?term=" + word;
+					response += " - more at http://www.urbandictionary.com/define.php?term=" + encodeURI(word);
 				}
 				
 				res.send(response);
