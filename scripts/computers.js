@@ -1,4 +1,4 @@
-// Description
+﻿// Description:
 //   Returns the availability list of library computers at St Lucia
 //
 // Commands:
@@ -8,7 +8,7 @@
 var cheerio = require("cheerio");
 
 module.exports = function (robot) {
-	robot.hear(/^!computers/i, function (res) {
+	robot.respond(/!?computers/i, function (res) {
 		robot.http("https://www.library.uq.edu.au/uqlsm/availablepcsembed.php?stlucia").get() (function(err, resp, body) {
 			var $ = cheerio.load(body);
 			var computers = [];

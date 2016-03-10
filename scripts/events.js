@@ -7,7 +7,7 @@
 
 var ical = require('ical');
 module.exports = function (robot) {
-	robot.hear(/^!events$/i, function (res) {
+	robot.respond(/!?events/i, function (res) {
 		var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 		ical.fromURL('https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics', {}, function(err, data) {
 			var now = new Date().getTime();

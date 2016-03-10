@@ -8,7 +8,7 @@
 var cheerio = require("cheerio");
 
 module.exports = function (robot) {
-	robot.hear(/^!parking/i, function (res) {
+	robot.respond(/!?parking/i, function (res) {
 		robot.http("https://pg.pf.uq.edu.au/").get() (function(err, resp, body) {
 			var $ = cheerio.load(body);
 			var responses = [];

@@ -4,9 +4,8 @@
 // Commands:
 //   !caesar[n] <text>
 // 
-
 module.exports = function (robot) {
-	robot.hear(/^!caesar(\d*) (.+)/i, function (res) {
+	robot.respond(/!?caesar(\d*) (.+)/i, function (res) {
 		var n = 0;
 		if(res.match[1] == "") { n = 47; }
 		else { n = Number(res.match[1]); }
