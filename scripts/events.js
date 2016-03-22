@@ -19,7 +19,7 @@ module.exports = function (robot) {
 				}
 			}
 			arr.sort(function(a,b) { return a.start.getTime()-b.start.getTime(); });
-			var ret = "Events in the *next two weeks*. For a list of all visit: https://uqcs.org.au/calendar.html";
+			var ret = "Events in the *next two weeks*. For a list of all events, visit: https://uqcs.org.au/calendar.html";
 			for(var k in arr) {
 				var ev = arr[k];
 				if(ev.location == "") {ev.location = "Unkown location";}
