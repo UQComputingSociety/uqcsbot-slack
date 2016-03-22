@@ -1,4 +1,4 @@
-﻿// Description:
+// Description:
 //   Gets the weather info or radar for st lucia by default or a specified location
 //
 //

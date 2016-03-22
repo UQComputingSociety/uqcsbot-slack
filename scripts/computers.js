@@ -1,4 +1,4 @@
-﻿// Description:
+// Description:
 //   Returns the availability list of library computers at St Lucia
 //
 // Commands:
