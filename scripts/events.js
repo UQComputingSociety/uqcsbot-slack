@@ -18,17 +18,24 @@ module.exports = function (robot) {
 					arr.push(data[k]);
 				}
 			}
-			arr.sort(function(a,b) { return a.start.getTime()-b.start.getTime(); });
-			var ret = "Events in the *next two weeks*. For a list of all events, visit: https://uqcs.org.au/calendar.html";
-			for(var k in arr) {
-				var ev = arr[k];
-				if(ev.location == "") {ev.location = "Unkown location";}
-				ret += "\r\n*" + months[ev.start.getMonth()] + " " + ev.start.getDate() + " " + ev.start.getHours() + ":" +
-					(ev.start.getMinutes() < 10 ? "0" : "") + ev.start.getMinutes() +
-					" - " + months[ev.end.getMonth()] + " " + ev.end.getDate() + " " + ev.end.getHours() + ":" +
-					(ev.end.getMinutes() < 10 ? "0" : "") + ev.end.getMinutes() + "*" +
-					" - _" + ev.location + "_" +
-					": `" + ev.summary + "`";
+			var ret = "";
+			if(arr.length == 0) {
+				ret = "_There doesn't appear to be any events in the next two weeks..._\r\n";
+				ret += "For a full list of events, visit: https://uqcs.org.au/calendar.html\r\n";
+			}
+			else {
+				arr.sort(function(a,b) { return a.start.getTime()-b.start.getTime(); });
+				ret = "Events in the *next two weeks*. For a list of all events, visit: https://uqcs.org.au/calendar.html\r\n";
+				for(var k in arr) {
+					var ev = arr[k];
+					if(ev.location == "") {ev.location = "TBA";}
+					ret += "*" + months[ev.start.getMonth()] + " " + ev.start.getDate() + " " + ev.start.getHours() + ":" +
+						(ev.start.getMinutes() < 10 ? "0" : "") + ev.start.getMinutes() +
+						" - " + months[ev.end.getMonth()] + " " + ev.end.getDate() + " " + ev.end.getHours() + ":" +
+						(ev.end.getMinutes() < 10 ? "0" : "") + ev.end.getMinutes() + "*" +
+						" - _" + ev.location + "_" +
+						": `" + ev.summary + "`\r\n";
+				}
 			}
 			res.send(ret);
 		});
