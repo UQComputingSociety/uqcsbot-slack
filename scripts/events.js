@@ -34,9 +34,10 @@ module.exports = function (robot) {
 					}
 				}
 			} else {
-				var n = Math.min(+res.match[1], data.length);
-				while (n > 0){
-					arr.push(data[n]);
+				var n = +res.match[1];
+				for(var k in data) {
+					if(n === 0) { break; }
+					arr.push(data[k]);
 					n--;
 				}
 			}
