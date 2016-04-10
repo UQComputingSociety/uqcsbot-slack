@@ -46,9 +46,6 @@ module.exports = function (robot) {
 						}
 						break;
 					case 2:
-						arr.push(data[k]);
-						n--;
-						break;
 					case 3:
 						if(data[k].end.getTime() > now){
 							arr.push(data[k]);
@@ -56,6 +53,12 @@ module.exports = function (robot) {
 						break;
 				}
 			}
+			arr.sort(function(a,b) { return a.start.getTime()-b.start.getTime(); });
+
+			if(type === 2) {
+				arr = arr.slice(0, n);
+			}
+
 			var ret = "";
 			if(arr.length === 0) {
 				ret += "_";
@@ -63,7 +66,6 @@ module.exports = function (robot) {
 				ret += "_\r\nFor a full list of events, visit: https://uqcs.org.au/calendar.html\r\n";
 			}
 			else {
-				arr.sort(function(a,b) { return a.start.getTime()-b.start.getTime(); });
 				ret += header[type].replace("<n>", res.match[1]);
 				ret += "\r\n";
 				for(var k in arr) {
