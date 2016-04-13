@@ -6,7 +6,7 @@ var HubotCron = require('hubot-cronjob');
 
 module.exports = function(robot) {
 	var fn, pattern, timezone;
-	pattern = '30 17 * * *'; // Daily at 5:30PM
+	pattern = '* 9 * * *'; // Daily at 5:30PM
 	timezone = 'Australia/Brisbane';
 
 	fn = function() {
@@ -16,7 +16,7 @@ module.exports = function(robot) {
             + process.env.HUBOT_SLACK_TOKEN
             + "&user=" + victim).get()(
                 function(err, resp, body){
-                    return robot.messageRoom("general", "Hey @" + JSON.parse(body).user.name + "! Tell us about something cool you are working on!");
+                    return robot.messageRoom("bot-testing", "Hey @" + JSON.parse(body).user.name + "! Tell us about something cool you are working on!");
                 }
             );
 
