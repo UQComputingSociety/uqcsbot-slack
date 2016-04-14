@@ -8,6 +8,10 @@ deployed on [Heroku][heroku] to get you up and running as quick as possible.
 [hubot]: http://hubot.github.com
 [generator-hubot]: https://github.com/github/generator-hubot
 
+### Is uqcsbot misbehaving?
+
+Say `uqcsbot: go down` and the process will exit. Then get someone to restart it.
+
 ### Running uqcsbot Locally
 
 You can test your hubot by running the following, however some plugins will not
