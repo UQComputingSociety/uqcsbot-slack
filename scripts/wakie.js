@@ -6,7 +6,7 @@ var HubotCron = require('hubot-cronjob');
 
 module.exports = function(robot) {
 	var fn, pattern, timezone;
-	pattern = '* 17 * * *'; // Daily at 5:00PM
+	pattern = '0 17 * * *'; // Daily at 5:00PM
 	timezone = 'Australia/Brisbane';
 
 	fn = function() {
