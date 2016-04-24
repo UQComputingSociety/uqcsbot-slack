@@ -22,7 +22,7 @@ module.exports = function(robot) {
       function(error, response, body) {
         var $ = cheerio.load(body);
         var response = '';
-        if ((!error) && (response.statusCode == 200) && !$('div.ajax-content p').hasClass('intro')) {
+        if ((!error) && !($('div.ajax-content p').hasClass('intro'))) {
 
           //bop it, push it, twist it, scrape it
           var avg_price = $('.price strong').html();
