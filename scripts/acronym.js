@@ -1,9 +1,9 @@
 // Description
-//   Generates help commands for Hubot.
-// 
+//   Finds an acronym.
+//
 // Commands:
-//   !acro <acronym> - Finds an acronym.
-// 
+//   !`acro` _<text>_ - Finds an acronym.
+//
 
 var cheerio = require("cheerio");
 
@@ -42,7 +42,7 @@ module.exports = function (robot) {
 					if (!err) {
 						responses[index] = body;
 						completed++;
-						
+
 						// Called when completing the final request
 						if (completed == max) {
 							var response = "";
@@ -69,11 +69,11 @@ module.exports = function (robot) {
 	robot.getAcronym = function (html) {
 		var $ = cheerio.load(html);
 		var responses = [];
-		
+
 		$('td.acr').each(function (i, element) {
 			responses.push($(element).siblings().text());
 		});
-		
+
 		return responses[Math.floor(Math.random() * responses.length)];
 	}
 }

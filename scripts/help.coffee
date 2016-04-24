@@ -2,8 +2,8 @@
 #   Generates help commands for Hubot.
 #
 # Commands:
-#   hubot help - Displays all of the help commands that Hubot knows about.
-#   hubot help <query> - Displays all help commands that match <query>.
+#   !`hubot` `help` - Displays all of the help commands that Hubot knows about.
+#   !`hubot` `help` _<query>_ - Displays all help commands that match <query>.
 #
 # URLS:
 #   /hubot/help
@@ -86,4 +86,3 @@ renamedHelpCommands = (robot) ->
   help_commands = robot.helpCommands().map (command) ->
     command.replace /hubot/ig, robot_name
   help_commands.sort()
-

@@ -1,9 +1,9 @@
 // Description
 //   Generates help commands for Hubot.
-// 
+//
 // Commands:
-//   !parking - Lists the available parking at UQ
-// 
+//   !`parking` - Lists the available parking at UQ
+//
 
 var cheerio = require("cheerio");
 
@@ -20,12 +20,12 @@ module.exports = function (robot) {
 					var park = $($(element).children()[0]).text().trim();
 					var permit = $($(element).children()[1]).text().trim();
 					var casual = $($(element).children()[2]).text().trim();
-					
+
 					if (permit.length != 0) {
 						responses.push([park, permit]);
 					} else {
 						responses.push([park, casual]);
-					}	
+					}
 				}
 			});
 
@@ -48,7 +48,7 @@ module.exports = function (robot) {
 			};
 
 			var response = ">Available parking at the University of Queensland\r\n";
-			
+
 			var msgs = [];
 
 			for (var i = 0; i < responses.length; i++) {
@@ -72,10 +72,10 @@ module.exports = function (robot) {
 					avail: avail,
 					after: after + "\r\n"
 				});
-				
+
 				//response += ">`" + parkName + "` " + modifier + " *" + avail + "*" + after + "\r\n";
 			}
-			
+
 			var max = 0;
 			for (var i = 0; i < msgs.length; i++) {
 				var item = msgs[i];
@@ -89,22 +89,22 @@ module.exports = function (robot) {
 				item = msgs[i];
 				len = Math.max(item.msg.length, 0);
 				len = Math.max(len, 0);
-				
+
 				response += item.msg;
 				while (len < max) {
 					response += " ";
 					len++;
 				}
-				
+
 				len = Math.max(item.avail.length, 0);
 				while (len < "FULL".length) {
 					response += " ";
 					len++;
 				}
-				
+
 				response += "` *" + item.avail + "*" + item.after;
 			}
-			
+
 			res.send(response);
 		});
 	});

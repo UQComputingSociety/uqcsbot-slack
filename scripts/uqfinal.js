@@ -1,9 +1,9 @@
 // Description
-//   UQFinal
-// 
+//   UQFinal: Returns the minimum mark as percentage on the final exam to pass (doesn't include hurdles)
+//
 // Commands:
-//   uqcsbot <uqfinal|wdinotf|final> <course> <score1> <score2> ... - (scores are the percentages) Returns the minimum mark on the final exam to pass (doesn't include hurdles)
-// 
+//   !`uqfinal|wdinotf|final` _<course>_ _<score1>_ _<score2>_ ... - Returns minimum mark needed on final exam
+//
 
 module.exports = function (robot) {
 	robot.respond(/!?(uqfinal|wdinotf|final) ([a-z]{4}[0-9]{4}[a-z]?) (.+)+/i, function (res) {

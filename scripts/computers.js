@@ -2,7 +2,7 @@
 //   Returns the availability list of library computers at St Lucia
 //
 // Commands:
-//   !computers - Lists the available computers at UQ
+//   !`computers` - Lists the available computers at UQ
 //
 
 var cheerio = require("cheerio");

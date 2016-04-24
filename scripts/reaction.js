@@ -1,10 +1,10 @@
 // Description
 //  Allows users to store and bring out reaction images/gifs
-// 
+//
 // Commands:
-//  !mrw <reaction_string>
-//  uqcsbot new reaction <reaction_string> <url to reaction image>
-// 
+//  !`mrw` _<string>_ - Load reaction image/gif
+//  !`new reaction` _<string>_ _<url to image>_ - Store reaction image
+//
 
 module.exports = function (robot) {
 	robot.respond(/!?mrw (.+)/i, function (res) {
@@ -13,7 +13,7 @@ module.exports = function (robot) {
 		robot.showReaction(rStr, res)
 	});
 
-	robot.respond(/new reaction (\w+\ [^ \n]+)/i, function (res) {
+	robot.respond(/!?new reaction (\w+\ [^ \n]+)/i, function (res) {
 		var input = res.match[1].split(" ");
 		var rStr = input[0];
 		var url = input[1]; // should probably ensure this is a url :/

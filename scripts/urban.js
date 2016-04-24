@@ -2,7 +2,7 @@
 //   Generates help commands for Hubot.
 //
 // Commands:
-//   !urban <phrase> - Looks a phrase up on Urban Dictionary.
+//   !`urban` _<phrase>_ - Looks a phrase up on Urban Dictionary.
 //
 
 module.exports = function (robot) {
@@ -16,7 +16,7 @@ module.exports = function (robot) {
 		(function (err, resp, body) {
 			if (!err) {
 				var response = "";
-				
+
 				var max = 2;
 				var lines = 0;
 
@@ -43,11 +43,11 @@ module.exports = function (robot) {
 						lines++;
 					});
 				}
-				
+
 				if (lines > 2) {
 					response += " - more at http://www.urbandictionary.com/define.php?term=" + encodeURI(word);
 				}
-				
+
 				res.send(response);
 			}
 		});
