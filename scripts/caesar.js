@@ -1,9 +1,9 @@
 // Description
 //   Performs Caesar shift on specified text
-// 
+//
 // Commands:
-//   !caesar[n] <text>
-// 
+//   !`caesar[n]`` _<text>_ - Performs Caesar shift
+//
 module.exports = function (robot) {
 	robot.respond(/!?caesar(\d*) (.+)/i, function (res) {
 		var n = 0;
