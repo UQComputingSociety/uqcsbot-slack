@@ -71,10 +71,16 @@ module.exports = function (robot) {
 				for(var k in arr) {
 					var ev = arr[k];
 					if(ev.location == "") {ev.location = "TBA";}
-					ret += "*" + months[ev.start.getMonth()] + " " + ev.start.getDate() + " " + ev.start.getHours() + ":" +
-						(ev.start.getMinutes() < 10 ? "0" : "") + ev.start.getMinutes() +
-						" - " + months[ev.end.getMonth()] + " " + ev.end.getDate() + " " + ev.end.getHours() + ":" +
-						(ev.end.getMinutes() < 10 ? "0" : "") + ev.end.getMinutes() + "*" +
+
+					var start_time = months[ev.start.getMonth()] + " " + ev.start.getDate() + " " + ev.start.getHours() + ":" +
+						(ev.start.getMinutes() < 10 ? "0" : "") + ev.start.getMinutes();
+
+					var end_time = ev.end.getHours() + ":" + (ev.end.getMinutes() < 10 ? "0" : "") + ev.end.getMinutes();
+					if (ev.start.getMonth() !== ev.end.getMonth() || ev.start.getDate() !== ev.end.getDate()) {
+						end_time = months[ev.end.getMonth()] + " " + ev.end.getDate() + " " + end_time;
+					}
+
+					ret += "*" + start_time + " - " + end_time + "*" +
 						" - _" + ev.location + "_" +
 						": `" + ev.summary + "`\r\n";
 				}
