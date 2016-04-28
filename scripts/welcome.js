@@ -20,8 +20,8 @@ module.exports = function(robot){
 	robot.enter(function(res){
 		if(res.message.room == "general"){
 			res.send("Welcome, " + res.message.user.name + "!");
-			members = robot.adapter.client.getChannelOrDMByName("general").length;
-			if(members % 100 == 0) {
+			members = robot.adapter.client.getChannelGroupOrDMByName("general").length;
+			if(members % 50 == 0) {
 				res.send(":tada: " + members + " members! :tada:");
 			}
 			welcomeMessages.forEach(function(msg, i) {
