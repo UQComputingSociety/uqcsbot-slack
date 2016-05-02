@@ -28,14 +28,21 @@ module.exports = function (robot) {
 							var total = 0;
 							var invalid = false;
 							for(var i = 0; i < num_of_assessment - 1; i++) {
-								var evaluated = math.eval(scores[i]);
-								if(isNaN(evaluated)) {
-									res.send("Invalid score: '" + scores[i] + "'.");
+								try {
+									var evaluated = math.eval(scores[i]);
+								}catch(err) {
+									res.send("Invalid score: " + scores[i] + ". Reason: Unparsable");
 									invalid = true;
 									break;
-								}else if(evaluated > 0 && evaluated < 1) {
+								}
+								if(evaluated > 0 && evaluated < 1) {
 									res.send("_Note: Treating '" + scores[i] + "' (" + evaluated + ") as: " + evaluated*100 + "%_");
 									evaluated *= 100;
+								}
+								if(evaluated < 0 || evaluated > 100) {
+									res.send("Invalid score: " + scores[i] + ". Reason: Score is not within 0 and 100");
+									invalid = true;
+									break;
 								}
 								total += (evaluated/100) * course.assessment[i].weight;
 							}
