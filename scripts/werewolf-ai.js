@@ -77,7 +77,7 @@ module.exports = function (robot) {
 	});
 
 	// If I'm the seer...
-	robot.hear(/if i('|a)m (the|a) seer,? i saw (.+) as ?a? (.+)/, function(res) {
+	robot.hear(/if i('| a)m (the|a) seer,? i saw (.+) as ?a? (.+)/i, function(res) {
 		var ai = robot.brain.get('werewolf_ai');
 		ai.players["@" + res.user.name].accusations[res.match[1]] = res.match[2];
 	});
@@ -86,7 +86,9 @@ module.exports = function (robot) {
 	robot.respond(/It is night and it is time to hunt/, function(res) {
 		var ai = robot.brain.get('werewolf_ai');
 		var players = keys(ai.players);
-		res.send("!kill #werewolf " + players[Math.floor(Math.random() * players.length)]);
+		setTimeout(function() {
+			res.send("!kill #werewolf " + players[Math.floor(Math.random() * players.length)]);
+		}, Math.random() * 3000 + 2000);
 	});
 
 	// Seer select
@@ -104,7 +106,9 @@ module.exports = function (robot) {
 			unknown.push(players[Math.floor(Math.random() * players.length)]);
 		}
 
-		res.send("!see #werewolf " + unknown[Math.floor(Math.random() * unknown.length)]);
+		setTimeout(function() {
+			res.send("!see #werewolf " + unknown[Math.floor(Math.random() * unknown.length)]);
+		}, Math.random() * 3000 + 2000);
 	});
 
 	// Seer results
