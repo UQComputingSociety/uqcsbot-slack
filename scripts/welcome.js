@@ -55,11 +55,15 @@ module.exports = function(robot){
 			res.send("Welcome, " + res.message.user.name + "!");
 			var unique = unique_messages[members];
 			if(unique !== undefined) {
-				res.send(members + ": " + unique);
+				setTimeout(function() {
+					res.send(members + ": " + unique);
+				}, messageTime);
 			}
 
 			if(members % 50 == 0) {
-				res.send(":tada: " + members + " members! :tada:");
+				setTimeout(function() {
+					res.send(":tada: " + members + " members! :tada:");
+				}, messageTime);
 			}
 			welcomeMessages.forEach(function(msg, i) {
 				setTimeout(function(){
