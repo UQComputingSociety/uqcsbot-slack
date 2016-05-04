@@ -51,7 +51,7 @@ var messageTime = 2500;
 module.exports = function(robot){
 	robot.enter(function(res){
 		if(res.message.room == "general"){
-			members = robot.adapter.client.getChannelGroupOrDMByName("general").length;
+			members = robot.adapter.client.getChannelGroupOrDMByName("general").members.length;
 			res.send("Welcome, " + res.message.user.name + "!");
 			var unique = unique_messages[members];
 			if(unique !== undefined) {
