@@ -34,6 +34,7 @@ var unique_messages = {
 	416: "Range Not Satisfiable",
 	417: "Expectation Failed",
 	418: "I'm a teapot",
+	420: "Smoke weed everyday",
 	421: "Misdirected Request",
 	422: "Unprocessable Entity",
 	423: "Locked",
@@ -42,7 +43,8 @@ var unique_messages = {
 	428: "Precondition Required",
 	429: "Too Many Requests",
 	431: "Request Header Fields Too Large",
-	451: "Unavailable For Legal Reasons"
+	451: "Unavailable For Legal Reasons",
+	666: "HAIL SATAN"
 };
 
 //The time between each individual welcome message send
@@ -52,6 +54,7 @@ module.exports = function(robot){
 	robot.enter(function(res){
 		if(res.message.room == "general"){
 			members = robot.adapter.client.getChannelGroupOrDMByName("general").members.length;
+			members -= 4; // Inactive accounts: uqcsbot, werewolf, claire, svict test
 			res.send("Welcome, " + res.message.user.name + "!");
 			var unique = unique_messages[members];
 			if(unique !== undefined) {
