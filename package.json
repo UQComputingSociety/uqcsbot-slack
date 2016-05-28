@@ -14,7 +14,7 @@
     "hubot-scripts": "^2.16.2",
     "hubot-slack": "^3.4.2",
     "hubot-google": "^0.1.2",
-    "hubot-voting": "^1.0.0",
+    "hubot-better-voting": "^1.0.0",
     "hubot-google-images": "^0.2.3",
     "hubot-youtube": "^1.0.1",
     "hubot-conversation": "^1.0.2",
