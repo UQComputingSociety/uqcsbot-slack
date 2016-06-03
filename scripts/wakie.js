@@ -11,7 +11,8 @@ module.exports = function(robot) {
 
 	fn = function() {
 		var general = robot.adapter.client.getChannelGroupOrDMByName("general");
-		var victim = general.members[Math.floor(Math.random() * general.members.length)];
+		var active = general.filter(function(user) { return !user.deleted; }); // Filter out deleted accounts
+		var victim = active[Math.floor(Math.random() * active)];
 		return robot.messageRoom("general", "Hey <@" + victim + ">! Tell us about something cool you are working on!");
 	};
 	return new HubotCron(pattern, timezone, fn);
