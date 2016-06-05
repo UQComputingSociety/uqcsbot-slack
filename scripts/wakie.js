@@ -12,7 +12,7 @@ module.exports = function(robot) {
 	fn = function() {
 		var general = robot.adapter.client.getChannelGroupOrDMByName("general");
 		var active = general.filter(function(user) { return !user.deleted; }); // Filter out deleted accounts
-		var victim = active[Math.floor(Math.random() * active)];
+		var victim = active[Math.floor(Math.random() * active.length)];
 		return robot.messageRoom("general", "Hey <@" + victim + ">! Tell us about something cool you are working on!");
 	};
 	return new HubotCron(pattern, timezone, fn);
