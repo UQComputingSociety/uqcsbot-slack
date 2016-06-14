@@ -96,11 +96,12 @@ module.exports = function (robot) {
 					len++;
 				}
 
+				/*
 				len = Math.max(item.avail.length, 0);
 				while (len < "FULL".length) {
 					response += " ";
 					len++;
-				}
+				}*/
 
 				response += "` *" + item.avail + "*" + item.after;
 			}
