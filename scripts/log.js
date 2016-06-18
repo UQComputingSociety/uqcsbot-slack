@@ -5,16 +5,19 @@
 //   !`logging` <status|enable|disable> <channel> - Manages channel logging
 //
 module.exports = function (robot) {
-	robot.brain.on("loaded", function() {
+	reset_brain = function() {
 		robot.brain.set("channel_logs", {
 			enabled: [],
 			messages: {}
 		});
-	});
+	};
 
 	robot.hear(/(.+)/, function (res) {
 		var logs = robot.brain.get("channel_logs");
-		if(logs === null) { return; } // Brain not loaded
+		if(logs === null) {
+			reset_brain();
+			if(logs === null) { return; }
+		}
 
 		var channel = res.room;
 		if(logs.enabled.indexOf(channel) === -1) { return; } // Not logging
@@ -23,7 +26,7 @@ module.exports = function (robot) {
 			logs.messages[channel] = [];
 		}
 
-		logs.messages[channel].append({msg: res.match[1], res: res});
+		logs.messages[channel].push({msg: res.match[1], res: res});
 	});
 
 	robot.respond(/!?logging (status|enable|disable) ?(#.+)?/i, function(res) {
@@ -49,7 +52,7 @@ module.exports = function (robot) {
 			if(logging_enabled) {
 				res.send("Already enabled.\r\n");
 			}else {
-				logs.enabled.append(channel);
+				logs.enabled.push(channel);
 				robot.messageRoom("#" + channel, res.message.user.name + " has enabled logging in this channel!\r\n");
 			}
 		}else if(cmd === "disable") {
@@ -61,4 +64,4 @@ module.exports = function (robot) {
 			}
 		}
 	});
-}
+};
