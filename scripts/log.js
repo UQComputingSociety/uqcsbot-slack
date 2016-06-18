@@ -19,7 +19,7 @@ module.exports = function (robot) {
 			if(logs === null) { return; }
 		}
 
-		var channel = res.room;
+		var channel = res.message.room.toLowerCase();
 		if(logs.enabled.indexOf(channel) === -1) { return; } // Not logging
 
 		if(logs.messages[channel] === undefined) {
@@ -39,7 +39,7 @@ module.exports = function (robot) {
 		var cmd = res.match[1].toLowerCase();
 		var channel = res.match[2];
 		if(channel === undefined) {
-			channel = res.room;
+			channel = res.message.room.toLowerCase();
 		}else {
 			channel = channel.substring(1, channel.length).toLowerCase();
 		}
@@ -47,7 +47,15 @@ module.exports = function (robot) {
 		var logging_enabled = (logs.enabled.indexOf(channel) !== -1);
 
 		if(cmd === "status") {
-			res.send("Logging in #" + channel + " is " + (logging_enabled ? "enabled" : "disabled") + "\r\n");
+			if(logging_enabled) {
+				var messages = 0;
+				if(logs.messages[channel] !== undefined) {
+					messages = logs.messages[channel].length;
+				}
+				res.send("Logging in #" + channel + " is enabled with a current total of " + messages + " messages.\r\n");
+			}else {
+				res.send("Logging in #" + channel + " is disabled.\r\n");
+			}
 		}else if(cmd === "enable") {
 			if(logging_enabled) {
 				res.send("Already enabled.\r\n");
