@@ -18,6 +18,5 @@ module.exports = function (robot) {
 		}
 
 		logs[channel].append({msg: res.match[1], res: res});
-		res.send("Logged " + res.match[1] + "\r\n");
 	});
 }
