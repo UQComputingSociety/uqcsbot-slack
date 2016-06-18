@@ -53,8 +53,10 @@ var messageTime = 2500;
 module.exports = function(robot){
 	robot.enter(function(res){
 		if(res.message.room == "general"){
-			members = robot.adapter.client.getChannelGroupOrDMByName("general").members.length;
-			members -= 4; // Inactive accounts: uqcsbot, werewolf, claire, svict test
+			var general = robot.adapter.client.getChannelGroupOrDMByName("general");
+			var active = general.members.filter(function(user) { return !user.deleted; }); // Filter out deleted accounts
+			var members = active.length;
+
 			res.send("Welcome, " + res.message.user.name + "!");
 			var unique = unique_messages[members];
 			if(unique !== undefined) {
