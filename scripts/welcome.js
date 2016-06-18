@@ -53,7 +53,7 @@ var messageTime = 2500;
 module.exports = function(robot){
 	robot.enter(function(res){
 		if(res.message.room == "general"){
-			var general = robot.adapter.client.getChannelGroupOrDMByName("general").members;
+			var general = robot.adapter.client.getChannelGroupOrDMByName("general");
 			var active = general.members.filter(function(user) { return !user.deleted; }); // Filter out deleted accounts
 			var members = active.length;
 
