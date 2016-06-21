@@ -7,7 +7,7 @@
 var request = require("request");
 
 module.exports = function(robot){
-  robot.hear(/\$\$([^\$]+)\$\$/, function(res){
+  robot.hear(/\$\$([^\$]+)\$\$|!tex|!latex/, function(res){
     res.send("http://latex.codecogs.com/gif.latex?" + encodeURIComponent(res.match[1]));
     robot.superHackyPostImageToYaBoisChat(res.message.room, res.match[1])
   });
