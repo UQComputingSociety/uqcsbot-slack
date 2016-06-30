@@ -6,8 +6,26 @@
 //   !`happiest` - Outputs the happiest person
 //   !`saddest` - Outputs the saddest person
 //
+
+var HubotCron = require('hubot-cronjob');
+
 module.exports = function (robot) {
-	robot.hear(/(:<|:\(|:'\()/, function (res) {
+	var happy_emotes = [":simple_smiley_face:", ":smiley:", ":>"];
+	var sad_emotes = [":cry:", ":sob:", ":<"];
+
+	function get_regex(arr) {
+		var combined = "(";
+		for(var i = 0; i < arr.length - 1; i++) {
+			combined += arr[i];
+			combined += "|";
+		}
+		combined += arr[arr.length - 1];
+		combined += ")";
+		console.log(combined);
+		return new RegExp(combined, "i");
+	}
+
+	robot.hear(get_regex(sad_emotes), function (res) {
 		var moods = robot.brain.get("moods");
 		if(moods === null) {
 			robot.brain.set("moods", {});
@@ -22,7 +40,7 @@ module.exports = function (robot) {
 		}
 	});
 
-	robot.hear(/(:>|:\)|:'\))/, function (res) {
+	robot.hear(get_regex(happy_emotes), function (res) {
 		var moods = robot.brain.get("moods");
 		if(moods === null) {
 			robot.brain.set("moods", {});
@@ -82,5 +100,5 @@ module.exports = function (robot) {
 
 	return new HubotCron("0 0 * * *", "Australia/Brisbane", function() {
 		robot.brain.set("moods", {});
-	}
+	});
 };
