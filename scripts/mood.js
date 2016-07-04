@@ -10,8 +10,16 @@
 var HubotCron = require('hubot-cronjob');
 
 module.exports = function (robot) {
-	var happy_emotes = [":simple_smiley_face:", ":smiley:", ":>"];
-	var sad_emotes = [":cry:", ":sob:", ":<"];
+	var happy_emotes = [":\\)", ":D", ":3", ":>", ":'\\)",
+		":grinning:", ":grin:", ":joy:", ":smiley:", ":smile:", ":laughing:",
+		":wink:", ":blush:", ":slightly_smiling_face:", ":upside_down_face:",
+		":relaxed:", ":yum:", ":heart_eyes:", ":kissing_heart:", ":kissing_smiling_eyes:",
+		":stuck_out_tongue_winking_eye:", ":stuck_out_tongue_closed_eyes:",
+		":stuck_out_tongue:", ":money_mouth_face:", ":hugging_face:", ":smirk:"];
+	var sad_emotes = [":\\(", ":'\\(", ":<", 
+		":unamused:", ":disappointed:", ":slightly_frowning_face:", ":white_frowning_face:",
+		":persevere:", ":confounded:", ":tired_face:", ":weary:", ":frowning:",
+		":anguished:", ":cry:", ":sob:"];
 
 	function get_regex(arr) {
 		var combined = "(";
@@ -21,7 +29,6 @@ module.exports = function (robot) {
 		}
 		combined += arr[arr.length - 1];
 		combined += ")";
-		console.log(combined);
 		return new RegExp(combined, "i");
 	}
 
@@ -55,14 +62,19 @@ module.exports = function (robot) {
 		}
 	});
 
-	robot.respond(/!?mood (.+)/i, function(res) {
+	robot.respond(/!?mood ?(.+)?/i, function(res) {
 		var moods = robot.brain.get("moods");
 		if(moods === null) {
 			res.send("Brain not loaded.\r\n");
 			return;
 		}
 
-		var target = res.match[1].toLowerCase();
+		var target;
+		if(res.match[1]) {
+			target = res.match[1].toLowerCase();
+		}else {
+			target = res.message.user.name.toLowerCase();
+		}
 		if(moods[target] === undefined) {
 			res.send(target + " is emotionless...\r\n");
 		}else {
