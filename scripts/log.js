@@ -47,14 +47,14 @@ module.exports = function (robot) {
 		var logging_enabled = (logs.enabled.indexOf(channel) !== -1);
 
 		if(cmd === "status") {
+			var messages = 0;
+			if(logs.messages[channel] !== undefined) {
+				messages = logs.messages[channel].length;
+			}
 			if(logging_enabled) {
-				var messages = 0;
-				if(logs.messages[channel] !== undefined) {
-					messages = logs.messages[channel].length;
-				}
 				res.send("Logging in #" + channel + " is enabled with a current total of " + messages + " messages.\r\n");
 			}else {
-				res.send("Logging in #" + channel + " is disabled.\r\n");
+				res.send("Logging in #" + channel + " is disabled. But has a total of " + messsages + " logged messages.\r\n");
 			}
 		}else if(cmd === "enable") {
 			if(logging_enabled) {
