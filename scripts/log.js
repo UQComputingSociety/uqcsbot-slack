@@ -29,7 +29,7 @@ module.exports = function (robot) {
 		logs.messages[channel].push({msg: res.match[1], res: res});
 	});
 
-	robot.respond(/!?logging (status|enable|disable) ?(#.+)?/i, function(res) {
+	robot.respond(/!?logging (status|enable|disable|clear) ?(#.+)?/i, function(res) {
 		var logs = robot.brain.get("channel_logs");
 		if(logs === null) {
 			res.send("Brain not loaded.\r\n");
@@ -70,6 +70,9 @@ module.exports = function (robot) {
 				logs.enabled.splice(logs.enabled.indexOf(channel), 1);
 				robot.messageRoom("#" + channel, res.message.user.name + " has disabled logging in this channel!\r\n");
 			}
+		}else if(cmd === "clear") {
+		  reset_brain();
+			res.send("Cleared.\r\n");
 		}
 	});
 };
