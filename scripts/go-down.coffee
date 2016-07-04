@@ -12,7 +12,7 @@ module.exports = (robot) ->
     msg.reply "Restart command recieved"
     robot.logger.info "#{msg.message.user.name} sent restart command"
     robot.messageRoom "bot-testing", "<@#{msg.message.user.name}> has shut me down. Don't worry, I auto-restart."
-    process.exit(0)
+    process.exit(1)
 
   robot.router.post "/#{robot.name}/restart", (req, res) ->
-    process.exit(0)
+    process.exit(1)
