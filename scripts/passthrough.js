@@ -34,7 +34,6 @@ module.exports = function (robot) {
                     form: {
                         "channel_name": envelope.room,
                         "user_id": envelope.user,
-                        "user_name": envelope.user_name,
                         "text": envelope.message.text,
                     }
                 });
