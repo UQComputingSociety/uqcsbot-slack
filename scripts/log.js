@@ -54,7 +54,7 @@ module.exports = function (robot) {
 			if(logging_enabled) {
 				res.send("Logging in #" + channel + " is enabled with a current total of " + messages + " messages.\r\n");
 			}else {
-				res.send("Logging in #" + channel + " is disabled. But has a total of " + messsages + " logged messages.\r\n");
+				res.send("Logging in #" + channel + " is disabled. But has a total of " + messages + " logged messages.\r\n");
 			}
 		}else if(cmd === "enable") {
 			if(logging_enabled) {
