@@ -7,7 +7,7 @@
 
 var ical = require('ical');
 module.exports = function (robot) {
-	robot.respond(/!?events ?(full|[1-9][0-9]*)? ?(weeks?)?/i, function (res) {
+	robot.respond(/!?events ?(full|all|[1-9][0-9]*)? ?(weeks?)?/i, function (res) {
 		var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 		var no_result = ["There doesn't appear to be any events in the next two weeks...",
 				 "There doesn't appear to be any events in the next *<n>* weeks...",
@@ -19,7 +19,7 @@ module.exports = function (robot) {
 			      "List of *all* upcoming events"];
 		var type = 0; // Two weeks
 		if (res.match[1] !== undefined) {
-			if (res.match[1] === "full") {
+			if (res.match[1] === "full" || res.match[1] === "all") {
 				type = 3; // All events
 			} else if (res.match[2] === undefined) {
 				type = 2; // n events
