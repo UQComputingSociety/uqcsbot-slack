@@ -11,7 +11,7 @@ module.exports = function(robot) {
 
 	fn = function() {
 		var general = robot.adapter.client.getChannelGroupOrDMByName("general");
-		var active = general.members.filter(function(user) { return robot.brain.userForId(user.deleted).slack.deleted === false; }); // Filter out deleted accounts
+		var active = general.members.filter(function(user) { return robot.brain.userForId(user).slack.deleted === false; }); // Filter out deleted accounts
 		var victim = active[Math.floor(Math.random() * active.length)];
 		return robot.messageRoom("general", "Hey <@" + victim + ">! Tell us about something cool you are working on!");
 	};
