@@ -28,7 +28,7 @@ module.exports = function(robot){
 
 			var url = "https://http.cat/" + members;
 			robot.http(url).get() (function (err, resp, body) {
-				if(!err) {
+				if(!err && resp.statusCode === 200) {
 					res.send(url);
 				}
 			});
