@@ -52,7 +52,7 @@ module.exports = function (robot) {
 		var add_reaction = function(item, emoji) {
 			robot.http("https://slack.com/api/reactions.add?token="
 					+ process.env.HUBOT_SLACK_TOKEN
-					+ "&name=thumbsup"
+					+ "&name=" + emoji
 					+ "&channel=" + item.channel
 					+ "&timestamp=" + item.ts).get() (
 						function(err, resp, body) {});
