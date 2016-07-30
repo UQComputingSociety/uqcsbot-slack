@@ -23,7 +23,10 @@ module.exports = function (robot) {
 		var channel_name = id.split("-")[0];
 		var channel = robot.adapter.client.getChannelGroupOrDMByID(channel_name);
 		if(!people) { return; }
-		var active = channel.members.filter(function(user) { return robot.brain.userForId(user.deleted).slack.deleted === false; }); // Filter out deleted accounts
+		var active = channel.members.filter(function(user) {
+			var slack = robot.brain.userForId(user).slack;
+			return slack.deleted === false && slack.is_bot === false;
+		});
 		var to_pass = active.length / 2;
 		if(votes.votes[id].count > to_pass) {
 			//Passed
@@ -45,7 +48,17 @@ module.exports = function (robot) {
 
 		var item = res.message.rawMessage;
 		votes.votes[get_id(item.channel, item.ts, item.user)] = {count: 0, text: res.match[1]};
-		res.send("Vote for: " + res.match[1] + " has begun!\r\n");
+
+		var add_reaction = function(item, emoji) {
+			robot.http("https://slack.com/api/reactions.add?token="
+					+ process.env.HUBOT_SLACK_TOKEN
+					+ "&name=thumbsup"
+					+ "&channel=" + item.channel
+					+ "&timestamp=" + item.ts).get() (
+						function(err, resp, body) {});
+		};
+		add_reaction(item, "thumbsup");
+		add_reaction(item, "thumbsdown");
 	});
 	robot.adapter.client.on("raw_message", function(message) {
 		var votes = robot.brain.get("voteythumbs");
