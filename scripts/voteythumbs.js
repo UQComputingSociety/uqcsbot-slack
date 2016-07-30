@@ -61,6 +61,7 @@ module.exports = function (robot) {
 	};
 	robot.respond(/!?voteythumbs:? (.+)/, function (res) {
 		voteythumbs_message(res);
+	});
 	robot.hear(/@channel voteythumbs:? (.+)/, function(res) {
 		voteythumbs_message(res);
 	});
