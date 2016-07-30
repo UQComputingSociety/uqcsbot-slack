@@ -22,7 +22,6 @@ module.exports = function (robot) {
 		//Get channel count
 		var channel_name = id.split("-")[0];
 		var channel = robot.adapter.client.getChannelGroupOrDMByID(channel_name);
-		if(!people) { return; }
 		var active = channel.members.filter(function(user) {
 			var slack = robot.brain.userForId(user).slack;
 			return slack.deleted === false && slack.is_bot === false;
@@ -38,7 +37,7 @@ module.exports = function (robot) {
 			votes.votes[id] = undefined;
 		}
 	};
-	robot.respond(/!?voteythumbs (.+)/, function (res) {
+	var voteythumbs_message = function(res) {
 		var votes = robot.brain.get("voteythumbs");
 		if(votes === null) {
 			reset_brain();
@@ -59,6 +58,11 @@ module.exports = function (robot) {
 		};
 		add_reaction(item, "thumbsup");
 		add_reaction(item, "thumbsdown");
+	};
+	robot.respond(/!?voteythumbs:? (.+)/, function (res) {
+		voteythumbs_message(res);
+	robot.hear(/@channel voteythumbs:? (.+)/, function(res) {
+		voteythumbs_message(res);
 	});
 	robot.adapter.client.on("raw_message", function(message) {
 		var votes = robot.brain.get("voteythumbs");
