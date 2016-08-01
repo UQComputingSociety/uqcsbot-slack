@@ -66,14 +66,13 @@ module.exports = function (robot) {
 							if(callback) { callback(); }
 						});
 		};
-		add_reaction(item, "thumbsup", function() {
-			add_reaction(item, "thumbsdown");
-		});
+		add_reaction(item, "thumbsdown");
+		add_reaction(item, "thumbsup");
 	};
 	robot.respond(/!?voteythumbs:? (.+)/, function (res) {
 		voteythumbs_message(res);
 	});
-	robot.hear(/@channel voteythumbs:? (.+)/, function(res) {
+	robot.hear(/@channel:? !?voteythumbs:? (.+)/, function(res) {
 		voteythumbs_message(res);
 	});
 	robot.adapter.client.on("raw_message", function(message) {
