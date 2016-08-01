@@ -66,8 +66,9 @@ module.exports = function (robot) {
 							if(callback) { callback(); }
 						});
 		};
-		add_reaction(item, "thumbsdown");
-		add_reaction(item, "thumbsup");
+		add_reaction(item, "thumbsup", function(){
+			add_reaction(item, "thumbsdown");
+		});
 	};
 	robot.respond(/!?voteythumbs:? (.+)/, function (res) {
 		voteythumbs_message(res);
