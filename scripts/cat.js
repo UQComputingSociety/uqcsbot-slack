@@ -6,11 +6,11 @@
 //   !`cat` - Shows the moss cat, brings torture to 2310 students
 module.exports = function (robot) {
 	robot.respond(/!?cat/i, function (res) {
-		res.send("\n" +
+		res.send("```\n" +
                 "         __..--''``\\--....___   _..,_\n" +
                 "     _.-'    .-/\";  `        ``<._  ``-+'~=.\n" +
                 " _.-' _..--.'_    \\                    `(^) )\n" +
                 "((..-'    (< _     ;_..__               ; `'   fL\n" +
-                "           `-._,_)'      ``--...____..-'\n");
+                "           `-._,_)'      ``--...____..-'\n```");
   });
 };
