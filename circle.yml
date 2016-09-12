@@ -1,0 +1,18 @@
+machine:
+  timezone: Australia/Brisbane
+  node:
+    version: 4.3.0
+
+dependencies:
+  pre:
+    - npm install -g purescript typescript pulp bower browserify
+  override:
+    - bower install
+    - npm install
+  post:
+    - tsc -p . --outDir $CIRCLE_ARTIFACTS
+    - pulp build
+    - browserify -o $CIRCLE_ARTIFACTS/scripts/lib/purescript_main.js --node --no-bundle-external -s purescript_main output/Main/index.js
+notify:
+  webhooks:
+    - url: https://hooks.uqcs.org.au/hubot-ci
