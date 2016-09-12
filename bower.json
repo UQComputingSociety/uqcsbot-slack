@@ -8,7 +8,8 @@
   ],
   "dependencies": {
     "purescript-console": "^1.0.0",
-    "purescript-hubot": "lightandlight/purescript-hubot"
+    "purescript-hubot": "lightandlight/purescript-hubot",
+    "purescript-foldable-traversable": "^1.0.0"
   },
   "devDependencies": {
     "purescript-psci-support": "^1.0.0"
