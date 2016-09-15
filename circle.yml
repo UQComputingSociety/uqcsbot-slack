@@ -9,8 +9,6 @@ dependencies:
     - bower_components
     - output
     - ts_build
-    - /opt/circleci/nodejs/v4.3.0/lib/node_modules/
-    - /opt/circleci/nodejs/v4.3.0/bin/
   pre:
     - npm install -g purescript typescript pulp bower browserify
   override:
