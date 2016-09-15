@@ -4,6 +4,11 @@ machine:
     version: 4.3.0
 
 dependencies:
+  cache_directories:
+    - node_modules
+    - bower_components
+    - output
+    - ts_build
   pre:
     - npm install -g purescript typescript pulp bower browserify
   override:
