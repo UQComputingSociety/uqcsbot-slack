@@ -53,7 +53,7 @@ script' robot pat = do
             liftEff $ send message response 
         Nothing -> pure unit
     
-script :: Robot -> Eff (err :: EXCEPTION, http :: HTTP, hubot :: HUBOT, console :: CONSOLE) Unit
+script :: forall e. Robot -> Eff (err :: EXCEPTION, http :: HTTP, hubot :: HUBOT, console :: CONSOLE | e) Unit
 script robot = case regex "!hoogle (.*)$" noFlags of
     Left err -> log err
     Right pat -> do
