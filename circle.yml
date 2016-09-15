@@ -17,6 +17,7 @@ dependencies:
     - bower install
     - npm install
   post:
+    - mkdir -p ts_build
     - tsc -p .
     - cp -R ts_build $CIRCLE_ARTIFACTS
     - pulp build --src-path purescript
