@@ -1,16 +1,8 @@
 module Main (setup) where
 
-import Prelude
-import Hubot (Robot)
-import Control.Monad.Eff (Eff)
+import Scripts (Script, scripts)
 import Data.Foldable (traverse_)
 
 
-type Script eff = Robot -> Eff (eff) Unit
-
-scripts :: forall eff. Array (Script (eff))
-scripts = [
-]
-
-setup :: forall eff. Script eff
+setup :: Script
 setup r = traverse_ (\x -> x r) scripts
