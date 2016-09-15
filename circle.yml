@@ -17,3 +17,6 @@ dependencies:
 notify:
   webhooks:
     - url: https://hooks.uqcs.org.au/hubot-ci
+test:
+  override:
+    - echo "No tests"
