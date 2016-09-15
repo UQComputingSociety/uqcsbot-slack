@@ -33,7 +33,7 @@ instance decodeHoogleResult :: DecodeJson HoogleResult where
         pure $ HoogleResult { url, typeSig }
 
 showHoogleResult :: HoogleResult -> String
-showHoogleResult (HoogleResult res) = res.typeSig <> " <" <> res.url <> "|link>"
+showHoogleResult (HoogleResult res) = "`" <>res.typeSig <> "` <" <> res.url <> "|link>"
 
 parseHoogleResults :: Json -> Either String (Array HoogleResult)
 parseHoogleResults json = do
