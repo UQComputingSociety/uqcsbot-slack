@@ -27,7 +27,7 @@ module.exports = function (robot) {
 
 		//Get channel count
 		var channel_id = id.split("-")[0];
-		var channel = robot.adapter.client.dataStore.getChannelById(channel_id);
+		var channel = robot.adapter.client.dataStore.getChannelByName(channel_id);
 
 		if(channel.members === undefined) {
 			//DM
@@ -93,7 +93,7 @@ module.exports = function (robot) {
 				if(votes === null) { return; }
 			}
 
-			if(robot.brain.userForId(message.user).slack.is_bot) { return; }
+			if(robot.brain.userForId(message.user).is_bot) { return; }
 
 			var item = message.item;
 			var id = get_id(item.channel, item.ts, message.item_user);
@@ -118,7 +118,7 @@ module.exports = function (robot) {
 				if(votes === null) { return; }
 			}
 
-			if(robot.brain.userForId(message.user).slack.is_bot) { return; }
+			if(robot.brain.userForId(message.user).is_bot) { return; }
 
 			var item = message.item;
 			var id = get_id(item.channel, item.ts, message.item_user);
