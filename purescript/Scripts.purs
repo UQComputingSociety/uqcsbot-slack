@@ -1,4 +1,4 @@
-module Scripts (scripts, Script) where
+module Scripts (scripts, Script, Script') where
 
 -- Effects, types
 import Prelude
@@ -15,6 +15,12 @@ type Script = Robot
             -> Eff ( http :: HTTP
                    , hubot :: HUBOT
                    , err :: EXCEPTION
+                   , console :: CONSOLE
+                   ) Unit
+
+type Script' = Robot
+            -> Eff ( http :: HTTP
+                   , hubot :: HUBOT
                    , console :: CONSOLE
                    ) Unit
 
