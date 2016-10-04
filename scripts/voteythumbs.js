@@ -84,7 +84,7 @@ module.exports = function (robot) {
 	});
 
 	if(robot.adapter.client.rtm) {
-		robot.adapter.client.rtm.on("reaction_added", function(msg){
+		robot.adapter.client.rtm.on("reaction_added", function(message){
 			var votes = robot.brain.get("voteythumbs");
 
 			if(votes === null) {
