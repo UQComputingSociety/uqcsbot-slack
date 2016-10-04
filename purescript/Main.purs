@@ -6,4 +6,4 @@ import Control.Monad.Eff.Exception (message, catchException)
 import Control.Monad.Eff.Console (error)
 
 setup :: Script'
-setup r = traverse_ (\x -> catchException (error <<< message) (x r)) scripts
+setup r = traverse_ ((flip ($) r) >>> catchException (error <<< message)) scripts
