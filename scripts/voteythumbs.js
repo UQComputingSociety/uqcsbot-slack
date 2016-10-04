@@ -61,12 +61,12 @@ module.exports = function (robot) {
 			if(votes === null) { return; }
 		}
 
-		var item = res.message.rawMessage;
-		votes.votes[get_id(item.channel, item.ts, item.user)] = {ups: 0, downs: 0, text: res.match[1]};
+		var item = res.message;
+		votes.votes[get_id(item.room, item.id, item.user)] = {ups: 0, downs: 0, text: res.match[1]};
 
 		var add_reaction = function(item, emoji, callback) {
 			robot.adapter.client.web.reactions.add(emoji,
-				{"channel": item.channel, "timestamp": item.ts},
+				{"channel": item.room, "timestamp": item.id},
 				callback);
 		};
 
