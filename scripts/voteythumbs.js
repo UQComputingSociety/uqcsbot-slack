@@ -5,6 +5,10 @@
 //   !`voteythumbs <message> - Shows your slack user id
 //
 //
+
+
+var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
+
 module.exports = function (robot) {
 	var reset_brain = function() {
 		robot.brain.set("voteythumbs", {votes:{}});
@@ -25,7 +29,7 @@ module.exports = function (robot) {
 
 		//Get channel count
 		var channel_id = id.split("-")[0];
-		var channel = robot.adapter.client.getChannelGroupOrDMByID(channel_id);
+		var channel = robot.adapter.client.dataStore.getChannelById(channel_id);
 
 		if(channel.members === undefined) {
 			//DM
@@ -63,17 +67,9 @@ module.exports = function (robot) {
 		votes.votes[get_id(item.channel, item.ts, item.user)] = {ups: 0, downs: 0, text: res.match[1]};
 
 		var add_reaction = function(item, emoji, callback) {
-			robot.http("https://slack.com/api/reactions.add?token="
-					+ process.env.HUBOT_SLACK_TOKEN
-					+ "&name=" + emoji
-					+ "&channel=" + item.channel
-					+ "&timestamp=" + item.ts).get() (
-						function(err, resp, body) {
-							if(resp.error) {
-								console.log("Adding reaction failed: " + resp.error);
-							}
-							if(callback) { callback(); }
-						});
+			robot.adapter.client.web.reactions.add(emoji,
+				{"channel": item.channel, "timestamp": item.ts},
+				callback);
 		};
 
 		add_reaction(item, "thumbsup", function(){
@@ -89,8 +85,8 @@ module.exports = function (robot) {
 		voteythumbs_message(res);
 	});
 
-	if(robot.adapter.client) {
-		robot.adapter.client.on("raw_message", function(message) {
+	if(robot.adapter.client.rtm) {
+		robot.adapter.client.rtm.on(RTM_EVENTS.REACTION_ADDED, function(msg){
 			var votes = robot.brain.get("voteythumbs");
 
 			if(votes === null) {
@@ -99,37 +95,45 @@ module.exports = function (robot) {
 				if(votes === null) { return; }
 			}
 
-			if(message.type === "reaction_added") {
-				if(robot.brain.userForId(message.user).slack.is_bot) { return; }
+			if(robot.brain.userForId(message.user).slack.is_bot) { return; }
 
-				var item = message.item;
-				var id = get_id(item.channel, item.ts, message.item_user);
+			var item = message.item;
+			var id = get_id(item.channel, item.ts, message.item_user);
 
-				if(votes.votes[id] === undefined) { return; }
+			if(votes.votes[id] === undefined) { return; }
 
-				if(message.reaction === "+1") {
-					votes.votes[id].ups += 1;
-				} else if(message.reaction === "-1") {
-					votes.votes[id].downs += 1;
-				}
-
-				check_if_passed(id);
-			} else if(message.type === "reaction_removed") {
-				if(robot.brain.userForId(message.user).slack.is_bot) { return; }
-
-				var item = message.item;
-				var id = get_id(item.channel, item.ts, message.item_user);
-
-				if(votes.votes[id] === undefined) { return; }
-
-				if(message.reaction === "+1") {
-					votes.votes[id].ups -= 1;
-				} else if(message.reaction === "-1") {
-					votes.votes[id].downs -= 1;
-				}
-
-				check_if_passed(id);
+			if(message.reaction === "+1") {
+				votes.votes[id].ups += 1;
+			} else if(message.reaction === "-1") {
+				votes.votes[id].downs += 1;
 			}
+
+			check_if_passed(id);
+
+		});
+		robot.adapter.client.rtm.on(RTM_EVENTS.REACTION_REMVOED, function(message){
+			var votes = robot.brain.get("voteythumbs");
+
+			if(votes === null) {
+				reset_brain();
+				votes = robot.brain.get("voteythumbs");
+				if(votes === null) { return; }
+			}
+
+			if(robot.brain.userForId(message.user).slack.is_bot) { return; }
+
+			var item = message.item;
+			var id = get_id(item.channel, item.ts, message.item_user);
+
+			if(votes.votes[id] === undefined) { return; }
+
+			if(message.reaction === "+1") {
+				votes.votes[id].ups -= 1;
+			} else if(message.reaction === "-1") {
+				votes.votes[id].downs -= 1;
+			}
+
+			check_if_passed(id);
 		});
 	}
 };
