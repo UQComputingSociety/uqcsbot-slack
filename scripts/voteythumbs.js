@@ -7,8 +7,6 @@
 //
 
 
-var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
-
 module.exports = function (robot) {
 	var reset_brain = function() {
 		robot.brain.set("voteythumbs", {votes:{}});
@@ -86,7 +84,7 @@ module.exports = function (robot) {
 	});
 
 	if(robot.adapter.client.rtm) {
-		robot.adapter.client.rtm.on(RTM_EVENTS.REACTION_ADDED, function(msg){
+		robot.adapter.client.rtm.on("reaction_added", function(msg){
 			var votes = robot.brain.get("voteythumbs");
 
 			if(votes === null) {
@@ -111,7 +109,7 @@ module.exports = function (robot) {
 			check_if_passed(id);
 
 		});
-		robot.adapter.client.rtm.on(RTM_EVENTS.REACTION_REMVOED, function(message){
+		robot.adapter.client.rtm.on("reaction_remvoed", function(message){
 			var votes = robot.brain.get("voteythumbs");
 
 			if(votes === null) {
