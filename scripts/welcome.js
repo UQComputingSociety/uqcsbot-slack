@@ -7,7 +7,7 @@ var welcomeMessages = [
     "This is the first time I've seen you, so you're probably new here",
     "I'm UQCSbot, your friendly (open source) robot helper",
     "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many subject-specific ones",
-    "Your friendly admins are @trm, @svict4, @gricey, @csa, @ainz, @dmarj97",
+    "Your friendly admins are @trm, @svict4, @gricey, @csa, @ainz, @dmarj97, and @lsenjov",
     "Type \"help\" here, or \"uqcsbot help\" anywhere else to find out what I can do.",
     "and again, welcome :)"
 ];
@@ -16,21 +16,22 @@ var messageTime = 2500;
 module.exports = function (robot) {
     robot.enter(function (res) {
         if (res.message.room == "general") {
-            var general = robot.adapter.client.getChannelByName("general");
-            var active = general.members.filter(function (user) { return robot.brain.userForId(user).slack.deleted === false; }); // Filter out deleted accounts
-            var members = active.length;
-            res.send("Welcome, " + res.message.user.name + "!");
-            var url = "https://http.cat/" + members;
-            robot.http(url).get()(function (err, resp, body) {
-                if (!err && resp.statusCode === 200) {
-                    res.send(url);
+            var general = 
+            var active = robot.adapter.client.web.users.list(0, function(result){
+                var num_members = result.members.filter(function (user) { return user.deleted == false; });
+                if (num_members % 50 == 0) {
+                    setTimeout(function () {
+                        res.send(":tada: " num_membersmembers + " members! :tada:");
+                    }, messageTime);
                 }
+                var url = "https://http.cat/" + num_members;
+                robot.http(url).get()(function (err, resp, body) {
+                    if (!err && resp.statusCode === 200) {
+                        res.send(url);
+                    }
+                });
             });
-            if (members % 50 == 0) {
-                setTimeout(function () {
-                    res.send(":tada: " + members + " members! :tada:");
-                }, messageTime);
-            }
+            res.send("Welcome, " + res.message.user.name + "!");
             welcomeMessages.forEach(function (msg, i) {
                 setTimeout(function () {
                     robot.send({ room: res.message.user.name }, msg);
