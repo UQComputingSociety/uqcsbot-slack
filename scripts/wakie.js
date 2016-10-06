@@ -14,7 +14,7 @@ module.exports = function(robot) {
 		robot.adapter.client.web.users.list({presence: 0}, function(ignored, result){
             var members = result.members.filter(function (user) { return user.deleted == false; });
             var victim = members[Math.floor(Math.random() * members.length)];
-            return robot.messageRoom("bot-testing", "Hey <@" + victim.id + ">! Tell us about something cool you are working on!");
+            return robot.messageRoom("general", "Hey <@" + victim.id + ">! Tell us about something cool you are working on!");
         });
 	};
 	return new HubotCron(pattern, timezone, fn);
