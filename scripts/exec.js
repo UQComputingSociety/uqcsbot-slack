@@ -13,22 +13,29 @@ module.exports = function (robot) {
 		var fake_send = function(str) {
 			output += str;
 		};
+		var found = false;
 		for(var i = 0; i < robot.listeners.length; i++) {
 			if(robot.listeners[i].regex == undefined) {
 				continue;
 			}
 			var matches = robot.listeners[i].regex.exec(cmd);
 			if(matches != null) {
+				found = true;
 				var new_res = new robot.Response(robot, res.message, matches);
 				new_res.send = fake_send;
 				robot.listeners[i].callback(new_res);
 			}
 		}
+		if(!found) {
+			output = "Invalid command: '" + cmd + "'.\n";
+		} else if(output.length == 0) {
+			output = "No output.\n";
+		}
 		return output;
 	}
 
 	function substitute_vals(res, cmd) {
-		var matches = /!\((.+)\)/.exec(cmd);
+		var matches = /!\((.+?)\)/.exec(cmd);
 		var new_cmd = cmd;
 		if(matches == null) {
 			return cmd;
@@ -41,7 +48,7 @@ module.exports = function (robot) {
 		return new_cmd;
 	}
 
-	robot.respond(/!?shell (.+)/i, function (res) {
+	robot.respond(/!?exec (.+)/i, function (res) {
 		var message = res.match[1];
 		var evald = substitute_vals(res, message);
 		res.send(evald + '\n');
