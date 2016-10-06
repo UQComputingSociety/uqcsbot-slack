@@ -83,7 +83,7 @@ module.exports = function (robot) {
 		voteythumbs_message(res);
 	});
 
-	if(robot.adapter.client.rtm) {
+	if(robot.adapter.client && robot.adapter.client.rtm) {
 		robot.adapter.client.rtm.on("reaction_added", function(message){
 			var votes = robot.brain.get("voteythumbs");
 
