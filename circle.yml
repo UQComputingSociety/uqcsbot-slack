@@ -10,7 +10,7 @@ dependencies:
     - output
     - ts_build
   pre:
-    - npm install -g purescript typescript pulp bower browserify
+    - npm install -g purescript@0.9.3 typescript pulp bower browserify
   override:
     - bower install
     - npm install
