@@ -11,9 +11,6 @@ module.exports = function (robot) {
             n = 47;
         } else {
             n = Number(res.match[1]);
-            if (res.match[1].charAt(0) == '-') {
-                n *= -1;
-            }
         }
 		caesar = "";
 		var c = 0;
