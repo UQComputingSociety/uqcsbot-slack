@@ -20,8 +20,7 @@ module.exports = function (robot) {
 			c = res.match[2].charCodeAt(i)
 			c -= 32;
 			c += n;
-            c += 5 * 94; // fixing the modulo
-			c %= 94;
+            c = ((c % 94) + 94) % 94;
 			c += 32;
 			caesar += String.fromCharCode(c);
 		}
