@@ -26,7 +26,7 @@ module.exports = function (robot) {
     });
 
     // respond to !`ecp ENGG2800`
-    robot.respond(/!?ecp ([a-zA-Z]{4}\d{4})?/, function (res) {
+    robot.respond(/!?ecp ([a-zA-Z]{4}\d*)$/, function (res) {
         var course = res.match[1];
         printCourse(res, course);
     });
