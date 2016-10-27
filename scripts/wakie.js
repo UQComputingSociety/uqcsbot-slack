@@ -10,10 +10,12 @@ module.exports = function(robot) {
 	timezone = 'Australia/Brisbane';
 
 	fn = function() {
-		var general = robot.adapter.client.getChannelGroupOrDMByName("general");
-		var active = general.members.filter(function(user) { return robot.brain.userForId(user).slack.deleted === false; }); // Filter out deleted accounts
-		var victim = active[Math.floor(Math.random() * active.length)];
-		return robot.messageRoom("general", "Hey <@" + victim + ">! Tell us about something cool you are working on!");
+	  console.log(robot.adapter.client.web.users.list);
+		robot.adapter.client.web.users.list({presence: 0}, function(ignored, result){
+            var members = result.members.filter(function (user) { return user.deleted == false; });
+            var victim = members[Math.floor(Math.random() * members.length)];
+            return robot.messageRoom("general", "Hey <@" + victim.id + ">! Tell us about something cool you are working on!");
+        });
 	};
 	return new HubotCron(pattern, timezone, fn);
 };
