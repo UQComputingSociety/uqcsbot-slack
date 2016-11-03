@@ -11,7 +11,7 @@ module.exports = function (robot) {
 	robot.respond(/!?(uqfinal|wdinotf|final) ([a-z]{4}[0-9]{4}[a-z]?) (.+)+/i, function (res) {
 		//res.match[2] is the course code
 		//res.match[3] is the space-seperated scores
-		var semester = 6620; // Temporary fix, ID is from rota.eait.uq.edu.au/semesters.json
+		var semester = 6660; // Temporary fix, ID is from rota.eait.uq.edu.au/semesters.json
 		var uqf = robot.http("http://uqfinal.com/json/" + semester + "/" + res.match[2].toUpperCase() + ".json")
 				.get() (function(err, resp, body) {
 					if(err) {
