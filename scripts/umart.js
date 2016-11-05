@@ -27,7 +27,10 @@ module.exports = function (robot) {
 				res.send(">trm as president?\r\n>priceless");
 				return;
 			} else if(list[0].toLowerCase() == "cat" || list[0] == "treasurer") {
-				res.send(">cat as secretary?\r\n>$100000000000");
+				res.send(">cat as treasurer?\r\n>$100000000000");
+				return;
+			} else if(list[0].toLowerCase() == "dmarj97" || list[0] == "secretary") {
+				res.send(">dmarj97 as secretary?\r\n>200 slav squats");
 				return;
 			}
 		}
