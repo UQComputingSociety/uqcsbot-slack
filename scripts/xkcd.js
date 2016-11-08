@@ -8,10 +8,11 @@ module.exports = function (robot) {
   robot.respond(/!?xkcd ?(.+)?/i, function (res) {
 
     /**
-     * This function is the reason why we can't have nice things
+     * Nicest SO answer I could find
+     * http://stackoverflow.com/a/10835227
      */
-    var isNumber = function (n) {
-      return !isNaN(n);
+    function isPositiveInteger(n) {
+      return n >>> 0 === parseFloat(n);
     }
 
     /**
@@ -52,7 +53,7 @@ module.exports = function (robot) {
     if (!comic) {
       res.send("You actually need to search for something");
       return;
-    } else if (isNumber(comic)) {
+    } else if (isPositiveInteger(comic)) {
       idSearch(comic);
     } else {
       textSearch(comic);
