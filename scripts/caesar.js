@@ -5,10 +5,10 @@
 //   !`caesar[n]`` _<text>_ - Performs Caesar shift
 //
 module.exports = function (robot) {
-	robot.respond(/!?caesar(\d*) (.+)/i, function (res) {
+	robot.respond(/!?caesar(\-?\d*) (.+)/i, function (res) {
 		var n = 0;
 		if(res.match[1] == "") { n = 47; }
-		else { n = Number(res.match[1]); }
+        else { n = Number(res.match[1]); }
 		caesar = "";
 		var c = 0;
 		for(var i = 0; i < res.match[2].length; i++) {
@@ -20,7 +20,7 @@ module.exports = function (robot) {
 			c = res.match[2].charCodeAt(i)
 			c -= 32;
 			c += n;
-			c %= 94;
+            c = ((c % 94) + 94) % 94;
 			c += 32;
 			caesar += String.fromCharCode(c);
 		}
