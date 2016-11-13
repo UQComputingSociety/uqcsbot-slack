@@ -8,8 +8,8 @@
 var safeEval = require("safe-eval");
 
 module.exports = function (robot) {
-	robot.respond(/!?javascript ?(.+)?/i, function (res) {
-        var code = res.match[1] || "('==' == '===' && '==' === '===')";
+	robot.respond(/!?(javascript|js) ?(.+)?/i, function (res) {
+        var code = res.match[2] || "('==' == '===' && '==' === '===')";
 
         var evaluated = "You sneaky bastard! I ain't running: \r\n";
         evaluated += "```\r\n" + code + "\r\n```";
