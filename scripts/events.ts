@@ -5,7 +5,7 @@
 //   !`events` _<description of time>_ - List UQCS Events
 //
 
-var ical = require('ical');
+import ical = require('ical');
 export = function (robot) {
 	robot.respond(/!?events ?(full|all|[1-9][0-9]*)? ?(weeks?)?/i, function (res) {
 		var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
