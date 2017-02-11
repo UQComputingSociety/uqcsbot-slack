@@ -34,6 +34,7 @@ module.exports = function (robot) {
 			var n = +res.match[1];
 			for(var k in data) {
 				if(n === 0) { break; }
+				if(data[k].type == 'VTIMEZONE') { continue; } // I don't even know. See issue #50 on peterbraden/ical.js
 				switch(type) {
 					case 0:
 						if(data[k].end.getTime() > now && data[k].start.getTime() < now + week*2) {
