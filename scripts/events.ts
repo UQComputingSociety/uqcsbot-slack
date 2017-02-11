@@ -6,7 +6,7 @@
 //
 
 var ical = require('ical');
-module.exports = function (robot) {
+export = function (robot) {
 	robot.respond(/!?events ?(full|all|[1-9][0-9]*)? ?(weeks?)?/i, function (res) {
 		var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 		var no_result = ["There doesn't appear to be any events in the next two weeks...",
