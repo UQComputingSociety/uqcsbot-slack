@@ -33,7 +33,7 @@ module.exports = function (robot) {
 				"p12": "Daycare",
 				"p11 l1": "Conifer L1 (Staff)",
 				"p11 l2": "Conifer L2 (Staff)",
-				"p11 l3": "Conifer L3 (Students)",
+				"p11 l3": "Conifer L3 (Staff)",
 				"p10": "UQ Centre",
 				"p9": "Boatshed Open",
 				"p8 l1": "Boatshed Bottom",
