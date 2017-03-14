@@ -58,7 +58,10 @@ module.exports = function (robot) {
                 }
 
                 var $ = cheerio.load(body);
-                var assessment = '';
+                var assessment = '_*WARNING:* Due dates and requirements ' +
+                                 'may vary/change/be entirely different! ' +
+                                 'Always check with your course for up to ' +
+                                 'date information_\r\n>>>';
 
                 // Look for the tblborder class, which is the assessment data
                 // table, then loop over its children starting at index 1 to
@@ -98,25 +101,13 @@ module.exports = function (robot) {
     /**
      * Robot responds to a message containing `!whatsdue`.
      */
-    robot.respond(/!?whatsdue ?((?:[a-z]{4}[0-9]{4} ?)+)?/i, function (res) {
-        // Checks if the room the bot is in is a valid course code.
-        // Note: This isn't necessary for normal functionality, but is nice for
-        //       users in a course room wanting to quickly check whats due.
-        var isCourse = res.message.room.match(/[a-z]{4}[0-9]{4}/i) != null;
-
-        // If there are no matching regex groups and the room the bot is in
-        // is not a valid course code, throw an error.
-        if (!isCourse && !res.match[1]) {
-            res.send('Please provide at least one valid course code.');
-            return;
-        }
-
+    robot.respond(/!?whatsdue ?((?: ?[a-z]{4}[0-9]{4})+)?$/i, function (res) {
         // If the user has provided a course list, use that; else, use the
         // current course room.
         if (res.match[1]) {
-          var courses = res.match[1].split(' ');
+            var courses = res.match[1].split(' ');
         } else {
-          var courses = [res.message.room];
+            var courses = [res.message.room];
         }
 
         // Create a Promise for each course.
@@ -132,6 +123,6 @@ module.exports = function (robot) {
             .then(profiles => assessmentUrl + profiles.join())
             .then(url => parseAssessmentData(url))
             .then(assessment => res.send(assessment))
-            .catch(error => { res.send(error); });
+            .catch(error => res.send(error));
     });
 };
