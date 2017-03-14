@@ -82,7 +82,7 @@ module.exports = function (robot) {
                         return;
                     }
 
-                    assessment.push([subject, task, dueDate, weighting]);
+                    assessment.unshift([subject, task, dueDate, weighting]);
                 });
 
                 resolve(assessment);
