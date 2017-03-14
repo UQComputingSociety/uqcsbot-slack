@@ -99,16 +99,26 @@ module.exports = function (robot) {
      * Robot responds to a message containing `!whatsdue`.
      */
     robot.respond(/!?whatsdue ?((?:[a-z]{4}[0-9]{4} ?)+)?/i, function (res) {
-        // If there are no matching groups, throw an error.
-        if (!res.match[1]) {
+        // Checks if the room the bot is in is a valid course code.
+        // Note: This isn't necessary for normal functionality, but is nice for
+        //       users in a course room wanting to quickly check whats due.
+        var isCourse = res.message.room.match(/[a-z]{4}[0-9]{4}/i) != null;
+
+        // If there are no matching regex groups and the room the bot is in
+        // is not a valid course code, throw an error.
+        if (!isCourse && !res.match[1]) {
             res.send('Please provide at least one valid course code.');
             return;
         }
 
-        // The regex groups the courses together as a single string, we can
-        // obtain an array of them by splitting at the whitespaces.
-        var courses = res.match[1].split(' ');
-        
+        // If the user has provided a course list, use that; else, use the
+        // current course room.
+        if (res.match[1]) {
+          var courses = res.match[1].split(' ');
+        } else {
+          var courses = [res.message.room];
+        }
+
         // Create a Promise for each course.
         var profileResponses = [];
         for (var i = 0; i < courses.length; i++) {
