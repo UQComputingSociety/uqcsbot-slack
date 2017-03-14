@@ -90,7 +90,7 @@ module.exports = function (robot) {
                                   + ' to be done by ' +
                                   '*' + dueDate + '*' +
                                   ' and is worth ' +
-                                  '*' + weighting + '*\n';
+                                  '*' + weighting + '*\r\n';
                 });
 
                 resolve(assessment);
