@@ -99,7 +99,7 @@ module.exports = function (robot) {
      * Robot responds to a message containing `!whatsdue`.
      */
     robot.respond(/!?whatsdue ?((?:[a-z]{4}[0-9]{4} ?)+)?/i, function (res) {
-        // If there is not matching groups, throw an error.
+        // If there are no matching groups, throw an error.
         if (!res.match[1]) {
             res.send('Please provide at least one valid course code.');
             return;
