@@ -64,6 +64,7 @@ module.exports = function (robot) {
                 // table, then loop over its children starting at index 1 to
                 // skip over the column headers (subject, task, due date and
                 // weighting).
+                // TODO(mitch): make this less ugly and bleh.
                 $('.tblborder').children().slice(1).each((index, element) => {
                     var columns = $(element).children();
 
