@@ -105,8 +105,6 @@ module.exports = function (robot) {
             return;
         }
 
-        res.send('"' + res.match[1] + '"');
-
         // The regex groups the courses together as a single string, we can
         // obtain an array of them by splitting at the whitespaces.
         var courses = res.match[1].split(' ');
