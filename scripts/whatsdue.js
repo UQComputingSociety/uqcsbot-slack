@@ -84,9 +84,9 @@ module.exports = function (robot) {
                         return;
                     }
 
-                    assessment += '*' + subject + '* requires ' +
-                                  '`' + task + '` to be done by ' +
-                                  '*' + dueDate + '* and is worth ' +
+                    assessment += '*' + subject + '*: ' +
+                                  '`' + task + '` ' +
+                                  '_' + dueDate + '_ ' +
                                   '*' + weighting + '*\r\n';
                 });
 
