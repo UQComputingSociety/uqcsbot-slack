@@ -5,7 +5,7 @@
 //   !`whatsdue`` _<course1>_ _<course2>_ ... - Prints all assessment for a
 //                                              given array of courses.
 
-var cheerio = require("cheerio");
+var cheerio = require('cheerio');
 
 module.exports = function (robot) {
 
@@ -25,17 +25,17 @@ module.exports = function (robot) {
         return new Promise((resolve, reject) => {
             robot.http(courseUrl + course).get() ((err, resp, body) => {
                 if (err) {
-                    reject("There was an error getting the course profile.");
+                    reject('There was an error getting the course profile.');
                     return;
                 }
 
                 // Look for first instance of `/profileId=`. Will always point
                 // to the latest profile id for the course.
                 var profileID = String(body.match(/profileId=\d*/));
-                if (profileID !== "null") {
+                if (profileID !== 'null') {
                     resolve(profileID.replace('profileId=',''));
                 } else {
-                    reject(course + " is not a valid course code.");
+                    reject(course + ' is not a valid course code.');
                 }
             });
         });
@@ -53,17 +53,20 @@ module.exports = function (robot) {
         return new Promise(resolve => {
             robot.http(url).get() ((err, resp, body) => {
                 if (err) {
-                    reject("There was an error getting the assessment.");
+                    reject('There was an error getting the assessment.');
                     return;
                 }
 
                 var $ = cheerio.load(body);
-                var assessment = [];
+                var assessment = '';
 
                 // Look for the tblborder class, which is the assessment data
                 // table, then loop over its children starting at index 1 to
                 // skip over the column headers (subject, task, due date and
                 // weighting).
+                // TODO(mitch): make this less ugly and bleh.
+                // Note: Formatting of assessment data is inconsistent and may
+                //       look ugly. Soz.
                 $('.tblborder').children().slice(1).each((index, element) => {
                     var columns = $(element).children();
 
@@ -77,30 +80,18 @@ module.exports = function (robot) {
                                     .text().trim();
 
                     if (!subject || !task || !dueDate || !weighting) {
-                        reject("There was an error parsing the assessment.");
+                        reject('There was an error parsing the assessment.');
                         return;
                     }
 
-                    assessment.push([subject, task, dueDate, weighting]);
+                    assessment += '*' + subject + '* requires ' +
+                                  '`' + task + '` to be done by ' +
+                                  '*' + dueDate + '* and is worth ' +
+                                  '*' + weighting + '*\r\n';
                 });
 
                 resolve(assessment);
             });
-        });
-    }
-
-    /**
-     * Prints the given assessment array with proper formatting.
-     *
-     * @param {Response} instance of robot.Response
-     * @param {Object} array of assessments
-     */
-    function printAssessment(res, assessmentArray) {
-        assessmentArray.forEach(assessment => {
-            res.send(assessment[0] + " requires " +
-                     assessment[1] + " to be done by " +
-                     assessment[2] + " and is worth " +
-                     assessment[3]);
         });
     }
 
@@ -111,7 +102,7 @@ module.exports = function (robot) {
     robot.respond(/!?whatsdue ((?:[a-z]{4}[0-9]{4} ?)+)/i, function (res) {
         // The regex groups the courses together as a single string, we can
         // obtain an array of them by splitting at the whitespaces.
-        var courses = res.match[1].split(" ");
+        var courses = res.match[1].split(' ');
         
         // Create a Promise for each course.
         var profileResponses = [];
@@ -125,7 +116,7 @@ module.exports = function (robot) {
         Promise.all(profileResponses)
             .then(profiles => assessmentUrl + profiles.join())
             .then(url => parseAssessmentData(url))
-            .then(assessment => printAssessment(res, assessment))
+            .then(assessment => res.send(assessment))
             .catch(error => { res.send(error); });
     });
 };
