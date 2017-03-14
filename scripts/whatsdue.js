@@ -86,7 +86,7 @@ module.exports = function (robot) {
 
                     assessment += '*' + subject + '*: ' +
                                   '`' + task + '` ' +
-                                  '_' + dueDate + '_ ' +
+                                  '_(' + dueDate + ')_ ' +
                                   '*' + weighting + '*\r\n';
                 });
 
