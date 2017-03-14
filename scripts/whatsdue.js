@@ -84,9 +84,9 @@ module.exports = function (robot) {
                         return;
                     }
 
-                    assessment += '*' + subject + '* requires ' +
-                                  '`' + task + '` to be done by ' +
-                                  '*' + dueDate + '* and is worth ' +
+                    assessment += '*' + subject + '*: ' +
+                                  '`' + task + '` ' +
+                                  '_(' + dueDate + ')_ ' +
                                   '*' + weighting + '*\r\n';
                 });
 
@@ -97,9 +97,14 @@ module.exports = function (robot) {
 
     /**
      * Robot responds to a message containing `!whatsdue`.
-     * Requires at least one course.
      */
-    robot.respond(/!?whatsdue ((?:[a-z]{4}[0-9]{4} ?)+)/i, function (res) {
+    robot.respond(/!?whatsdue ?((?:[a-z]{4}[0-9]{4} ?)+)?/i, function (res) {
+        // If there are no matching groups, throw an error.
+        if (!res.match[1]) {
+            res.send('Please provide at least one valid course code.');
+            return;
+        }
+
         // The regex groups the courses together as a single string, we can
         // obtain an array of them by splitting at the whitespaces.
         var courses = res.match[1].split(' ');
