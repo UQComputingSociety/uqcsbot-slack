@@ -65,6 +65,8 @@ module.exports = function (robot) {
                 // skip over the column headers (subject, task, due date and
                 // weighting).
                 // TODO(mitch): make this less ugly and bleh.
+                // Note: Formatting of assessment data is inconsistent and may
+                //       look ugly. Soz.
                 $('.tblborder').children().slice(1).each((index, element) => {
                     var columns = $(element).children();
 
