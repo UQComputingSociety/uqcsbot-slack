@@ -58,10 +58,9 @@ module.exports = function (robot) {
                 }
 
                 var $ = cheerio.load(body);
-                var assessment = '_*WARNING:* Due dates and requirements ' +
-                                 'may vary/change/be entirely different! ' +
-                                 'Always check with your course for up to ' +
-                                 'date information_\r\n>>>';
+                var assessment = '_*WARNING:* Assessment information may ' +
+                                 'vary/change/be entirely different! Use ' +
+                                 'at your own discretion_\r\n>>>';
 
                 // Look for the tblborder class, which is the assessment data
                 // table, then loop over its children starting at index 1 to
