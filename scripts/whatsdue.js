@@ -104,11 +104,7 @@ module.exports = function (robot) {
     robot.respond(/!?whatsdue ?((?: ?[a-z]{4}[0-9]{4})+)?$/i, function (res) {
         // If the user has provided a course list, use that; else, use the
         // current course room.
-        if (res.match[1]) {
-            var courses = res.match[1].split(' ');
-        } else {
-            var courses = [res.message.room];
-        }
+        var courses = (res.match[1]) ? res.match[1].split(' ') : [res.message.room];
 
         // Create a Promise for each course.
         var profileResponses = [];
