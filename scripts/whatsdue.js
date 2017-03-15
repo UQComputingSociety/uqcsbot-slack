@@ -58,7 +58,9 @@ module.exports = function (robot) {
                 }
 
                 var $ = cheerio.load(body);
-                var assessment = '';
+                var assessment = '_*WARNING:* Assessment information may ' +
+                                 'vary/change/be entirely different! Use ' +
+                                 'at your own discretion_\r\n>>>';
 
                 // Look for the tblborder class, which is the assessment data
                 // table, then loop over its children starting at index 1 to
@@ -98,17 +100,11 @@ module.exports = function (robot) {
     /**
      * Robot responds to a message containing `!whatsdue`.
      */
-    robot.respond(/!?whatsdue ?((?:[a-z]{4}[0-9]{4} ?)+)?/i, function (res) {
-        // If there are no matching groups, throw an error.
-        if (!res.match[1]) {
-            res.send('Please provide at least one valid course code.');
-            return;
-        }
+    robot.respond(/!?whatsdue ?((?: ?[a-z]{4}[0-9]{4})+)?$/i, function (res) {
+        // If the user has provided a course list, use that; else, use the
+        // current course room.
+        var courses = (res.match[1]) ? res.match[1].split(' ') : [res.message.room];
 
-        // The regex groups the courses together as a single string, we can
-        // obtain an array of them by splitting at the whitespaces.
-        var courses = res.match[1].split(' ');
-        
         // Create a Promise for each course.
         var profileResponses = [];
         for (var i = 0; i < courses.length; i++) {
@@ -122,6 +118,6 @@ module.exports = function (robot) {
             .then(profiles => assessmentUrl + profiles.join())
             .then(url => parseAssessmentData(url))
             .then(assessment => res.send(assessment))
-            .catch(error => { res.send(error); });
+            .catch(error => res.send(error));
     });
 };
