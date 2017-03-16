@@ -23,7 +23,7 @@ module.exports = function (robot) {
             }
 
             var link = 'www.courses.uq.edu.au/student_section_loader.php?section=1&' + profileID;
-            onComplete(course + ' ECP: ' + link);
+            onComplete('*' + course + ' ECP*: ' + link);
         });
     }
 
