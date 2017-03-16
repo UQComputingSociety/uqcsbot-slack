@@ -101,10 +101,11 @@ module.exports = function (robot) {
      * Robot responds to a message containing `!whatsdue`.
      */
     robot.respond(/!?whatsdue ?((?: ?[a-z]{4}[0-9]{4})+)?$/i, function (res) {
+        var channel = null;
         // Get the channel name (and treat it as a course code!).
         if (robot.adapter.client && robot.adapter.client.rtm) {
-            var channel = robot.adapter.client.rtm.dataStore
-                          .getChannelById(res.message.room).name;
+            channel = robot.adapter.client.rtm.dataStore
+                      .getChannelById(res.message.room).name;
         }
 
         // Prevent local testing failing (when robot.adapter.client is null)
