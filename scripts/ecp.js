@@ -8,7 +8,7 @@
 module.exports = function (robot) {
 
     function getEcp(course, onComplete) {
-        var URL = "https://www.uq.edu.au/study/course.html?course_code=" + course;
+        var URL = 'https://www.uq.edu.au/study/course.html?course_code=' + course;
 
         robot.http(URL).get() (function(err, resp, body) {
             if (err) {
@@ -17,19 +17,34 @@ module.exports = function (robot) {
             }
 
             var profileID = String(body.match(/profileId=\d*/));
-            if (profileID === "null") {
-                onComplete("Course '" + course + "' does not exist.");
+            if (profileID === 'null') {
+                onComplete(course + ' is not a valid course code.');
                 return;
             }
 
-            var link = "www.courses.uq.edu.au/student_section_loader.php?section=1&" + profileID;
-            onComplete("The ECP of '" + course + "' is located at " + link);
+            var link = 'www.courses.uq.edu.au/student_section_loader.php?section=1&' + profileID;
+            onComplete('*' + course + ' ECP*: ' + link);
         });
     }
 
     // respond to !`ecp` or !`ecp ENGG2800`
     robot.respond(/!?ecp ?([a-z]{4}[0-9]{4})?$/i, function (res) {
-        var course = res.match[1] || res.message.room;
+        var channel = null;
+        // Get the channel name (and treat it as a course code!).
+        if (robot.adapter.client && robot.adapter.client.rtm) {
+            channel = robot.adapter.client.rtm.dataStore
+                      .getChannelById(res.message.room).name;
+        }
+
+        // Prevent local testing failing (when robot.adapter.client is null)
+        if (!channel && !res.match[1]) {
+            res.send('Please enter at least one course to test.');
+            return;
+        }
+
+        // If the user has provided a course list, use that; else, use the
+        // current channel as the course code.
+        var course = res.match[1] || channel;
         getEcp(course, ecp => { res.send(ecp) });
     });
 };
