@@ -45,10 +45,7 @@ module.exports = function(robot) {
                         message = expDate + "\t" + message;
                     }
 
-                    if (!!specialWords && message.match(specialWords) !== null) {
-                        response += code + "\t" + message + "\n";
-                        noOfCoupons--;
-                    } else if (!specialWords)  {
+                    if (!!specialWords && message.match(specialWords) !== null || !specialWords) {
                         response += code + "\t" + message + "\n";
                         noOfCoupons--;
                     }
