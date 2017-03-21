@@ -2,7 +2,7 @@
 //        A script to find the best dominos coupons
 //
 // Commands:
-//        !dominos -n <number of coupons to list> -f <only find coupons with this/ these word(s) in it>
+//        !dominos -n <number of coupons to list> -f <only find coupons with this/ these word(s) in it> -e (to view expiry dates)
 //        if -n isn't specified the number of coupons listed is 10 or as many as can be found up to 10
 //
 
