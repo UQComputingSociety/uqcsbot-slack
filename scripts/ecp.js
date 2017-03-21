@@ -16,14 +16,21 @@ module.exports = function (robot) {
                 return;
             }
 
+            // Look for first instance of `/profileId=`. Will always point
+            // to the latest profile id for the course. If there is no
+            // profileId, check to ensure the course code is valid and return
+            // the relevant error message.
             var profileID = String(body.match(/profileId=\d*/));
-            if (profileID === 'null') {
-                onComplete(course + ' is not a valid course code.');
-                return;
+            if (profileID !== 'null') {
+                var link = 'www.courses.uq.edu.au/student_section_loader.php?' +
+                           'section=1&' + profileID;
+                onComplete('>*' + course + ' ECP*: ' + link);
+            } else if (body.match(/is not a valid course code/) || 
+                       body.match(/Unable to find course code/)) {
+                onComplete(course + ' is not a valid course code.');  
+            } else {
+                onComplete(course + ' has no available course profiles.');  
             }
-
-            var link = 'www.courses.uq.edu.au/student_section_loader.php?section=1&' + profileID;
-            onComplete('*' + course + ' ECP*: ' + link);
         });
     }
 
@@ -45,6 +52,6 @@ module.exports = function (robot) {
         // If the user has provided a course list, use that; else, use the
         // current channel as the course code.
         var course = res.match[1] || channel.name;
-        getEcp(course, ecp => { res.send(ecp) });
+        getEcp(course.toUpperCase(), ecp => { res.send(ecp) });
     });
 };
