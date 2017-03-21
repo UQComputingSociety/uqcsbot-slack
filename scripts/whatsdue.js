@@ -105,18 +105,18 @@ module.exports = function (robot) {
         // Get the channel name (and treat it as a course code!).
         if (robot.adapter.client && robot.adapter.client.rtm) {
             channel = robot.adapter.client.rtm.dataStore
-                      .getChannelById(res.message.room).name;
+                      .getChannelById(res.message.room);
         }
 
-        // Prevent local testing failing (when robot.adapter.client is null)
-        if (!channel && !res.match[1]) {
-            res.send('Please enter at least one course to test.');
+        // Check there is either a valid channel or a valid input.
+        if (!(channel && channel.name) && !res.match[1]) {
+            res.send('Please enter at least one valid course.');
             return;
         }
 
         // If the user has provided a course list, use that; else, use the
         // current channel as the course code.
-        var courses = (res.match[1]) ? res.match[1].split(' ') : [channel];
+        var courses = (res.match[1]) ? res.match[1].split(' ') : [channel.name];
 
         // Create a Promise for each course.
         var profileResponses = [];
