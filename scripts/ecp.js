@@ -25,7 +25,8 @@ module.exports = function (robot) {
                 var link = 'www.courses.uq.edu.au/student_section_loader.php?' +
                            'section=1&' + profileID;
                 onComplete('>*' + course + ' ECP*: ' + link);
-            } else if (body.match(/is not a valid course code/)) {
+            } else if (body.match(/is not a valid course code/) || 
+                       body.match(/Unable to find course code/)) {
                 onComplete(course + ' is not a valid course code.');  
             } else {
                 onComplete(course + ' has no available course profiles.');  
@@ -34,7 +35,7 @@ module.exports = function (robot) {
     }
 
     // respond to !`ecp` or !`ecp ENGG2800`
-    robot.respond(/!?ecp ?([a-z0-9]+)?$/i, function (res) {
+    robot.respond(/!?ecp ?([a-z]{4}[0-9]{4}[a-z]?)?$/i, function (res) {
         var channel = null;
         // Get the channel name (and treat it as a course code!).
         if (robot.adapter.client && robot.adapter.client.rtm) {
