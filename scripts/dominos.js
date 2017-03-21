@@ -2,21 +2,19 @@
 //        A script to find the best dominos coupons
 //
 // Commands:
-//        !dominos -n <number of coupons to list> -f <only find coupons with this/ these word(s) in it> -e (to view expiry dates)
+//        !dominos -n <number of coupons to list> -f <only find coupons with this/ these word(s) in it>
 //        if -n isn't specified the number of coupons listed is 10 or as many as can be found up to 10
 //
-
-
 var cheerio = require("cheerio");
 
-module.exports = function (robot) {
+module.exports = function(robot) {
 
     function printItems(res, item) {
         var noOfCoupons = 10;
         var specialWords = false;
         var response = "";
-	var expiry = false;
-	
+        var expiry = false;
+
         if (item.match(/-n/g) !== null) {
             noOfCoupons = item.match(/-n\s+\d{0,3}/g)[0].match(/\d+/)[0];
         }
@@ -26,26 +24,26 @@ module.exports = function (robot) {
             specialWords = new RegExp(specialWords, "gi");
         }
 
-	if (item.match(/-e/g) !== null) {
-	    response += "Coupon\tExpiry\t\tDescription\n";
-	    expiry = true;
-	} else {
-	    response += "Coupon\tDescription\n";
-	}
+        if (item.match(/-e/g) !== null) {
+            response += "Coupon\tExpiry\t\tDescription\n";
+            expiry = true;
+        } else {
+            response += "Coupon\tDescription\n";
+        }
 
 
         var URL = "https://www.couponese.com/store/dominos.com.au/";
-        robot.http(URL).get()(function (err, resp, body) {
+        robot.http(URL).get()(function(err, resp, body) {
             $ = cheerio.load(body);
-            $(".ov-coupon:not(.ov-expired)").each(function (i, elem) {
+            $(".ov-coupon:not(.ov-expired)").each(function(i, elem) {
                 if (noOfCoupons > 0) {
                     var code = $(this).find(".ov-code").find("strong").text();
                     var message = $(this).find(".ov-title").find("a").text();
-		    var expDate = $(this).find(".ov-expiry").text().trim();
-		    
-		    if (expiry) {
-			message = expDate + "\t" + message;
-	 	    }		
+                    var expDate = $(this).find(".ov-expiry").text().trim();
+
+                    if (expiry) {
+                        message = expDate + "\t" + message;
+                    }
 
                     if (!!specialWords) {
                         if (message.match(specialWords) !== null) {;
@@ -65,10 +63,9 @@ module.exports = function (robot) {
     }
 
     // Response if no args given
-    robot.respond(/!?dominos(.*)$/, function (res) {
-	res.send("Fetching the latest dominos coupons");
+    robot.respond(/!?dominos(.*)$/, function(res) {
+        res.send("Fetching the latest dominos coupons");
         printItems(res, res.match[1]);
     });
 
 };
-
