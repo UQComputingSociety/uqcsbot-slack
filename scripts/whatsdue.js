@@ -36,7 +36,8 @@ module.exports = function (robot) {
                 var profileID = String(body.match(/profileId=\d*/));
                 if (profileID !== 'null') {
                     resolve(profileID.replace('profileId=',''));
-                } else if (body.match(/is not a valid course code/)) {
+                } else if (body.match(/is not a valid course code/) || 
+                           body.match(/Unable to find course code/)) {
                     reject(course + ' is not a valid course code.');  
                 } else {
                     reject(course + ' has no available course profiles.');  
@@ -104,7 +105,7 @@ module.exports = function (robot) {
     /**
      * Robot responds to a message containing `!whatsdue`.
      */
-    robot.respond(/!?whatsdue ?((?: ?[a-z0-9]+)+)?$/i, function (res) {
+    robot.respond(/!?whatsdue ?((?: ?[a-z]{4}[0-9]{4}[a-z]?)+)?$/i, function (res) {
         var channel = null;
         // Get the channel name (and treat it as a course code!).
         if (robot.adapter.client && robot.adapter.client.rtm) {
@@ -125,7 +126,7 @@ module.exports = function (robot) {
         // Create a Promise for each course.
         var profileResponses = [];
         for (var i = 0; i < courses.length; i++) {
-            profileResponses.push(getProfileId(courses[i]));
+            profileResponses.push(getProfileId(courses[i].toUpperCase()));
         }
 
         // Resolve all the Promises to obtain an array of profile ids. Join
