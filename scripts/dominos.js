@@ -2,9 +2,9 @@
 //        A script to find the best dominos coupons
 //
 // Commands:
-//        !dominos -n <number of coupons to list> -f <only find coupons with this/ these word(s) in it>
-//        if -n isn't specified the number of coupons listed is 10 or as many as can be found up to 10
+//        !dominos -n <number of coupons to list> -f <only find coupons with this/ these word(s) in it> -e (lists the expiry date of the cupons). Notes: if -n isn't specified the number of coupons listed is 10 or as many as can be found up to 10
 //
+
 var cheerio = require("cheerio");
 
 module.exports = function(robot) {
@@ -45,14 +45,10 @@ module.exports = function(robot) {
                         message = expDate + "\t" + message;
                     }
 
-                    if (!!specialWords) {
-                        if (message.match(specialWords) !== null) {;
-                            response += code + "\t" + message + "\n";
-                            noOfCoupons--;
-                        } else {
-                            noOfCoupons--;
-                        }
-                    } else {
+                    if (!!specialWords && message.match(specialWords) !== null) {
+                        response += code + "\t" + message + "\n";
+                        noOfCoupons--;
+                    } else if (!specialWords)  {
                         response += code + "\t" + message + "\n";
                         noOfCoupons--;
                     }
