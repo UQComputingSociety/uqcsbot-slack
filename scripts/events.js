@@ -51,7 +51,8 @@ module.exports = function (robot) {
 					if(to) {
 						times = data[k].rrule.between(new Date(now), new Date(to));
 					} else {
-						times = data[k].rrule.after(new Date(now));
+						// Technically until a year ahead, safer this way.
+						times = data[k].rrule.between(new Date(now), new Date(now + week * 52));
 					}
 					var obj;
 					var duration = data[k].end.getTime() < data[k].start.getTime(); // How long it goes for
