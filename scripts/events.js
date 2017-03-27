@@ -55,7 +55,7 @@ module.exports = function (robot) {
 						times = data[k].rrule.between(new Date(now), new Date(now + week * 52));
 					}
 					var obj;
-					var duration = data[k].end.getTime() < data[k].start.getTime(); // How long it goes for
+					var duration = data[k].end.getTime() - data[k].start.getTime(); // How long it goes for
 					for(var i = 0; i < times.length; i++) {
 						obj = {};
 						// Copy necessary information from the original event
