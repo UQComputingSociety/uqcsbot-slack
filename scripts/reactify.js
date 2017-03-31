@@ -31,7 +31,7 @@ var emoji = {
 	'w': ["w"],
 	'x': ['xbox'],
 	'y': ["y"],
-	'z': ["zero"], // No Z?
+	'z': ["zoidberg"], // No Z?
 
 	'1': ["one"],
 	'2': ["two"],
