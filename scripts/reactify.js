@@ -45,27 +45,40 @@ var emoji = {
 	'0': ["zero"]
 };
 
+var Promise = require('promise');
+
 module.exports = function (robot) {
 	robot.respond(/!?reactify ?([a-zA-Z0-9 ]+)?$/i, function (res) {
 		if (robot.adapter.client && robot.adapter.client.rtm) {
-			// Adds reaction to the provided item (a message)
-			var add_reaction = function(item, emoji, callback) {
-				robot.adapter.client.web.reactions.add(emoji,
-					{"channel": item.room, "timestamp": item.id},
-					callback);
-			};
-
 			var item = res.message;
 			// Get text, all in lowercase and remove all whitespace
 			var msg = res.match[1].toLowerCase().replace(/ /g, "");
 
-			// React in reverse order since it seems reacts occur in
-			// first in last out order.
-			for (var i = msg.length - 1; i >= 0; i--) {
-				// Get random emoji from our dictionary of lists
-				var react = emoji[msg[i]][Math.floor(Math.random() * emoji[msg[i]].length)];
-				add_reaction(item, react);
-			}
+			generateReactionChain(msg, item);
         }
-  });
+    });
+	
+	// Adds reaction to the provided item (a message)
+	var addReaction = function(item, emoji, callback) {
+		return new Promise((resolve, reject) => {
+			robot.adapter.client.web.reactions.add(emoji,
+			{"channel": item.room, "timestamp": item.id},
+			callback);
+
+			setTimeout(function() {
+				resolve(true);
+			}, 1000);
+		});
+	};
+
+	// We have to sequentially perform api calls for reaction otherwise the
+	// ordering can get messed up.
+	function generateReactionChain(msg, item) {
+		var chain = Promise.resolve();
+		for (var i in msg) {
+			var c = msg[i];
+			var react = emoji[c][Math.floor(Math.random() * emoji[c].length)];
+			chain = chain.then(addReaction.bind(null, item, react));
+		}
+	}
 };
