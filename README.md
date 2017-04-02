@@ -10,7 +10,7 @@ deployed on [Heroku][heroku] to get you up and running as quick as possible.
 
 ### Running uqcsbot locally
 
-** If you're having trouble building/running the bot don't be afraid to ask for help in the UQCS slack **
+**If you're having trouble building/running the bot don't be afraid to ask for help in the UQCS slack**
 
 You can test your hubot by running the following, however some plugins will not
 behave as expected unless the [environment variables](#configuration) they rely
