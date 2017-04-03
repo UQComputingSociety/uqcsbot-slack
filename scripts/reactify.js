@@ -45,8 +45,6 @@ var emoji = {
 	'0': ["zero"]
 };
 
-var Promise = require('promise');
-
 module.exports = function (robot) {
 	robot.respond(/!?reactify ?([a-zA-Z0-9 ]+)?$/i, function (res) {
 		if (robot.adapter.client && robot.adapter.client.rtm) {
@@ -64,10 +62,7 @@ module.exports = function (robot) {
 			robot.adapter.client.web.reactions.add(emoji,
 			{"channel": item.room, "timestamp": item.id},
 			callback);
-
-			setTimeout(function() {
-				resolve(true);
-			}, 1000);
+			setTimeout(() => resolve(), 1000);
 		});
 	};
 
@@ -81,4 +76,3 @@ module.exports = function (robot) {
 			chain = chain.then(addReaction.bind(null, item, react));
 		}
 	}
-};
