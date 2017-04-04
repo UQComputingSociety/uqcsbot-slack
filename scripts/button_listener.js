@@ -43,7 +43,6 @@ module.exports = function (robot) {
         // Increment vote counter
         var title = attachments[0].fields[type].title;
         var count = parseInt(title[title.length - 2]) + 1;
-        robot.logger.info(count);
         
         if (type == YES_VOTE) {
             attachments[0].fields[type].title = "Yes (" + count + ")";
@@ -54,8 +53,6 @@ module.exports = function (robot) {
         else {
 
         }
-
-        robot.logger.info(attachments[0].fields[type]);
 
         // Update message
         robot.adapter.client.web.chat.update(payload.message_ts,
