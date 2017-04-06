@@ -76,3 +76,4 @@ module.exports = function (robot) {
 			chain = chain.then(addReaction.bind(null, item, react));
 		}
 	}
+};
