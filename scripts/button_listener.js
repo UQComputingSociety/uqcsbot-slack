@@ -57,6 +57,6 @@ module.exports = function (robot) {
         // Update message
         robot.adapter.client.web.chat.update(payload.message_ts,
             payload.channel.id, payload.original_message.text,
-            {"attachments": attachments, "link_names": false});
+            {"attachments": attachments});
     }
 };
