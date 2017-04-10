@@ -46,7 +46,7 @@ var emoji = {
 };
 
 module.exports = function (robot) {
-	robot.respond(/!?reactify ?([a-zA-Z0-9 ]+)?$/i, function (res) {
+	robot.respond(/!?reactify ?(.+)?$/i, function (res) {
 		if (robot.adapter.client && robot.adapter.client.rtm) {
 			// Adds reaction to the provided item (a message)
 			var add_reaction = function(item, emoji, callback) {
@@ -56,16 +56,22 @@ module.exports = function (robot) {
 			};
 
 			var item = res.message;
-			// Get text, all in lowercase and remove all whitespace
-			var msg = res.match[1].toLowerCase().replace(/ /g, "");
+			// Get text, all in lowercase and remove non alphanumeric
+			var msg = res.match[1].toLowerCase().replace(/[^a-zA-Z0-9]/g, "");
 
 			// React in reverse order since it seems reacts occur in
 			// first in last out order.
+      var used_reacts = [];
 			for (var i = msg.length - 1; i >= 0; i--) {
 				// Get random emoji from our dictionary of lists
-				var react = emoji[msg[i]][Math.floor(Math.random() * emoji[msg[i]].length)];
-				add_reaction(item, react);
-			}
+        var possible_reacts = emoji[msg[i]].filter(x => used_reacts.indexOf(x) < 0);
+        if (possible_reacts.length < 1) {
+          continue;
         }
+				var react = possible_reacts[Math.floor(Math.random() * possible_reacts.length)];
+				add_reaction(item, react);
+        used_reacts.push(react);
+			}
+    }
   });
 };
