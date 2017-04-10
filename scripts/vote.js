@@ -15,7 +15,6 @@ module.exports = function (robot) {
                     "fallback": "Fail",
                     "color": "#3AA3E3",
                     "callback_id": "vote",
-                    "link_names": false,
                     "attachment_type": "default",
                     "fields" : [
                         {

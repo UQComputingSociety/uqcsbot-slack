@@ -9,7 +9,6 @@ const ABSTAIN_VOTE = 2;
 module.exports = function (robot) {
     robot.router.post("/button", function(req, res) {
         var payload = JSON.parse(req.body.payload);
-        //robot.logger.info(payload);
         // Verification token
         if (payload.token == process.env.SLACK_VERIFICATION_TOKEN) {
             res.end(); // Return response early to reduce timeouts
