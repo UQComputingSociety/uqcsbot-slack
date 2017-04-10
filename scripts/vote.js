@@ -6,7 +6,7 @@
 //
 
 module.exports = function (robot) {
-    robot.respond(/!?vote ?(.+)/i, function (res) {
+    robot.respond(/!?vote (.+)/i, function (res) {
         robot.adapter.client.web.chat.postMessage(res.message.room,
             res.message.user.name + ": " + res.match[1],  {
             "attachments": [
@@ -38,6 +38,11 @@ module.exports = function (robot) {
                         {
                             "name": "no",
                             "text": "No",
+                            "type": "button"
+                        },
+                        {
+                            "name": "abstain",
+                            "text": "Abstain",
                             "type": "button"
                         },
                     ]
