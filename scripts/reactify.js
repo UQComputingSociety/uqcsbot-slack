@@ -61,17 +61,17 @@ module.exports = function (robot) {
 
 			// React in reverse order since it seems reacts occur in
 			// first in last out order.
-      var used_reacts = [];
+			var used_reacts = [];
 			for (var i = msg.length - 1; i >= 0; i--) {
 				// Get random emoji from our dictionary of lists
-        var possible_reacts = emoji[msg[i]].filter(x => used_reacts.indexOf(x) < 0);
-        if (possible_reacts.length < 1) {
-          continue;
-        }
+				var possible_reacts = emoji[msg[i]].filter(x => used_reacts.indexOf(x) < 0);
+				if (possible_reacts.length < 1) {
+					continue;
+				}
 				var react = possible_reacts[Math.floor(Math.random() * possible_reacts.length)];
 				add_reaction(item, react);
-        used_reacts.push(react);
+				used_reacts.push(react);
 			}
-    }
-  });
+		}
+	});
 };
