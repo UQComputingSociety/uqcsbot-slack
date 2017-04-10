@@ -23,7 +23,7 @@ var emoji = {
 	'o': ["palantir", "tf2"],
 	'p': ["p", "producthunt"],
 	'q': ["q"],
-	'r': ["r"],
+	'r': ["r", "registered", "redroom"],
 	's': ["s", "stanford", "sublime"],
 	't': ["t"],
 	'u': ["u"],
