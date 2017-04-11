@@ -91,7 +91,7 @@ module.exports = function (robot) {
         // This seems like a bad way to store vote info (and count it)
         var count = 0;
         var list = payload.original_message.attachments[0].fields[type].value;
-        for (var i=0; i < list.length; i++) {
+        for (var i = 0; i < list.length; i++) {
             if (list[i] === '\n') {
                 count++;
             }
