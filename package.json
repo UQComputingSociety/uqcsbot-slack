@@ -25,7 +25,8 @@
     "kd.tree": "^0.1.3",
     "mathjs": "^3.2.1",
     "request": "^2.67.0",
-    "safe-eval": "^0.3.0"
+    "safe-eval": "^0.3.0",
+    "scoped-http-client": "^0.11.0"
   },
   "engines": {
     "node": "0.10.x"
