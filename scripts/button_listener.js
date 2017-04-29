@@ -4,7 +4,7 @@
 
 const YES_VOTE = 0;
 const NO_VOTE = 1;
-const ABSTAIN_VOTE = 2;
+const CLEAR_VOTE = 2;
 
 module.exports = function (robot) {
     robot.router.post("/button", function(req, res) {
@@ -19,8 +19,8 @@ module.exports = function (robot) {
                 else if (payload.actions[0].name == 'no') {
                     process_action(payload, res, NO_VOTE);
                 }
-                else if (payload.actions[0].name == 'abstain') {
-                    process_action(payload, res, ABSTAIN_VOTE);
+                else if (payload.actions[0].name == 'clear') {
+                    process_action(payload, res, CLEAR_VOTE);
                 }
                 else {
                     // Unknown action
@@ -41,7 +41,7 @@ module.exports = function (robot) {
         else if (type == NO_VOTE) {
             process_vote(payload, res, type);
         }
-        else if (type == ABSTAIN_VOTE) {
+        else if (type == CLEAR_VOTE) {
             // Remove our user from the vote list if they're on it
             remove_vote(payload, YES_VOTE);
             remove_vote(payload, NO_VOTE);
