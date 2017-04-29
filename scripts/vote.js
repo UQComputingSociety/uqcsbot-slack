@@ -40,8 +40,8 @@ module.exports = function (robot) {
                             "type": "button"
                         },
                         {
-                            "name": "abstain",
-                            "text": "Abstain",
+                            "name": "clear",
+                            "text": "Clear",
                             "type": "button"
                         },
                     ]
