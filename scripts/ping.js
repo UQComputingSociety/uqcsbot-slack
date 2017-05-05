@@ -5,8 +5,6 @@
 //   
 // Commands:
 //   !`ping` (channel|everyone|here)
-
-// Dictionary of characters mapping to emojis.
 var allowed = ['trm', 'dmarj97', 'csa', 'mqt', 'ainz', 'gricey', 'cat'];
 
 module.exports = function (robot) {
