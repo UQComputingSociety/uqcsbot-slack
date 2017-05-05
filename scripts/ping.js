@@ -15,7 +15,8 @@ module.exports = function (robot) {
             // Get text, all in lowercase and remove non alphanumeric
             var msg = res.match[1].toLowerCase().replace(/[^a-zA-Z0-9]/g, "");
             var room = res.message.room;
-	    var channel = robot.adapter.client.rtm.dataStore.getChannelGroupOrDMById(room);
+            var data = robot.adapter.client.rtm.dataStore;
+            var channel = data.getChannelGroupOrDMById(room);
 
             if (in_array(res.message.user.name, allowed) ||
                 channel.members.length < 50) {
