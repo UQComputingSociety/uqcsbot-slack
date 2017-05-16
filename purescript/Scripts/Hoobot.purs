@@ -33,7 +33,7 @@ instance decodeHoogleResult :: DecodeJson HoogleResult where
         pure $ HoogleResult { url, typeSig }
 
 showHoogleResult :: HoogleResult -> String
-showHoogleResult (HoogleResult res) = "`<" <> res.url <> "|" <> res.typeSig <> ">`"
+showHoogleResult (HoogleResult res) = "`" <> res.typeSig <> "` "<" <> res.url <> "|link>"
 
 parseHoogleResults :: Json -> Either String (Array HoogleResult)
 parseHoogleResults json = do
@@ -50,9 +50,9 @@ script' robot pat = do
             let message = case jsonParser result.body >>= parseHoogleResults of
                     Left err -> err
                     Right results -> unlines $ map showHoogleResult results
-            liftEff $ send message response 
+            liftEff $ send message response
         Nothing -> pure unit
-    
+
 script :: forall e. Robot -> Eff (err :: EXCEPTION, http :: HTTP, hubot :: HUBOT, console :: CONSOLE | e) Unit
 script robot = case regex "!hoogle (.*)$" noFlags of
     Left err -> log err
