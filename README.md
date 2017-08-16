@@ -8,7 +8,9 @@ deployed on [Heroku][heroku] to get you up and running as quick as possible.
 [hubot]: http://hubot.github.com
 [generator-hubot]: https://github.com/github/generator-hubot
 
-### Running uqcsbot Locally
+### Running uqcsbot locally
+
+**If you're having trouble building/running the bot don't be afraid to ask for help in the UQCS slack**
 
 You can test your hubot by running the following, however some plugins will not
 behave as expected unless the [environment variables](#configuration) they rely
@@ -36,6 +38,19 @@ Then you can interact with uqcsbot by typing `uqcsbot help`.
 1. `npm install`
 2. `dos2unix bin/hubot`
 3. `bin/hubot`
+
+### Running the bot locally on a dummy slack
+
+If you want to test some slack specific features (e.g. emoji's):
+
+0. Ensure you have the bot running in it's command line form as above (ask in slack if you're having trouble)
+1. Create a [slack team](https://slack.com/get-started)
+2. Now you need to add a new bot go [here](https://slack.com/apps), ensuring you have your newly created team selected
+3. Search for "Bots"
+4. Add a new configuration
+5. Setup a new enviromental variable: `HUBOT_SLACK_TOKEN=xoxb-YOUR-TOKEN-HERE`
+6. Run your bot like so: `bin/hubot --adapter slack`
+7. Your bot should now connect to your slack, make sure you invite your bot to any channels you want it to work in.
 
 ### Configuration
 

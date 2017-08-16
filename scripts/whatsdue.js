@@ -89,13 +89,12 @@ module.exports = function (robot) {
     }
 
     /**
-     * 
+     * Loop over each assessment and concatentate the subject, task, due date and weighting in nice formatting.
      */
     function getFormattedAssessment(assessment) {
         var formattedAssessment = '_*WARNING:* Assessment information may vary/change/be entirely different! Use at ' +
                                   'your own discretion_\r\n>>>';
-
-        // Loop over each assessment and concatentate the subject, task, due date and weighting in nice formatting.
+                                  
         assessment.map(function(a) {
             formattedAssessment += '*' + a[0] + '*: `' + a[1] + '` _' + a[2] + '_ *(' + a[3] + ')*\r\n';
         })
@@ -107,38 +106,43 @@ module.exports = function (robot) {
      * Generate iCal calendar containing the assessment pieces and return a link to it.
      */
     function getCalendar(assessment, userChannel) {
-            //
-            var cal = new ical.Component(['vcalendar', [], []]);
-            cal.updatePropertyWithValue('prodid', '-//uqcsbot whatsdue assessment generation');
-            cal.updatePropertyWithValue('version', '2.0');
+        //
+        var cal = new ical.Component(['vcalendar', [], []]);
+        cal.updatePropertyWithValue('prodid', '-//uqcsbot whatsdue assessment generation');
+        cal.updatePropertyWithValue('version', '2.0');
 
-            //
-            assessment.map(function(a) {
-                var vevent = new ical.Component('vevent');
-                vevent.updatePropertyWithValue('dtstamp', ICAL.Time.now());
+        //
+        assessment.map(function(a) {
+            var vevent = new ical.Component('vevent');
+            vevent.updatePropertyWithValue('dtstamp', ICAL.Time.now());
 
-                var event = new ical.Event(vevent);
-                event.summary = a[0] + ' ' + a[1] + ' ' + a[2] + ' ' + a[3];
-                event.uid = a[0];
-                event.startDate = new ical.Time.now();
+            var event = new ical.Event(vevent);
+            event.summary = a[0] + ' (' + a[1] + '): ' + a[2].split(' - ')[0];
+            event.uid = new ical.Time.now(); // probably chose a better uid
+            event.startDate = new ical.Time.now();
 
-                cal.addSubcomponent(vevent);
-            });
+            // time = Date.parse(a[3])/1000;
+            // console.log(time);
+            // console.log(new ical.Time.fromUnixTime(time));
 
-            //
-            return robot.adapter.client.web.files.upload('assessmentCalendar.ics', {
-                channels: userChannel,
-                title: 'Importable iCalendar containing your assessment',
-                initial_comment: 'Click the menu next to me and select "Copy Link" to import me as an URL',
-                file: {
-                    value: cal.toString(),
-                    options: {
-                        filename: 'assessmentCalendar.ics',
-                        contentType: 'text/calendar',
-                        knownLength: cal.toString().length
-                    }
+            cal.addSubcomponent(vevent);
+        });
+
+        // TODO(mitch): let them know which events were added successfully?
+        
+        // 
+        return robot.adapter.client.web.files.upload('assessmentCalendar.ics', {
+            channels: userChannel,
+            title: 'Importable iCalendar containing your assessment!',
+            file: {
+                value: cal.toString(),
+                options: {
+                    filename: 'assessmentCalendar.ics',
+                    contentType: 'text/calendar',
+                    knownLength: cal.toString().length
                 }
-            });
+            }
+        });
     }
 
     /**
@@ -175,7 +179,6 @@ module.exports = function (robot) {
                 res.send(getFormattedAssessment(assessment));
                 return getCalendar(assessment, res.message.user.id);
             })
-            .then(response => console.log(response))
             .catch(error => res.send(error));
     });
 };

@@ -10,7 +10,7 @@
 
 module.exports = (robot) ->
   robot.respond /repo/i, (res) ->
-    res.send "https://github.com/UQComputingSociety/uqcs-hubot"
+    res.send "https://github.com/UQComputingSociety/uqcsbot"
 
   # robot.hear /badger/i, (res) ->
   #   res.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
