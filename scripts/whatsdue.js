@@ -6,7 +6,6 @@
 
 var cheerio = require('cheerio');
 var ical = require('ical.js');
-var Readable = require('stream').Readable;
 
 module.exports = function (robot) {
 
@@ -70,17 +69,17 @@ module.exports = function (robot) {
                 $('.tblborder').children().slice(1).each((index, element) => {
                     var columns = $(element).children();
 
-                    var subject = $(columns[0]).find('div').text().trim().slice(0, 8);
-                    var task = $(columns[1]).find('div').html().trim().replace('<br>', ' - ');
-                    var dueDate = $(columns[2]).find('div').text().trim();
-                    var weighting = $(columns[3]).find('div').text().trim();
+                    var subject = $(columns[0]).find('div').text().slice(0, 8);
+                    var task = $(columns[1]).find('div').html().replace('<br>', ' - ').trim();
+                    var dueDate = $(columns[2]).find('div').html().split('<br>')[0].trim();
+                    var weighting = $(columns[3]).find('div').html().split('<br>')[0].trim();
 
                     if (!subject || !task || !dueDate || !weighting) {
                         reject('There was an error parsing the assessment.');
                         return;
                     }
 
-                    assessment.push([subject, weighting, task, dueDate]);
+                    assessment.push([subject, task, dueDate, weighting]);
                 });
 
                 resolve(assessment);
@@ -96,7 +95,7 @@ module.exports = function (robot) {
                                   'your own discretion_\r\n>>>';
                                   
         assessment.map(function(a) {
-            formattedAssessment += '*' + a[0] + '*: `' + a[1] + '` _' + a[2] + '_ *(' + a[3] + ')*\r\n';
+            formattedAssessment += '*' + a[0] + '*: `' + a[3] + '` _' + a[1] + '_ *(' + a[2] + ')*\r\n';
         })
 
         return formattedAssessment;
@@ -117,9 +116,37 @@ module.exports = function (robot) {
             vevent.updatePropertyWithValue('dtstamp', ICAL.Time.now());
 
             var event = new ical.Event(vevent);
-            event.summary = a[0] + ' (' + a[1] + '): ' + a[2].split(' - ')[0];
-            event.uid = new ical.Time.now(); // probably chose a better uid
-            event.startDate = new ical.Time.now();
+            event.summary = a[0] + ' (' + a[3] + '): ' + a[1].split(' - ')[0];
+            event.uid = Math.random().toString();
+
+
+            // If examination date
+            // TODO(mitch): scrape http://www.uq.edu.au/events/calendar_view.php?category_id=16&year=2017 for dates
+            if (a[2] == 'Examination Period') {
+                event.startDate = new ical.Time.fromJSDate(new Date('4 November 2017'), false);
+                event.endDate = new ical.Time.fromJSDate(new Date('18 November 2017'), false);
+                console.log(1);
+
+            // if normal date
+            } else if (Date.parse(a[2])) {
+                event.startDate = new ical.Time.fromJSDate(new Date(a[2]), false);
+                console.log(2);
+
+            // if date range
+            } else if (Date.parse(a[2].split('-')[0]) && Date.parse(a[2].split('-')[1])) {
+                event.startDate = new ical.Time.fromJSDate(new Date(a[2].split('-')[0]), false);
+                event.endDate = new ical.Time.fromJSDate(new Date(a[2].split('-')[1]), false);
+                console.log(3);
+
+            // else ask person to manually schedule
+            //TODO(mitch): ensure strings like 'Tutorial, week 3' and '10am Mon week 5, Tues week 10 & Mon week 13' are caught
+            } else {
+                event.summary = 'WARNING: Date of assessment could not be parsed, please manually set date for event!\n' + event.summary
+                event.startDate = new ical.Time.now();
+                console.log(4);
+            }
+
+            console.log(event.startDate.toString() + ' ' + a[2]);
 
             // time = Date.parse(a[3])/1000;
             // console.log(time);
@@ -128,12 +155,12 @@ module.exports = function (robot) {
             cal.addSubcomponent(vevent);
         });
 
-        // TODO(mitch): let them know which events were added successfully?
+        // TODO(mitch): add calendar toggle for command
         
         // 
         return robot.adapter.client.web.files.upload('assessmentCalendar.ics', {
             channels: userChannel,
-            title: 'Importable iCalendar containing your assessment!',
+            title: 'Importable calendar containing your assessment!',
             file: {
                 value: cal.toString(),
                 options: {
