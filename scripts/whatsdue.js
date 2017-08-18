@@ -3,6 +3,7 @@
 //
 // Commands:
 //   !`whatsdue`` _<course1>_ _<course2>_ ... - Prints all assessment for a given array of courses.
+//   !`calendar`` _<course1>_ _<course2>_ ... - Generates a calendar containing all assessment for the given subjects.
 
 var cheerio = require('cheerio');
 var ical = require('ical.js');
@@ -103,49 +104,41 @@ module.exports = function (robot) {
      * Generate iCal calendar containing the assessment pieces and upload it to slack.
      */
     function getCalendar(assessment, channel) {
-        // TODO(mitch): comment this
         var cal = new ical.Component(['vcalendar', [], []]);
         cal.updatePropertyWithValue('prodid', '-//uqcsbot whatsdue assessment generation');
         cal.updatePropertyWithValue('version', '2.0');
 
-        // TODO(mitch): comment this
+        // Loop over assessment and create a calendar event for each one
         assessment.map(function(a) {
             var vevent = new ical.Component('vevent');
-            vevent.updatePropertyWithValue('dtstamp', ICAL.Time.now());
-
             var event = new ical.Event(vevent);
+            vevent.updatePropertyWithValue('dtstamp', ICAL.Time.now());
             event.summary = a[0] + ' (' + a[3] + '): ' + a[1].split(' - ')[0];
             event.uid = Math.random().toString();
 
-            //TODO(mitch): abstract this out?
+            //TODO(mitch): abstract this out? \/
 
             // If examination date
-            // TODO(mitch): scrape http://www.uq.edu.au/events/calendar_view.php?category_id=16&year=2017 for dates
+            // TODO(mitch): scrape http://www.uq.edu.au/events/calendar_view.php?category_id=16&year=2017 for dates?
             if (a[2] == 'Examination Period') {
                 event.startDate = new ical.Time.fromJSDate(new Date('4 November 2017'), false);
                 event.endDate = new ical.Time.fromJSDate(new Date('18 November 2017'), false);
-                console.log(1);
 
-            // if normal date
-            // TODO(mitch): do better than hard coding year pls
-            // Note to self: check > 2017 because it catches cases like 'Tutorial, week 3'
-            } else if (Date.parse(a[2]) > Date.parse('01/01/2017')) {
+            // If normal date
+            // Note: Checks year is at least this year to catch cases like 'Tutorial, week 3'
+            } else if (Date.parse(a[2]) > Date.parse('1/1/' + new Date().getFullYear())) {
                 event.startDate = new ical.Time.fromJSDate(new Date(a[2]), false);
-                console.log(2);
 
-            // if date range
+            // If date range
             // TODO(mitch): make this cleaner pls
             } else if (Date.parse(a[2].split('-')[0]) && Date.parse(a[2].split('-')[1])) {
                 event.startDate = new ical.Time.fromJSDate(new Date(a[2].split('-')[0]), false);
                 event.endDate = new ical.Time.fromJSDate(new Date(a[2].split('-')[1]), false);
-                console.log(3);
 
-            // else ask person to manually schedule
-            // TODO(mitch): get feedback on warning text
+            // Else ask person to manually schedule
             } else {
                 event.summary = 'WARNING: DATE PARSING FAILED\nPlease manually set date for event!\n' + event.summary
                 event.startDate = new ical.Time.now();
-                console.log(4);
             }
 
             cal.addSubcomponent(vevent);
@@ -166,12 +159,10 @@ module.exports = function (robot) {
         });
     }
 
-    // TODO(mitch): add calendar generation command, abstract out whatsdue functionality
-
     /**
-     * Robot responds to a message containing `!whatsdue`.
+     * Parses the input string for assessment.
      */
-    robot.respond(/!?whatsdue ?((?: ?[a-z0-9]+)+)?$/i, function (res) {
+     function parseAssessment(res) {
         var channel = null;
         // Get the channel name (and treat it as a course code!).
         if (robot.adapter.client && robot.adapter.client.rtm) {
@@ -194,14 +185,27 @@ module.exports = function (robot) {
         }
 
         // Resolve all the Promises to obtain an array of profile ids. Join them together to create the necessary
-        // assessment url to parse and display back to the user. Print any errors that occured.
-        Promise.all(profileResponses)
+        // assessment url to parse and display back to the user.
+        return Promise.all(profileResponses)
             .then(profiles => assessmentUrl + profiles.join())
-            .then(url => getAssessment(url))
-            .then(assessment => {
-                res.send(getFormattedAssessment(assessment));
-                return getCalendar(assessment, res.message.room);
-            })
-            .catch(error => res.send(error));
+            .then(url => getAssessment(url));
+     }
+
+    /**
+     * Robot responds to a message containing `!whatsdue`.
+     */
+    robot.respond(/!?whatsdue ?((?: ?[a-z0-9]+)+)?$/i, function (res) {
+        parseAssessment(res)
+        .then(assessment => res.send(getFormattedAssessment(assessment)))
+        .catch(error => res.send(error));
+    });
+
+    /**
+     * Robot responds to a message containing `!calendar`.
+     */
+    robot.respond(/!?calendar ?((?: ?[a-z0-9]+)+)?$/i, function (res) {
+        parseAssessment(res)
+        .then(assessment => getCalendar(assessment, res.message.room))
+        .catch(error => res.send(error));
     });
 };
