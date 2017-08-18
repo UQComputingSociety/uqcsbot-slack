@@ -2,7 +2,7 @@
   "hubot-google-translate",
   "hubot-maps",
   "hubot-google",
-  "hubot-redis-brain",
+  "hubot-postgres-brain",
   "hubot-better-voting",
   "hubot-google-images",
   "hubot-youtube",
