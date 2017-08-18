@@ -62,15 +62,13 @@ module.exports = function (robot) {
                 // Look for the tblborder class, which is the assessment data table, then loop over its children
                 // starting at index 1 to skip over the column headers (subject, task, due date and weighting).
                 //
-                // TODO(mitch): make this less ugly and bleh.
-                //
                 // Note: Scraped assessment data is inconsistently formatted and may my assumptions below may make it
                 // look ugly. Soz, tell UQ to standardise their shiet.
                 $('.tblborder').children().slice(1).each((index, element) => {
                     var columns = $(element).children();
 
                     var subject = $(columns[0]).find('div').text().slice(0, 8);
-                    var task = $(columns[1]).find('div').html().replace('<br>', ' - ').trim();
+                    var task = $(columns[1]).find('div').html().replace(/<br>/g, ' - ').trim();
                     var dueDate = $(columns[2]).find('div').html().split('<br>')[0].trim();
                     var weighting = $(columns[3]).find('div').html().split('<br>')[0].trim();
 
@@ -88,7 +86,7 @@ module.exports = function (robot) {
     }
 
     /**
-     * Loop over each assessment and concatentate the subject, task, due date and weighting in nice formatting.
+     * Get a pretty formatted string of all the assessment pieces.
      */
     function getFormattedAssessment(assessment) {
         var formattedAssessment = '_*WARNING:* Assessment information may vary/change/be entirely different! Use at ' +
@@ -102,15 +100,15 @@ module.exports = function (robot) {
     }
 
     /**
-     * Generate iCal calendar containing the assessment pieces and return a link to it.
+     * Generate iCal calendar containing the assessment pieces and upload it to slack.
      */
-    function getCalendar(assessment, userChannel) {
-        //
+    function getCalendar(assessment, channel) {
+        // TODO(mitch): comment this
         var cal = new ical.Component(['vcalendar', [], []]);
         cal.updatePropertyWithValue('prodid', '-//uqcsbot whatsdue assessment generation');
         cal.updatePropertyWithValue('version', '2.0');
 
-        //
+        // TODO(mitch): comment this
         assessment.map(function(a) {
             var vevent = new ical.Component('vevent');
             vevent.updatePropertyWithValue('dtstamp', ICAL.Time.now());
@@ -119,6 +117,7 @@ module.exports = function (robot) {
             event.summary = a[0] + ' (' + a[3] + '): ' + a[1].split(' - ')[0];
             event.uid = Math.random().toString();
 
+            //TODO(mitch): abstract this out?
 
             // If examination date
             // TODO(mitch): scrape http://www.uq.edu.au/events/calendar_view.php?category_id=16&year=2017 for dates
@@ -128,38 +127,33 @@ module.exports = function (robot) {
                 console.log(1);
 
             // if normal date
-            } else if (Date.parse(a[2])) {
+            // TODO(mitch): do better than hard coding year pls
+            // Note to self: check > 2017 because it catches cases like 'Tutorial, week 3'
+            } else if (Date.parse(a[2]) > Date.parse('01/01/2017')) {
                 event.startDate = new ical.Time.fromJSDate(new Date(a[2]), false);
                 console.log(2);
 
             // if date range
+            // TODO(mitch): make this cleaner pls
             } else if (Date.parse(a[2].split('-')[0]) && Date.parse(a[2].split('-')[1])) {
                 event.startDate = new ical.Time.fromJSDate(new Date(a[2].split('-')[0]), false);
                 event.endDate = new ical.Time.fromJSDate(new Date(a[2].split('-')[1]), false);
                 console.log(3);
 
             // else ask person to manually schedule
-            //TODO(mitch): ensure strings like 'Tutorial, week 3' and '10am Mon week 5, Tues week 10 & Mon week 13' are caught
+            // TODO(mitch): get feedback on warning text
             } else {
-                event.summary = 'WARNING: Date of assessment could not be parsed, please manually set date for event!\n' + event.summary
+                event.summary = 'WARNING: DATE PARSING FAILED\nPlease manually set date for event!\n' + event.summary
                 event.startDate = new ical.Time.now();
                 console.log(4);
             }
 
-            console.log(event.startDate.toString() + ' ' + a[2]);
-
-            // time = Date.parse(a[3])/1000;
-            // console.log(time);
-            // console.log(new ical.Time.fromUnixTime(time));
-
             cal.addSubcomponent(vevent);
         });
 
-        // TODO(mitch): add calendar toggle for command
-        
-        // 
+        // Upload the generated calendar to slack and post it the channel
         return robot.adapter.client.web.files.upload('assessmentCalendar.ics', {
-            channels: userChannel,
+            channels: channel,
             title: 'Importable calendar containing your assessment!',
             file: {
                 value: cal.toString(),
@@ -171,6 +165,8 @@ module.exports = function (robot) {
             }
         });
     }
+
+    // TODO(mitch): add calendar generation command, abstract out whatsdue functionality
 
     /**
      * Robot responds to a message containing `!whatsdue`.
@@ -204,7 +200,7 @@ module.exports = function (robot) {
             .then(url => getAssessment(url))
             .then(assessment => {
                 res.send(getFormattedAssessment(assessment));
-                return getCalendar(assessment, res.message.user.id);
+                return getCalendar(assessment, res.message.room);
             })
             .catch(error => res.send(error));
     });
