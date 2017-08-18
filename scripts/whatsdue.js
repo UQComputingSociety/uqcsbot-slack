@@ -125,7 +125,7 @@ module.exports = function (robot) {
                 event.endDate = new ical.Time.fromJSDate(new Date('18 November 2017'), false);
 
             // If normal date
-            // Note: Checks year is at least this year to catch cases like 'Tutorial, week 3'
+            // Note: Checks year is at least this y ear to catch cases like 'Tutorial, week 3'
             } else if (Date.parse(a[2]) > Date.parse('1/1/' + new Date().getFullYear())) {
                 event.startDate = new ical.Time.fromJSDate(new Date(a[2]), false);
 
