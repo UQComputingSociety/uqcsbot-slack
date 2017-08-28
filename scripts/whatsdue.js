@@ -88,6 +88,9 @@ module.exports = function (robot) {
 
     /**
      * Get a pretty formatted string of all the assessment pieces.
+     *
+     * @param {Array} array of assessment items
+     * @return {string} A formatted string of assessment items
      */
     function getFormattedAssessment(assessment) {
         var formattedAssessment = '_*WARNING:* Assessment information may vary/change/be entirely different! Use at ' +
@@ -102,6 +105,10 @@ module.exports = function (robot) {
 
     /**
      * Generate iCal calendar containing the assessment pieces and upload it to slack.
+     *
+     * @param {Array} array of assessment items
+     * @param {channel} the channel that the calendar will be posted to
+     * @return {!Promise} A promise that resolves with the importable calendar or an error
      */
     function getCalendar(assessment, channel) {
         var cal = new ical.Component(['vcalendar', [], []]);
@@ -115,8 +122,6 @@ module.exports = function (robot) {
             vevent.updatePropertyWithValue('dtstamp', ICAL.Time.now());
             event.summary = a[0] + ' (' + a[3] + '): ' + a[1].split(' - ')[0];
             event.uid = Math.random().toString();
-
-            //TODO(mitch): abstract this out? \/
 
             // If examination date
             // TODO(mitch): scrape http://www.uq.edu.au/events/calendar_view.php?category_id=16&year=2017 for dates?
