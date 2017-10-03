@@ -80,7 +80,7 @@ get started, along with the [Scripting Guide](scripting-docs).
 For many common tasks, there's a good chance someone has already one to do just
 the thing.
 
-[scripting-docs]: https://github.com/github/hubot/blob/master/docs/scripting.md
+[scripting-docs]: https://hubot.github.com/docs/scripting/
 
 ### external-scripts
 
