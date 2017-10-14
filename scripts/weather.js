@@ -3,7 +3,7 @@
 //
 //
 // Commands:
-//   `!weather [<RADAR>] [LOCATION]` - Gets the weather (or optionally radar) for a location (default: brisbane)
+//   `!weather [radar] [LOCATION]` - Gets the weather (or optionally radar) for a location (default: brisbane)
 //
 
 var kdt = require("kd.tree");
