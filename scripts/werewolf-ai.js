@@ -2,12 +2,12 @@
 //   Allows UQCSBot to participate in werewolf
 //
 // Commands:
-//   !`play` - When used in #werewolf, UQCSBot will play.
+//   `!werewolf` - When used in #werewolf, UQCSBot will play
 //
 
 module.exports = function (robot) {
-	// !play
-	robot.respond(/!?play/i, function (res) {
+	// !werewolf
+	robot.respond(/!?werewolf/i, function (res) {
 		if(res.room === "werewolf") {
 			// Join
 			res.send("!join");

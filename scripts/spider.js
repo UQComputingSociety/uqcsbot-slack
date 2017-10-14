@@ -2,7 +2,7 @@
 //   Better shrug
 //
 // Commands:
-//   !`spider` - Shows spider shrug
+//   `!spider` - Shows spider shrug
 //
 //
 module.exports = function (robot) {

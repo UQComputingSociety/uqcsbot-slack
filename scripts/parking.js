@@ -2,7 +2,7 @@
 //   Generates help commands for Hubot.
 //
 // Commands:
-//   !`parking` - Lists the available parking at UQ
+//   `!parking` - Lists the available parking at UQ
 //
 
 var cheerio = require("cheerio");

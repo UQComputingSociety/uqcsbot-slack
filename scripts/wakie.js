@@ -1,6 +1,5 @@
 // Description
 //   Wakie Wakie - Pings a random person in #general and asks what they are up to
-//
 
 var HubotCron = require('hubot-cronjob');
 

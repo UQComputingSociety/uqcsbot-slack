@@ -2,8 +2,7 @@
 //   Finds an acronym.
 //
 // Commands:
-//   !`acro` _<text>_ - Finds an acronym.
-//
+//   `!acro <TEXT>` - Finds an acronym for the given text
 
 var cheerio = require("cheerio");
 

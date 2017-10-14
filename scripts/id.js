@@ -2,9 +2,9 @@
 //   Get slack user ID
 //
 // Commands:
-//   !`id` - Shows your slack user id
-//
-//
+//   `!id` - Returns the user's slack ID
+//   `!whoami` - Returns slack information about the user
+
 module.exports = function (robot) {
     robot.respond(/!?id/i, function(res) {
         res.send(res.envelope.user.id);

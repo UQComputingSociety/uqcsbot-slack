@@ -1,9 +1,8 @@
 // Description
-//   Generates help commands for Hubot.
+//   Runs and evaluates snippets of JavaScript
 //
 // Commands:
-//   !`parking` - Lists the available parking at UQ
-//
+//   `!js <JAVASCRIPT CODE>` - Returns the (safe) evaluation of the given JavaScript
 
 var safeEval = require("safe-eval");
 

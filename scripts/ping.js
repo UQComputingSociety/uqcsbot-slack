@@ -4,8 +4,9 @@
 //   This command works for anyone in channels with less that 50 people
 //   
 // Commands:
-//   !`ping` (channel|everyone|here)
-var allowed = ['trm', 'dmarj97', 'csa', 'mqt', 'ainz', 'gricey', 'cat'];
+//   `!ping (channel|everyone|here)` - Pings channel/everyone/here only if the user is an admin OR the channel contains less than 50 people
+
+var allowed = ['trm', 'mitch', 'csa', 'guthers', 'artemis', 'rob', 'mb'];
 
 module.exports = function (robot) {
     robot.respond(/!?ping ?(.+)?$/i, function (res) {

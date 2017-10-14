@@ -2,8 +2,7 @@
 //        A script to find the best dominos coupons
 //
 // Commands:
-//        !dominos -n <number of coupons to list> -f <only find coupons with this/ these word(s) in it> -e (lists the expiry date of the cupons). Notes: if -n isn't specified the number of coupons listed is 10 or as many as can be found up to 10
-//
+//        `!dominos [-n <NUM COUPONS>] [-f <KEY WORD>] [-e]` - Returns a list of Dominos coupons (default: 10). Number of coupons is specified with -n. Keyword matching is specified with -f. Expiry date can be toggled with -e.
 
 var cheerio = require("cheerio");
 

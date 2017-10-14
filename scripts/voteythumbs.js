@@ -2,9 +2,7 @@
 //   Voteythumbs, uses thumb up or down emojis to vote
 //
 // Commands:
-//   !`voteythumbs <message> - Shows your slack user id
-//
-//
+//   `!voteythumbs <TOPIC>` - Uses thumb up or down emojis to vote on a topic
 
 
 module.exports = function (robot) {

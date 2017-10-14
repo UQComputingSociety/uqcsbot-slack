@@ -2,10 +2,7 @@
 //		A script to find the best prices for electronics in Aus based on the staticice search
 //
 // Commands:
-//		!staticice <item name> -n <number of items>
-//		if -n isn't specified the number of items listed is 5
-//
-
+//    `!staticice <ITEM NAME> [-n <NUM ITEMS>]` - Finds pricing on an item and returns a list of items from staticice (default: 5)
 
 var cheerio = require("cheerio");
 

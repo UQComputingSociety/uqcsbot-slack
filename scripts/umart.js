@@ -2,8 +2,7 @@
 //   Finds pricing at umart for items
 //
 // Commands:
-//   !`umart` _<parts...>_ - Finds an acronym.
-//
+//   `!umart <PART>...` - Finds umart pricing on a given list of items
 
 var cheerio = require("cheerio");
 

@@ -3,8 +3,7 @@
 //
 //
 // Commands:
-//   !`weather` _<location (opt)>_ - Gets the weather for a location (Defaults to Brisbane)
-//   !`weather` `radar` _<location (opt)>_ - Gets the closets BOM radar + weather
+//   `!weather [<RADAR>] [LOCATION]` - Gets the weather (or optionally radar) for a location (default: brisbane)
 //
 
 var kdt = require("kd.tree");

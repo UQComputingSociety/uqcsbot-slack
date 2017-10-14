@@ -1,11 +1,11 @@
 // Description:
-// Pulls a chunk of text from a relevent wikipedia entry.
-
+//   Pulls a chunk of text from a relevent wikipedia entry.
+//
 // Dependencies:
-// http
-
+//   http
+//
 // Commands:
-// !wiki <topic>
+//   `!wiki <TOPIC>` - Pulls a chunk of text from a relevent wikipedia entry
 
 function queryWiki(msg, search) {
   var url;
