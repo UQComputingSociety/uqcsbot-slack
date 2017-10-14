@@ -2,10 +2,10 @@
 //   Shutdown uqcsbot
 //
 // Commands:
-//   `!uqcsbot shutdown` - Shuts down uqcsbot, waiting to be restarted via CESI
+//   `!shutdown` - Shuts down uqcsbot, waiting to be restarted via CESI
 
 module.exports = function (robot) {
-    robot.respond(/!?uqcsbot shutdown/i, function (res) {
+    robot.respond(/!?shutdown/i, function (res) {
         comandee = res.message.user
         if (comandee.is_admin) {
             robot.messageRoom("bot-testing", comandee.name + " ordered me to shutdown!", "Shutting down.");
