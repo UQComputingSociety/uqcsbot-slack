@@ -1,4 +1,4 @@
 [
-  "hubot-redis-brain",
+  "hubot-postgres-brain",
   "hubot-wolfram"
 ]
