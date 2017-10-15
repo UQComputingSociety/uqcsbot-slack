@@ -74,13 +74,11 @@ it's suggested that you search for a dedicated guide focused on your OS.
 
 ### Scripting
 
-An example script is included at `scripts/example.coffee`, so check it out to
-get started, along with the [Scripting Guide](scripting-docs).
+Looking through the existing scripts (/scripts) is a great way to learn how to interact with Hubot and write your first script. Be sure to check out Hubot's own [Scripting Guide](scripting-docs) for more examples.
 
-For many common tasks, there's a good chance someone has already one to do just
-the thing.
+For any further help or information, the `bot-testing` channel on UQCS slack is the best place to ask any questions!
 
-[scripting-docs]: https://hubot.github.com/docs/scripting/
+[scripting-docs]: https://github.com/hubotio/hubot/blob/master/docs/scripting.md
 
 ### external-scripts
 

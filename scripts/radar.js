@@ -1,7 +1,7 @@
 // Description
 //   Gets the Bureau of Meteorology's latest radar image
 // Commands
-//   !`radar` - Gets Brisbane's radar
+//   `!radar` - Gets Brisbane's radar
 //
 
 module.exports = function (robot) {

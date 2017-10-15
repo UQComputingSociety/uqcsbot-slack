@@ -2,8 +2,8 @@
 // xkcd
 //
 // Commands:
-//   !xkcd phrase 
-//   Searches for an xkcd comic that is appropriate for that phrase
+//   `!xkcd <PHRASE>` - Searches for an xkcd comic that is appropriate for that phrase
+
 module.exports = function (robot) {
   robot.respond(/!?xkcd ?(.+)?/i, function (res) {
 

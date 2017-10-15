@@ -1,9 +1,9 @@
 // Description
-//   Prints all assessment for a given array of courses.
+//   Prints all assessment for a given list of courses.
 //
 // Commands:
-//   !`whatsdue`` _<course1>_ _<course2>_ ... - Prints all assessment for a given array of courses.
-//   !`calendar`` _<course1>_ _<course2>_ ... - Generates a calendar containing all assessment for the given subjects.
+//   `!whatsdue [COURSE CODE]...` - Prints all assessment for a given list of courses (default: current channel)
+//   `!calendar [COURSE CODE]...` - Generates a downloadable calendar containing all assessment for a given list of courses (default: current channel)
 
 var cheerio = require('cheerio');
 var ical = require('ical.js');

@@ -1,10 +1,5 @@
 [
-  "hubot-google-translate",
-  "hubot-maps",
-  "hubot-google",
   "hubot-postgres-brain",
-  "hubot-better-voting",
-  "hubot-google-images",
   "hubot-youtube",
   "hubot-wolfram"
 ]

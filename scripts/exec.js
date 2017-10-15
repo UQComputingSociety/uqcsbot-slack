@@ -2,8 +2,8 @@
 //   Shell for UQCSBot (allows advanced use of commands)
 //
 // Commands:
-//   !`shell` _<command>_ - Executes the shell command
-//
+//   `!exec <COMMAND>` - Executes the shell command
+
 module.exports = function (robot) {
 	function run_cmd(res, cmd) {
 		// Allow lack of starting '!'

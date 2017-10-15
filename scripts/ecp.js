@@ -2,9 +2,8 @@
 //   Finds links for electronic course profiles.
 //
 // Commands:
-//   !`ecp /[a-z]{4}[0-9]{4}/` - Finds the link to the ECP for the given course profile
-//   !`ecp ENGG2800` - Shows the electronic course profile of ENGG2800
-//   !`ecp ENGG2801` - Prints an error message
+//   `!ecp [COURSE CODE]` - Returns the link to the latest ECP for the given course code (default: current channel)
+
 module.exports = function (robot) {
 
     function getEcp(course, onComplete) {

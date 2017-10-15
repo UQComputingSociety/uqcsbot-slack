@@ -2,10 +2,7 @@
 //   Retrives past exams for a subject.
 //
 // Commands:
-//   !`pastexams /[a-z0-9]+/` - Retrieves past exams for a subject
-//   !`pastexams` - Retrieves past exams for the current channel
-//   !`pastexams ENGG2800` - Shows a list of past exams for ENGG2800
-//   !`pastexams ENGG2801` - Prints an error message
+//   `!pastexams [COURSE CODE]` - Retrieves past exams for a given course code (default: current channel)
 
 var cheerio = require('cheerio');
 

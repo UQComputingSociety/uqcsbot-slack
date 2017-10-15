@@ -1,6 +1,5 @@
 // Description
 //   A script that runs cronjobs for messages or other functions
-//
 
 var HubotCron = require('hubot-cronjob');
 

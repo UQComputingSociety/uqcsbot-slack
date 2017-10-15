@@ -2,8 +2,7 @@
 //   Finds the cheapest local place to get fuel
 //
 // Commands:
-//   !`fuel` `potscode` - tells you if you should fill up and finds the best nearby servo
-//
+//   `!fuel <POSTCODE>` - Finds the cheapest local place to get fuel and how fair the price is
 
 var request = require('request');
 var cheerio = require("cheerio");

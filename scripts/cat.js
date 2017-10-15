@@ -3,7 +3,8 @@
 //   Why that wasn't there already I don't even know
 //
 // Commands:
-//   !`cat` - Shows the moss cat, brings torture to 2310 students
+//   `!cat` - Shows the moss cat, brings torture to 2310 students
+
 module.exports = function (robot) {
 	robot.respond(/!?cat/i, function (res) {
 		res.send("```\n" +

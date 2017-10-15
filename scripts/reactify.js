@@ -2,7 +2,7 @@
 //   Spells out words with emoji
 //
 // Commands:
-//   !`reactify` _<word>_ - Spells out the given word with emoji!
+//   `!reactify <WORD>` - Spells out the given word with emoji
 
 // Dictionary of characters mapping to emojis.
 var emoji = {

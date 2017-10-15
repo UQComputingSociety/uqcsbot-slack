@@ -2,7 +2,7 @@
 //   Parses the UQCS calendar (https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics)
 //
 // Commands:
-//   !`events` _<description of time>_ - List UQCS Events
+//   `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - List UQCS Events
 //
 
 var ical = require('ical');

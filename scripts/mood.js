@@ -2,9 +2,9 @@
 //   Keeps track of user moods
 //
 // Commands:
-//   !`mood` <username> - Outputs the mood of the user
-//   !`happiest` - Outputs the happiest person
-//   !`saddest` - Outputs the saddest person
+//   `!mood` <USER NAME> - Outputs the mood of the user
+//   `!happiest` - Outputs the happiest person
+//   `!saddest` - Outputs the saddest person
 //
 
 var HubotCron = require('hubot-cronjob');

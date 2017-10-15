@@ -2,7 +2,7 @@
 //   Allows users to vote yes/no to a question
 //
 // Commands:
-//   !`vote` <name> - Start's a vote with the given name
+//   `!vote <TITLE>`  - Start a yes/no vote with the given title
 //
 
 module.exports = function (robot) {
