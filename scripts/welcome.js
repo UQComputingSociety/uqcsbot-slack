@@ -1,6 +1,7 @@
 // Description
-//   Welcomes new users to UQCS Slack
+//   Welcomes new users to UQCS Slack and check for member milestones
 
+var MEMBER_MILESTONE = 50;
 var MESSAGE_PAUSE = 2500;
 var WELCOME_MESSAGES = [
     "Hey there! Welcome to the UQCS slack!",
@@ -14,23 +15,32 @@ var WELCOME_MESSAGES = [
 
 module.exports = function (robot) {
     robot.enter(function (res) {
+        // Make sure we have access to all the clients we need
         if(!robot.adapter.client || !robot.adapter.client.rtm || !robot.adapter.client.web) {
             return;
         }
 
+        // Check the user has entered general
         var general = robot.adapter.client.rtm.dataStore.getChannelByName("general").id; 
         if (res.message.room != general) {
             return;
         }
         
+        // Welcome them to general and send them a personal welcome
         res.send("Welcome, " + res.message.user.name + "!");
         WELCOME_MESSAGES.map((message, i) => setTimeout(() => {
             robot.send({room: res.message.user.id}, message);
         }, i * MESSAGE_PAUSE));
 
-        robot.adapter.client.web.users.list({presence: false}).then(result => {
-            var members = result.members.filter(user => user.deleted == false);
-            if (members.length % 50 != 0) {
+        // Check if we've hit a member milestone
+        robot.adapter.client.web.conversations.members(general).then(result => {
+            // Filter out all the deleted users from the member count
+            var members = result.members.filter(id => {
+                return robot.adapter.client.web.users.info(id).then(user => user.deleted == false);
+            });
+
+            // If we're not at a member milestone, don't bother celebrating!
+            if (members.length % MEMBER_MILESTONE != 0) {
                 return;
             }
 
