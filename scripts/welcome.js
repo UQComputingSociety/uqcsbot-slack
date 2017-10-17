@@ -27,7 +27,7 @@ module.exports = function (robot) {
         }
         
         // Welcome them to general and send them a personal welcome
-        res.send("Welcome, " + res.message.user.name + "!");
+        res.send("Welcome, " + res.message.user.profile.display_name + "!");
         WELCOME_MESSAGES.forEach((message, i) => setTimeout(() => {
             robot.send({room: res.message.user.id}, message);
         }, i * MESSAGE_PAUSE));
