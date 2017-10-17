@@ -28,23 +28,29 @@ module.exports = function (robot) {
         
         // Welcome them to general and send them a personal welcome
         res.send("Welcome, " + res.message.user.name + "!");
-        WELCOME_MESSAGES.map((message, i) => setTimeout(() => {
+        WELCOME_MESSAGES.forEach((message, i) => setTimeout(() => {
             robot.send({room: res.message.user.id}, message);
         }, i * MESSAGE_PAUSE));
 
-        // Check if we've hit a member milestone
+        // Check member count to see if we've hit a member milestone
         robot.adapter.client.web.conversations.members(general).then(result => {
-            // Filter out all the deleted users from the member count
-            var members = result.members.filter(id => {
-                return robot.adapter.client.web.users.info(id).then(user => user.deleted == false);
-            });
+            // Create a list of promises that resolve to each member's status
+            var memberPromises = result.members.map(id => {
+                return robot.adapter.client.web.users.info(id)
+                    .then(user => (user.deleted) ? 0 : 1);
+                });
 
-            // If we're not at a member milestone, don't bother celebrating!
-            if (members.length % MEMBER_MILESTONE != 0) {
-                return;
-            }
+            // Get accurate sum of users, filtering out all who are deleted
+            Promise.all(memberPromises)
+                .then(statuses => statuses.reduce((a, b) => a + b, 0))
+                .then(memberCount => {
+                    // If we're not at a member milestone, don't bother celebrating!
+                    if (memberCount % MEMBER_MILESTONE != 0) {
+                        return;
+                    }
 
-            res.send(":tada: " + members.length + " members! :tada:");
+                    res.send(":tada: " + memberCount + " members! :tada:");
+                });
         });
     });
 };
