@@ -1,8 +1,8 @@
 // Description
 //   Welcomes new users to UQCS Slack
-//
-"use strict";
-var welcomeMessages = [
+
+var MESSAGE_PAUSE = 2500;
+var WELCOME_MESSAGES = [
     "Hey there! Welcome to the UQCS slack!",
     "This is the first time I've seen you, so you're probably new here",
     "I'm UQCSbot, your friendly (open source) robot helper",
@@ -12,41 +12,29 @@ var welcomeMessages = [
     "and again, welcome :)"
 ];
 
-function sendWelcome(robot, user, msg_id){
-  if (msg_id == undefined) msg_id = 0;
-  if (msg_id >= welcomeMessages.length) return;
-  setTimeout(function () {
-    robot.send({ room: user.id }, welcomeMessages[msg_id]);
-	sendWelcome(robot, user, msg_id+1);
-  }, messageTime);
-}
-
-
-//The time between each individual welcome message send
-var messageTime = 2500;
 module.exports = function (robot) {
-    if(robot.adapter.client && robot.adapter.client.rtm) {
-      var channel = robot.adapter.client.rtm.dataStore.getChannelByName("general");
-      robot.enter(function (res) {
-          if (res.message.room == channel.id) {
-              var active = robot.adapter.client.web.users.list({presence: 0}, function(result){
-                  var members = result.members.filter(function (user) { return user.deleted == false; });
-                  if (members.length % 50 == 0) {
-                      setTimeout(function () {
-                          res.send(":tada: " + members.length + " members! :tada:");
-                      }, messageTime);
-                  }
-                  var url = "https://http.cat/" + members.length;
-                  robot.http(url).get()(function (err, resp, body) {
-                      if (!err && resp.statusCode === 200) {
-                          res.send(url);
-                      }
-                  });
-              });
-              res.send("Welcome, " + res.message.user.name + "!");
-                          sendWelcome(robot, res.message.user);
-          }
-      });
-    }
-};
+    robot.enter(function (res) {
+        if(!robot.adapter.client || !robot.adapter.client.rtm || !robot.adapter.client.web) {
+            return;
+        }
 
+        var general = robot.adapter.client.rtm.dataStore.getChannelByName("general").id; 
+        if (res.message.room != general) {
+            return;
+        }
+        
+        res.send("Welcome, " + res.message.user.name + "!");
+        WELCOME_MESSAGES.map((message, i) => setTimeout(() => {
+            robot.send({room: res.message.user.id}, message);
+        }, i * MESSAGE_PAUSE));
+
+        robot.adapter.client.web.users.list({presence: false}).then(result => {
+            var members = result.members.filter(user => user.deleted == false);
+            if (members.length % 50 != 0) {
+                return;
+            }
+
+            res.send(":tada: " + members.length + " members! :tada:");
+        });
+    });
+};
