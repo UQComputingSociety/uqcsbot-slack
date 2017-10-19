@@ -20,9 +20,8 @@ function getMemberCount(robot, room, memberCount, cursor) {
         return Promise.resolve(memberCount);
     }
 
-    // Request for next batch of users
-    options = {limit: API_LIMIT, cursor: cursor};
-    return robot.adapter.client.web.conversations.members(room, options)
+    // Increment member count and request for next batch of users
+    return robot.adapter.client.web.conversations.members(room, {limit: API_LIMIT, cursor: cursor})
         .then(res => getMemberCount(robot, room, memberCount + res.members.length, res.response_metadata.next_cursor));
 }
 
