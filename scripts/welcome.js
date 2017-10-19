@@ -56,6 +56,6 @@ module.exports = function (robot) {
             }
 
             res.send(":tada: " + memberCount + " members! :tada:");
-        }).catch(err => console.log(err));
+        }).catch(console.log);
     });
 };
