@@ -14,27 +14,16 @@ var WELCOME_MESSAGES = [    // Welcome messages sent to new members
     "and again, welcome :)"
 ];
 
-function getNumMembers(robot, room, numMembers, cursor) {
+function getMemberCount(robot, room, memberCount, cursor) {
     // No more members to get, return the final count
     if (cursor == "") {
-        return Promise.resolve(numMembers);
+        return Promise.resolve(memberCount);
     }
 
     // Request for next batch of users
     options = {limit: API_LIMIT, cursor: cursor};
-    return robot.adapter.client.web.conversations.members(announcements, options).then(res => {
-        // Create a list of promises that resolve to each member's status
-        var memberPromises = res.members.map(id => {
-            return robot.adapter.client.web.users.info(id)
-                .then(user => (user.deleted) ? 0 : 1);
-            });
-
-        // Count this batch of users, filtering out all who are deleted, and request next batch
-        nextCursor = res.response_metadata.next_cursor;
-        return Promise.all(memberPromises)
-            .then(statuses => statuses.reduce((a, b) => a + b, 0))
-            .then(count => getNumMembers(robot, announcements, numMembers + count, nextCursor));
-    });
+    return robot.adapter.client.web.conversations.members(room, options)
+        .then(res => getMemberCount(robot, room, memberCount + res.members.length, res.response_metadata.next_cursor));
 }
 
 module.exports = function (robot) {
@@ -61,7 +50,7 @@ module.exports = function (robot) {
         }, i * MESSAGE_PAUSE));
 
         // Get member count to see if we've hit a member milestone
-        getNumMembers(robot, announcements, 0).then(memberCount => {
+        getMemberCount(robot, announcements, 0).then(memberCount => {
             // If we're not at a member milestone, don't bother celebrating!
             if (memberCount % MEMBER_MILESTONE != 0) {
                 return;
