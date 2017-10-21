@@ -15,7 +15,7 @@ module.exports = function (robot) {
 		var to = null; // Time until, false values imply no end
 		var cap = 0; // Maximum number of events, 0 implies no cap
 
-		var no_result_msg = "There doesn't appear to be any ";
+		var no_result_msg = "There don't appear to be any ";
 		var header;
 
 		if (res.match[1] === undefined) {
