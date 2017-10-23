@@ -21,7 +21,7 @@ function getMembers(robot, room, members, cursor) {
 
 module.exports = function(robot) {
     // Wakie function that pings two random people in general
-	var wakieFunction = function() {
+    var wakieFunction = function() {
         var announcements = robot.adapter.client.rtm.dataStore.getChannelByName("announcements").id;
         getMembers(robot, announcements, []).then(members => {
             var victim1 = members[Math.floor(Math.random() * members.length)];
@@ -30,8 +30,8 @@ module.exports = function(robot) {
                 "Hey <@" + victim1 + ">! Tell us about something cool you are working on!\r\n" + 
                 "Hey <@" + victim2 + ">! Tell us about something cool you are working on!");
         });
-	};
+    };
 
     // Export the cron job to run the wakie function at the specified time
-	return new HubotCron(PATTERN, TIMEZONE, wakieFunction);
+    return new HubotCron(PATTERN, TIMEZONE, wakieFunction);
 };
