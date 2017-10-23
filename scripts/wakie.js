@@ -4,7 +4,7 @@
 var HubotCron = require('hubot-cronjob');
 
 var API_LIMIT = 200;                 // Number of members to get at a time
-var PATTERN =  '59 11 * * *';        // Daily at 5:00PM
+var PATTERN =  '0 17 * * *';        // Daily at 5:00PM
 var TIMEZONE = 'Australia/Brisbane'; // in B-town
 
 // Get a list of all the members in a room
