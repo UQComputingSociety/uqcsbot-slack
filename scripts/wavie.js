@@ -1,5 +1,5 @@
 // Description
-//   Wave at people as they joining/leaving a room
+//   Wave at people as they join/leave a room
 
 module.exports = function (robot) {
     // Wave at the person joining/leaving the room
