@@ -12,20 +12,24 @@ module.exports = function (robot) {
         // Shorten web client so we can have nice concise lines ;)
         var webClient = robot.adapter.client.web;
 
-        // If room was not a channel (public) and not a group (private), exit
-        if (room[0] != 'C' && room[0] != 'G') {
+        // If room was not a public channel and not a private channel, exit
+        if (room[0] == 'C') {
+            var channelPromise = webClient.channels.info(room);
+        } else if (room[0] == 'G') {
+            var channelPromise = webClient.groups.info(room);
+        } else {
             return;
         }
 
-        // Retrieve the room information and :wave: if the latest message is a person joining/leaving
-        var channelPromise = (room[0] == 'C') ? webClient.channels.info(room) : webClient.groups.info(room);
+        // :wave: if the latest message is a person joining/leaving
         channelPromise.then(res => {
-            // If the latest message was not a person joining nor leaving, exit
-            if (res.channel.latest.subtype != 'channel_join' && res.channel.latest.subtype != 'channel_leave') {
+            // If the last message was not a person joining nor leaving, exit
+            var last = res.channel.latest;
+            if (last.subtype != 'channel_join' && last.subtype != 'channel_leave') {
                 return;
             }
 
-            webClient.reactions.add('wave', {channel: room, timestamp: res.channel.latest.ts});
+            webClient.reactions.add('wave', {channel: room, timestamp: last.ts});
         }).catch(err => console.log);
     }
 
