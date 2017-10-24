@@ -1,7 +1,21 @@
 #!/bin/sh
 
+# UQCS testing slack tokens
+tokens=(xoxb-260143289456-hIuFgNWfXnYppxDIfcQLPVU1 xoxb-260850095972-tLzDIfVLiy89sbPVJacom5M3 xoxb-260936998101-XKDFqzvhGRCcDHCAhemVTH27 xoxb-261681938550-SWmDKXm8iv9ozWzgUiWCTCmJ)
+
 set -e
 
 export PATH="node_modules/.bin:node_modules/hubot/node_modules/.bin:$PATH"
 
-exec node_modules/.bin/hubot --name "uqcsbot" --alias "!" "$@"
+if [ $# -eq 3 ] && [ "$1" = "--adapter" ] && [ "$2" = "slack" ]; then
+    index=$3
+    if [ $index -gt 3 ] || [ $index -lt 0 ]; then
+        echo "Slack token selection must be in the range of 0-3"
+    else
+        export HUBOT_SLACK_TOKEN=${tokens[index]}
+        exec node_modules/.bin/hubot --name "uqcsbot" --alias "!" $1 $2
+    fi
+else
+    echo "$@"
+    exec node_modules/.bin/hubot --name "uqcsbot" --alias "!" "$@"
+fi
