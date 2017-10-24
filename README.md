@@ -39,6 +39,25 @@ Then you can interact with uqcsbot by typing `uqcsbot help`.
 2. `dos2unix bin/hubot`
 3. `bin/hubot`
 
+### Running the bot on our test slack
+
+We've created a test slack just for testing bot features out.
+
+How to use:
+1. [Join the test slack by clicking here](https://uqcstest-inviter.herokuapp.com/)
+2. Pick one of the bot tokens to connect your bot to the bot on the test slack
+3. Setup a new enviromental variable: `HUBOT_SLACK_TOKEN=xoxb-YOUR-TOKEN-HERE`
+4. Run your bot like so: `bin/hubot --adapter slack`
+5. Enjoy testing :)
+
+There's currently 4 public bot tokens avaliable for usage please check others aren't using them before you use one, if you want to test our more complicated/advanced features it's probably easier to setup your own dummy slack as described below.
+
+Tokens (name: token):
+- alpha: `xoxb-260143289456-hIuFgNWfXnYppxDIfcQLPVU1`
+- beta: `xoxb-260850095972-tLzDIfVLiy89sbPVJacom5M3`
+- gamma: `xoxb-261681938550-SWmDKXm8iv9ozWzgUiWCTCmJ`
+- delta: `xoxb-260936998101-XKDFqzvhGRCcDHCAhemVTH27`
+
 ### Running the bot locally on a dummy slack
 
 If you want to test some slack specific features (e.g. emoji's):
