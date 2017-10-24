@@ -45,18 +45,17 @@ We've created a test slack just for testing bot features out.
 
 How to use:
 1. [Join the test slack by clicking here](https://uqcstest-inviter.herokuapp.com/)
-2. Pick one of the bot tokens to connect your bot to the bot on the test slack
-3. Setup a new enviromental variable: `HUBOT_SLACK_TOKEN=xoxb-YOUR-TOKEN-HERE`
-4. Run your bot like so: `bin/hubot --adapter slack`
-5. Enjoy testing :)
+2. Pick one of the bots to use (make sure no one else is using them first!)
+3. Run your bot like so: `bin/hubot --adapter slack [0-3]` where the number is the number of the bot you want to run.
+4. Enjoy testing :)
 
-There's currently 4 public bot tokens avaliable for usage please check others aren't using them before you use one, if you want to test our more complicated/advanced features it's probably easier to setup your own dummy slack as described below.
+There's currently 4 public bot tokens avaliable for usage, please check others aren't using them before you use one. If you want to test our more complicated/advanced features it's probably easier to setup your own dummy slack as described below.
 
-Tokens (name: token):
-- alpha: `xoxb-260143289456-hIuFgNWfXnYppxDIfcQLPVU1`
-- beta: `xoxb-260850095972-tLzDIfVLiy89sbPVJacom5M3`
-- gamma: `xoxb-260936998101-XKDFqzvhGRCcDHCAhemVTH27`
-- delta: `xoxb-261681938550-SWmDKXm8iv9ozWzgUiWCTCmJ`
+Tokens (name: number):
+- alpha: 0
+- beta: 1
+- gamma: 2
+- delta: 3
 
 ### Running the bot locally on a dummy slack
 
