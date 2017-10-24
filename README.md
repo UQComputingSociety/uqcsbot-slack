@@ -55,8 +55,8 @@ There's currently 4 public bot tokens avaliable for usage please check others ar
 Tokens (name: token):
 - alpha: `xoxb-260143289456-hIuFgNWfXnYppxDIfcQLPVU1`
 - beta: `xoxb-260850095972-tLzDIfVLiy89sbPVJacom5M3`
-- gamma: `xoxb-261681938550-SWmDKXm8iv9ozWzgUiWCTCmJ`
-- delta: `xoxb-260936998101-XKDFqzvhGRCcDHCAhemVTH27`
+- gamma: `xoxb-260936998101-XKDFqzvhGRCcDHCAhemVTH27`
+- delta: `xoxb-261681938550-SWmDKXm8iv9ozWzgUiWCTCmJ`
 
 ### Running the bot locally on a dummy slack
 
