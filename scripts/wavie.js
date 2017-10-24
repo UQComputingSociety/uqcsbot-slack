@@ -29,7 +29,7 @@ module.exports = function (robot) {
                 return;
             }
 
-            webClient.reactions.add('wave', {channel: room, timestamp: last.ts});
+            return webClient.reactions.add('wave', {channel: room, timestamp: last.ts});
         }).catch(err => console.log);
     }
 
