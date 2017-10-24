@@ -16,6 +16,5 @@ if [ $# -eq 3 ] && [ "$1" = "--adapter" ] && [ "$2" = "slack" ]; then
         exec node_modules/.bin/hubot --name "uqcsbot" --alias "!" $1 $2
     fi
 else
-    echo "$@"
     exec node_modules/.bin/hubot --name "uqcsbot" --alias "!" "$@"
 fi
