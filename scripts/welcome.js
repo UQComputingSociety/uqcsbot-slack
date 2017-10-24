@@ -41,7 +41,8 @@ module.exports = function (robot) {
         // Welcome new user to #general
         var general = robot.adapter.client.rtm.dataStore.getChannelByName("general").id; 
         name = res.message.user.profile.display_name || res.message.user.name;
-        robot.send({room: general}, "Welcome " + name + "!");
+        robot.send({room: general}, "Welcome " + name + "!")[0]
+            .then(res => robot.adapter.client.web.reactions.add('wave', {channel: general, timestamp: res.ts}));
 
         // Welcome new user personally
         WELCOME_MESSAGES.forEach((message, i) => setTimeout(() => {
