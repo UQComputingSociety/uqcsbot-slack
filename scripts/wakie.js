@@ -3,9 +3,10 @@
 
 var HubotCron = require('hubot-cronjob');
 
-var API_LIMIT = 200;                 // Number of members to get at a time
-var PATTERN =  '0 17 * * *';        // Daily at 5:00PM
-var TIMEZONE = 'Australia/Brisbane'; // in B-town
+var API_LIMIT = 200; // Number of members to get at a time
+var PATTERN   = '0 17 * * *'; // Daily at 5:00PM
+var TIMEZONE  = 'Australia/Brisbane';
+var LOADING   = ['waiting', 'apple_waiting', 'waiting_droid', 'waitingparrot'] // List of waiting emojs to react with
 
 // Get a list of all the members in a room
 function getMembers(robot, room, members, cursor) {
@@ -32,10 +33,11 @@ module.exports = function(robot) {
         getMembers(robot, general, []).then(members => {
             var victim1 = members[Math.floor(Math.random() * members.length)];
             var victim2 = members[Math.floor(Math.random() * members.length)];
+            var react   = LOADING[Math.floor(Math.random() * LOADING.length)];
             message = "Hey <@" + victim1 + ">! Tell us about something cool you are working on!\r\n" + 
                       "Hey <@" + victim2 + ">! Tell us about something cool you are working on!";
             robot.send({room: general}, message)[0]
-                .then(res => robot.adapter.client.web.reactions.add('loading', {channel: general, timestamp: res.ts}));
+                .then(res => robot.adapter.client.web.reactions.add(react, {channel: general, timestamp: res.ts}));
         });
     };
 
