@@ -96,6 +96,9 @@ function printRoomStat(robot, res, rooms) {
         return;
     }
 
+    // Shorten web client so we can have nice concise lines ;)
+    var webClient = robot.adapter.client.web;
+
     // Get a sorted list of commands and calculate the total amount of calls
     var sortedRooms = getSortedEntries(rooms);
     var totalMessages = sortedRooms.reduce((sum, entry) => sum + entry[1], 0);
@@ -104,11 +107,9 @@ function printRoomStat(robot, res, rooms) {
     var sortedRoomPromises = sortedRooms.map(roomEntry => {
         var room = roomEntry[0]
         if (room[0] == 'C') {
-            return robot.adapter.client.web.channels.info(room)
-                .then(result => Promise.resolve([result.channel.name, roomEntry[1]]));
+            return webClient.channels.info(room).then(result => [result.channel.name, roomEntry[1]]);
         } else {
-            return robot.adapter.client.web.groups.info(room)
-                .then(result => Promise.resolve([result.group.name, roomEntry[1]]));
+            return webClient.groups.info(room).then(result => [result.group.name, roomEntry[1]]);
         }
     });
 
