@@ -42,9 +42,9 @@ function getStats(robot) {
 
 // Handles room stat
 function handleRoomStat(stats, res) {
-    // If room was not a public channel and not a private channel, exit
+    // If room is not a public channel, exit
     var room = res.message.room;
-    if (room[0] != 'C' && room[0] != 'G') return;
+    if (room[0] != 'C') return;
     incrementCounter(stats.rooms, room);
 }
 
@@ -96,21 +96,14 @@ function printRoomStat(robot, res, rooms) {
         return;
     }
 
-    // Shorten web client so we can have nice concise lines ;)
-    var webClient = robot.adapter.client.web;
-
     // Get a sorted list of commands and calculate the total amount of calls
     var sortedRooms = getSortedEntries(rooms);
     var totalMessages = sortedRooms.reduce((sum, entry) => sum + entry[1], 0);
 
     // Generate a list of promises that resolve to a room's name and its # of calls
     var sortedRoomPromises = sortedRooms.map(roomEntry => {
-        var room = roomEntry[0]
-        if (room[0] == 'C') {
-            return webClient.channels.info(room).then(result => [result.channel.name, roomEntry[1]]);
-        } else {
-            return webClient.groups.info(room).then(result => [result.group.name, roomEntry[1]]);
-        }
+        return robot.adapter.client.web.channels.info(roomEntry[0])
+            .then(result => [result.channel.name, roomEntry[1]]);
     });
 
     // Attempt to resolve all promises to build and send output message
