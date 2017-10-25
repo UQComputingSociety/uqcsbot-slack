@@ -77,8 +77,8 @@ function printCommandStat(robot, res, commands) {
     var sortedCommands = getSortedEntries(commands);
     var totalCalls = sortedCommands.reduce((sum, entry) => {
         // Make sure we only count base commands
-        if (entry[0].split(' ')[0] != entry[0]) return sum;
-        return sum + entry[1];
+        if (entry[0].indexOf(' ') < 0) return sum + entry[1];
+        return sum;
     }, 0);
 
     // Build and send output message
