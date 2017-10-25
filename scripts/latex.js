@@ -7,8 +7,14 @@
 var request = require("request");
 
 module.exports = function(robot){
-  robot.hear(/\$\$([^\$]+)\$\$ | !?(tex|latex) ([^\$]+)/, function(res){
+  robot.hear(/\$\$([^\$]+)\$\$/, function(res){
     var regexString = res.match[1] || res.match[2] || res.match[3];
+    res.send("http://latex.codecogs.com/gif.latex?" + encodeURIComponent(regexString));
+    robot.superHackyPostImageToYaBoisChat(res.message.room, res.match[1])
+  });
+
+  robot.hear(/!(tex|latex) ([^\$]+)/, function(res){
+    var regexString = res.match[2];
     res.send("http://latex.codecogs.com/gif.latex?" + encodeURIComponent(regexString));
     robot.superHackyPostImageToYaBoisChat(res.message.room, res.match[1])
   });
