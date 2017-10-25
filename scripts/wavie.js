@@ -5,7 +5,7 @@ module.exports = function (robot) {
     // Wave at the person joining/leaving the room
     function wave(room) {
         // Make sure we have access to all the clients we need
-        if (!robot.adapter.client || !robot.adapter.client.web) {
+        if (!robot.adapter.client || !robot.adapter.client.web || !robot.adapter.client.rtm) {
             return;
         }
 
