@@ -19,23 +19,31 @@ module.exports = function (robot) {
         var webClient = robot.adapter.client.web;
 
         // If room was not a public channel and not a private channel, exit
+        // If the last message was not a person joining nor leaving, reject
         if (room[0] == 'C') {
-            var channelPromise = webClient.channels.info(room).then(res => res.channel.latest);
+            var channelPromise = webClient.channels.info(room).then(res => {
+                last = res.channel.latest;
+                if (last.subtype != 'channel_join' && last.subtype != 'channel_leave') {
+                    return Promise.reject('was not a person joining or leaving');
+                }
+                return last.ts;
+            });
         } else if (room[0] == 'G') {
-            var channelPromise = webClient.groups.info(room).then(res => res.group.latest);
+            var channelPromise = webClient.groups.info(room).then(res => {
+                last = res.group.latest;
+                if (last.subtype != 'group_join' && last.subtype != 'group_leave') {
+                    return Promise.reject('was not a person joining or leaving');
+                }
+                return last.ts;
+            });
         } else {
             return;
         }
 
         // :wave: if the latest message is a person joining/leaving
-        channelPromise.then(last => {
-            // If the last message was not a person joining nor leaving, exit
-            if (last.subtype != 'channel_join' && last.subtype != 'channel_leave') {
-                return;
-            }
-
-            return webClient.reactions.add('wave', {channel: room, timestamp: last.ts});
-        }).catch(err => console.log);
+        channelPromise
+            .then(ts => webClient.reactions.add('wave', {channel: room, timestamp: ts}))
+            .catch(err => console.log(err));
     }
 
     // Listen for when someone enters a room
