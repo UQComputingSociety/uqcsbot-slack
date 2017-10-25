@@ -20,17 +20,16 @@ module.exports = function (robot) {
 
         // If room was not a public channel and not a private channel, exit
         if (room[0] == 'C') {
-            var channelPromise = webClient.channels.info(room);
+            var channelPromise = webClient.channels.info(room).then(res => res.channel.latest);
         } else if (room[0] == 'G') {
-            var channelPromise = webClient.groups.info(room);
+            var channelPromise = webClient.groups.info(room).then(res => res.group.latest);
         } else {
             return;
         }
 
         // :wave: if the latest message is a person joining/leaving
-        channelPromise.then(res => {
+        channelPromise.then(last => {
             // If the last message was not a person joining nor leaving, exit
-            var last = res.channel.latest;
             if (last.subtype != 'channel_join' && last.subtype != 'channel_leave') {
                 return;
             }
