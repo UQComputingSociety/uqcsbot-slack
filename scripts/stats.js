@@ -1,13 +1,32 @@
 // Description
-//   TODO
+//   Collects and yields general slack statistics for analysis and insight
 //
 // Commands:
-//   `!stats (channels|commands)` - TODO
+//   `!stats (rooms|commands)` - Yields general slack statistics for analysis and insight
 
 // Default stats upon reset
-DEFAULT_STATS = {channels: {}, commands: {}};
+DEFAULT_STATS = {rooms: {}, commands: {}};
 
-// Retrieves stored slack stats, setting them to default values if none are currently stored
+/////////////////////
+// HELPER COMMANDS //
+/////////////////////
+
+// Increment counter in map, first setting to 0 if it does not exist
+function incrementCounter(map, entry) {
+    if (!(entry in map)) {
+        map[entry] = 0;
+    }
+    map[entry]++;
+}
+
+// Returns a sorted list of object entries
+function getSortedEntries(object) {
+    var entries = [];
+    for (var entry in object) entries.push([entry, object[entry]])
+    return entries.sort((a, b) => b[1] - a[1]);
+}
+
+// Retrieves stored slack stats, setting them to default values if they do not exist
 function getStats(robot) {
     var stats = robot.brain.get('stats');
     if (!stats) {
@@ -17,40 +36,107 @@ function getStats(robot) {
     return stats;
 }
 
+//////////////////////
+// HANDLER COMMANDS //
+//////////////////////
+
+// Handles room stat
+function handleRoomStat(stats, res) {
+    // If room was not a public channel and not a private channel, exit
+    var room = res.message.room;
+    if (room[0] != 'C' && room[0] != 'G') return;
+    incrementCounter(stats.rooms, room);
+}
+
+// Handles command stat 
+function handleCommandStat(stats, res) {
+    // If the command is not actually a command, exit
+    var command = res.message.text;
+    if (command[0] != '!') {
+        return;
+    }
+
+    incrementCounter(stats.commands, command);
+
+    // If command did not contain any options, exit
+    var baseCommand = command.split(' ')[0];
+    if (baseCommand == command) {
+        return;
+    }
+
+    incrementCounter(stats.commands, baseCommand);
+}
+
+////////////////////
+// PRINT COMMANDS //
+////////////////////
+
+// Prints out command stat
+function printCommandStat(robot, res, commands) {
+    // Get a sorted list of commands and calculate the total amount of calls
+    var sortedCommands = getSortedEntries(commands);
+    var totalCalls = sortedCommands.reduce((sum, entry) => {
+        // Make sure we only count base commands
+        if (entry[0].split(' ')[0] != entry[0]) return sum;
+        return sum + entry[1];
+    }, 0);
+
+    // Build and send output message
+    var message = `>>> _${totalCalls} total call(s)_\n\n`;
+    sortedCommands.forEach(commandEntry => {
+        message += `*${commandEntry[0]}*: ${commandEntry[1]} call(s)\n`; 
+    });
+    res.send(message);
+}
+
+// Prints out room stat
+function printRoomStat(robot, res, rooms) {
+    // Make sure we have access to all the clients we need
+    if(!robot.adapter.client || !robot.adapter.client.web) {
+        return;
+    }
+
+    // Get a sorted list of commands and calculate the total amount of calls
+    var sortedRooms = getSortedEntries(rooms);
+    var totalMessages = sortedRooms.reduce((sum, entry) => sum + entry[1], 0);
+
+    // Generate a list of promises that resolve to a room's name and its # of calls
+    var sortedRoomPromises = sortedRooms.map(roomEntry => {
+        var room = roomEntry[0]
+        if (room[0] == 'C') {
+            return robot.adapter.client.web.channels.info(room)
+                .then(result => Promise.resolve([result.channel.name, roomEntry[1]]));
+        } else {
+            return robot.adapter.client.web.groups.info(room)
+                .then(result => Promise.resolve([result.group.name, roomEntry[1]]));
+        }
+    });
+
+    // Attempt to resolve all promises to build and send output message
+    Promise.all(sortedRoomPromises).then(sortedNamedRooms => {
+        var message = `>>> _${totalMessages} total message(s)_\n\n`;
+        sortedNamedRooms.forEach(roomEntry => {
+            message += `*${roomEntry[0]}*: ${roomEntry[1]} message(s)\n`; 
+        })
+        res.send(message);
+    }).catch(err => console.log(err));
+}
+
+///////////////
+// LISTENERS //
+///////////////
+
 module.exports = function (robot) {
     robot.hear(/.*/, function (res) {
         var stats = getStats(robot);
-
-        // Increment channel message counter, setting to 0 if it does not exist
-        var room = res.message.room;
-        if (!(room in stats.channels)) {
-            stats.channels[room] = 0;
-        }
-        stats.channels[room]++;
-
-        // If the message is not a command, exit
-        if (res.message.text[0] != '!') {
-            return;
-        }
-
-        // Increment command usage counter, setting to 0 if it does not exist
-        var command = res.message.text;
-        if (!(command in stats.commands)) {
-            stats.commands[command] = 0;
-        }
-        stats.commands[command]++;
+        handleRoomStat(stats, res);
+        handleCommandStat(stats, res);
     });
 
-    robot.respond(/!?stats (channels|commands)/, function (res) {
+    robot.respond(/!?stats (rooms|commands)/, function (res) {
         var stats = getStats(robot);
-
-        option = res.match[1];
-        if (option == 'channels') {
-            console.log(stats.channels);
-        }
-
-        if (option == 'commands') {
-            console.log(stats.commands);
-        }
+        var option = res.match[1];
+        if (option == 'rooms')    printRoomStat(robot, res, stats.rooms);
+        if (option == 'commands') printCommandStat(robot, res, stats.commands);
     });
 };
