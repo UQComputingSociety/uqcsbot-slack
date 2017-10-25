@@ -9,6 +9,12 @@ module.exports = function (robot) {
             return;
         }
 
+        // If user entered announcements, don't wave at them
+        var announcements = robot.adapter.client.rtm.dataStore.getChannelByName("announcements").id; 
+        if (room == announcements) {
+            return;
+        }
+
         // Shorten web client so we can have nice concise lines ;)
         var webClient = robot.adapter.client.web;
 
