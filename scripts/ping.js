@@ -31,4 +31,15 @@ module.exports = function (robot) {
             }
         }
     });
+
+
+    function adminSend(channel, msg) {
+        SLACK_ADMIN_TOKEN = process.env.SLACK_ADMIN_TOKEN;
+
+        var prefix = "https://slack.com/api/chat.postMessage?"
+        var token = "token=" + SLACK_ADMIN_TOKEN + "&"
+        var channel = "channel=" + channel + "&"
+        var text = "text=" + msg;
+        var request = prefix + token + channel + text;
+    }
 };
