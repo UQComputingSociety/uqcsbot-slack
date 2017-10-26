@@ -2,9 +2,7 @@
 //   Gets the weather info or radar for st lucia by default or a specified location
 //
 // Commands:
-//   `!weather [radar] [LOCATION]` - Gets the weather (or optionally radar) for a location (default: brisbane)
-
-var kdt = require("kd.tree");
+//   `!weather [LOCATION]` - Gets the weather for a location (default: brisbane)
 
 module.exports = function (robot) {
   robot.respond(/!?weather ?(.+)?/i, function (res) {
