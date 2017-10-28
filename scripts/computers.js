@@ -15,7 +15,7 @@ module.exports = function (robot) {
 
 			var emoji = [':building_construction:', ':biohazard_sign:', ':wrench:',
 									 ':office:', ':chart:', ':sparkling_heart:', ':scales:',
-									 ':speech_balloon:'];
+									 ':speech_balloon:', ':syringe:'];
 									 //there's no real emoji support for ☤
 
 			// scrap the data
