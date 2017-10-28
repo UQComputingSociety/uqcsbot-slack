@@ -107,7 +107,7 @@ module.exports = function (robot) {
 			check_if_passed(id);
 
 		});
-		robot.adapter.client.rtm.on("reaction_remvoed", function(message){
+		robot.adapter.client.rtm.on("reaction_removed", function(message){
 			var votes = robot.brain.get("voteythumbs");
 
 			if(votes === null) {
