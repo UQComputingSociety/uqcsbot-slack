@@ -50,9 +50,10 @@ function handleRoomStat(stats, res) {
 
 // Handles command stat 
 function handleCommandStat(stats, res) {
-    // If the command is not actually a command, exit
+    // If the command is not actually a command or the room is a private channel, exit
     var command = res.message.text;
-    if (command[0] != '!' && res.message.room[0] != 'D') {
+    var room = res.message.room;
+    if ((command[0] != '!' && room[0] != 'D') || room[0] == 'G') {
         return;
     }
 
@@ -61,13 +62,8 @@ function handleCommandStat(stats, res) {
         command = command.replace('uqcsbot ', '');
     }
 
-    incrementCounter(stats.commands, command);
-
-    // If command did not contain any options, exit
+    // Strip down to just the base command
     var baseCommand = command.split(' ')[0];
-    if (baseCommand == command) {
-        return;
-    }
 
     incrementCounter(stats.commands, baseCommand);
 }
@@ -91,7 +87,7 @@ function printCommandStat(robot, res, commands) {
     sortedCommands.forEach(commandEntry => {
         message += `*${commandEntry[0]}*: ${commandEntry[1]} call(s)\n`; 
     });
-    res.send(message);
+    robot.send({room: res.message.user.id}, message);
 }
 
 // Prints out room stat
@@ -117,7 +113,7 @@ function printRoomStat(robot, res, rooms) {
         sortedNamedRooms.forEach(roomEntry => {
             message += `*${roomEntry[0]}*: ${roomEntry[1]} message(s)\n`; 
         })
-        res.send(message);
+        robot.send({room: res.message.user.id}, message);
     }).catch(err => console.log(err));
 }
 
