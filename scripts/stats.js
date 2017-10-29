@@ -52,8 +52,13 @@ function handleRoomStat(stats, res) {
 function handleCommandStat(stats, res) {
     // If the command is not actually a command, exit
     var command = res.message.text;
-    if (command[0] != '!') {
+    if (command[0] != '!' && res.message.room[0] != 'D') {
         return;
+    }
+
+    // If we're talking to uqcsbot, remove the implicit uqcsbot call
+    if (command.indexOf('uqcsbot') == 0) {
+        command = command.replace('uqcsbot ', '');
     }
 
     incrementCounter(stats.commands, command);
