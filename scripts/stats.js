@@ -101,7 +101,6 @@ function handleCommandStat(stats, res) {
 
     // Strip down to just the base command
     var baseCommand = command.split(' ')[0];
-
     incrementCounter(stats.commands, baseCommand);
 }
 
@@ -186,10 +185,8 @@ function sendToSubscribers(robot) {
     console.log('subscribers: ' + JSON.stringify(subscribers));
     for (var subscriber in subscribers) {
         var subscriptions = subscribers[subscriber];
-
         message = `Here are your weekly subscriptions to \`${subscriptions.join(', ')}\`:`;
-        robot.send({room: subscriber}, message)[0]
-            .then(() => (0)); // no op waits for Promise to resolve before moving on
+        robot.send({room: subscriber}, message)[0].then(() => (0)); // No op to ensure this is sent first
         subscriptions.forEach(subscription => {
             switch (subscription) {
                 case 'rooms':    printRoomStat(robot, {id: subscriber}, stats.rooms);       break;
