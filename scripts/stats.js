@@ -28,14 +28,23 @@ function addToList(map, entry, item) {
 
 // Removes item from list, returning true if successful else false
 function removeFromList(map, entry, item) {
-    if (!(entry in map)) return false;
+    // If entry is not in map, return false
+    if (!(entry in map)) {
+        return false;
+    }
+
+    // If item is not in list, return false
     var index = map[entry].indexOf(item);
-    if (index == -1) return false;
+    if (index < 0) {
+        return false;
+    }
+
+    // Remove item and return true
     map[entry].splice(index, 1);
     return true;
 }
 
-// Returns a sorted list of object entries
+// Returns a sorted list of object entries in descending order
 function getSortedEntries(object) {
     var entries = [];
     for (var entry in object) entries.push([entry, object[entry]])
@@ -106,8 +115,11 @@ function handleCommandStat(stats, res) {
 
 // Subscribes the user to the requested stat
 function subscribeToStat(robot, user, subscribers, stat) {
+    // If no stat specified, exit
     var index = stat.indexOf(' ');
-    if (index < 0) return;
+    if (index < 0) {
+        return;
+    }
 
     var stat = stat.substring(index + 1);
     addToList(subscribers, user.id, stat);
@@ -118,8 +130,11 @@ function subscribeToStat(robot, user, subscribers, stat) {
 
 // Unsubscribes the user from the requested stat
 function unsubscribeFromStat(robot, user, subscribers, stat) {
+    // If no stat specified, exit
     var index = stat.indexOf(' ');
-    if (index < 0) return;
+    if (index < 0) {
+        return;
+    }
 
     var stat = stat.substring(index + 1);
     var message = `Could not find requested subscription \`${stat}\`, ` +
