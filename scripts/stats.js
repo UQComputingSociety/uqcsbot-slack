@@ -20,28 +20,19 @@ function incrementCounter(map, entry) {
     map[entry]++;
 }
 
-// Add item to list, first setting as list if one does not exist
-function addToList(map, entry, item) {
-    if (!(entry in map)) map[entry] = [];
-    map[entry].push(item);
+// Add item to set, first setting as a Set if one does not exist
+// Returns true if successfully added a unique item, else false
+function addToSet(map, entry, item) {
+    if (!(entry in map)) map[entry] = new Set();
+    if (map[entry].has(item)) return false;
+    map[entry].add(item);
+    return true;
 }
 
-// Removes item from list, returning true if successful else false
-function removeFromList(map, entry, item) {
-    // If entry is not in map, return false
-    if (!(entry in map)) {
-        return false;
-    }
-
-    // If item is not in list, return false
-    var index = map[entry].indexOf(item);
-    if (index < 0) {
-        return false;
-    }
-
-    // Remove item and return true
-    map[entry].splice(index, 1);
-    return true;
+// Removes item from set, returning true if successful else false
+function removeFromSet(map, entry, item) {
+    if (!(entry in map)) return false;
+    return map[entry].delete(item);
 }
 
 // Returns a sorted list of object entries in descending order
@@ -121,10 +112,18 @@ function subscribeToStat(robot, user, subscribers, stat) {
         return;
     }
 
+    // Try subscribing to the stat
     var stat = stat.substring(index + 1);
-    addToList(subscribers, user.id, stat);
-    message = `Subscribed to \`${stat}\`, ` +
-              `you are now subscribed to \`${subscribers[user.id].join(', ')}\``;
+    if (addToSet(subscribers, user.id, stat)) {
+        var subscriptions = Array.from(subscribers[user.id]);
+        var message = `Subscribed to \`${stat}\`, ` +
+                  `you are now subscribed to \`${subscriptions.join(', ')}\``;
+    } else {
+        var subscriptions = Array.from(subscribers[user.id]);
+        var message = `Already subscribed to \`${stat}\`, ` +
+                  `you are currently subscribed to \`${subscriptions.join(', ')}\``;
+    }
+
     robot.send({room: user.id}, message);
 }
 
@@ -136,16 +135,23 @@ function unsubscribeFromStat(robot, user, subscribers, stat) {
         return;
     }
 
+    // Try unsubscribing from the stat
     var stat = stat.substring(index + 1);
-    var message = `Could not find requested subscription \`${stat}\`, ` +
-                  `you are currently subscribed to \`${subscribers[user.id].join(', ')}\``;
-    if (removeFromList(subscribers, user.id, stat)) {
-        subscriptions = subscribers[user.id];
-        message = `Unsubscribed from \`${stat}\`, `;
+    if (removeFromSet(subscribers, user.id, stat)) {
+        var subscriptions = Array.from(subscribers[user.id]);
+        var message = `Unsubscribed from \`${stat}\`, `;
         if (subscriptions.length > 0) {
             message += `you are still subscribed to \`${subscriptions.join(', ')}\``;
         } else {
             message += `you have no remaining subscriptions`;
+        }
+    } else {
+        var subscriptions = Array.from(subscribers[user.id]);
+        var message = `Could not find requested subscription \`${stat}\`, `;
+        if (subscriptions.length > 0) {
+            message += `you are currently subscribed to \`${subscriptions.join(', ')}\``;
+        } else {
+            message += `you have no current subscriptions`;
         }
     }
     robot.send({room: user.id}, message);
@@ -213,8 +219,8 @@ function sendToSubscribers(robot, stats) {
     var subscribers = stats._subscribers;
     for (var subscriber in subscribers) {
         var user = {id: subscriber};
-        var subscriptions = subscribers[subscriber];
-        message = `Here are your weekly subscriptions to \`${subscriptions.join(', ')}\`!`;
+        var subscriptions = Array.from(subscribers[subscriber]);
+        var message = `Here are your weekly subscriptions to \`${subscriptions.join(', ')}\`!`;
         robot.send({room: subscriber}, message)[0].then(() => {
             subscriptions.forEach(subscription => {
                 switch (subscription) {
