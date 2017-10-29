@@ -108,7 +108,9 @@ function handleCommandStat(stats, res) {
 function subscribeToStat(robot, user, subscribers, stat) {
     var stat = stat.replace('subscribe ', '');
     addToList(subscribers, user.id, stat);
-    robot.send({room: user.id}, `Subscribed to \`${stat}\``);
+    message = `Subscribed to \`${stat}\`, ` +
+              `you are now subscribed to \`${subscribers[user.id].join(', ')}\``;
+    robot.send({room: user.id}, message);
 }
 
 // Unsubscribes the user from the requested stat
@@ -116,7 +118,8 @@ function unsubscribeFromStat(robot, user, subscribers, stat) {
     var stat = stat.replace('unsubscribe ', '');
     var message = `Could not find requested subscription \`${stat}\``;
     if (removeFromList(subscribers, user.id, stat)) {
-        message = `Unsubscribed from \`${stat}\``;
+        message = `Unsubscribed from \`${stat}\`, ` +
+                  `you are now subscribed to \`${subscribers[user.id].join(', ')}\``;
     }
     robot.send({room: user.id}, message);
 }
