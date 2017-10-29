@@ -2,10 +2,13 @@
 //   Collects and yields general slack statistics for analysis and insight
 //
 // Commands:
-//   `!stats (rooms|commands)` - Yields general slack statistics for analysis and insight
+//   `!stats (rooms|commands|<STAT>)` - Yields general slack statistics for analysis and insight
+//   `!stats (subscribe|unsubscribe) (rooms|commands|<STAT>)` - Subscribes/Unsubscribes user from the given stats
+
+var HubotCron = require('hubot-cronjob');
 
 // Default stats upon reset
-DEFAULT_STATS = {rooms: {}, commands: {}};
+DEFAULT_STATS = {rooms: {}, commands: {}, _subscribers: {}};
 
 /////////////////////
 // HELPER COMMANDS //
@@ -13,10 +16,23 @@ DEFAULT_STATS = {rooms: {}, commands: {}};
 
 // Increment counter in map, first setting to 0 if it does not exist
 function incrementCounter(map, entry) {
-    if (!(entry in map)) {
-        map[entry] = 0;
-    }
+    if (!(entry in map)) map[entry] = 0;
     map[entry]++;
+}
+
+// Increment counter in map, first setting to 0 if it does not exist
+function addToList(map, entry, item) {
+    if (!(entry in map)) map[entry] = [];
+    map[entry].push(item);
+}
+
+// Increment counter in map, first setting to 0 if it does not exist
+function removeFromList(map, entry, item) {
+    if (!(entry in map)) return false;
+    var index = map[entry].indexOf(item);
+    if (index == -1) return false;
+    map[entry].splice(index, 1);
+    return true;
 }
 
 // Returns a sorted list of object entries
@@ -34,6 +50,24 @@ function getStats(robot) {
         stats = robot.brain.get('stats');
     }
     return stats;
+}
+
+// Returns the requested stat, else null
+function getStat(stats, stat) {
+    for (var s in stats) {
+        var v = stats[s];
+        if (s == stat) {
+            return [s, v]
+        }
+
+        if (typeof v === 'object') {
+            result = getStat(v, stat);
+            if (!!result) {
+                return result;
+            }
+        }
+    }
+    return null;
 }
 
 //////////////////////
@@ -68,30 +102,47 @@ function handleCommandStat(stats, res) {
     incrementCounter(stats.commands, baseCommand);
 }
 
+// Subscribes the user to the requested stat
+function subscribeToStat(robot, user, subscribers, stat) {
+    var stat = stat.replace('subscribe ', '');
+    var message = `Could not subscribe to \`${stat}\``;
+    if (stat[0] != '_') {
+        addToList(subscribers, user.id, stat);
+        message = `Subscribed to \`${stat}\``;
+    }
+    robot.send({room: user.id}, message);
+}
+
+// Unsubscribes the user from the requested stat
+function unsubscribeFromStat(robot, user, subscribers, stat) {
+    var stat = stat.replace('unsubscribe ', '');
+    var message = `Could not find requested subscription \`${stat}\``;
+    if (removeFromList(subscribers, user.id, stat)) {
+        message = `Unsubscribed from \`${stat}\``;
+    }
+    robot.send({room: user.id}, message);
+}
+
 ////////////////////
 // PRINT COMMANDS //
 ////////////////////
 
 // Prints out command stat
-function printCommandStat(robot, res, commands) {
+function printCommandStat(robot, user, commands) {
     // Get a sorted list of commands and calculate the total amount of calls
     var sortedCommands = getSortedEntries(commands);
-    var totalCalls = sortedCommands.reduce((sum, entry) => {
-        // Make sure we only count base commands
-        if (entry[0].indexOf(' ') < 0) return sum + entry[1];
-        return sum;
-    }, 0);
+    var totalCalls = sortedCommands.reduce((sum, entry) => sum + entry[1], 0);
 
     // Build and send output message
     var message = `>>> _${totalCalls} total call(s)_\n\n`;
     sortedCommands.forEach(commandEntry => {
         message += `*${commandEntry[0]}*: ${commandEntry[1]} call(s)\n`; 
     });
-    robot.send({room: res.message.user.id}, message);
+    robot.send({room: user.id}, message);
 }
 
 // Prints out room stat
-function printRoomStat(robot, res, rooms) {
+function printRoomStat(robot, user, rooms) {
     // Make sure we have access to all the clients we need
     if(!robot.adapter.client || !robot.adapter.client.web) {
         return;
@@ -113,8 +164,39 @@ function printRoomStat(robot, res, rooms) {
         sortedNamedRooms.forEach(roomEntry => {
             message += `*${roomEntry[0]}*: ${roomEntry[1]} message(s)\n`; 
         })
-        robot.send({room: res.message.user.id}, message);
+        robot.send({room: user.id}, message);
     }).catch(err => console.log(err));
+}
+
+// Prints out requested stat
+function printStat(robot, user, stats, stat) {
+    var statEntry = getStat(stats, stat);
+    var message = `Could not find requested stat \`${stat}\``;
+    if (!!statEntry) {
+        message = `>>>*${statEntry[0]}*: ${statEntry[1]}`;
+    }
+    robot.send({room: user.id}, message);
+}
+
+// Sends out all subscriber's subscriptions
+function sendToSubscribers(robot) {
+    var stats = getStats(robot);
+    var subscribers = stats._subscribers;
+    console.log('subscribers: ' + JSON.stringify(subscribers));
+    for (var subscriber in subscribers) {
+        var subscriptions = subscribers[subscriber];
+
+        message = `Here are your weekly subscriptions to \`${subscriptions.join(', ')}\`:`;
+        robot.send({room: subscriber}, message)[0]
+            .then(() => (0)); // no op waits for Promise to resolve before moving on
+        subscriptions.forEach(subscription => {
+            switch (subscription) {
+                case 'rooms':    printRoomStat(robot, {id: subscriber}, stats.rooms);       break;
+                case 'commands': printCommandStat(robot, {id: subscriber}, stats.commands); break;
+                default:         printStat(robot, {id: subscriber}, stats, subscription);
+            }
+        });
+    }
 }
 
 ///////////////
@@ -122,16 +204,32 @@ function printRoomStat(robot, res, rooms) {
 ///////////////
 
 module.exports = function (robot) {
+    // Listen to everything (._.)
     robot.hear(/.*/, function (res) {
         var stats = getStats(robot);
         handleRoomStat(stats, res);
         handleCommandStat(stats, res);
     });
 
-    robot.respond(/!?stats (rooms|commands)/, function (res) {
+    // Listen to command calls
+    robot.respond(/!?stats (.*)/i, function (res) {
         var stats = getStats(robot);
         var option = res.match[1];
-        if (option == 'rooms')    printRoomStat(robot, res, stats.rooms);
-        if (option == 'commands') printCommandStat(robot, res, stats.commands);
+        var user = res.message.user;
+        switch(option.split(' ')[0]) {
+            case 'rooms':       printRoomStat(robot, user, stats.rooms);                      break;
+            case 'commands':    printCommandStat(robot, user, stats.commands);                break;
+            case 'subscribe':   subscribeToStat(robot, user, stats._subscribers, option);     break;
+            case 'unsubscribe': unsubscribeFromStat(robot, user, stats._subscribers, option); break;
+            default:            printStat(robot, user, stats, option);
+        }
+    });
+
+    // Send out weekly results to subscribers and reset stats
+    return new HubotCron("2 * * * *", "Australia/Brisbane", function() {
+    // return new HubotCron("0 0 * * 1", "Australia/Brisbane", function() {
+        sendToSubscribers(robot);
+        robot.brain.set("stats", DEFAULT_STATS);
     });
 };
+
