@@ -182,17 +182,18 @@ function printStat(robot, user, stats, stat) {
 function sendToSubscribers(robot) {
     var stats = getStats(robot);
     var subscribers = stats._subscribers;
-    console.log('subscribers: ' + JSON.stringify(subscribers));
     for (var subscriber in subscribers) {
+        var user = {id: subscriber};
         var subscriptions = subscribers[subscriber];
-        message = `Here are your weekly subscriptions to \`${subscriptions.join(', ')}\`:`;
-        robot.send({room: subscriber}, message)[0].then(() => (0)); // No op to ensure this is sent first
-        subscriptions.forEach(subscription => {
-            switch (subscription) {
-                case 'rooms':    printRoomStat(robot, {id: subscriber}, stats.rooms);       break;
-                case 'commands': printCommandStat(robot, {id: subscriber}, stats.commands); break;
-                default:         printStat(robot, {id: subscriber}, stats, subscription);
-            }
+        message = `Here are your weekly subscriptions to \`${subscriptions.join(', ')}\`!`;
+        robot.send({room: subscriber}, message)[0].then(() => {
+            subscriptions.forEach(subscription => {
+                switch (subscription) {
+                    case 'rooms':    printRoomStat(robot, user, stats.rooms);       break;
+                    case 'commands': printCommandStat(robot, user, stats.commands); break;
+                    default:         printStat(robot, user, stats, subscription);
+                }
+            });
         });
     }
 }
