@@ -106,7 +106,10 @@ function handleCommandStat(stats, res) {
 
 // Subscribes the user to the requested stat
 function subscribeToStat(robot, user, subscribers, stat) {
-    var stat = stat.replace('subscribe ', '');
+    var index = stat.indexOf(' ');
+    if (index < 0) return;
+
+    var stat = stat.substring(index + 1);
     addToList(subscribers, user.id, stat);
     message = `Subscribed to \`${stat}\`, ` +
               `you are now subscribed to \`${subscribers[user.id].join(', ')}\``;
@@ -115,11 +118,20 @@ function subscribeToStat(robot, user, subscribers, stat) {
 
 // Unsubscribes the user from the requested stat
 function unsubscribeFromStat(robot, user, subscribers, stat) {
-    var stat = stat.replace('unsubscribe ', '');
-    var message = `Could not find requested subscription \`${stat}\``;
+    var index = stat.indexOf(' ');
+    if (index < 0) return;
+
+    var stat = stat.substring(index + 1);
+    var message = `Could not find requested subscription \`${stat}\`, ` +
+                  `you are currently subscribed to \`${subscribers[user.id].join(', ')}\``;
     if (removeFromList(subscribers, user.id, stat)) {
-        message = `Unsubscribed from \`${stat}\`, ` +
-                  `you are now subscribed to \`${subscribers[user.id].join(', ')}\``;
+        subscriptions = subscribers[user.id];
+        message = `Unsubscribed from \`${stat}\`, `;
+        if (subscriptions.length > 0) {
+            message += `you are still subscribed to \`${subscriptions.join(', ')}\``;
+        } else {
+            message += `you have no remaining subscriptions`;
+        }
     }
     robot.send({room: user.id}, message);
 }
@@ -182,8 +194,7 @@ function printStat(robot, user, stats, stat) {
 }
 
 // Sends out all subscriber's subscriptions
-function sendToSubscribers(robot) {
-    var stats = getStats(robot);
+function sendToSubscribers(robot, stats) {
     var subscribers = stats._subscribers;
     for (var subscriber in subscribers) {
         var user = {id: subscriber};
@@ -229,8 +240,14 @@ module.exports = function (robot) {
 
     // Send out weekly results to subscribers and reset stats
     return new HubotCron("0 0 * * 1", "Australia/Brisbane", function() {
-        sendToSubscribers(robot);
-        robot.brain.set("stats", DEFAULT_STATS);
+        var stats = getStats(robot);
+        sendToSubscribers(robot, stats);
+
+        // Reset stats
+        for (var stat in stats) {
+            if (stat == '_subscribers') continue;
+            stats[stat] = {};
+        }
     });
 };
 
