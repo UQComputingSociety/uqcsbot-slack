@@ -226,8 +226,7 @@ module.exports = function (robot) {
     });
 
     // Send out weekly results to subscribers and reset stats
-    return new HubotCron("2 * * * *", "Australia/Brisbane", function() {
-    // return new HubotCron("0 0 * * 1", "Australia/Brisbane", function() {
+    return new HubotCron("0 0 * * 1", "Australia/Brisbane", function() {
         sendToSubscribers(robot);
         robot.brain.set("stats", DEFAULT_STATS);
     });
