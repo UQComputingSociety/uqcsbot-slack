@@ -135,7 +135,8 @@ function printCommandStat(robot, user, commands) {
     // Build and send output message
     var message = `>>> _${totalCalls} total call(s)_\n\n`;
     sortedCommands.forEach(commandEntry => {
-        message += `*${commandEntry[0]}*: ${commandEntry[1]} call(s)\n`; 
+        percentage =  Math.round(commandEntry[1] / totalCalls * 100);
+        message += `*${commandEntry[0]}*: ${commandEntry[1]} call(s) \`(${percentage}%)\`\n`;
     });
     robot.send({room: user.id}, message);
 }
@@ -161,7 +162,8 @@ function printRoomStat(robot, user, rooms) {
     Promise.all(sortedRoomPromises).then(sortedNamedRooms => {
         var message = `>>> _${totalMessages} total message(s)_\n\n`;
         sortedNamedRooms.forEach(roomEntry => {
-            message += `*${roomEntry[0]}*: ${roomEntry[1]} message(s)\n`; 
+            percentage =  Math.round(roomEntry[1] / totalMessages * 100);
+            message += `*${roomEntry[0]}*: ${roomEntry[1]} message(s) \`(${percentage}%)\`\n`; 
         })
         robot.send({room: user.id}, message);
     }).catch(err => console.log(err));
