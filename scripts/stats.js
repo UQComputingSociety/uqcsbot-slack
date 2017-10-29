@@ -20,13 +20,13 @@ function incrementCounter(map, entry) {
     map[entry]++;
 }
 
-// Increment counter in map, first setting to 0 if it does not exist
+// Add item to list, first setting as list if one does not exist
 function addToList(map, entry, item) {
     if (!(entry in map)) map[entry] = [];
     map[entry].push(item);
 }
 
-// Increment counter in map, first setting to 0 if it does not exist
+// Removes item from list, returning true if successful else false
 function removeFromList(map, entry, item) {
     if (!(entry in map)) return false;
     var index = map[entry].indexOf(item);
@@ -54,12 +54,15 @@ function getStats(robot) {
 
 // Returns the requested stat, else null
 function getStat(stats, stat) {
+    // Loop over object attributes
     for (var s in stats) {
         var v = stats[s];
+        // If the attribute is the stat we're looking for, return it and its value
         if (s == stat) {
             return [s, v]
         }
 
+        // If the value is another object, recurse into it
         if (typeof v === 'object') {
             result = getStat(v, stat);
             if (!!result) {
@@ -105,12 +108,8 @@ function handleCommandStat(stats, res) {
 // Subscribes the user to the requested stat
 function subscribeToStat(robot, user, subscribers, stat) {
     var stat = stat.replace('subscribe ', '');
-    var message = `Could not subscribe to \`${stat}\``;
-    if (stat[0] != '_') {
-        addToList(subscribers, user.id, stat);
-        message = `Subscribed to \`${stat}\``;
-    }
-    robot.send({room: user.id}, message);
+    addToList(subscribers, user.id, stat);
+    robot.send({room: user.id}, `Subscribed to \`${stat}\``);
 }
 
 // Unsubscribes the user from the requested stat
