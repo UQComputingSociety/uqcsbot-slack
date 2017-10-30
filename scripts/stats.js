@@ -197,7 +197,7 @@ function printRoomStat(robot, user, rooms) {
 
     // Attempt to resolve all promises to build and send output message
     Promise.all(sortedRoomPromises).then(sortedNamedRooms => {
-        var message = `>>> _${totalMessages} total message(s)_\n\n`;
+        var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} rooms_\n\n`;
         sortedNamedRooms.forEach(roomEntry => {
             percentage =  Math.round(roomEntry[1] / totalMessages * 100);
             message += `*${roomEntry[0]}*: ${roomEntry[1]} message(s) \`(${percentage}%)\`\n`; 
