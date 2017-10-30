@@ -16,16 +16,16 @@ if [ $# -eq 3 ] && [ "$1" = "--adapter" ] && [ "$2" = "slack" ]; then
         echo "Slack token selection must be in the range of 0-3"
     else
         if [ $index -eq 0 ]; then
-            export HUBOT_SLACK_TOKEN=tokens_0
+            export HUBOT_SLACK_TOKEN=$token_0
         fi
         if [ $index -eq 1 ]; then
-            export HUBOT_SLACK_TOKEN=tokens_1
+            export HUBOT_SLACK_TOKEN=$token_1
         fi
         if [ $index -eq 2 ]; then
-            export HUBOT_SLACK_TOKEN=tokens_2
+            export HUBOT_SLACK_TOKEN=$token_2
         fi
         if [ $index -eq 3 ]; then
-            export HUBOT_SLACK_TOKEN=tokens_3
+            export HUBOT_SLACK_TOKEN=$token_3
         fi
 
         exec node_modules/.bin/hubot --name "uqcsbot" --alias "!" $1 $2
