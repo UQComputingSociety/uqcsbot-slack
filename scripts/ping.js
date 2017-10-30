@@ -18,13 +18,13 @@ module.exports = function (robot) {
 
             if (user.is_admin || channel.members.length < 50) {
                 if (msg === "channel") {
-                    res.send("@channel");
+                    adminSend(room, "@channel");
                 }
                 else if (msg === "everyone") {
-                    res.send("@everyone");
+                    adminSend(room, "@everyone");
                 }
                 else if (msg === "here") {
-                    res.send("@here");
+                    adminSend(room, "@here");
                 }
             } else {
                 res.send("Unauthorised ping, must be either admin or in a channel with < 50 members")
@@ -36,10 +36,11 @@ module.exports = function (robot) {
     function adminSend(channel, msg) {
         SLACK_ADMIN_TOKEN = process.env.SLACK_ADMIN_TOKEN;
 
-        var prefix = "https://slack.com/api/chat.postMessage?"
+        var prefix = "https://slack.com/api/chat.postMessage?link_names=true&username=uqcsbot&"
         var token = "token=" + SLACK_ADMIN_TOKEN + "&"
         var channel = "channel=" + channel + "&"
         var text = "text=" + msg;
         var request = prefix + token + channel + text;
+        robot.http(request).get()(function(err, resp, body) { });
     }
 };
