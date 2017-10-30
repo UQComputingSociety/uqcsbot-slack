@@ -121,14 +121,11 @@ function subscribeToStat(robot, user, subscribers, stat) {
     var stat = stat.substring(index + 1);
     if (addToSet(subscribers, user.id, stat)) {
         var subscriptions = Array.from(subscribers[user.id]);
-        var message = `Subscribed to \`${stat}\`, ` +
-                  `you are now subscribed to \`${subscriptions.join(', ')}\``;
+        var message = `Subscribed to \`${stat}\`, you are now subscribed to \`${subscriptions.join(', ')}\``;
     } else {
         var subscriptions = Array.from(subscribers[user.id]);
-        var message = `Already subscribed to \`${stat}\`, ` +
-                  `you are currently subscribed to \`${subscriptions.join(', ')}\``;
+        var message = `Already subscribed to \`${stat}\`, you are currently subscribed to \`${subscriptions.join(', ')}\``;
     }
-
     robot.send({room: user.id}, message);
 }
 
@@ -212,9 +209,10 @@ function printRoomStat(robot, user, rooms) {
 // Prints out requested stat
 function printStat(robot, user, stats, stat) {
     var statEntry = getStat(stats, stat);
-    var message = `Could not find requested stat \`${stat}\``;
     if (!!statEntry) {
-        message = `>>>*${statEntry[0]}*: ${statEntry[1]}`;
+        var message = `>>>*${statEntry[0]}*: ${statEntry[1]}`;
+    } else {
+        var message = `Could not find requested stat \`${stat}\``;
     }
     robot.send({room: user.id}, message);
 }
