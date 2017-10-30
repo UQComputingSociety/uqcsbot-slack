@@ -18,13 +18,13 @@ if [ $# -eq 3 ] && [ "$1" = "--adapter" ] && [ "$2" = "slack" ]; then
         if [ $index -eq 0 ]; then
             export HUBOT_SLACK_TOKEN=tokens_0
         fi
-        if [ $index -eq 1]; then
+        if [ $index -eq 1 ]; then
             export HUBOT_SLACK_TOKEN=tokens_1
         fi
-        if [ $index -eq 2]; then
+        if [ $index -eq 2 ]; then
             export HUBOT_SLACK_TOKEN=tokens_2
         fi
-        if [ $index -eq 3]; then
+        if [ $index -eq 3 ]; then
             export HUBOT_SLACK_TOKEN=tokens_3
         fi
 
