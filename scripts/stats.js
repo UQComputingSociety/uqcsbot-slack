@@ -3,7 +3,7 @@
 //
 // Commands:
 //   `!stats (rooms|commands|<STAT>)` - Yields general slack statistics for analysis and insight
-//   `!stats (subscribe|unsubscribe) (rooms|commands|<STAT>)` - Subscribes/Unsubscribes user from the given stat
+//   `!stats (subscribe|unsubscribe) (rooms|commands|<STAT>)` - Subscribes/Unsubscribes the user to/from the given stat. Subscriptions publish weekly results to subscribers
 
 var HubotCron = require('hubot-cronjob');
 
