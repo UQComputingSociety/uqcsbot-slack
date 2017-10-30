@@ -3,7 +3,7 @@
 //
 // Commands:
 //   `!stats (rooms|commands|<STAT>)` - Yields general slack statistics for analysis and insight
-//   `!stats (subscribe|unsubscribe) (rooms|commands|<STAT>)` - Subscribes/Unsubscribes user from the given stats
+//   `!stats (subscribe|unsubscribe) (rooms|commands|<STAT>)` - Subscribes/Unsubscribes user from the given stat
 
 var HubotCron = require('hubot-cronjob');
 
@@ -56,8 +56,13 @@ function getStats(robot) {
 function getStat(stats, stat) {
     // Loop over object attributes
     for (var s in stats) {
-        var v = stats[s];
+        // If the stat is a private one, skip it
+        if (s[0] == '_') {
+            continue;
+        }
+
         // If the attribute is the stat we're looking for, return it and its value
+        var v = stats[s];
         if (s == stat) {
             return [s, v]
         }
