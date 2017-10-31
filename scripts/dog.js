@@ -1,6 +1,5 @@
 // Description
-//   Moss cat command
-//   Why that wasn't there already I don't even know
+//   Like !cat, but for dog people (and with less trauma for 2310 students
 //
 // Commands:
 //   `!dog` - Like !cat, but for dog people.
