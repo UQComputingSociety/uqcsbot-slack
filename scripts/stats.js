@@ -172,8 +172,10 @@ function printCommandStat(robot, user, commands) {
     // Build and send output message
     var message = `>>> _${totalCalls} total call(s)_\n\n`;
     sortedCommands.forEach(commandEntry => {
-        percentage =  Math.round(commandEntry[1] / totalCalls * 100);
-        message += `*${commandEntry[0]}*: ${commandEntry[1]} call(s) \`(${percentage}%)\`\n`;
+        var command = commandEntry[0];
+        var numCalls = commandEntry[1];
+        percentage =  Math.round(numCalls / totalCalls * 100);
+        message += `*${command}*: ${numCalls} call(s) \`(${percentage}%)\`\n`;
     });
     robot.send({room: user.id}, message);
 }
@@ -181,7 +183,7 @@ function printCommandStat(robot, user, commands) {
 // Prints out room stat
 function printRoomStat(robot, user, rooms) {
     // Make sure we have access to all the clients we need
-    if(!robot.adapter.client || !robot.adapter.client.web) {
+    if(!robot.adapter.client || !robot.adapter.client.rtm) {
         return;
     }
 
@@ -189,21 +191,16 @@ function printRoomStat(robot, user, rooms) {
     var sortedRooms = getSortedEntries(rooms);
     var totalMessages = sortedRooms.reduce((sum, entry) => sum + entry[1], 0);
 
-    // Generate a list of promises that resolve to a room's name and its # of calls
-    var sortedRoomPromises = sortedRooms.map(roomEntry => {
-        return robot.adapter.client.web.channels.info(roomEntry[0])
-            .then(result => [result.channel.name, roomEntry[1]]);
+    // Build and send output message
+    var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} room(s)_\n\n`;
+    sortedRooms.forEach(roomEntry => {
+        var channelId = roomEntry[0];
+        var numMessages = roomEntry[1];
+        var channelName = robot.adapter.client.rtm.dataStore.getChannelById(channelId).name;
+        percentage =  Math.round(numMessages / totalMessages * 100);
+        message += `*${channelName}*: ${numMessages} message(s) \`(${percentage}%)\`\n`; 
     });
-
-    // Attempt to resolve all promises to build and send output message
-    Promise.all(sortedRoomPromises).then(sortedNamedRooms => {
-        var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} room(s)_\n\n`;
-        sortedNamedRooms.forEach(roomEntry => {
-            percentage =  Math.round(roomEntry[1] / totalMessages * 100);
-            message += `*${roomEntry[0]}*: ${roomEntry[1]} message(s) \`(${percentage}%)\`\n`; 
-        })
-        robot.send({room: user.id}, message);
-    }).catch(err => console.log(err));
+    robot.send({room: user.id}, message);
 }
 
 // Prints out requested stat
