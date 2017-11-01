@@ -1,5 +1,5 @@
 // Description
-//   Like !cat, but for dog people (and with less trauma for 2310 students
+//   Like !cat, but for dog people (and with less trauma for 2310 students).
 //
 // Commands:
 //   `!dog` - Like !cat, but for dog people.
