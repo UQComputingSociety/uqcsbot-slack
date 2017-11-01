@@ -23,8 +23,8 @@ module.exports = function (robot) {
           return;
         }
 
-        // Get the current semester uqId (as per UQ Rota)
-        var semester = JSON.parse(body).data.semesters.pop().uqId;
+        // Get the current semester from UQ Final API (as per UQ Rota)
+        var semester = JSON.parse(body).data.semesters.pop();
 
         // Handle failure to get semester
         if (!semester) {
@@ -33,7 +33,7 @@ module.exports = function (robot) {
         }
 
         // Make API request to UQ Final
-        robot.http("https://api.uqfinal.com/course/" + semester + "/" + res.match[1]) // res.match[1] is the course code
+        robot.http("https://api.uqfinal.com/course/" + semester.uqId + "/" + res.match[1]) // res.match[1] is the course code
           .get()(function (err, resp, body) {
             if (err) {
               res.send("Error: " + err);
