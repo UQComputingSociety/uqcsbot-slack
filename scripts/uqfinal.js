@@ -24,13 +24,7 @@ module.exports = function (robot) {
         }
 
         // Get the current semester uqId (as per UQ Rota)
-        var semesters = JSON.parse(body).data.semesters;
-        for (var i = 0; i < semesters.length; i++) {
-          if (semesters[i].isCurrent) {
-            semester = semesters[i].uqId;
-            break;
-          }
-        }
+        var semester = JSON.parse(body).data.semesters.pop().uqId;
 
         // Handle failure to get semester
         if (!semester) {
