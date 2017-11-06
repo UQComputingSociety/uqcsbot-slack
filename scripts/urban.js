@@ -16,36 +16,32 @@ module.exports = function (robot) {
           return res.send("> Usage: `!urban <SEARCH_PHRASE>`");
         }
 
-        // Check for JS/hubot errors
+        // Check that a response was received.
         if (err) {
           return res.send(">>> Error: " + err.toString() + ".");
         }
 
-        // Check for HTTP Errors
+        // Check for HTTP Errors.
         if (resp.statusCode !== 200) {
           return res.send("> HTTP Error ( " + resp.statusCode + ").");
         }
 
-        var udResp = JSON.parse(body);
+        var udResp = JSON.parse(body); // The urban dictionary response, parsed into a JSON object.
 
         // Parse Urban Dictionary response and send result.
-        if (udResp["result_type"] !== undefined && udResp["result_type"] !== "no_results") {
-          try {
-            var firstResult = udResp["list"][0];
-            var definition = firstResult["definition"];
-            var example = firstResult["example"];
-            var response = phrase.toUpperCase() + ":\n" + definition.toString() + "\n";
-            if (example) {
-              response += ">>> " + example.toString();
-            }
-            res.send(response);
-            if (udResp["list"].length > 1) {
-              res.send(" - more definitions at http://www.urbandictionary.com/define.php?term=" + encodeURI(phrase));
-            }
-            return;
-          } catch(err) {
-            return res.send(">>> Error parsing Urban Dictionary response: " + err.toString());
+        if (udResp["result_type"] === "exact") {
+          var firstResult = udResp["list"][0];
+          var definition = firstResult["definition"];
+          var example = firstResult["example"];
+          var response = phrase.toUpperCase() + ":\n" + definition.toString() + "\n";
+          if (example) {
+            response += ">>> " + example.toString();
           }
+          res.send(response);
+          if (udResp["list"].length > 1) {
+            res.send(" - more definitions at http://www.urbandictionary.com/define.php?term=" + encodeURI(phrase));
+          }
+          return;
         } else {
           return res.send("> No results found for " + phrase +". ¯\\_(ツ)_/¯")
         }
