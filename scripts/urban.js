@@ -6,68 +6,49 @@
 //
 
 module.exports = function (robot) {
-	robot.respond(/!?urban (.+)/i, function (res) {
-		robot.getUrban(res, res.match[1].trim());
-	});
+  robot.respond(/!?urban(.*)/i, function (res) {
+    var phrase = res.match[1].trim();
+    var urban = robot.http("http://api.urbandictionary.com/v0/define?term=" + encodeURI(phrase))
+      .get()(function (err, resp, body) {
 
-	robot.getUrban = function (res, word) {
+        // Check for correct usage
+        if (res.match[1][0] !== " " || !phrase || phrase.length < 1) {
+          return res.send("> Usage: `!urban <SEARCH_PHRASE>`");
+        }
 
-		robot.http("http://api.urbandictionary.com/v0/define?term=" + word).get()
-		(function (err, resp, body) {
-			if (!err) {
-				var response = "";
+        // Check for JS/hubot errors
+        if (err) {
+          return res.send(">>> Error: " + err.toString() + ".");
+        }
 
-				var max = 2;
-				var lines = 0;
+        // Check for HTTP Errors
+        if (resp.statusCode !== 200) {
+          return res.send("> HTTP Error ( " + resp.statusCode + ").");
+        }
 
-				if (robot.getUrbanResult(body) == "no_results") {
-					response += "> :( No result found for " + word;
-				} else {
-					var definition = robot.getUrbanDef(body);
-					var example = robot.getUrbanExample(body);
-					response += ">" + word.toUpperCase() + ": ";
-					definition.split("\r\n").forEach(function (line) {
-						if (lines <= max) {
-							if (lines == 0) {
-								response += line + "\r\n";
-							} else {
-								response += "> " + line + "\r\n";
-							}
-						}
-						lines++;
-					});
-					example.split("\r\n").forEach(function (line) {
-						if (lines <= max) {
-							response += "> \t _" + line + "_ \r\n";
-						}
-						lines++;
-					});
-				}
+        var udResp = JSON.parse(body);
 
-				if (lines > 2) {
-					response += " - more at http://www.urbandictionary.com/define.php?term=" + encodeURI(word);
-				}
-
-				res.send(response);
-			}
-		});
-	};
-
-	// Parses the JSON to get the first definition
-	robot.getUrbanResult = function (string) {
-		json = JSON.parse(string);
-		return json["result_type"];
-	};
-
-	// Parses the JSON to get the first definition
-	robot.getUrbanDef = function (string) {
-		json = JSON.parse(string);
-		return json["list"][0]["definition"];
-	};
-
-	// Parses the JSON to get the first definition
-	robot.getUrbanExample = function (string) {
-		json = JSON.parse(string);
-		return json["list"][0]["example"];
-	};
+        // Parse Urban Dictionary response and send result.
+        if (udResp["result_type"] !== undefined && udResp["result_type"] !== "no_results") {
+          try {
+            var firstResult = udResp["list"][0];
+            var definition = firstResult["definition"];
+            var example = firstResult["example"];
+            var response = phrase.toUpperCase() + ":\n" + definition.toString() + "\n";
+            if (example) {
+              response += ">>> " + example.toString();
+            }
+            res.send(response);
+            if (udResp["list"].length > 1) {
+              res.send(" - more definitions at http://www.urbandictionary.com/define.php?term=" + encodeURI(phrase));
+            }
+            return;
+          } catch(err) {
+            return res.send(">>> Error parsing Urban Dictionary response: " + err.toString());
+          }
+        } else {
+          return res.send("> No results found for " + phrase +". ¯\\_(ツ)_/¯")
+        }
+      });
+  });
 };
