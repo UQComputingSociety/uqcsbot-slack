@@ -6,15 +6,17 @@
 //
 
 module.exports = function (robot) {
-  robot.respond(/!?urban(.*)/i, function (res) {
+  robot.respond(/!?urban( .+)?/i, function (res) {
+
+    // Check for correct usage
+    if (!res.match[1] || res.match[1].length < 1) {
+      return res.send("> Usage: `!urban <SEARCH_PHRASE>`");
+    }
+
     var phrase = res.match[1].trim();
+
     var urban = robot.http("http://api.urbandictionary.com/v0/define?term=" + encodeURI(phrase))
       .get()(function (err, resp, body) {
-
-        // Check for correct usage
-        if (res.match[1][0] !== " " || !phrase || phrase.length < 1) {
-          return res.send("> Usage: `!urban <SEARCH_PHRASE>`");
-        }
 
         // Check that a response was received.
         if (err) {
@@ -28,22 +30,22 @@ module.exports = function (robot) {
 
         var udResp = JSON.parse(body); // The urban dictionary response, parsed into a JSON object.
 
-        // Parse Urban Dictionary response and send result.
-        if (udResp["result_type"] === "exact") {
-          var firstResult = udResp["list"][0];
-          var definition = firstResult["definition"];
-          var example = firstResult["example"];
-          var response = phrase.toUpperCase() + ":\n" + definition.toString() + "\n";
-          if (example) {
-            response += ">>> " + example.toString();
-          }
-          res.send(response);
-          if (udResp["list"].length > 1) {
-            res.send(" - more definitions at http://www.urbandictionary.com/define.php?term=" + encodeURI(phrase));
-          }
-          return;
-        } else {
+        // Check that a result was found.
+        if (udResp["result_type"] !== 'exact') {
           return res.send("> No results found for " + phrase +". ¯\\_(ツ)_/¯")
+        }
+
+        // Parse Urban Dictionary response and send result.
+        var firstResult = udResp["list"][0];
+        var definition = firstResult["definition"];
+        var example = firstResult["example"];
+        var response = phrase.toUpperCase() + ":\n" + definition.toString() + "\n";
+        if (example) {
+          response += ">>> " + example.toString();
+        }
+        res.send(response);
+        if (udResp["list"].length > 1) {
+          res.send(" - more definitions at http://www.urbandictionary.com/define.php?term=" + encodeURI(phrase));
         }
       });
   });
