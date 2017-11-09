@@ -21,7 +21,7 @@ module.exports = function (robot) {
         }
 
         // Check if user has entered #announcements channel
-        var announcements = robot.adapter.client.rtm.dataStore.getChannelByName("random"); 
+        var announcements = robot.adapter.client.rtm.dataStore.getChannelByName("announcements"); 
         if (res.message.room != announcements.id) {
             return;
         }
