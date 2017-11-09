@@ -1,7 +1,6 @@
 // Description
 //   Welcomes new users to UQCS Slack and check for member milestones
 
-var API_LIMIT = 200;        // Number of members to get at a time
 var MEMBER_MILESTONE = 50;  // Number of members between posting a celebration
 var MESSAGE_PAUSE = 2500;   // Number of seconds between sending bot messages
 var WELCOME_MESSAGES = [    // Welcome messages sent to new members
@@ -14,17 +13,6 @@ var WELCOME_MESSAGES = [    // Welcome messages sent to new members
     "and again, welcome :)"
 ];
 
-function getMemberCount(robot, room, memberCount, cursor) {
-    // No more members to get, return the final count
-    if (cursor == "") {
-        return Promise.resolve(memberCount);
-    }
-
-    // Increment member count and request for next batch of users
-    return robot.adapter.client.web.conversations.members(room, {limit: API_LIMIT, cursor: cursor})
-        .then(res => getMemberCount(robot, room, memberCount + res.members.length, res.response_metadata.next_cursor));
-}
-
 module.exports = function (robot) {
     robot.enter(function (res) {
         // Make sure we have access to all the clients we need
@@ -33,8 +21,8 @@ module.exports = function (robot) {
         }
 
         // Check if user has entered #announcements channel
-        var announcements = robot.adapter.client.rtm.dataStore.getChannelByName("announcements").id; 
-        if (res.message.room != announcements) {
+        var announcements = robot.adapter.client.rtm.dataStore.getChannelByName("random"); 
+        if (res.message.room != announcements.id) {
             return;
         }
         
@@ -49,14 +37,11 @@ module.exports = function (robot) {
             robot.send({room: res.message.user.id}, message);
         }, i * MESSAGE_PAUSE));
 
-        // Get member count to see if we've hit a member milestone
-        getMemberCount(robot, announcements, 0).then(memberCount => {
-            // If we're not at a member milestone, don't bother celebrating!
-            if (memberCount % MEMBER_MILESTONE != 0) {
-                return;
-            }
+        // If we're not at a member milestone, don't bother celebrating!
+        if (announcements.members.length % MEMBER_MILESTONE != 0) {
+            return;
+        }
 
-            res.send(":tada: " + memberCount + " members! :tada:");
-        }).catch(console.log);
+        res.send(":tada: " + announcements.members.length + " members! :tada:");
     });
 };
