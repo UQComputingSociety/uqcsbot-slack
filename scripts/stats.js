@@ -171,9 +171,7 @@ function printCommandStat(robot, user, commands) {
 
     // Build and send output message
     var message = `>>> _${totalCalls} total call(s)_ since Monday\n\n`;
-    sortedCommands.forEach(commandEntry => {
-        var command = commandEntry[0];
-        var numCalls = commandEntry[1];
+    sortedCommands.forEach(([commandEntry, numCalls]) => {
         percentage =  Math.round(numCalls / totalCalls * 100);
         message += `*${command}*: ${numCalls} call(s) \`(${percentage}%)\`\n`;
     });
@@ -193,9 +191,7 @@ function printRoomStat(robot, user, rooms) {
 
     // Build and send output message
     var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} room(s)_ since Monday\n\n`;
-    sortedRooms.forEach(roomEntry => {
-        var channelId = roomEntry[0];
-        var numMessages = roomEntry[1];
+    sortedRooms.forEach(([channelId, numMessages]) => {
         var channelName = robot.adapter.client.rtm.dataStore.getChannelById(channelId).name;
         percentage =  Math.round(numMessages / totalMessages * 100);
         message += `*${channelName}*: ${numMessages} message(s) \`(${percentage}%)\`\n`; 
