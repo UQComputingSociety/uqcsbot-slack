@@ -37,11 +37,13 @@ module.exports = function (robot) {
             robot.send({room: res.message.user.id}, message);
         }, i * MESSAGE_PAUSE));
 
+
         // If we're not at a member milestone, don't bother celebrating!
-        if (announcements.members.length % MEMBER_MILESTONE != 0) {
+        var activeMembers = announcements.members.filter(user => !user.deleted);
+        if (activeMembers.length % MEMBER_MILESTONE != 0) {
             return;
         }
 
-        res.send(":tada: " + announcements.members.length + " members! :tada:");
+        res.send(":tada: " + activeMembers.length + " members! :tada:");
     });
 };
