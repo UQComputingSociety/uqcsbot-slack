@@ -45,7 +45,7 @@ module.exports = function (robot) {
         }
         var more = "";
         if (udResp["list"].length > 1) {
-          more += "- more definitions at http://www.urbandictionary.com/define.php?term=" + encodeURI(phrase);
+          more += "- more definitions at www.urbandictionary.com/define.php?term=" + encodeURI(phrase);
         }
         res.send(response, more);
       });
