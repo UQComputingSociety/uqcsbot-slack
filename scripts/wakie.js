@@ -16,7 +16,7 @@ module.exports = function(robot) {
 
         // Send ping to two random victims in #general and react with random emoji
         var general = robot.adapter.client.rtm.dataStore.getChannelByName("general");
-        var members = general.members;
+        var members = general.members.filter(user => !user.deleted);
         var victim1 = members[Math.floor(Math.random() * members.length)];
         var victim2 = members[Math.floor(Math.random() * members.length)];
         var react   = REACTS[Math.floor(Math.random() * REACTS.length)];
