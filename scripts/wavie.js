@@ -18,7 +18,7 @@ module.exports = function (robot) {
         }
 
         // If there was no last message or the last message was not a person joining nor leaving, exit
-        var latest = room.latest;
+        var latest = room.history[room.history.length - 1];
         if (!latest || (latest.subtype != 'channel_join' && latest.subtype != 'channel_leave')) {
             return;
         }
