@@ -170,7 +170,7 @@ function printCommandStat(robot, user, commands) {
     var totalCalls = sortedCommands.reduce((sum, entry) => sum + entry[1], 0);
 
     // Build and send output message
-    var message = `>>> _${totalCalls} total call(s)_\n\n`;
+    var message = `>>> _${totalCalls} total call(s)_ since Monday\n\n`;
     sortedCommands.forEach(commandEntry => {
         var command = commandEntry[0];
         var numCalls = commandEntry[1];
@@ -192,7 +192,7 @@ function printRoomStat(robot, user, rooms) {
     var totalMessages = sortedRooms.reduce((sum, entry) => sum + entry[1], 0);
 
     // Build and send output message
-    var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} room(s)_\n\n`;
+    var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} room(s)_ since Monday\n\n`;
     sortedRooms.forEach(roomEntry => {
         var channelId = roomEntry[0];
         var numMessages = roomEntry[1];
@@ -207,7 +207,7 @@ function printRoomStat(robot, user, rooms) {
 function printStat(robot, user, stats, stat) {
     var statEntry = getStat(stats, stat);
     if (!!statEntry) {
-        var message = `>>>*${statEntry[0]}*: ${statEntry[1]}`;
+        var message = `>>>*${statEntry[0]}*: ${statEntry[1]} since Monday`;
     } else {
         var message = `Could not find requested stat \`${stat}\``;
     }
