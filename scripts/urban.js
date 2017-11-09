@@ -39,14 +39,15 @@ module.exports = function (robot) {
         var firstResult = udResp["list"][0];
         var definition = firstResult["definition"];
         var example = firstResult["example"];
-        var response = phrase.toUpperCase() + ":\n" + definition.toString() + "\n";
+        var response = phrase.toUpperCase() + ":\n" + definition + "\n";
         if (example) {
-          response += ">>> " + example.toString();
+          response += ">>> " + example;
         }
-        res.send(response);
+        var more = "";
         if (udResp["list"].length > 1) {
-          res.send(" - more definitions at http://www.urbandictionary.com/define.php?term=" + encodeURI(phrase));
+          more += "- more definitions at http://www.urbandictionary.com/define.php?term=" + encodeURI(phrase);
         }
+        res.send(response, more);
       });
   });
 };
