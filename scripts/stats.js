@@ -92,16 +92,11 @@ function handleRoomStat(stats, res) {
 
 // Handles command stat 
 function handleCommandStat(stats, res) {
-    // If the command is not actually a command or the room is a private channel, exit
+    // If the room is not a public channel, exit
     var command = res.message.text;
     var room = res.message.room;
-    if ((command[0] != '!' && room[0] != 'D') || room[0] == 'G') {
+    if (room[0] != 'C') {
         return;
-    }
-
-    // If we're talking to uqcsbot, remove the implicit uqcsbot call
-    if (command.indexOf('uqcsbot') == 0) {
-        command = command.replace('uqcsbot ', '');
     }
 
     // Strip down to just the base command
