@@ -92,10 +92,10 @@ function handleRoomStat(stats, res) {
 
 // Handles command stat 
 function handleCommandStat(stats, res) {
-    // If the room is not a public channel, exit
+    // If the room is not a public channel or the message is not a command, exit
     var command = res.message.text;
     var room = res.message.room;
-    if (room[0] != 'C') {
+    if (room[0] != 'C' || command[0] != '!') {
         return;
     }
 
