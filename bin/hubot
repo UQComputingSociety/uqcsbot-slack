@@ -7,10 +7,10 @@ token_1=260850095972-qpQeBegFUhTlqYbzZdPMGv3v
 token_2=260936998101-SfKZgBU1FlpPhy43KttJ5cmO
 token_3=261681938550-e3XzaBtZJJzQVmLieTn8QX1S
 
-
 set -e
 
 export PATH="node_modules/.bin:node_modules/hubot/node_modules/.bin:$PATH"
+export DATABASE_URL=${DATABASE_URL:=""}
 
 if [ $# -eq 3 ] && [ "$1" = "--adapter" ] && [ "$2" = "slack" ]; then
     index=$3
