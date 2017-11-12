@@ -8,7 +8,7 @@
 var HubotCron = require('hubot-cronjob');
 
 // Default stats upon reset
-DEFAULT_STATS = {rooms: {}, commands: {}, _subscribers: {}};
+DEFAULT_STATS = ['rooms', 'commands', '_subscribers'];
 
 /////////////////////
 // HELPER COMMANDS //
@@ -42,12 +42,19 @@ function getSortedEntries(object) {
     return entries.sort((a, b) => b[1] - a[1]);
 }
 
+// Returns true if the stats object contains all the default stats, else false
+function hasDefaultStats(stats) {
+    a = new Set(Object.keys(stats));
+    b = new Set(DEFAULT_STATS);
+    return a.size === b.size && [...a].every(stat => b.has(stat));
+}
+
 // Retrieves stored slack stats, setting them to default values if they do not exist
 function getStats(robot) {
     var stats = robot.brain.get('stats');
-    if (!stats) {
-        robot.brain.set('stats', DEFAULT_STATS);
-        stats = robot.brain.get('stats');
+    if (!stats || !hasDefaultStats(stats)) {
+        stats = robot.brain.set('stats', {}).get('stats');
+        DEFAULT_STATS.forEach(stat => stats[stat] = {});
     }
     return stats;
 }
@@ -256,7 +263,7 @@ module.exports = function (robot) {
         sendToSubscribers(robot, stats);
 
         // Reset stats
-        for (var stat in stats) {
+        for (var stat in DEFAULT_STATS) {
             if (stat == '_subscribers') continue;
             stats[stat] = {};
         }
