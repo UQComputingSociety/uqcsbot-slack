@@ -83,11 +83,17 @@ function getStat(stats, stat) {
 //////////////////////
 
 // Handles room stat
-function handleRoomStat(stats, res) {
+function handleRoomStat(robot, stats, res) {
+    // Make sure we have access to all the clients we need
+    if(!robot.adapter.client || !robot.adapter.client.rtm) {
+        return;
+    }
+
     // If room is not a public channel, exit
     var room = res.message.room;
     if (room[0] != 'C') return;
-    incrementCounter(stats.rooms, room);
+    var roomName = robot.adapter.client.rtm.dataStore.getChannelById(room).name;
+    incrementCounter(stats.rooms, roomName);
 }
 
 // Handles command stat 
@@ -165,9 +171,9 @@ function printCommandStat(robot, user, commands) {
     var totalCalls = sortedCommands.reduce((sum, entry) => sum + entry[1], 0);
 
     // Build and send output message
-    var message = `>>> _${totalCalls} total call(s)_ since Monday\n\n`;
-    sortedCommands.forEach(([commandEntry, numCalls]) => {
-        percentage =  Math.round(numCalls / totalCalls * 100);
+    var message = `>>> _${totalCalls} total call(s) since Monday_\n\n`;
+    sortedCommands.forEach(([command, numCalls]) => {
+        percentage =  Math.round(numCalls / totalCalls * 1000) / 10; // Round to one decimal place
         message += `*${command}*: ${numCalls} call(s) \`(${percentage}%)\`\n`;
     });
     robot.send({room: user.id}, message);
@@ -175,21 +181,15 @@ function printCommandStat(robot, user, commands) {
 
 // Prints out room stat
 function printRoomStat(robot, user, rooms) {
-    // Make sure we have access to all the clients we need
-    if(!robot.adapter.client || !robot.adapter.client.rtm) {
-        return;
-    }
-
     // Get a sorted list of commands and calculate the total amount of calls
     var sortedRooms = getSortedEntries(rooms);
     var totalMessages = sortedRooms.reduce((sum, entry) => sum + entry[1], 0);
 
     // Build and send output message
-    var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} room(s)_ since Monday\n\n`;
-    sortedRooms.forEach(([channelId, numMessages]) => {
-        var channelName = robot.adapter.client.rtm.dataStore.getChannelById(channelId).name;
-        percentage =  Math.round(numMessages / totalMessages * 100);
-        message += `*${channelName}*: ${numMessages} message(s) \`(${percentage}%)\`\n`; 
+    var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} room(s) since Monday_\n\n`;
+    sortedRooms.forEach(([room, numMessages]) => {
+        percentage =  Math.round(numMessages / totalMessages * 1000) / 10; // Round to one decimal place
+        message += `*${room}*: ${numMessages} message(s) \`(${percentage}%)\`\n`;
     });
     robot.send({room: user.id}, message);
 }
@@ -232,7 +232,7 @@ module.exports = function (robot) {
     // Listen to everything (._.)
     robot.hear(/.*/, function (res) {
         var stats = getStats(robot);
-        handleRoomStat(stats, res);
+        handleRoomStat(robot, stats, res);
         handleCommandStat(stats, res);
     });
 
