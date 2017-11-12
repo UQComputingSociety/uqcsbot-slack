@@ -42,20 +42,13 @@ function getSortedEntries(object) {
     return entries.sort((a, b) => b[1] - a[1]);
 }
 
-// Returns true if the stats object contains all the default stats, else false
-function hasDefaultStats(stats) {
-    a = new Set(Object.keys(stats));
-    b = new Set(DEFAULT_STATS);
-    return a.size === b.size && [...a].every(stat => b.has(stat));
-}
-
-// Retrieves stored slack stats, setting them to default values if they do not exist
+// Retrieves stored slack stats
 function getStats(robot) {
     var stats = robot.brain.get('stats');
-    if (!stats || !hasDefaultStats(stats)) {
-        stats = robot.brain.set('stats', {}).get('stats');
-        DEFAULT_STATS.forEach(stat => stats[stat] = {});
-    }
+    // If we have no stats, initialise them
+    if (!stats) stats = robot.brain.set('stats', {}).get('stats');
+    // If we're missing some default stats, add them
+    DEFAULT_STATS.filter(stat => !(stat in stats)).forEach(stat => stats[stat] = {});
     return stats;
 }
 
