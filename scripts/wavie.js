@@ -3,56 +3,31 @@
 
 module.exports = function (robot) {
     // Wave at the person joining/leaving the room
-    function wave(room) {
+    function wave(roomId) {
         // Make sure we have access to all the clients we need
-        if (!robot.adapter.client || !robot.adapter.client.web || !robot.adapter.client.rtm) {
+        if (!robot.adapter.client || !robot.adapter.client.rtm || !robot.adapter.client.web) {
             return;
         }
 
-        // If user entered announcements, don't wave at them
-        var announcements = robot.adapter.client.rtm.dataStore.getChannelByName("announcements").id; 
-        if (room == announcements) {
+        // Get room info from data store
+        var room = robot.adapter.client.rtm.dataStore.getChannelById(roomId);
+
+        // If user entered announcements, don't wave at them and exit
+        if (room.name == 'announcements') {
             return;
         }
 
-        // Shorten web client so we can have nice concise lines ;)
-        var webClient = robot.adapter.client.web;
-
-        // If room was not a public channel and not a private channel, exit
-        // If the last message was not a person joining nor leaving, reject
-        if (room[0] == 'C') {
-            var channelPromise = webClient.channels.info(room).then(res => {
-                last = res.channel.latest;
-                if (last.subtype != 'channel_join' && last.subtype != 'channel_leave') {
-                    return Promise.reject('was not a person joining or leaving');
-                }
-                return last.ts;
-            });
-        } else if (room[0] == 'G') {
-            var channelPromise = webClient.groups.info(room).then(res => {
-                last = res.group.latest;
-                if (last.subtype != 'group_join' && last.subtype != 'group_leave') {
-                    return Promise.reject('was not a person joining or leaving');
-                }
-                return last.ts;
-            });
-        } else {
+        // If there was no last message or the last message was not a person joining nor leaving, exit
+        var latest = room.history[room.history.length - 1];
+        if (!latest || (latest.subtype != 'channel_join' && latest.subtype != 'channel_leave')) {
             return;
         }
 
-        // :wave: if the latest message is a person joining/leaving
-        channelPromise
-            .then(ts => webClient.reactions.add('wave', {channel: room, timestamp: ts}))
-            .catch(err => console.log(err));
+        // :wave:!
+        robot.adapter.client.web.reactions.add('wave', {channel: room.id, timestamp: latest.ts});
     }
 
-    // Listen for when someone enters a room
-    robot.enter(function (res) {
-        wave(res.message.room);
-    });
-
-    // Listen for when someone leaves a room
-    robot.leave(function (res) {
-        wave(res.message.room);
-    });
+    // Listen for when someone enters/exits a room
+    robot.enter(res => wave(res.message.room));
+    robot.leave(res => wave(res.message.room));
 };
