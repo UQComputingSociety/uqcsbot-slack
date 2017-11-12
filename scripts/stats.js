@@ -173,7 +173,7 @@ function printCommandStat(robot, user, commands) {
     // Build and send output message
     var message = `>>> _${totalCalls} total call(s) since Monday_\n\n`;
     sortedCommands.forEach(([command, numCalls]) => {
-        percentage =  Math.round(numCalls / totalCalls * 100);
+        percentage =  Math.round(numCalls / totalCalls * 1000) / 10;
         message += `*${command}*: ${numCalls} call(s) \`(${percentage}%)\`\n`;
     });
     robot.send({room: user.id}, message);
@@ -188,7 +188,7 @@ function printRoomStat(robot, user, rooms) {
     // Build and send output message
     var message = `>>> _${totalMessages} total message(s) in ${sortedRooms.length} room(s) since Monday_\n\n`;
     sortedRooms.forEach(([room, numMessages]) => {
-        percentage =  Math.round(numMessages / totalMessages * 100);
+        percentage =  Math.round(numMessages / totalMessages * 1000) / 10;
         message += `*${room}*: ${numMessages} message(s) \`(${percentage}%)\`\n`;
     });
     robot.send({room: user.id}, message);
