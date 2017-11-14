@@ -12,8 +12,8 @@ module.exports = function (robot) {
         // Get room info from data store
         var room = robot.adapter.client.rtm.dataStore.getChannelById(roomId);
 
-        // If user entered announcements, don't wave at them and exit
-        if (room.name == 'announcements') {
+        // If user entered announcements or general, don't wave at them and exit
+        if (room.name == 'announcements' || room.name == 'general') {
             return;
         }
 
