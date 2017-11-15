@@ -2,7 +2,7 @@
 //   Retrieves files from a course's UQAttic folder
 //
 // Commands:
-//   `!attic [COURSE CODE]` - Retrieves UQAttic files for a given course code (default: returns base UQAttic folder)
+//   `!attic [COURSE CODE]` - Retrieves UQAttic files for a given course code (default: current channel)
 
 BASE_FOLDER_URL = 'https://drive.google.com/drive/folders/'
 BASE_FILE_URL = 'https://drive.google.com/file/d/'
@@ -45,12 +45,26 @@ function flattenArray(array) {
 
 module.exports = function (robot) {
 	robot.respond(/!?attic ?(.*)/i, function (res) {
-        // If no course code is provided, return the correct usage and exit
-        if (!res.match[1]) {
-            res.send("> Usage: `!attic [COURSE CODE]`");
+        // Make sure we have access to all the clients we need
+        if (!robot.adapter.client || !robot.adapter.client.rtm) {
             return;
         }
 
+        // If no course code is provided, use the current channel as default
+        var courseCode = res.match[1];
+        if (!courseCode) {
+            // If the current channel is not in the datastore (e.g. is likely a DM), return the correct usage and exit
+            var channel = robot.adapter.client.rtm.dataStore.getChannelById(res.message.room);
+            if (!channel) {
+                res.send('> Usage: `!attic [COURSE CODE]`');
+                return;
+            }
+
+            courseCode = channel.name;
+        }
+        courseCode = courseCode.toUpperCase();
+
+        // Retrieve base UQAttic folder
         var baseFolderRequest = BASE_API_URL + `files?q='` + BASE_ATTIC_FOLDER +
                                 `' in parents and mimeType = 'application/vnd.google-apps.folder'&key=` + API_KEY;
         robot.http(baseFolderRequest).get() ((err, resp, body) => {
@@ -60,32 +74,31 @@ module.exports = function (robot) {
             }
 
             // Retrieve the user specified course folder
-            var courseCode = res.match[1].toUpperCase();
             var courseFolder = JSON.parse(body).files.find(course => course.name.toUpperCase() == courseCode);
             if (!courseFolder) {
                 res.send(`No course folder found for ${courseCode}`);
                 return;
             }
 
-            // Send the course folder link to the channel
-            res.send(`Retrieving all files from <${BASE_FOLDER_URL}${courseFolder.id}|UQAttic's ${courseCode} Folder>...`);
+            // Send the course folder link to the channel, then attempt to retrieve all files from the course folder 
+            var msg = `Retrieving all files from <${BASE_FOLDER_URL}${courseFolder.id}|UQAttic's ${courseCode} Folder>...`;
+            robot.send({room: res.message.room}, msg)[0].then(() => {
+                getAllFiles(robot, courseFolder).then(files => {
+                    // Flatten and format files
+                    var flatFiles = flattenArray(files);
+                    var formattedFiles = flatFiles.map(file => `> *${file.name}*: <${BASE_FILE_URL}${file.id}|Link>`);
 
-            // Retrieve all files from the user specified course folder
-            getAllFiles(robot, courseFolder).then(files => {
-                // Flatten and format files
-                var flatFiles = flattenArray(files);
-                var formattedFiles = flatFiles.map(file => `> *${file.name}*: <${BASE_FILE_URL}${file.id}|Link>`);
-                
-                // If there is too many files, send directly to user, else send to channel
-                if (formattedFiles.length > ROOM_FILE_LIMIT) {
-                    user = res.message.user;
-                    name = user.profile.display_name || user.name;
-                    res.send(`Too many files to display, sent results directly to ${name}`);
-                    robot.send({room: user.id}, formattedFiles.join('\n'));
-                } else {
-                    res.send(formattedFiles.join('\n'));
-                }
-            }).catch(err => console.log(err));
+                    // If there is too many files, send directly to user, else send to channel
+                    if (formattedFiles.length > ROOM_FILE_LIMIT) {
+                        user = res.message.user;
+                        name = user.profile.display_name || user.name;
+                        res.send(`Too many files to display, sent results directly to ${name}`);
+                        robot.send({room: user.id}, formattedFiles.join('\n'));
+                    } else {
+                        res.send(formattedFiles.join('\n'));
+                    }
+                }).catch(err => console.log(err));
+            });
         });
     });
 };
