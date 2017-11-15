@@ -8,7 +8,7 @@ BASE_FOLDER_URL = 'https://drive.google.com/drive/folders/';
 BASE_FILE_URL = 'https://drive.google.com/file/d/';
 BASE_API_URL = 'https://www.googleapis.com/drive/v3/';
 BASE_ATTIC_FOLDER = '0B6_D4T6LJ-uwZmFhMzIyNGYtNTM2OS00ZDJlLTg0NmYtY2IyNzA1MDZlNDIx';
-API_KEY = process.env.GOOGLE_DRIVE_API_KEY;
+API_KEY = process.env.GOOGLE_API_KEY;
 ROOM_FILE_LIMIT = 15; // Number of files allowed to be posted in room, else sent via direct message
 
 // Retrieves all the files from the given folder and all sub-folders
