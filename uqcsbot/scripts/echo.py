@@ -1,6 +1,8 @@
-from uqcsbot import command_handler, api
+from uqcsbot import command_handler, bot
+from uqcsbot.command_handler import Command
+
 
 @command_handler.on("echo")
-def handle_echo(command):
+def handle_echo(command: Command):
     if command.has_arg():
-        api.post_message(command.channel, command.arg)
+        bot.post_message(command.channel, command.arg)
