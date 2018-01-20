@@ -3,13 +3,13 @@ from typing import List
 
 
 # see https://api.slack.com/docs/pagination for details
-def paginate_api_call(client: SlackClient, method: str, *args, **kwargs):
-    responses = []
+def paginate_api_call(client: SlackClient, method: str, *args, **kwargs) -> List[dict]:
+    pages = []
     while kwargs.get("cursor") != "":
-        response = client.api_call(method, *args, **kwargs)
-        responses.append(response)
-        kwargs["cursor"] = response["response_metadata"]["next_cursor"]
-    return responses
+        page = client.api_call(method, *args, **kwargs)
+        pages.append(page)
+        kwargs["cursor"] = page["response_metadata"]["next_cursor"]
+    return pages
 
 
 class Channel(object):
