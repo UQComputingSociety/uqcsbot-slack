@@ -9,5 +9,5 @@ SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
 slack_events_adapter = SlackEventAdapter(SLACK_VERIFICATION_TOKEN, "/uqcsbot/events")
 slack_client = SlackClient(SLACK_BOT_TOKEN)
 
-command_handler = command_handler.CommandHandler(slack_events_adapter)
+command_handler = command_handler.CommandHandler(slack_events_adapter, slack_client)
 bot = api.Bot(slack_client)
