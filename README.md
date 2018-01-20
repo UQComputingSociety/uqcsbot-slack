@@ -2,9 +2,23 @@
 
 uqcsbot is a chat bot built in python for use on our [UQCS Slack Team](uqcs.slack.com).
 
-## How to run
+## Setting up the development environment
 
-1. Optionally set up a virtualenv. I recommend this because of the FLASK_APP environment variable.
-1. `python setup.py install`
-1. Set an evironment variable for `FLASK_APP` to `uqcsbot/uqcsbot.py`
-1. Run the app with `flask run`
+To set everything up make sure you have Python 3, virtualenv, and [ngrok](https://ngrok.com/)
+
+1. [Create a Slack workspace](https://slack.com/create)
+1. Set up a `virtualenv`. See [virtualenv docs](https://virtualenv.pypa.io/en/stable/) for more information.
+1. Activate the `virtualenv`
+1. `pip install -r requirements.txt`
+1. [Create a new Slack app](https://api.slack.com/apps/)
+1. Add a bot user to your app
+1. Install your app to your workspace. Install App > Install App to Workspace
+1. Copy the Bot User OAuth Access Token and set it as an environment variable under `SLACK_BOT_TOKEN`
+1. Go to Basic Information, copy your Verification Token and set it as an environment variable under `SLACK_VERIFICATION_TOKEN`
+1. Run `python uqcsbot.py`
+1. Run `ngrok http 5000`
+1. Copy the https URL (It should look like `https://h7465j.ngrok.io`)
+1. Under Event Subscriptions, make sure events are enabled and paste this URL +  `/uqcsbot/events/` into the Request URL. (For example `https://h7465j.ngrok.io/uqcsbot/events`)
+1. Subscribe to `message.channels` under bot events
+
+The bot should now be receiving all slack events. Because of how ngrok works, you will need to update the `ngrok` URL each time you run it unless you get a paid plan or deploy to an actual server instead of using `ngrok`.
