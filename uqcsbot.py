@@ -35,7 +35,7 @@ class API:
     def __init__(self, client):
         self.client = client
 
-    def post_Message(self, channel, text):
+    def post_message(self, channel, text):
         self.client.api_call("chat.postMessage", channel=channel, text=text)
 
 command_handler = CommandHandler(slack_events_adapter)
@@ -44,6 +44,6 @@ api = API(slack_client)
 @command_handler.on("echo")
 def handle_echo(command):
     if command.has_arg():
-        api.post_Message(command.channel, command.arg)
+        api.post_message(command.channel, command.arg)
 
 slack_events_adapter.start(port=5000)
