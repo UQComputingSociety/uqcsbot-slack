@@ -19,8 +19,9 @@ class CommandHandler(EventEmitter):
 
     def handle_command(self, event_data: dict):
         message = event_data["event"]
-        if message.get("subtype") == "bot_message" or not message.get("text").startswith("!"):
+        text = message.get("text")
+        if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
             return
-        command_name, *arg = message["text"][1:].split(" ", 1)
+        command_name, *arg = text[1:].split(" ", 1)
         command = Command(command_name, None if not arg else arg[0], message["channel"])
         self.emit(command_name, command)
