@@ -3,13 +3,8 @@ from slackeventsapi import SlackEventAdapter
 from slackclient import SlackClient
 import os
 
-SLACK_VERIFICATION_TOKEN = os.environ["SLACK_VERIFICATION_TOKEN"]
-SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
 
-slack_events_adapter = SlackEventAdapter(SLACK_VERIFICATION_TOKEN, "/uqcsbot/events")
-slack_client = SlackClient(SLACK_BOT_TOKEN)
-
-class Command:
+class Command(object):
     def __init__(self, command_name, arg, channel):
         self.command_name = command_name
         self.arg = arg
@@ -18,9 +13,10 @@ class Command:
     def has_arg(self):
         return self.arg is not None
 
+
 class CommandHandler(EventEmitter):
-    def __init__(self, adapter):
-        EventEmitter.__init__(self)
+    def __init__(self, adapter, *args, **kwargs):
+        super(EventEmitter, self).__init__(*args, **kwargs)
         adapter.on("message", self.handle_command)
 
     def handle_command(self, event_data):
@@ -31,19 +27,20 @@ class CommandHandler(EventEmitter):
         command = Command(command_name, None if not arg else arg[0], message["channel"])
         self.emit(command_name, command)
 
-class API:
+
+class API(object):
     def __init__(self, client):
         self.client = client
 
     def post_message(self, channel, text):
         self.client.api_call("chat.postMessage", channel=channel, text=text)
 
+
+SLACK_VERIFICATION_TOKEN = os.environ["SLACK_VERIFICATION_TOKEN"]
+SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
+
+slack_events_adapter = SlackEventAdapter(SLACK_VERIFICATION_TOKEN, "/uqcsbot/events")
+slack_client = SlackClient(SLACK_BOT_TOKEN)
+
 command_handler = CommandHandler(slack_events_adapter)
 api = API(slack_client)
-
-@command_handler.on("echo")
-def handle_echo(command):
-    if command.has_arg():
-        api.post_message(command.channel, command.arg)
-
-slack_events_adapter.start(port=5000)
