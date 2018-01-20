@@ -15,8 +15,8 @@ class Command(object):
 
 
 class CommandHandler(EventEmitter):
-    def __init__(self, adapter, *args, **kwargs):
-        super(EventEmitter, self).__init__(*args, **kwargs)
+    def __init__(self, adapter):
+        super().__init__()
         adapter.on("message", self.handle_command)
 
     def handle_command(self, event_data):
