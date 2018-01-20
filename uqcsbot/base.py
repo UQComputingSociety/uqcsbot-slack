@@ -44,9 +44,3 @@ slack_client = SlackClient(SLACK_BOT_TOKEN)
 
 command_handler = CommandHandler(slack_events_adapter)
 api = API(slack_client)
-
-
-@command_handler.on("echo")
-def handle_echo(command):
-    if command.has_arg():
-        api.post_message(command.channel, command.arg)

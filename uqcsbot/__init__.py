@@ -1,7 +1,6 @@
 import os
 import importlib
-from .base import slack_events_adapter
-
+from .base import slack_events_adapter, api, command_handler
 
 
 def main():
