@@ -1,9 +1,11 @@
 from pyee import EventEmitter
 from slackeventsapi import SlackEventAdapter
+from slackclient import SlackClient
+from .api import Channel
 
 
 class Command(object):
-    def __init__(self, command_name: str, arg: str, channel: str):
+    def __init__(self, command_name: str, arg: str, channel: Channel):
         self.command_name = command_name
         self.arg = arg
         self.channel = channel
@@ -13,9 +15,10 @@ class Command(object):
 
 
 class CommandHandler(EventEmitter):
-    def __init__(self, adapter: SlackEventAdapter):
+    def __init__(self, adapter: SlackEventAdapter, client: SlackClient):
         super().__init__()
         adapter.on("message", self.handle_command)
+        self.client = client
 
     def handle_command(self, event_data: dict):
         message = event_data["event"]
@@ -23,5 +26,6 @@ class CommandHandler(EventEmitter):
         if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
             return
         command_name, *arg = text[1:].split(" ", 1)
-        command = Command(command_name, None if not arg else arg[0], message["channel"])
+        channel = Channel(self.client, message["channel"])
+        command = Command(command_name, None if not arg else arg[0], channel)
         self.emit(command_name, command)

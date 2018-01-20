@@ -1,6 +1,6 @@
 import os
 import importlib
-from .base import slack_events_adapter, bot, command_handler
+from uqcsbot.base import slack_events_adapter, bot, command_handler
 
 
 def main():
