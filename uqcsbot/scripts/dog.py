@@ -1,8 +1,7 @@
-from uqcsbot import command_handler, bot
-from uqcsbot.command_handler import Command
+from uqcsbot import bot, Command
 
 
-@command_handler.on("dog")
+@bot.on_command("dog")
 def handle_dog(command: Command):
     dog = "```\n" + \
           "                                __\n" + \

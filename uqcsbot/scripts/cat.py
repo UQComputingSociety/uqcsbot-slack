@@ -1,8 +1,7 @@
-from uqcsbot import command_handler, bot
-from uqcsbot.command_handler import Command
+from uqcsbot import bot, Command
 
 
-@command_handler.on("cat")
+@bot.on_command("cat")
 def handle_cat(command: Command):
     cat = "```\n" + \
           "         __..--''``\\--....___   _..,_\n" + \
