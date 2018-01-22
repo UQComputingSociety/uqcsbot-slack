@@ -1,7 +1,8 @@
 import os
+import sys
 import importlib
 from uqcsbot.base import slack_events_adapter, bot, command_handler
-
+from uqcsbot.stub import ClientStub
 
 def main():
     dir_path = os.path.dirname(__file__)
@@ -12,7 +13,12 @@ def main():
         module = f'uqcsbot.scripts.{sub_file[:-3]}'
         importlib.import_module(module)
 
-    slack_events_adapter.start(port=5000)
+    if '--dev' in sys.argv:
+        stub = ClientStub(command_handler)
+        bot.client = stub
+        stub.adapter.prompt()
+    else:
+        slack_events_adapter.start(port=5000)
 
 if __name__ == "__main__":
     main()
