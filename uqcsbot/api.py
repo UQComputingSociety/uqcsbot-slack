@@ -1,5 +1,5 @@
-from slackclient import SlackClient
 from typing import List
+from slackclient import SlackClient
 
 
 # see https://api.slack.com/docs/pagination for details
@@ -13,12 +13,12 @@ def paginate_api_call(client: SlackClient, method: str, *args, **kwargs) -> List
 
 
 class Channel(object):
-    def __init__(self, client: SlackClient, channel_name: str):
-        self.name = channel_name
+    def __init__(self, client: SlackClient, channel_id: str):
         self.client = client
+        self.id = channel_id
 
     def get_members(self) -> List[str]:
-        member_pages = paginate_api_call(self.client, "conversations.members", channel=self.name)
+        member_pages = paginate_api_call(self.client, "conversations.members", channel=self.id)
         members = []
         for page in member_pages:
             members += page["members"]
@@ -30,4 +30,4 @@ class Bot(object):
         self.client = client
 
     def post_message(self, channel: Channel, text: str):
-        self.client.api_call("chat.postMessage", channel=channel.name, text=text)
+        self.client.api_call("chat.postMessage", channel=channel.id, text=text)

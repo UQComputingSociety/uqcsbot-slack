@@ -1,7 +1,7 @@
 from pyee import EventEmitter
-from slackeventsapi import SlackEventAdapter
 from slackclient import SlackClient
-from .api import Channel
+from slackeventsapi import SlackEventAdapter
+from uqcsbot.api import Channel
 
 
 class Command(object):
@@ -15,10 +15,10 @@ class Command(object):
 
 
 class CommandHandler(EventEmitter):
-    def __init__(self, adapter: SlackEventAdapter, client: SlackClient):
+    def __init__(self, client: SlackClient, adapter: SlackEventAdapter):
         super().__init__()
-        adapter.on("message", self.handle_command)
         self.client = client
+        adapter.on("message", self.handle_command)
 
     def handle_command(self, event_data: dict):
         message = event_data["event"]
