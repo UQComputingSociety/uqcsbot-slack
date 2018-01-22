@@ -19,6 +19,7 @@ class Command(object):
 
 CommandHandler = Callable[[Command], None]
 
+
 class UQCSBot(EventEmitter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,7 +63,7 @@ class UQCSBot(EventEmitter):
         self.client = SlackClient(api_token)
         self.verification_token = verification_token
         self.server = SlackServer(verification_token, '/uqcsbot/events', self, None)
-        waitress.serve(self, **kwargs)
+        waitress.serve(self.server, **kwargs)
 
     def run_debug(self):
         """

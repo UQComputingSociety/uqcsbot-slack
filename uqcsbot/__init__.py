@@ -1,9 +1,7 @@
 import os
 import sys
 import importlib
-from slackclient import SlackClient
-from slackeventsapi import SlackEventAdapter
-from .base import UQCSBot, bot, Command
+from uqcsbot.base import UQCSBot, bot, Command
 
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
@@ -22,7 +20,6 @@ def main():
     # Run bot
     if '--dev' in sys.argv:
         bot.run_debug()
-        event_adapter = EventAdapterStub()
     else:
         bot.run(SLACK_BOT_TOKEN, SLACK_VERIFICATION_TOKEN, host='0.0.0.0', port=5000)
 
