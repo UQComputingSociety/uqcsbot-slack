@@ -2,7 +2,14 @@
 
 uqcsbot is a chat bot built in python for use on our [UQCS Slack Team](uqcs.slack.com).
 
-## Setting up the development environment
+## Setting up the local development environment
+
+To run the local development environment, make sure you have Python 3 installed.
+
+1. Run `python setup.py install`
+2. Run `python -m uqcsbot --dev`
+
+## Setting up the remote development environment
 
 To set everything up make sure you have Python 3, virtualenv, and [ngrok](https://ngrok.com/)
 
@@ -18,7 +25,7 @@ To set everything up make sure you have Python 3, virtualenv, and [ngrok](https:
 1. Run `python -m uqcsbot`
 1. Run `ngrok http 5000`
 1. Copy the https URL (It should look like `https://h7465j.ngrok.io`)
-1. Under Event Subscriptions, make sure events are enabled and paste this URL +  `/uqcsbot/events/` into the Request URL. (For example `https://h7465j.ngrok.io/uqcsbot/events`)
+1. Under Event Subscriptions, make sure events are enabled and paste this URL +  `/uqcsbot/events` into the Request URL. (For example `https://h7465j.ngrok.io/uqcsbot/events`)
 1. Subscribe to `message.channels` under bot events
 
 The bot should now be receiving all slack events. Because of how ngrok works, you will need to update the `ngrok` URL each time you run it unless you get a paid plan or deploy to an actual server instead of using `ngrok`.
