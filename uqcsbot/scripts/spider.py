@@ -1,7 +1,6 @@
-from uqcsbot import command_handler, bot
-from uqcsbot.command_handler import Command
+from uqcsbot import bot, Command
 
 
-@command_handler.on("spider")
+@bot.on_command("spider")
 def handle_spider(command: Command):
     bot.post_message(command.channel, "//\\; ;/\\\\")

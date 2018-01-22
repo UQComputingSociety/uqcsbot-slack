@@ -24,10 +24,3 @@ class Channel(object):
             members += page["members"]
         return members
 
-
-class Bot(object):
-    def __init__(self, client: SlackClient):
-        self.client = client
-
-    def post_message(self, channel: Channel, text: str):
-        self.client.api_call("chat.postMessage", channel=channel.id, text=text)
