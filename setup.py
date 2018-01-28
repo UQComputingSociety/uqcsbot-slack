@@ -12,6 +12,8 @@ install_requires = [
     'slackclient',
     'pyee',
     'waitress',
+    'requests',
+    'BeautifulSoup4'
 ]
 
 setup(
