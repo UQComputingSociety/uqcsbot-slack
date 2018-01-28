@@ -10,7 +10,7 @@ BASE_URL = "http://acronyms.thefreedictionary.com"
 
 
 def get_acronyms(raw_html: str) -> List[str]:
-    html = BeautifulSoup(raw_html, 'htm ql.parser')
+    html = BeautifulSoup(raw_html, 'html.parser')
     acronym_tds = html.find_all("td", class_="acr")
     return [td.find_next_sibling("td").text for td in acronym_tds]
 
