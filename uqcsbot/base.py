@@ -98,7 +98,10 @@ class UQCSBot(EventEmitter):
         if executor is None:
             executor = concurrent.futures.ThreadPoolExecutor()
         self._executor = executor
-        waitress.serve(self.server, **kwargs)
+        ws_thread = threading.Thread(target=waitress.serve, args=(self.server,), kwargs=kwargs)
+        ws_thread.start()
+        loop.run_forever()
+        ws_thread.join()
 
     def run_debug(self):
         """
