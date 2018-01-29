@@ -57,6 +57,7 @@ class UQCSBot(EventEmitter):
         self._server = None
         self._evt_loop = asyncio.new_event_loop()
         self._executor = concurrent.futures.ThreadPoolExecutor()
+        self._evt_loop.set_default_executor(self._executor)
         self.on("message")(self._handle_command)
         self._command_registry = collections.defaultdict(list)
 
