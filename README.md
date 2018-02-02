@@ -2,21 +2,24 @@
 
 uqcsbot is a chat bot built in python for use on our [UQCS Slack Team](uqcs.slack.com).
 
-## Setting up the local development environment
 
-To run the local development environment, make sure you have Python 3 installed.
 
-1. Run `python setup.py install`
-2. Run `python -m uqcsbot --dev`
+## Setting up development
+Ensure you have Python 3.6 or higher, and `virutalenv` installed.
 
-## Setting up the remote development environment
-
-To set everything up make sure you have Python 3, virtualenv, and [ngrok](https://ngrok.com/)
-
-1. [Create a Slack workspace](https://slack.com/create)
 1. Set up a `virtualenv`. See [virtualenv docs](https://virtualenv.pypa.io/en/stable/) for more information.
 1. Activate the `virtualenv`
-1. `python setup.py install`
+1. `pip install -r requirements.txt`
+
+### Local environment
+
+To test UQCSbot locally, just use `python -m uqcsbot --dev`. This will create a virtual prompt you can type UQCSBot commands in to.
+
+## Remove environment
+
+The simplest way to test against a remote environment requires you to have [ngrok](https://ngrok.com/) installed.
+
+1. [Create a Slack workspace](https://slack.com/create)
 1. [Create a new Slack app](https://api.slack.com/apps/)
 1. Add a bot user to your app
 1. Install your app to your workspace. Install App > Install App to Workspace
