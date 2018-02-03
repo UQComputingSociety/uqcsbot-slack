@@ -8,6 +8,7 @@ import collections
 import asyncio
 import concurrent.futures
 import threading
+from contextlib import contextmanager
 from typing import Callable, Optional
 
 
@@ -35,6 +36,11 @@ def protected_property(prop_name, attr_name):
 underscored_getter = lambda s: protected_property(s, '_' + s)
 
 
+def async_worker(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+
 class UQCSBot(EventEmitter):
     api_token: Optional[str]
     client: Optional[SlackClient]
@@ -49,8 +55,9 @@ class UQCSBot(EventEmitter):
         self._client = None
         self._verification_token = None
         self._server = None
-        self._evt_loop = None
-        self._executor = None
+        self._evt_loop = asyncio.new_event_loop()
+        self._executor = concurrent.futures.ThreadPoolExecutor()
+        self._evt_loop.set_default_executor(self._executor)
         self.on("message")(self._handle_command)
         self._command_registry = collections.defaultdict(list)
 
@@ -63,12 +70,12 @@ class UQCSBot(EventEmitter):
         channel = Channel(self.client, message["channel"])
         command = Command(command_name, None if not arg else arg[0], channel)
         for cmd in self._command_registry[command_name]:
-            asyncio.ensure_future(cmd(command), loop=self.evt_loop)
+            asyncio.run_coroutine_threadsafe(cmd(command), self._evt_loop)
 
     def on_command(self, command_name: str):
         def decorator(fn):
             if not asyncio.iscoroutinefunction(fn):
-                fn = partial(self._run_function_async, fn)
+                fn = partial(self.run_async, fn)
             self._command_registry[command_name].append(fn)
             return fn
         return decorator
@@ -85,28 +92,33 @@ class UQCSBot(EventEmitter):
     client = underscored_getter("client")
     verification_token = underscored_getter("verification_token")
     server = underscored_getter("server")
-    evt_loop = underscored_getter("evt_loop")
-    executor = underscored_getter("executor")
 
-    def _run_function_async(self, fn, *args, **kwargs):
+    async def run_async(self, fn, *args, **kwargs):
         """
         Private:
         
         Runs a synchronous function in the bot's async executor, tracking it with
         asyncio.
         """
-        return self.evt_loop.run_in_executor(self.executor, partial(fn, *args, **kwargs))
+        return await self._evt_loop.run_in_executor(self._executor, partial(fn, *args, **kwargs))
 
-    def _setup_async(self, evt_loop=None, executor=None):
-        if evt_loop is None:
-            evt_loop = asyncio.get_event_loop()
-        self._evt_loop = evt_loop
+    @contextmanager
+    def _async_context(self):
+        async_thread = threading.Thread(target=async_worker, args=(self._evt_loop,))
+        async_thread.start()
+        try:
+            yield
+        except:
+            # Windows bugfix - have to queue a taks
+            fix_future = asyncio.run_coroutine_threadsafe(asyncio.sleep(1000), self._evt_loop)
+            self._executor.shutdown()
+            self._evt_loop.stop()
+            fix_future.cancel()
+            async_thread.join()
+            self._evt_loop.close()
+            raise
 
-        if executor is None:
-            executor = concurrent.futures.ThreadPoolExecutor()
-        self._executor = executor
-
-    def run(self, api_token, verification_token, evt_loop=None, executor=None, **kwargs):
+    def run(self, api_token, verification_token, **kwargs):
         """
         Run the bot.
 
@@ -120,55 +132,32 @@ class UQCSBot(EventEmitter):
         self._client = SlackClient(api_token)
         self._verification_token = verification_token
         self._server = SlackServer(verification_token, '/uqcsbot/events', self, None)
-        self._setup_async(evt_loop, executor)
-        def ws_worker():
-            try:
-                waitress.serve(self.server, **kwargs)
-            except:
-                self.executor.shutdown()
-                self.evt_loop.stop()
-                raise
-        ws_thread = threading.Thread(target=ws_worker)
-        ws_thread.start()
-        self.evt_loop.run_forever()
-        ws_thread.join()
+        with self._async_context():
+            waitress.serve(self.server, **kwargs)
 
     def run_debug(self, evt_loop=None, executor=None):
         """
         Run in debug mode
         """
+        self._evt_loop.set_debug(True)
         def debug_api_call(method, **kwargs):
             if method == "chat.postMessage":
                 print(kwargs['text'])
             else:
                 print(kwargs)
-        def debug_worker():
-            try:
-                while True:
-                    response = input("> ")
-                    message = {
-                        "event": {
-                            "text": response,
-                            "channel": "general",
-                            "subtype": "user"
-                        }
-                    }
-                    self.emit("message", message)
-            except:
-                self.executor.shutdown()
-                self.evt_loop.stop()
-                raise
 
         self.api_call = debug_api_call
-        self._setup_async(evt_loop, executor)
-        self.evt_loop.set_debug(True)
-
-        worker_thread = threading.Thread(target=debug_worker)
-        worker_thread.start()
-
-        self.evt_loop.run_forever()
-        worker_thread.join()
-
+        with self._async_context():
+            while True:
+                response = input("> ")
+                message = {
+                    "event": {
+                        "text": response,
+                        "channel": "general",
+                        "subtype": "user"
+                    }
+                }
+                self.emit("message", message)
 
 
 bot = UQCSBot()
