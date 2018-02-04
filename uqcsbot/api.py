@@ -1,17 +1,12 @@
-from typing import List, Union, Awaitable
+from typing import List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any
 from functools import partial
 from slackclient import SlackClient
 import asyncio
 
 
 # see https://api.slack.com/docs/pagination for details
-def paginate_api_call(client: SlackClient, method: str, *args, **kwargs) -> List[dict]:
-    pages = []
-    while kwargs.get("cursor") != "":
-        page = client.api_call(method, *args, **kwargs)
-        pages.append(page)
-        kwargs["cursor"] = page["response_metadata"]["next_cursor"]
-    return pages
+def paginate_api_call(client: SlackClient, method: str, **kwargs) -> List[dict]:
+    return list(Paginator(client, method, **kwargs))
 
 
 class Channel(object):
@@ -27,6 +22,35 @@ class Channel(object):
         return members
 
 
+class Paginator(Iterable[dict], AsyncIterable[dict]):
+    def __init__(self, client, method, **kwargs):
+        self._client = client
+        self._method = method
+        self._kwargs = kwargs
+
+    def _gen(self) -> Generator[dict, Any, None]:
+        kwargs = self._kwargs.copy()
+        while kwargs.get("cursor") != "":
+            page = self._client.api_call(self._method, **self._kwargs)
+            yield page
+            kwargs["cursor"] = page.get('response_metadata', {}).get('next_cursor', "")
+
+    def __iter__(self):
+        return self._gen()
+
+    async def _agen(self):
+        loop = asyncio.get_event_loop()
+        kwargs = self._kwargs.copy()
+        request_fn = partial(self._client.api_call, self._method, **kwargs)
+        while kwargs.get("cursor") != "":
+            page = await loop.run_in_executor(None, request_fn)
+            yield page
+            kwargs["cursor"] = page.get('response_metadata', {}).get('next_cursor', "")
+
+    def __aiter__(self) -> AsyncGenerator[dict, Any, None]:
+        return self._agen()
+
+
 class APIMethodProxy(object):
     """
     Helper class used to implement APIWrapper
@@ -36,7 +60,7 @@ class APIMethodProxy(object):
         self._method = method
         self._async = is_async
 
-    def __call__(self, timeout=None, **kwargs) -> Union[dict, Awaitable[dict]]:
+    def __call__(self, **kwargs) -> dict:
         """
         Perform the relevant API request. Equivalent to SlackClient.api_call
         except the `method` argument is filled in.
@@ -48,7 +72,6 @@ class APIMethodProxy(object):
         fn = partial(
             self._client.api_call,
             self._method,
-            timeout=self.timeout,
             **kwargs
         )
         if self._async:
@@ -56,6 +79,9 @@ class APIMethodProxy(object):
             return loop.run_in_executor(None, fn)
         else:
             return fn()
+
+    def paginate(self, **kwargs) -> Paginator:
+        return Paginator(self._client, self._method, **kwargs)
 
     def __getattr__(self, item) -> 'APIMethodProxy':
         """
