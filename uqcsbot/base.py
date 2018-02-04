@@ -63,7 +63,7 @@ class UQCSBot(object):
 
     def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
-            self.logger.debug(f"Goodbye event has unexpected extras: {evt}")
+            self.logger.debug(f"Hello event has unexpected extras: {evt}")
         self.logger.info(f"Successfully connected to server")
 
     def _handle_goodbye(self, evt):
