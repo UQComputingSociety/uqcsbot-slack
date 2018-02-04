@@ -1,6 +1,7 @@
 import os
 import sys
 import importlib
+import logging
 from uqcsbot.base import UQCSBot, bot, Command
 
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
@@ -19,9 +20,11 @@ def main():
 
     # Run bot
     if '--dev' in sys.argv:
+        logging.basicConfig(level=logging.DEBUG)
         bot.run_debug()
     else:
-        bot.run(SLACK_BOT_TOKEN, SLACK_VERIFICATION_TOKEN, host='0.0.0.0', port=5000)
+        logging.basicConfig(level=logging.INFO)
+        bot.run(SLACK_BOT_TOKEN, SLACK_VERIFICATION_TOKEN)
 
 if __name__ == "__main__":
     main()
