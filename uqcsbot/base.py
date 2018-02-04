@@ -1,5 +1,6 @@
 from pyee import EventEmitter
 from slackclient import SlackClient
+from slackeventsapi.server import SlackServer
 from .api import Channel
 from functools import partial
 import waitress
@@ -127,6 +128,7 @@ class UQCSBot(object):
         self._api_token = api_token
         self._client = SlackClient(api_token)
         self._verification_token = verification_token
+        self._server = SlackServer(verification_token, '/uqcsbot/events', self, None)
         with self._async_context():
             waitress.serve(self.server, **kwargs)
 
