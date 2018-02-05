@@ -19,6 +19,7 @@ def main():
         importlib.import_module(module)
 
     # Run bot
+    # TODO: Make logging command-line configurable
     if '--dev' in sys.argv:
         logging.basicConfig(level=logging.DEBUG)
         bot.run_debug()
