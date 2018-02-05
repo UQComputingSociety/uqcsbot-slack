@@ -4,7 +4,6 @@ from slackclient import SlackClient
 import asyncio
 
 
-# see https://api.slack.com/docs/pagination for details
 def paginate_api_call(client: SlackClient, method: str, **kwargs) -> List[dict]:
     return list(Paginator(client, method, **kwargs))
 
@@ -23,6 +22,12 @@ class Channel(object):
 
 
 class Paginator(Iterable[dict], AsyncIterable[dict]):
+    """
+    Provides synchronous and asynchronous iterators over the pages of responses
+    from a cursor-based paginated Slack
+
+    See https://api.slack.com/docs/pagination for details
+    """
     def __init__(self, client, method, **kwargs):
         self._client = client
         self._method = method
@@ -30,10 +35,14 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
 
     def _gen(self) -> Generator[dict, Any, None]:
         kwargs = self._kwargs.copy()
-        while kwargs.get("cursor") != "":
+        while True:
             page = self._client.api_call(self._method, **self._kwargs)
             yield page
-            kwargs["cursor"] = page.get('response_metadata', {}).get('next_cursor', "")
+            cursor = page.get('response_metadata', {}).get('next_cursor')
+            if not cursor:
+                break
+            kwargs["cursor"] = cursor
+
 
     def __iter__(self):
         return self._gen()
@@ -42,10 +51,13 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
         loop = asyncio.get_event_loop()
         kwargs = self._kwargs.copy()
         request_fn = partial(self._client.api_call, self._method, **kwargs)
-        while kwargs.get("cursor") != "":
+        while True:
             page = await loop.run_in_executor(None, request_fn)
             yield page
-            kwargs["cursor"] = page.get('response_metadata', {}).get('next_cursor', "")
+            cursor = page.get('response_metadata', {}).get('next_cursor')
+            if not cursor:
+                break
+            kwargs["cursor"] = cursor
 
     def __aiter__(self) -> AsyncGenerator[dict, Any, None]:
         return self._agen()
@@ -81,6 +93,14 @@ class APIMethodProxy(object):
             return fn()
 
     def paginate(self, **kwargs) -> Paginator:
+        """
+        Returns a `Paginator` which can be used as both a synchronous and an
+        asynchronous iterable, allowing you to iterate over each page of
+        response data from a Slack response that is paginated in the
+        cursor-style.
+
+        Count/oldest/latest and page/count methods require manual pagination.
+        """
         return Paginator(self._client, self._method, **kwargs)
 
     def __getattr__(self, item) -> 'APIMethodProxy':
