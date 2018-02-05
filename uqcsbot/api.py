@@ -4,19 +4,15 @@ from slackclient import SlackClient
 import asyncio
 
 
-def paginate_api_call(client: SlackClient, method: str, **kwargs) -> List[dict]:
-    return list(Paginator(client, method, **kwargs))
-
-
 class Channel(object):
     def __init__(self, client: SlackClient, channel_id: str):
         self.client = client
+        self.api = APIWrapper(self.client)
         self.id = channel_id
 
     def get_members(self) -> List[str]:
-        member_pages = paginate_api_call(self.client, "conversations.members", channel=self.id)
         members = []
-        for page in member_pages:
+        for page in self.api.conversations.members.paginate(channel=self.id):
             members += page["members"]
         return members
 
