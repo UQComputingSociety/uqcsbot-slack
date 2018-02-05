@@ -83,6 +83,7 @@ class UQCSBot(object):
 
     def on_command(self, command_name: str):
         def decorator(fn):
+            fn = self._wrap_async(fn)
             self._command_registry[command_name].append(fn)
             return fn
         return decorator
@@ -97,8 +98,7 @@ class UQCSBot(object):
             message_type = ""
         if not callable(handler_fn):
             raise TypeError(f"Handler function {handler_fn} must be callable")
-        if not asyncio.iscoroutinefunction(handler_fn):
-            handler_fn = partial(self.run_async, handler_fn)
+        handler_fn = self._wrap_async(handler_fn)
         self._handlers[message_type].append(handler_fn)
         return handler_fn
 
@@ -113,6 +113,14 @@ class UQCSBot(object):
 
     def post_message(self, channel: Channel, text: str):
         self.api.chat.postMessage(channel=channel.id, text=text)
+
+    def _wrap_async(self, fn):
+        """
+        Wrap a function to run it asynchronously if it's not already a coroutine function
+        """
+        if not asyncio.iscoroutinefunction(fn):
+            fn = partial(self.run_async, fn)
+        return fn
 
     async def run_async(self, fn, *args, **kwargs):
         """
