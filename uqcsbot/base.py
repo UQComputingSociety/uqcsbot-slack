@@ -8,7 +8,7 @@ import concurrent.futures
 import threading
 import logging
 from contextlib import contextmanager
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
@@ -120,8 +120,9 @@ class UQCSBot(object):
     def api(self):
         return APIWrapper(self.client)
 
-    def post_message(self, channel: Channel, text: str):
-        self.api.chat.postMessage(channel=channel.id, text=text)
+    def post_message(self, channel: Union[Channel, str], text: str):
+        channel_id = channel if isinstance(channel, str) else channel.id
+        self.api.chat.postMessage(channel=channel_id, text=text)
 
     @property
     def channels(self):
