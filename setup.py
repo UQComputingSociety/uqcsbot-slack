@@ -8,10 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 install_requires = [
-    'slackeventsapi',
     'slackclient',
-    'pyee',
-    'waitress',
     'requests',
     'BeautifulSoup4'
 ]
