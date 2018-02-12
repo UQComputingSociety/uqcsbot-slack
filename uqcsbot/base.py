@@ -1,6 +1,5 @@
 from slackclient import SlackClient
-from slackclient.channel import Channel
-from .api import APIWrapper
+from .api import APIWrapper, ChannelWrapper
 from functools import partial
 import collections
 import asyncio
@@ -65,6 +64,8 @@ class UQCSBot(object):
         self.register_handler('hello', self._handle_hello)
         self.register_handler('goodbye', self._handle_goodbye)
 
+        self.channels = ChannelWrapper(self)
+
     def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
             self.logger.debug(f"Hello event has unexpected extras: {evt}")
@@ -80,7 +81,7 @@ class UQCSBot(object):
         if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
             return
         command_name, *arg = text[1:].split(" ", 1)
-        channel = self.channels.find(message["channel"])
+        channel = self.channels.get(message["channel"])
         command = Command(command_name, None if not arg else arg[0], channel)
         await asyncio.gather(*[
             self._await_error(cmd(command))
@@ -122,10 +123,6 @@ class UQCSBot(object):
 
     def post_message(self, channel: Channel, text: str):
         self.api.chat.postMessage(channel=channel.id, text=text)
-
-    @property
-    def channels(self):
-        return self.client.server.channels
 
     def _wrap_async(self, fn):
         """
