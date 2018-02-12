@@ -209,10 +209,20 @@ class ChannelWrapper(object):
 
     def _initialise(self):
         with self._lock:
+            if self._initialised:
+                # Prevent double-calls after lock release
+                return
+            self._initialised = True
+            self._channels_by_id = {}
+            self._channels_by_name = {}
             for page in self._bot.api.channels.list.paginate():
                 for chan in page['channels']:
                     self._add_channel(chan)
             self._initialised = True
+
+    def reload(self):
+        self._initialised = False
+        self._initialise()
 
     def get(self, name_or_id: str, default: T = None, use_cache: bool =True) -> Union[Channel, T]:
         if use_cache and not self._initialised:
