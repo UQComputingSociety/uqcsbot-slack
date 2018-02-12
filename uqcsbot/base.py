@@ -148,7 +148,7 @@ class UQCSBot(object):
     def _async_context(self):
         async_thread = threading.Thread(target=async_worker, args=(self._evt_loop,))
         async_thread.start()
-        self.scheduler.start()
+        self._scheduler.start()
         # Windows bugfix - cancelling queues requires a task being queued
         fix_future = asyncio.run_coroutine_threadsafe(asyncio.sleep(1000), self._evt_loop)
         try:
