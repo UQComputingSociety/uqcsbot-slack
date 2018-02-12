@@ -12,12 +12,12 @@ def wave(evt):
     """
     if evt.get('subtype') not in ['channel_join', 'channel_leave']:
         return
-    channel = bot.client.server.channels.find(evt['channel'])
-    if channel.name == 'announcements':
+    chan = bot.channels.get(evt['channel'])
+    if chan not is None and chan.name == 'announcements':
         return
     result = bot.api.reactions.add(
         name='wave',
-        channel=evt['channel'],
+        channel=chan.id,
         timestamp=evt['ts'],
     )
     if not result.get('ok'):
