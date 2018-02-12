@@ -9,7 +9,7 @@ import threading
 import logging
 from contextlib import contextmanager
 from typing import Callable, Optional
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
 class Command(object):
@@ -47,7 +47,7 @@ class UQCSBot(object):
     verification_token: Optional[str] = underscored_getter("verification_token")
     evt_loop: Optional[asyncio.AbstractEventLoop] = underscored_getter("evt_loop")
     executor: Optional[concurrent.futures.ThreadPoolExecutor] = underscored_getter("executor")
-    scheduler: Optional[BackgroundScheduler] = underscored_getter("scheduler")
+    scheduler: Optional[AsyncIOScheduler] = underscored_getter("scheduler")
 
     def __init__(self, logger=None):
         self._api_token = None
@@ -59,7 +59,7 @@ class UQCSBot(object):
         self.logger = logger or logging.getLogger("uqcsbot")
         self._handlers = collections.defaultdict(list)
         self._command_registry = collections.defaultdict(list)
-        self._scheduler = BackgroundScheduler()
+        self._scheduler = AsyncIOScheduler(event_loop=self._evt_loop)
 
         self.register_handler('message', self._handle_command)
         self.register_handler('hello', self._handle_hello)
@@ -148,6 +148,7 @@ class UQCSBot(object):
     def _async_context(self):
         async_thread = threading.Thread(target=async_worker, args=(self._evt_loop,))
         async_thread.start()
+        self.scheduler.start()
         # Windows bugfix - cancelling queues requires a task being queued
         fix_future = asyncio.run_coroutine_threadsafe(asyncio.sleep(1000), self._evt_loop)
         try:
@@ -155,6 +156,7 @@ class UQCSBot(object):
             fix_future.cancel()
         except:
             self.logger.exception("An error occurred, exiting")
+            self._scheduler.shutdown()
             self._executor.shutdown()
             fix_future.cancel()
             self._evt_loop.stop()
@@ -196,19 +198,18 @@ class UQCSBot(object):
         self._verification_token = verification_token
         with self._async_context():
             self.client.rtm_connect()
-            self.scheduler.start()
             while True:
                 for message in self.client.rtm_read():
                     self._run_handlers(message)
                     if message.get('type') == "goodbye":
                         break
 
-
     def run_debug(self):
         """
         Run in debug mode
         """
         self.evt_loop.set_debug(True)
+
         def debug_api_call(method, **kwargs):
             if method == "chat.postMessage":
                 print(kwargs['text'])
