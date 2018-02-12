@@ -1,4 +1,4 @@
-from typing import List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any
+from typing import Iterable, AsyncIterable, AsyncGenerator, Generator, Any
 from functools import partial
 from slackclient import SlackClient
 import asyncio
@@ -25,7 +25,6 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
             if not cursor:
                 break
             kwargs["cursor"] = cursor
-
 
     def __iter__(self):
         return self._gen()
