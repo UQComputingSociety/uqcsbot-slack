@@ -41,11 +41,11 @@ def async_worker(loop):
     loop.run_forever()
 
 
-class UQCSBot(EventEmitter):
-    api_token: Optional[str]
-    client: Optional[SlackClient]
-    verification_token: Optional[str]
-    server: Optional[SlackServer]
+class UQCSBot(object):
+    api_token: Optional[str] = underscored_getter("api_token")
+    client: Optional[SlackClient] = underscored_getter("client")
+    verification_token: Optional[str] = underscored_getter("verification_token")
+    server: Optional[SlackServer] = underscored_getter("server")
     evt_loop: Optional[asyncio.AbstractEventLoop]
     executor: Optional[concurrent.futures.ThreadPoolExecutor]
 
@@ -88,10 +88,6 @@ class UQCSBot(EventEmitter):
     def post_message(self, channel: Channel, text: str):
         self.api_call("chat.postMessage", channel=channel.id, text=text)
 
-    api_token = underscored_getter("api_token")
-    client = underscored_getter("client")
-    verification_token = underscored_getter("verification_token")
-    server = underscored_getter("server")
 
     async def run_async(self, fn, *args, **kwargs):
         """
@@ -106,14 +102,15 @@ class UQCSBot(EventEmitter):
     def _async_context(self):
         async_thread = threading.Thread(target=async_worker, args=(self._evt_loop,))
         async_thread.start()
+        # Windows bugfix - cancelling queues requires a task being queued
+        fix_future = asyncio.run_coroutine_threadsafe(asyncio.sleep(1000), self._evt_loop)
         try:
             yield
-        except:
-            # Windows bugfix - have to queue a taks
-            fix_future = asyncio.run_coroutine_threadsafe(asyncio.sleep(1000), self._evt_loop)
-            self._executor.shutdown()
-            self._evt_loop.stop()
             fix_future.cancel()
+        except:
+            self._executor.shutdown()
+            fix_future.cancel()
+            self._evt_loop.stop()
             async_thread.join()
             self._evt_loop.close()
             raise
