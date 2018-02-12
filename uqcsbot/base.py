@@ -1,7 +1,7 @@
 from pyee import EventEmitter
 from slackclient import SlackClient
 from slackeventsapi.server import SlackServer
-from .api import Channel
+from .api import Channel, APIWrapper
 from functools import partial
 import waitress
 import collections
@@ -85,8 +85,12 @@ class UQCSBot(object):
 
     api_call.__doc__ = SlackClient.api_call.__doc__
 
+    @property
+    def api(self):
+        return APIWrapper(self.client)
+
     def post_message(self, channel: Channel, text: str):
-        self.api_call("chat.postMessage", channel=channel.id, text=text)
+        self.api.chat.postMessage(channel=channel.id, text=text)
 
 
     async def run_async(self, fn, *args, **kwargs):
