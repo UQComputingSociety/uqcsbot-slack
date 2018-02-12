@@ -9,6 +9,8 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 install_requires = [
     'slackclient',
+    'requests',
+    'BeautifulSoup4'
 ]
 
 setup(
