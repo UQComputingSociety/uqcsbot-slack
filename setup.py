@@ -11,7 +11,7 @@ install_requires = [
     'slackclient',
     'requests',
     'BeautifulSoup4',
-    'apscheduler'
+    'apscheduler',
 ]
 
 setup(
