@@ -55,7 +55,7 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
                 break
             kwargs["cursor"] = cursor
 
-    def __aiter__(self) -> AsyncGenerator[dict, Any, None]:
+    def __aiter__(self) -> AsyncGenerator[dict, Any]:
         return self._agen()
 
 
