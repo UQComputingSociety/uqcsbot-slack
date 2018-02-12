@@ -9,138 +9,6 @@ if TYPE_CHECKING:
 T = TypeVar('T')
 
 
-class Channel(object):
-    def __init__(
-        self,
-        bot: 'UQCSBot',
-        channel_id: str,
-        name: str,
-        is_public: bool = False,
-        is_private: bool = False,
-        is_archived: bool = False,
-        previous_names: List[str] = None
-    ): 
-        self._bot = bot
-        self.id = channel_id
-        self.name = name
-        self._members = None
-        self.is_public = is_public
-        self.is_private = is_private
-        self.is_archived = is_archived
-        self.previous_names = previous_names or []
-
-    @property
-    def members(self) -> List[str]:
-        if self._members is not None:
-            return self._members
-        members = []
-        for page in self._bot.api.conversations.members.paginate(channel=self.id):
-            members += page["members"]
-        self._members = members
-        return self._members
-
-    def update_members(self) -> List[str]:
-        self._members = None
-        return self.members
-
-class ChannelWrapper(object):
-    def __init__(self, bot: 'UQCSBot'):
-        self._bot = bot
-        self._initialised = False
-        self._channels_by_id = {}
-        self._channels_by_name = {}
-        self._lock = threading.RLock()
-        self._bind_handlers()
-
-    def _bind_handlers(self) -> None:
-        PREFIX = "_on_"
-        for name in dir(type(self)):
-            if not name.startswith(PREFIX):
-                continue
-            attr = getattr(self, name)
-            mtype = name[len(PREFIX):]
-            self._bot.on(mtype, attr)
-
-    def _add_channel(self, chan_dict: dict) -> Channel:
-        chan = Channel(
-            bot=_bot,
-            channel_id=chan_dict['id'],
-            name=chan_dict['name'],
-            is_public=chan_dict.get('is_public', False),
-            is_private=chan_dict.get('is_private', False),
-            is_archived=chan_dict.get('is_archived', False),
-        )
-        self._channels_by_name[chan.name] = chan
-        self._channels_by_id[chan.id] = chan
-        return chan
-
-    def _initialise(self):
-        with self._lock:
-            for page in self._bot.api.channels.list.paginate():
-                for chan in page['channels']:
-                    self._add_channel(chan)
-            self._initialised = True
-
-    def get(self, name_or_id: str, default: T = None, use_cache: bool =True) -> Union[Channel, T]:
-        if use_cache and not self._initialised and:
-            self._initialise()
-        if name_or_id in self._channels_by_id:
-            return self._channels_by_id[name_or_id]
-        elif name_or_id in self._channels_by_name:
-            return self._channels_by_name[name_or_id]
-        elif not use_cache:
-            with self._lock:
-                resp = self._bot.api.channels.info(channel=name_or_id)
-                if not resp.get('ok'):
-                    return default
-                return self._add_channel(resp['channel'])
-        else:
-            return default
-
-    def __iter__(self):
-        return iter(self._channels_by_id.values())
-
-    def _on_member_joined_channel(self, evt):
-        chan = self.get(evt['channel'])
-        if chan._member_ids is None:
-            return
-        chan.member_ids.append(evt['user'])
-
-    def _on_member_left_channel(self, evt):
-        chan = self.get(evt['channel'])
-        if chan._member_ids is None:
-            return
-        chan.member_ids.remove(evt['user'])
-
-    def _on_channel_rename(self, evt):
-        with self._lock:
-            chan = self.get(evt['channel'])
-            self._channels_by_name.pop(chan.name)
-            chan.name = evt['name']
-            self._channels_by_name[chan.name] = chan.name
-
-    def _on_channel_archive(self, evt):
-        chan = self.get(evt['channel'])
-        chan.is_archived = True
-
-    def _on_channel_unarchive(self, evt):
-        chan = self.get(evt['channel'])
-        chan.is_archived = False
-
-    def _on_channel_created(self, evt):
-        self._add_channel(evt["channel"])
-
-    def _on_channel_deleted(self, evt):
-        with self._lock:
-            chan = self.get(evt['channel'])
-            self._channels_by_id.pop(chan.id)
-            self._channels_by_name.pop(chan.name)
-
-
-class MembersWrapper(object):
-    pass
-
-
 class Paginator(Iterable[dict], AsyncIterable[dict]):
     """
     Provides synchronous and asynchronous iterators over the pages of responses
@@ -271,3 +139,136 @@ class APIWrapper(object):
         On call, reconfigure the API Wrapper
         """
         return type(self)(self._client, **kwargs)
+
+
+class Channel(object):
+    def __init__(
+        self,
+        bot: 'UQCSBot',
+        channel_id: str,
+        name: str,
+        is_public: bool = False,
+        is_private: bool = False,
+        is_archived: bool = False,
+        previous_names: List[str] = None
+    ): 
+        self._bot = bot
+        self.id = channel_id
+        self.name = name
+        self._members = None
+        self.is_public = is_public
+        self.is_private = is_private
+        self.is_archived = is_archived
+        self.previous_names = previous_names or []
+
+    @property
+    def members(self) -> List[str]:
+        if self._members is not None:
+            return self._members
+        members = []
+        for page in self._bot.api.conversations.members.paginate(channel=self.id):
+            members += page["members"]
+        self._members = members
+        return self._members
+
+    def update_members(self) -> List[str]:
+        self._members = None
+        return self.members
+
+
+class ChannelWrapper(object):
+    def __init__(self, bot: 'UQCSBot'):
+        self._bot = bot
+        self._initialised = False
+        self._channels_by_id = {}
+        self._channels_by_name = {}
+        self._lock = threading.RLock()
+        self._bind_handlers()
+
+    def _bind_handlers(self) -> None:
+        PREFIX = "_on_"
+        for name in dir(type(self)):
+            if not name.startswith(PREFIX):
+                continue
+            attr = getattr(self, name)
+            mtype = name[len(PREFIX):]
+            self._bot.on(mtype, attr)
+
+    def _add_channel(self, chan_dict: dict) -> Channel:
+        chan = Channel(
+            bot=_bot,
+            channel_id=chan_dict['id'],
+            name=chan_dict['name'],
+            is_public=chan_dict.get('is_public', False),
+            is_private=chan_dict.get('is_private', False),
+            is_archived=chan_dict.get('is_archived', False),
+        )
+        self._channels_by_name[chan.name] = chan
+        self._channels_by_id[chan.id] = chan
+        return chan
+
+    def _initialise(self):
+        with self._lock:
+            for page in self._bot.api.channels.list.paginate():
+                for chan in page['channels']:
+                    self._add_channel(chan)
+            self._initialised = True
+
+    def get(self, name_or_id: str, default: T = None, use_cache: bool =True) -> Union[Channel, T]:
+        if use_cache and not self._initialised and:
+            self._initialise()
+        if name_or_id in self._channels_by_id:
+            return self._channels_by_id[name_or_id]
+        elif name_or_id in self._channels_by_name:
+            return self._channels_by_name[name_or_id]
+        elif not use_cache:
+            with self._lock:
+                resp = self._bot.api.channels.info(channel=name_or_id)
+                if not resp.get('ok'):
+                    return default
+                return self._add_channel(resp['channel'])
+        else:
+            return default
+
+    def __iter__(self):
+        return iter(self._channels_by_id.values())
+
+    def _on_member_joined_channel(self, evt):
+        chan = self.get(evt['channel'])
+        if chan._member_ids is None:
+            return
+        chan.member_ids.append(evt['user'])
+
+    def _on_member_left_channel(self, evt):
+        chan = self.get(evt['channel'])
+        if chan._member_ids is None:
+            return
+        chan.member_ids.remove(evt['user'])
+
+    def _on_channel_rename(self, evt):
+        with self._lock:
+            chan = self.get(evt['channel'])
+            self._channels_by_name.pop(chan.name)
+            chan.name = evt['name']
+            self._channels_by_name[chan.name] = chan.name
+
+    def _on_channel_archive(self, evt):
+        chan = self.get(evt['channel'])
+        chan.is_archived = True
+
+    def _on_channel_unarchive(self, evt):
+        chan = self.get(evt['channel'])
+        chan.is_archived = False
+
+    def _on_channel_created(self, evt):
+        self._add_channel(evt["channel"])
+
+    def _on_channel_deleted(self, evt):
+        with self._lock:
+            chan = self.get(evt['channel'])
+            self._channels_by_id.pop(chan.id)
+            self._channels_by_name.pop(chan.name)
+
+
+class MembersWrapper(object):
+    pass
