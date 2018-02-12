@@ -4,19 +4,6 @@ from slackclient import SlackClient
 import asyncio
 
 
-class Channel(object):
-    def __init__(self, client: SlackClient, channel_id: str):
-        self.client = client
-        self.api = APIWrapper(self.client)
-        self.id = channel_id
-
-    def get_members(self) -> List[str]:
-        members = []
-        for page in self.api.conversations.members.paginate(channel=self.id):
-            members += page["members"]
-        return members
-
-
 class Paginator(Iterable[dict], AsyncIterable[dict]):
     """
     Provides synchronous and asynchronous iterators over the pages of responses
