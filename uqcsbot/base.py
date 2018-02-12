@@ -43,8 +43,8 @@ class UQCSBot(object):
     api_token: Optional[str] = underscored_getter("api_token")
     client: Optional[SlackClient] = underscored_getter("client")
     verification_token: Optional[str] = underscored_getter("verification_token")
-    evt_loop: Optional[asyncio.AbstractEventLoop]
-    executor: Optional[concurrent.futures.ThreadPoolExecutor]
+    evt_loop: Optional[asyncio.AbstractEventLoop] = underscored_getter("evt_loop")
+    executor: Optional[concurrent.futures.ThreadPoolExecutor]  = underscored_getter("executor")
 
     def __init__(self, logger=None):
         self._api_token = None
@@ -57,9 +57,9 @@ class UQCSBot(object):
         self._handlers = collections.defaultdict(list)
         self._command_registry = collections.defaultdict(list)
 
-        self._handlers[''].append(self._handle_command)
-        self._handlers['hello'].append(self._handle_hello)
-        self._handlers['hello'].append(self._handle_goodbye)
+        self.register_handler('message', self._handle_command)
+        self.register_handler('hello', self._handle_hello)
+        self.register_handler('goodbye', self._handle_goodbye)
 
     def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
@@ -149,24 +149,24 @@ class UQCSBot(object):
             self._evt_loop.close()
             raise
 
-    async def _await_error(self, name, awaitable):
+    async def _await_error(self, awaitable):
         try:
             return (await awaitable)
         except Exception:
-            self.logger.exception(f'Error in handler "{name}"')
+            self.logger.exception('Error in handler')
             return None
 
     def _run_handlers(self, event):
         if "type" not in event:
             self.logger.error(f"No type in message: {event}")
-        handlers = self._handlers[event['type']]
-        awaitables = {}
-        for name, handler in handlers.items():
-            awaitables[name] = self._await_error(name, handler(event))
-        asyncio.run_coroutine_threadsafe(
-            coro=asyncio.gather(*awaitables.values(), return_exceptions=True),
-            loop=self.evt_loop
-        )
+        handlers = self._handlers[event['type']] + self._handlers['']
+        awaitables = [
+            asyncio.run_coroutine_threadsafe(
+                self._await_error(handler(event)),
+                loop=self.evt_loop
+            )
+            for handler in handlers
+        ]
 
     def run(self, api_token, verification_token, **kwargs):
         """
