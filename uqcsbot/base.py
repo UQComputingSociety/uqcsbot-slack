@@ -1,5 +1,6 @@
 from slackclient import SlackClient
-from .api import Channel, APIWrapper
+from slackclient.channel import Channel
+from .api import APIWrapper
 from functools import partial
 import collections
 import asyncio
@@ -76,7 +77,7 @@ class UQCSBot(object):
         if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
             return
         command_name, *arg = text[1:].split(" ", 1)
-        channel = Channel(self.client, message["channel"])
+        channel = self.channels.find(message["channel"])
         command = Command(command_name, None if not arg else arg[0], channel)
         for cmd in self._command_registry[command_name]:
             asyncio.run_coroutine_threadsafe(cmd(command), self._evt_loop)
@@ -113,6 +114,10 @@ class UQCSBot(object):
 
     def post_message(self, channel: Channel, text: str):
         self.api.chat.postMessage(channel=channel.id, text=text)
+
+    @property
+    def channels(self):
+        return self.client.server.channels
 
     def _wrap_async(self, fn):
         """
