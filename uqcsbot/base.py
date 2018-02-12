@@ -1,5 +1,5 @@
 from slackclient import SlackClient
-from .api import APIWrapper, ChannelWrapper
+from .api import APIWrapper, ChannelWrapper, Channel
 from functools import partial
 import collections
 import asyncio
@@ -194,7 +194,8 @@ class UQCSBot(object):
         self._client = SlackClient(api_token)
         self._verification_token = verification_token
         with self._async_context():
-            self.client.rtm_connect()
+            if not self.client.rtm_connect():
+                raise OSError("Error connecting to RTM API")
             while True:
                 for message in self.client.rtm_read():
                     self._run_handlers(message)

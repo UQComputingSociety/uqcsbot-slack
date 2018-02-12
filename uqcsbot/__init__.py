@@ -7,6 +7,10 @@ from uqcsbot.base import UQCSBot, bot, Command
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 
+@bot.on('message')
+def on_message(evt):
+    print(bot.channels.get(evt['channel']).members)
+
 
 def main():
     # Import scripts

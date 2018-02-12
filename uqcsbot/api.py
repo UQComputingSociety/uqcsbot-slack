@@ -196,7 +196,7 @@ class ChannelWrapper(object):
 
     def _add_channel(self, chan_dict: dict) -> Channel:
         chan = Channel(
-            bot=_bot,
+            bot=self._bot,
             channel_id=chan_dict['id'],
             name=chan_dict['name'],
             is_public=chan_dict.get('is_public', False),
@@ -215,7 +215,7 @@ class ChannelWrapper(object):
             self._initialised = True
 
     def get(self, name_or_id: str, default: T = None, use_cache: bool =True) -> Union[Channel, T]:
-        if use_cache and not self._initialised and:
+        if use_cache and not self._initialised:
             self._initialise()
         if name_or_id in self._channels_by_id:
             return self._channels_by_id[name_or_id]
