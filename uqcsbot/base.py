@@ -71,15 +71,17 @@ class UQCSBot(object):
             self.logger.debug(f"Goodbye event has unexpected extras: {evt}")
         self.logger.info(f"Server is about to disconnect")
 
-    def _handle_command(self, message: dict) -> None:
+    async def _handle_command(self, message: dict) -> None:
         text = message.get("text")
         if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
             return
         command_name, *arg = text[1:].split(" ", 1)
         channel = Channel(self.client, message["channel"])
         command = Command(command_name, None if not arg else arg[0], channel)
-        for cmd in self._command_registry[command_name]:
-            asyncio.run_coroutine_threadsafe(cmd(command), self._evt_loop)
+        await asyncio.gather(*[
+            self._await_error(cmd(command))
+            for cmd in self._command_registry[command_name]
+        ])
 
     def on_command(self, command_name: str):
         def decorator(fn):
