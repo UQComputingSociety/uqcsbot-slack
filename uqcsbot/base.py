@@ -9,6 +9,7 @@ import threading
 import logging
 from contextlib import contextmanager
 from typing import Callable, Optional
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 class Command(object):
@@ -45,7 +46,8 @@ class UQCSBot(object):
     client: Optional[SlackClient] = underscored_getter("client")
     verification_token: Optional[str] = underscored_getter("verification_token")
     evt_loop: Optional[asyncio.AbstractEventLoop] = underscored_getter("evt_loop")
-    executor: Optional[concurrent.futures.ThreadPoolExecutor]  = underscored_getter("executor")
+    executor: Optional[concurrent.futures.ThreadPoolExecutor] = underscored_getter("executor")
+    scheduler: Optional[BackgroundScheduler] = underscored_getter("scheduler")
 
     def __init__(self, logger=None):
         self._api_token = None
@@ -57,6 +59,7 @@ class UQCSBot(object):
         self.logger = logger or logging.getLogger("uqcsbot")
         self._handlers = collections.defaultdict(list)
         self._command_registry = collections.defaultdict(list)
+        self._scheduler = BackgroundScheduler()
 
         self.register_handler('message', self._handle_command)
         self.register_handler('hello', self._handle_hello)
@@ -95,6 +98,9 @@ class UQCSBot(object):
         if fn is None:
             return partial(self.register_handler, message_type)
         return self.register_handler(message_type, fn)
+
+    def on_schedule(self, *args, **kwargs):
+        return lambda f: self._scheduler.add_job(f, *args, **kwargs)
     
     def register_handler(self, message_type: Optional[str], handler_fn: Callable):
         if message_type is None:
@@ -190,6 +196,7 @@ class UQCSBot(object):
         self._verification_token = verification_token
         with self._async_context():
             self.client.rtm_connect()
+            self.scheduler.start()
             while True:
                 for message in self.client.rtm_read():
                     self._run_handlers(message)
