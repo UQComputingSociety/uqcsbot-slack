@@ -9,10 +9,11 @@ ACRONYM_LIMIT = 5
 BASE_URL = "http://acronyms.thefreedictionary.com"
 
 
-def get_acronyms(raw_html: str) -> List[str]:
-    html = BeautifulSoup(raw_html, 'html.parser')
+async def get_acronyms(word: str) -> (str, List[str]):
+    http_response = await bot.run_async(get, f"{BASE_URL}/{quote(word)}")
+    html = BeautifulSoup(http_response.content, 'html.parser')
     acronym_tds = html.find_all("td", class_="acr")
-    return [td.find_next_sibling("td").text for td in acronym_tds]
+    return word, [td.find_next_sibling("td").text for td in acronym_tds]
 
 
 @bot.on_command("acro")
@@ -22,6 +23,7 @@ async def handle_acronym(command: Command):
 
     words = command.arg.split(" ")
 
+    # Requested by @wbo, do not remove unless you get his express permission
     if len(words) == 1:
         word = words[0]
         if word.lower() in [":horse:", "horse"]:
@@ -31,15 +33,9 @@ async def handle_acronym(command: Command):
             bot.post_message(command.channel, ">:older_woman:")
             return
 
-    loop = asyncio.get_event_loop()
-    acronym_futures = []
-    for word in words[:ACRONYM_LIMIT]:
-        get_task = loop.run_in_executor(None, get, f"{BASE_URL}/{quote(word)}")
-        acronym_futures.append(get_task)
-
+    acronym_futures = [get_acronyms(word) for word in words[:ACRONYM_LIMIT]]
     response = ""
-    for http_response in await asyncio.gather(*acronym_futures):
-        acronyms = get_acronyms(http_response.content)
+    for word, acronyms in await asyncio.gather(*acronym_futures):
         if acronyms:
             acronym = acronyms[0]
             response += f">{word.upper()}: {acronym}\r\n"
