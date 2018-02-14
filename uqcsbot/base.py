@@ -20,6 +20,16 @@ class Command(object):
     def has_arg(self) -> bool:
         return self.arg is not None
 
+    @classmethod
+    def from_message(cls, bot, message: dict):
+        text = message.get("text")
+        if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
+            return
+        self.command_name, *arg = text[1:].split(" ", 1)
+        self.channel = bot.channels.get(message["channel"])
+        self.command = None if not arg else arg[0]
+
+
 
 CommandHandler = Callable[[Command], None]
 
@@ -77,15 +87,10 @@ class UQCSBot(object):
         self.logger.info(f"Server is about to disconnect")
 
     async def _handle_command(self, message: dict) -> None:
-        text = message.get("text")
-        if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
-            return
-        command_name, *arg = text[1:].split(" ", 1)
-        channel = self.channels.get(message["channel"])
-        command = Command(command_name, None if not arg else arg[0], channel)
+        command = Command.from_message(self, message)
         await asyncio.gather(*[
             self._await_error(cmd(command))
-            for cmd in self._command_registry[command_name]
+            for cmd in self._command_registry[command.command_name]
         ])
 
     def on_command(self, command_name: str):
@@ -123,7 +128,7 @@ class UQCSBot(object):
 
     def post_message(self, channel: Union[Channel, str], text: str):
         channel_id = channel if isinstance(channel, str) else channel.id
-        self.api.chat.postMessage(channel=channel_id, text=text)
+        return self.api.chat.postMessage(channel=channel_id, text=text)
 
     def _wrap_async(self, fn):
         """
