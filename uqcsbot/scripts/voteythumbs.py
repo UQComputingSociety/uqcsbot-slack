@@ -39,6 +39,14 @@ async def voteythumbs(evt: dict):
         channel=cmd.channel.id,
         timestamp=result['ts'],
     )
-    await add_reaction("thumbsup")
+    res = await add_reaction("thumbsup")
+    if not res.get('ok'):
+        bot.logger.error(f"Voteythumbs error adding \"thumbsup\": {res}")
+        return
     await add_reaction("thumbsdown")
+    if not res.get('ok'):
+        bot.logger.error(f"Voteythumbs error adding \"thumbsdown\": {res}")
+        return
     await add_reaction("eyes")
+    if not res.get('ok'):
+        bot.logger.error(f"Voteythumbs error adding \"eyes\": {res}")
