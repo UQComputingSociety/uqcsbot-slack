@@ -34,8 +34,9 @@ async def voteythumbs(evt: dict):
         return
 
     result = await bot.run_async(bot.post_message, cmd.channel, "Starting vote: {cmd.arg}")
-    add_reaction = bot.run_async(
+    add_reaction = lambda name: bot.run_async(
         bot.api.reactions.add,
+        name=name,
         channel=cmd.channel.id,
         timestamp=result['ts'],
     )
