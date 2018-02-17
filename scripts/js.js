@@ -32,6 +32,6 @@ module.exports = function (robot) {
             ];
         }
 
-        res.send(responseLines.join("\r\n");
+        res.send(responseLines.join("\r\n"));
 	});
 }
