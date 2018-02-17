@@ -6,7 +6,7 @@ REACTS = ['waiting', 'apple_waiting', 'waiting_droid', 'keen', 'fiestaparrot']
 
 @bot.on_schedule('cron', hour=17, timezone='Australia/Brisbane')
 async def wakie():
-    channel = bot.channels.get("csatestbot-test")
+    channel = bot.channels.get("general")
     victims = sample(channel.members, 2)
     lines = [f'Hey <@{v}>! Tell us about something cool you are working on!' for v in victims]
     msg = await bot.run_async(bot.post_message, channel, '\r\n'.join(lines))
