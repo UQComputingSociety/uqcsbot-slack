@@ -13,7 +13,7 @@ def wave(evt):
     if evt.get('subtype') not in ['channel_join', 'channel_leave']:
         return
     chan = bot.channels.get(evt['channel'])
-    if chan not is None and chan.name == 'announcements':
+    if chan is not None and chan.name == 'announcements':
         return
     result = bot.api.reactions.add(
         name='wave',

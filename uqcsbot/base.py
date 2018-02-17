@@ -7,18 +7,32 @@ import concurrent.futures
 import threading
 import logging
 from contextlib import contextmanager
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, TypeVar
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
+T = TypeVar('T')
+
 class Command(object):
-    def __init__(self, command_name: str, arg: str, channel: Channel):
+    def __init__(self, command_name: str, arg: Optional[str], channel: Channel):
         self.command_name = command_name
         self.arg = arg
         self.channel = channel
     
     def has_arg(self) -> bool:
         return self.arg is not None
+
+    @classmethod
+    def from_message(cls: T, bot, message: dict) -> Optional[T]:
+        text = message.get("text")
+        if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
+            return
+        command_name, *arg = text[1:].split(" ", 1)
+        return cls(
+            command_name=command_name,
+            channel=bot.channels.get(message["channel"]),
+            arg=None if not arg else arg[0],
+        )
 
 
 CommandHandler = Callable[[Command], None]
@@ -77,15 +91,12 @@ class UQCSBot(object):
         self.logger.info(f"Server is about to disconnect")
 
     async def _handle_command(self, message: dict) -> None:
-        text = message.get("text")
-        if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
+        command = Command.from_message(self, message)
+        if command is None:
             return
-        command_name, *arg = text[1:].split(" ", 1)
-        channel = self.channels.get(message["channel"])
-        command = Command(command_name, None if not arg else arg[0], channel)
         await asyncio.gather(*[
             self._await_error(cmd(command))
-            for cmd in self._command_registry[command_name]
+            for cmd in self._command_registry[command.command_name]
         ])
 
     def on_command(self, command_name: str):
@@ -121,9 +132,13 @@ class UQCSBot(object):
     def api(self):
         return APIWrapper(self.client)
 
+    @property
+    def async(self):
+        return AsyncBotWrapper(self.client)
+
     def post_message(self, channel: Union[Channel, str], text: str):
         channel_id = channel if isinstance(channel, str) else channel.id
-        self.api.chat.postMessage(channel=channel_id, text=text)
+        return self.api.chat.postMessage(channel=channel_id, text=text)
 
     def _wrap_async(self, fn):
         """
@@ -225,6 +240,19 @@ class UQCSBot(object):
                     "subtype": "user",
                     "type": "message"
                 })
+
+
+class AsyncBotWrapper(object):
+    bot: UQCSBot
+
+    def __init__(self, bot: UQCSBot):
+        self.bot = bot
+
+    def __getattr__(self, name):
+        attr = getattr(self.bot, name)
+        if not callable(attr) or not asyncio.iscoroutinefunction(attr):
+            return attr
+        return partial(bot.run_async, attr)
 
 
 bot = UQCSBot()
