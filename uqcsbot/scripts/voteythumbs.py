@@ -38,20 +38,20 @@ async def voteythumbs(evt: dict):
     cmd.arg = strip(cmd.arg)
 
     result = await bot.run_async(bot.post_message, cmd.channel, f"Starting vote: {cmd.arg}")
-    add_reaction = lambda name: bot.run_async(
+    add_reaction = partial(
+        bot.run_async,
         bot.api.reactions.add,
-        name=name,
         channel=cmd.channel.id,
         timestamp=result['ts'],
     )
-    res = await add_reaction("thumbsup")
+    res = await add_reaction(name="thumbsup")
     if not res.get('ok'):
         bot.logger.error(f"Voteythumbs error adding \"thumbsup\": {res}")
         return
-    await add_reaction("thumbsdown")
+    res = await add_reaction(name="thumbsdown")
     if not res.get('ok'):
         bot.logger.error(f"Voteythumbs error adding \"thumbsdown\": {res}")
         return
-    await add_reaction("eyes")
+    res = await add_reaction(name="eyes")
     if not res.get('ok'):
         bot.logger.error(f"Voteythumbs error adding \"eyes\": {res}")
