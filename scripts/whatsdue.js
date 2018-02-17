@@ -11,7 +11,7 @@ var ical = require('ical.js');
 module.exports = function (robot) {
 
     // The course and assessment urls to get profile and assessment info.
-    var courseUrl = 'https://www.uq.edu.au/study/course.html?course_code=';
+    var courseUrl = 'https://my.uq.edu.au/programs-courses/course.html?course_code=';
     var assessmentUrl = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds=';
 
     /**
