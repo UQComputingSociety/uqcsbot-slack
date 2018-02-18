@@ -155,7 +155,7 @@ class Channel(object):
         self._bot = bot
         self.id = channel_id
         self.name = name
-        self._members = None
+        self._member_ids = None
         self.is_public = is_public
         self.is_private = is_private
         self.is_archived = is_archived
@@ -163,16 +163,17 @@ class Channel(object):
 
     @property
     def members(self) -> List[str]:
-        if self._members is not None:
-            return self._members
+        if self._member_ids is not None:
+            return self._member_ids
+        self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
         members = []
         for page in self._bot.api.conversations.members.paginate(channel=self.id):
             members += page["members"]
-        self._members = members
-        return self._members
+        self._member_ids = members
+        return self._member_ids
 
     def update_members(self) -> List[str]:
-        self._members = None
+        self._member_ids = None
         return self.members
 
 
