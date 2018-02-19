@@ -3,7 +3,7 @@ from uqcsbot import bot
 import asyncio
 
 MEMBER_MILESTONE = 50;  # Number of members between posting a celebration
-MESSAGE_PAUSE = 2500 / 1000;   # Number of seconds between sending bot messages
+MESSAGE_PAUSE = 2.5;   # Number of seconds between sending bot messages
 WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "Hey there! Welcome to the UQCS slack!",
     "This is the first time I've seen you, so you're probably new here",
@@ -16,17 +16,21 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
 
 @bot.on("member_joined_channel")
 async def welcome(evt: dict):
+    """
+    Welcomes new users to UQCS Slack and checks for member milestones
+    """
     chan = bot.channels.get(evt.get('channel'))
     if chan is None or chan.name != "announcements":
         return
+    
     announcements = chan
     general = bot.channels.get("general")
+    
     user_info = await bot.run_async(bot.api.users.info, user=evt.get("user"))
     display_name = user_info.get("user", {}).get("profile", {}).get("display_name")
-
-    # Ensure the message to #general is scheduled, but don't block
-    coro = bot.run_async(bot.post_message, general, f"Welcome, {display_name}")
-    asyncio.run_coroutine_threadsafe(coro, bot.evt_loop)
+    
+    if display_name:
+        await bot.run_async(bot.post_message, general, f"Welcome, {display_name}")
 
     for message in WELCOME_MESSAGES:
         await asyncio.sleep(MESSAGE_PAUSE)
