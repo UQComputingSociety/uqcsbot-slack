@@ -6,6 +6,7 @@ import asyncio
 import concurrent.futures
 import threading
 import logging
+import time
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -185,6 +186,7 @@ class UQCSBot(object):
             return None
 
     def _run_handlers(self, event):
+        self.logger.debug(f"Running handlers for {event}")
         if "type" not in event:
             self.logger.error(f"No type in message: {event}")
         handlers = self._handlers[event['type']] + self._handlers['']
@@ -217,6 +219,7 @@ class UQCSBot(object):
                     self._run_handlers(message)
                     if message.get('type') == "goodbye":
                         break
+                time.sleep(0.5)
 
     def run_debug(self):
         """
