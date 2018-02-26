@@ -1,5 +1,5 @@
 from uqcsbot import bot, Command
-from requests import get
+import requests
 from requests.utils import quote
 from bs4 import BeautifulSoup
 
@@ -10,7 +10,7 @@ COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 async def handle_ecp(command: Command):
     channel = command.channel
     course_name = channel.name if not command.has_arg() else command.arg
-    http_response = await bot.run_async(get, f"{COURSE_URL}{quote(course_name)}")
+    http_response = await bot.run_async(requests.get, f"{COURSE_URL}{quote(course_name)}")
     html = BeautifulSoup(http_response.content, 'html.parser')
     if html.find(id="course-notfound"):
         bot.post_message(channel, f"Not a valid course code.")

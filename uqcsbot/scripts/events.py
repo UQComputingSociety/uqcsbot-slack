@@ -1,7 +1,7 @@
 from typing import List
 from uqcsbot import bot, Command
 from icalendar import Calendar, vText
-from requests import get
+import requests
 from datetime import datetime, timedelta
 from pytz import timezone, utc
 import re
@@ -20,21 +20,21 @@ class EventFilter(object):
         self._weeks = weeks
         self._cap = cap
 
-    @staticmethod
-    def from_command(command: Command):
+    @classmethod
+    def from_command(cls, command: Command):
         if not command.has_arg():
-            return EventFilter(weeks=2)
+            return cls(weeks=2)
         else:
             match = re.match(FILTER_REGEX, command.arg)
             if not match:
-                return EventFilter(is_valid=False)
+                return cls(is_valid=False)
             filter_str = match.group(0)
             if filter_str in ['full', 'all']:
-                return EventFilter(full=True)
+                return cls(full=True)
             elif 'week' in filter_str:
-                return EventFilter(weeks=int(filter_str.split()[0]))
+                return cls(weeks=int(filter_str.split()[0]))
             else:
-                return EventFilter(cap=int(filter_str))
+                return cls(cap=int(filter_str))
 
     def filter_events(self, events: List['Event'], start_time: datetime):
         if self._weeks is not None:
@@ -65,13 +65,13 @@ class Event(object):
         self.location = location
         self.summary = summary
 
-    @staticmethod
-    def from_cal_event(cal_event):
+    @classmethod
+    def from_cal_event(cls, cal_event):
         start = cal_event.get('dtstart').dt
         end = cal_event.get('dtend').dt
         location = cal_event.get('location', 'TBA')
         summary = cal_event.get('summary')
-        return Event(start, end, location, summary)
+        return cls(start, end, location, summary)
 
     def __str__(self):
         d1 = self.start.astimezone(BRISBANE_TZ)
@@ -93,22 +93,30 @@ async def handle_events(command: Command):
         bot.post_message(command.channel, "Invalid events filter.")
         return
 
-    http_response = await bot.run_async(get, CALENDAR_URL)
+    http_response = await bot.run_async(requests.get, CALENDAR_URL)
     cal = Calendar.from_ical(http_response.content)
 
     current_time = datetime.now(tz=BRISBANE_TZ).astimezone(utc)
 
-    # TODO: support recurring events
+    events = []
     # subcomponents are how icalendar returns the list of things in the calendar
-    # we are only interested in ones with the name VEVENT as they are events
-    # we also currently filter out recurring events
-    events = [Event.from_cal_event(c) for c in cal.subcomponents if c.name == 'VEVENT' and c.get('RRULE') is None]
-    # next we want to filter out any events that are not after the current time
-    events = [e for e in events if e.start > current_time]
+    for c in cal.subcomponents:
+        # TODO: support recurring events
+        # we are only interested in ones with the name VEVENT as they are events
+        # we also currently filter out recurring events
+        if c.name != 'VEVENT' or c.get('RRULE') is not None:
+            continue
+
+        # we convert it to our own event class
+        event = Event.from_cal_event(c)
+        # then we want to filter out any events that are not after the current time
+        if event.start > current_time:
+            events.append(event)
+
     # then we apply our event filter as generated earlier
     events = event_filter.filter_events(events, current_time)
     # then, we sort the events by date
-    events = sorted(events, key=lambda e: e.start, reverse=True)
+    events = sorted(events, key=lambda e: e.start)
 
     # then print to the user the result
     if not events:

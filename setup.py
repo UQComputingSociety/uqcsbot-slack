@@ -13,6 +13,7 @@ install_requires = [
     'BeautifulSoup4',
     'apscheduler',
     'icalendar',
+    'pytz',
 ]
 
 setup(
