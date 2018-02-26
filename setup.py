@@ -12,6 +12,7 @@ install_requires = [
     'requests',
     'BeautifulSoup4',
     'apscheduler',
+    'icalendar',
 ]
 
 setup(
