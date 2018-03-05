@@ -18,7 +18,7 @@ async def handle_wiki(command: Command):
     possible_matches = response[result_list]
 
     # If the results are empty let them know
-    if not possible_matches[best_match]:
+    if not possible_matches:
         bot.post_message(command.channel, "No Results.")
         return
 
