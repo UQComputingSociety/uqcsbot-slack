@@ -7,7 +7,11 @@ import json
 async def handle_wiki(command: Command):
     search_query = command.arg
     api_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&format=json&limit=2"
+
     http_response = await bot.run_async(requests.get, api_url, params={'search': search_query})
+    if http_response.status_code != requests.codes.ok:
+        bot.post_message(command.channel, "Problem fetching data")
+
     _, title_list, snippet_list, url_list = json.loads(http_response.content)
 
     # If the results are empty let them know. Any list being empty signifies this.
@@ -17,7 +21,7 @@ async def handle_wiki(command: Command):
 
     title, snippet, url = title_list[0], snippet_list[0], url_list[0]
     # Detect if there are multiple references to the query, if so, use the first reference (i.e. the second item in the lists).
-    multiple_reference_instances = ("may refer to:", "may have several meanings:")
+    multiple_reference_instances = ("may refer to:", "may have several meanings:", "")
     if any(instance in snippet for instance in multiple_reference_instances):
         title, snippet, url = title_list[1], snippet_list[1], url_list[1]
 
