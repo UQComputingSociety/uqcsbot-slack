@@ -19,7 +19,8 @@ BOT_TOKENS = {'U9LA6BX8X': b64decode('eG94Yi0zMjYzNDY0MDUzMDMteGpIbFhlamVNUG1McV
               'U9K81NL7N': b64decode('eG94Yi0zMjUyNzM3NjgyNjAtNFd0SGhRUWhLb3BSVUlJNFJuc0VRRXJL').decode('utf-8'),
               'U9JJZ1ZJ4': b64decode('eG94Yi0zMjQ2NDUwNjc2MTYtaHNpR3B3S0ZhSnY3bzJrOW43UU9uRXFp').decode('utf-8'),
               'U9K5W508K': b64decode('eG94Yi0zMjUyMDAxNzAyOTEtTlJvdVVLcWdyVEpVSE9SMjBoUzhBcnhW').decode('utf-8')}
-
+# Channel group which contains all the bots. Easy way to get all their ids.
+SECRET_BOT_MEETING_ROOM = 'G9JJXHF7S'
 # Mitch's UQCSTesting Slack API Token. No touchie >:(
 API_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01YjdmYjlhYzAyZWYzNDAyNTYyMTJmY2Q2YjQ1NmEyYg==').decode('utf-8')
 
@@ -62,8 +63,8 @@ def get_test_bot_token():
     (that is, not currently being used by anyone else) and return their
     respective BOT_TOKEN.
     '''
-    api_url = 'https://slack.com/api/conversations.members?channel=G9JJXHF7S'
-    response = requests.get(api_url, params={'token': API_TOKEN})
+    api_url = 'https://slack.com/api/conversations.members'
+    response = requests.get(api_url, params={'token': API_TOKEN, 'channe': SECRET_BOT_MEETING_ROOM})
     if response.status_code != requests.codes['ok']:
         return None
 
