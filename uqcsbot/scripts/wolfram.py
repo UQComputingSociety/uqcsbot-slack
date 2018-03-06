@@ -71,16 +71,31 @@ async def handle_wolfram(command: Command):
     result = json_response['result']
     conversation_id = json_response['conversationID']
 
-    attachments = [{'footer': str(conversation_id)}]
-    bot.post_message(command.channel, result, attachments=attachments)
+    # TODO: Is there a better option than storing the id in the fallback?
+    # TODO: The footer is actually used in a check in handle_reply. This is probably fine unless someone else uses this footer but why would they? In any case a better solution would be good. Another non visible field would work.
+    attachments = [{
+        'fallback': conversation_id,
+        'footer': 'Further questions may be asked',
+        'text': result
+    }]
+
+    bot.post_message(command.channel, "", attachments=attachments)
 
 @bot.on('message')
 def handle_reply(evt: dict):
+    channel = evt['channel']
+
+    # if 'thread_ts' in evt:
+    #     bot.post_message(channel, evt)
+
+    print(bot.api.channels.info(channel=channel)['channel']['latest'])
     # We only care about replies to messages that have been set up for conversation
     if 'subtype' not in evt or evt['subtype'] != 'message_replied':
         return
 
-    bot.post_message(evt['channel'], evt)
+
+    bot.post_message(channel, evt)
+
 
 async def short_answer(command: Command):
     """
