@@ -2,7 +2,7 @@ from functools import partial
 from slackclient import SlackClient
 import asyncio
 import threading
-from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar
+from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar, Optional
 if TYPE_CHECKING:
     from .base import UQCSBot
 
@@ -208,6 +208,22 @@ class ChannelWrapper(object):
         self._channels_by_id[chan.id] = chan
         return chan
 
+    def _add_im(self, im_dict: dict) -> Optional[Channel]:
+        if im_dict['is_user_deleted']:
+            return
+
+        # TODO: Name
+        chan = Channel(
+            bot=self._bot,
+            channel_id=im_dict['id'],
+            name='idk_what_you_want_here',
+            is_public=False,
+            is_private=True,
+            is_archived=False
+        )
+        self._channels_by_id[chan.id] = chan
+        return chan
+
     def _initialise(self):
         with self._lock:
             if self._initialised:
@@ -219,6 +235,11 @@ class ChannelWrapper(object):
             for page in self._bot.api.channels.list.paginate():
                 for chan in page['channels']:
                     self._add_channel(chan)
+
+            for page in self._bot.api.im.list.paginate():
+                for im in page['ims']:
+                    self._add_im(im)
+
             self._initialised = True
 
     def reload(self):
