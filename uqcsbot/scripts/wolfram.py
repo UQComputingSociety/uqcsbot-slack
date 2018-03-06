@@ -55,27 +55,36 @@ async def handle_wolfram(command: Command):
         bot.post_message(command.channel, "There was a problem getting the response")
         return
 
-    result = json.loads(http_response.content)
+    json_response = json.loads(http_response.content)
 
-    if 'error' in result:
-        error = result['error']
+    if 'error' in json_response:
+        error = json_response['error']
         if error == "No result is available":
             # If no conversational result is available just return a normal short answer
             # TODO: Should the user be told they can't reply to the result?
-            short_answer(command)
+            await short_answer(command)
             return
         else:
             bot.post_message(command.channel, error)
             return
 
+    result = json_response['result']
+    conversation_id = json_response['conversationID']
 
+    attachments = [{'footer': str(conversation_id)}]
+    bot.post_message(command.channel, result, attachments=attachments)
 
-    bot.post_message(command.channel, result)
+@bot.on('message')
+def handle_reply(evt: dict):
+    # We only care about replies to messages that have been set up for conversation
+    if 'subtype' not in evt or evt['subtype'] != 'message_replied':
+        return
 
+    bot.post_message(evt['channel'], evt)
 
 async def short_answer(command: Command):
     """
-    This uses wolframs short answers api to just return a simple short plaintext response.
+    This uses wolfram's short answers api to just return a simple short plaintext response.
 
     This is used if the conversation api fails to get a result (for instance !wolfram pineapple is not a great
     conversation starter but may be interesting.
