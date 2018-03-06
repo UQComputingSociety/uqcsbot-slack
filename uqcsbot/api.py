@@ -208,6 +208,16 @@ class ChannelWrapper(object):
         self._channels_by_id[chan.id] = chan
         return chan
 
+    def reload_ims(self):
+        for page in self._bot.api.im.list.paginate():
+            for im in page['ims']:
+                if im['is_user_deleted']:
+                    continue
+
+                im['is_private'] = True
+                im['name'] = im['id']
+                self._add_channel(im)
+
     def _initialise(self):
         with self._lock:
             if self._initialised:
@@ -220,14 +230,7 @@ class ChannelWrapper(object):
                 for chan in page['channels']:
                     self._add_channel(chan)
 
-            for page in self._bot.api.im.list.paginate():
-                for im in page['ims']:
-                    if im['is_user_deleted']:
-                        continue
-
-                    im['is_private'] = True
-                    im['name'] = im['id']
-                    self._add_channel(im)
+            self.reload_ims()
 
             self._initialised = True
 
