@@ -2,15 +2,17 @@ from uqcsbot import bot, Command
 from typing import Iterable, Tuple
 import requests
 import json
-import functools
 
-API_URL = r"http://api.wolframalpha.com/v2/query?appid=UVKV2V-5XW2TETT69&output=json"
+APP_ID = "UVKV2V-5XW2TETT69"
 
-# TODO: SHow the assumptions made?
-@bot.on_command("wolfram")
-async def handle_wolfram(command: Command):
+# TODO: Show the assumptions made?
+# TODO: Better naming of commands
+@bot.on_command("wolframfull")
+async def handle_wolframfull(command: Command):
+    """This posts the full results from wolfram query. Images and all"""
+    api_url = r"http://api.wolframalpha.com/v2/query?&output=json"
     search_query = command.arg
-    http_response = await bot.run_async(requests.get, API_URL, params={'input': search_query})
+    http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
 
     # Check if the response is ok
     if http_response.status_code != requests.codes.ok:
@@ -39,6 +41,23 @@ async def handle_wolfram(command: Command):
 
     bot.post_message(command.channel, message)
 
+
+@bot.on_command("wolfram")
+async def handle_wolfram(command: Command):
+    """This uses wolframs short answers api to just return a simple short plaintext response"""
+    api_url = r"http://api.wolframalpha.com/v1/result?"
+    search_query = command.arg
+    http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
+
+    # Check if the response is ok. A status code of 501 signifies that no result could be found.
+    if http_response.status_code == 501:
+        bot.post_message(command.channel, "No short answer available. Try !wolframfull")
+        return
+    elif http_response.status_code != requests.codes.ok:
+        bot.post_message(command.channel, "There was a problem getting the response")
+        return
+
+    bot.post_message(command.channel, http_response.content)
 
 # TODO: Should this really be a generator?
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
