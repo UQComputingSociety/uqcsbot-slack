@@ -2,7 +2,7 @@ from functools import partial
 from slackclient import SlackClient
 import asyncio
 import threading
-from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar, Optional
+from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar
 if TYPE_CHECKING:
     from .base import UQCSBot
 
