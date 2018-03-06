@@ -15,6 +15,6 @@ Run `python3 -m uqcsbot --local`
 ## Running the bot in the communal dev Slack team
 
 1. Ensure you've joined the [uqcstesting Slack team](https://uqcstest-inviter.herokuapp.com/)
-2. Run `python3 -m uqcsbot`
+2. Run `python3 -m uqcsbot --dev`
 
 If a bot was available, it will now be running on uqcstesting.
