@@ -3,10 +3,9 @@ import sys
 import importlib
 import logging
 import argparse
-import requests
-import random
-import json
 from base64 import b64decode
+import json
+import requests
 from uqcsbot.base import UQCSBot, bot, Command
 
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
@@ -25,39 +24,47 @@ BOT_TOKENS = {'U9LA6BX8X': b64decode('eG94Yi0zMjYzNDY0MDUzMDMteGpIbFhlamVNUG1McV
 API_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01YjdmYjlhYzAyZWYzNDAyNTYyMTJmY2Q2YjQ1NmEyYg==').decode('utf-8')
 
 
-# Returns true if the given user_id is an active bot (i.e. not deleted).
 def is_active_bot(user_id):
+    '''
+    Returns true if the given user_id is an active bot (i.e. not deleted).
+    '''
     api_url = 'https://slack.com/api/users.info'
     response = requests.get(api_url, params={'token': API_TOKEN, 'user': user_id})
-    if response.status_code != requests.codes.ok:
+    if response.status_code != requests.codes['ok']:
         return False
 
     json_contents = json.loads(response.content)
     user = json_contents['user']
     return json_contents['ok'] and user['is_bot'] and not user['deleted']
 
-# Returns true if the given user_id is an active bot that is avaible (i.e. is
-# not currently 'active' which would mean it is in use by another user).
+
 def is_available_bot(user_id):
+    '''
+    Returns true if the given user_id is an active bot that is avaible (i.e. is
+    not currently 'active' which would mean it is in use by another user).
+    '''
     if not is_active_bot(user_id):
         return False
 
     api_url = 'https://slack.com/api/users.getPresence'
     response = requests.get(api_url, params={'token': API_TOKEN, 'user': user_id})
-    if response.status_code != requests.codes.ok:
+    if response.status_code != requests.codes['ok']:
         return False
 
     json_contents = json.loads(response.content)
     return json_contents['ok'] and json_contents['presence'] == 'away'
 
-# Pings a channel on the UQCSTesting Slack that contains all the available bots,
-# and Mitch. We can poll this channel to find  bots which are 'away' (that is,
-# not currently being used by anyone else) and return their respective
-# BOT_TOKEN.
+
 def get_test_bot_token():
+    '''
+    Pings a channel on the UQCSTesting Slack that contains all the available
+    bots, and Mitch. We can poll this channel to find  bots which are 'away'
+    (that is, not currently being used by anyone else) and return their
+    respective BOT_TOKEN.
+    '''
     api_url = 'https://slack.com/api/conversations.members?channel=G9JJXHF7S'
     response = requests.get(api_url, params={'token': API_TOKEN})
-    if response.status_code != requests.codes.ok:
+    if response.status_code != requests.codes['ok']:
         return None
 
     json_contents = json.loads(response.content)
