@@ -208,22 +208,6 @@ class ChannelWrapper(object):
         self._channels_by_id[chan.id] = chan
         return chan
 
-    def _add_im(self, im_dict: dict) -> Optional[Channel]:
-        if im_dict['is_user_deleted']:
-            return
-
-        # TODO: Name
-        chan = Channel(
-            bot=self._bot,
-            channel_id=im_dict['id'],
-            name='idk_what_you_want_here',
-            is_public=False,
-            is_private=True,
-            is_archived=False
-        )
-        self._channels_by_id[chan.id] = chan
-        return chan
-
     def _initialise(self):
         with self._lock:
             if self._initialised:
@@ -238,7 +222,12 @@ class ChannelWrapper(object):
 
             for page in self._bot.api.im.list.paginate():
                 for im in page['ims']:
-                    self._add_im(im)
+                    if im['is_user_deleted']:
+                        continue
+
+                    im['is_private'] = True
+                    im['name'] = im['id']
+                    self._add_channel(im)
 
             self._initialised = True
 
