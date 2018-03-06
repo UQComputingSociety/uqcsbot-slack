@@ -19,7 +19,7 @@ class Command(object):
         self.command_name = command_name
         self.arg = arg
         self.channel = channel
-    
+
     def has_arg(self) -> bool:
         return self.arg is not None
 
@@ -71,6 +71,7 @@ class UQCSBot(object):
         self._executor = concurrent.futures.ThreadPoolExecutor()
         self._evt_loop.set_default_executor(self._executor)
         self.logger = logger or logging.getLogger("uqcsbot")
+        self._evt_loop.set_debug(self.logger.isEnabledFor(logging.DEBUG))
         self._handlers = collections.defaultdict(list)
         self._command_registry = collections.defaultdict(list)
         self._scheduler = AsyncIOScheduler(event_loop=self._evt_loop)
@@ -114,7 +115,7 @@ class UQCSBot(object):
 
     def on_schedule(self, *args, **kwargs):
         return lambda f: self._scheduler.add_job(f, *args, **kwargs)
-    
+
     def register_handler(self, message_type: Optional[str], handler_fn: Callable):
         if message_type is None:
             message_type = ""
@@ -152,7 +153,7 @@ class UQCSBot(object):
     async def run_async(self, fn, *args, **kwargs):
         """
         Private:
-        
+
         Runs a synchronous function in the bot's async executor, tracking it with
         asyncio.
         """
@@ -221,19 +222,18 @@ class UQCSBot(object):
                         break
                 time.sleep(0.5)
 
-    def run_debug(self):
+    def run_cli(self):
         """
-        Run in debug mode
+        Run in local (CLI) mode
         """
-        self.evt_loop.set_debug(True)
 
-        def debug_api_call(method, **kwargs):
+        def cli_api_call(method, **kwargs):
             if method == "chat.postMessage":
                 print(kwargs['text'])
             else:
                 print(kwargs)
 
-        self.api_call = debug_api_call
+        self.api_call = cli_api_call
         with self._async_context():
             while True:
                 response = input("> ")
