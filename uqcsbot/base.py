@@ -137,9 +137,9 @@ class UQCSBot(object):
     def async(self):
         return AsyncBotWrapper(self.client)
 
-    def post_message(self, channel: Union[Channel, str], text: str):
+    def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
         channel_id = channel if isinstance(channel, str) else channel.id
-        return self.api.chat.postMessage(channel=channel_id, text=text)
+        return self.api.chat.postMessage(channel=channel_id, text=text, **kwargs)
 
     def _wrap_async(self, fn):
         """
