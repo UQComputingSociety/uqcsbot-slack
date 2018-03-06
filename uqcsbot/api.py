@@ -208,16 +208,6 @@ class ChannelWrapper(object):
         self._channels_by_id[chan.id] = chan
         return chan
 
-    def reload_ims(self, *args):
-        for page in self._bot.api.im.list.paginate():
-            for im in page['ims']:
-                if im['is_user_deleted']:
-                    continue
-
-                im['is_private'] = True
-                im['name'] = im['id']
-                self._add_channel(im)
-
     def _initialise(self):
         with self._lock:
             if self._initialised:
@@ -230,7 +220,15 @@ class ChannelWrapper(object):
                 for chan in page['channels']:
                     self._add_channel(chan)
 
-            self.reload_ims()
+            # The ims cover the direct messages between the bot and users
+            for page in self._bot.api.im.list.paginate():
+                for im in page['ims']:
+                    if im['is_user_deleted']:
+                        continue
+
+                    im['name'] = im['id']
+                    im['is_private'] = True
+                    self._add_channel(im)
 
             self._initialised = True
 
@@ -256,6 +254,13 @@ class ChannelWrapper(object):
 
     def __iter__(self):
         return iter(self._channels_by_id.values())
+
+    def _on_im_created(self, evt):
+        chan = evt['channel']
+
+        chan['name'] = chan['id']
+        chan['is_private'] = True
+        self._add_channel(chan)
 
     def _on_member_joined_channel(self, evt):
         chan = self.get(evt['channel'])

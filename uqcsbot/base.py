@@ -81,8 +81,6 @@ class UQCSBot(object):
 
         self.channels = ChannelWrapper(self)
 
-        self.register_handler('team_join', self.channels.reload_ims)
-
     def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
             self.logger.debug(f"Hello event has unexpected extras: {evt}")
