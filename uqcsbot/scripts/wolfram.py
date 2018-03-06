@@ -5,6 +5,7 @@ import json
 
 APP_ID = "UVKV2V-5XW2TETT69"
 
+
 # TODO: Show the assumptions made?
 # TODO: Better naming of commands
 @bot.on_command("wolframfull")
@@ -58,6 +59,7 @@ async def handle_wolfram(command: Command):
         return
 
     bot.post_message(command.channel, http_response.content)
+
 
 # TODO: Should this really be a generator?
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
