@@ -208,7 +208,7 @@ class ChannelWrapper(object):
         self._channels_by_id[chan.id] = chan
         return chan
 
-    def reload_ims(self):
+    def reload_ims(self, *args):
         for page in self._bot.api.im.list.paginate():
             for im in page['ims']:
                 if im['is_user_deleted']:
