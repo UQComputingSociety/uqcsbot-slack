@@ -45,7 +45,7 @@ async def handle_wolframfull(command: Command):
 
 @bot.on_command("wolfram")
 async def handle_wolfram(command: Command):
-    """This uses wolframs short answers api to just return a simple short plaintext response"""
+    """This uses wolfram's conversation api to return a short response that can be replied to in a thread"""
     api_url = r"http://api.wolframalpha.com/v1/conversation.jsp"
     search_query = command.arg
     http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
@@ -57,13 +57,43 @@ async def handle_wolfram(command: Command):
 
     result = json.loads(http_response.content)
 
-    channel_id = command.channel if isinstance(command.channel, str) else command.channel.id
-    a = bot.api.chat.postMessage(channel=channel_id, text="Test message")
-    bot.post_message(command.channel, a)
+    if 'error' in result:
+        error = result['error']
+        if error == "No result is available":
+            # If no conversational result is available just return a normal short answer
+            # TODO: Should the user be told they can't reply to the result?
+            short_answer(command)
+            return
+        else:
+            bot.post_message(command.channel, error)
+            return
 
 
 
-# TODO: Should this really be a generator?
+    bot.post_message(command.channel, result)
+
+
+async def short_answer(command: Command):
+    """
+    This uses wolframs short answers api to just return a simple short plaintext response.
+
+    This is used if the conversation api fails to get a result (for instance !wolfram pineapple is not a great
+    conversation starter but may be interesting.
+    """
+    api_url = r"http://api.wolframalpha.com/v1/result?"
+    search_query = command.arg
+    http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
+
+    # Check if the response is ok. A status code of 501 signifies that no result could be found.
+    if http_response.status_code == 501:
+        bot.post_message(command.channel, "No short answer available. Try !wolframfull")
+        return
+    elif http_response.status_code != requests.codes.ok:
+        bot.post_message(command.channel, "There was a problem getting the response")
+        return
+
+    bot.post_message(command.channel, http_response.content)
+
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
     """Yields sublots in the order they should be displayed"""
     for pod in pods:
