@@ -19,7 +19,7 @@ Run `python3 -m uqcsbot --local`
 
 If a bot was available, it will now be running on uqcstesting.
 
-## Running the bot in custom Slack team
+## Running the bot in a custom Slack team
 
 1. [Create a Slack workspace](https://slack.com/create)
 2. Run `python3 setup.py install`
