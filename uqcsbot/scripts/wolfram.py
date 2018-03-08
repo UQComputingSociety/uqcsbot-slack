@@ -48,7 +48,16 @@ async def handle_wolframfull(command: Command):
 
 @bot.on_command("wolfram")
 async def handle_wolfram(command: Command):
-    """This uses wolfram's conversation api to return a short response that can be replied to in a thread"""
+    """
+    This uses wolfram's conversation api to return a short response that can be replied to in a thread.
+    If the response cannot be replied to a general short answer response is displayed instead.
+
+    Example Usage:
+    !wolfram Solve Newton's Second Law for mass
+    !wolfram What is the distance from Earth to Mars?
+
+    and then start a thread to continue to conversation
+    """
     api_url = r"http://api.wolframalpha.com/v1/conversation.jsp"
     search_query = command.arg
     http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
@@ -58,22 +67,22 @@ async def handle_wolfram(command: Command):
         bot.post_message(command.channel, "There was a problem getting the response")
         return
 
-    json_response = json.loads(http_response.content)
-
-    if 'error' in json_response:
-        error = json_response['error']
+    wolfram_result = json.loads(http_response.content)
+    if 'error' in wolfram_result:
+        error = wolfram_result['error']
         if error == "No result is available":
             # If no conversational result is available just return a normal short answer
-            await short_answer(command)
+            short_response = await short_answer()
+            bot.post_message(command.channel, short_response)
             return
         else:
             bot.post_message(command.channel, error)
             return
 
-    result = json_response['result']
-    reply_host = json_response['host']
-    conversation_id = json_response['conversationID']
-    s_output = json_response.get('s', None)
+    result = wolfram_result['result']
+    reply_host = wolfram_result['host']
+    conversation_id = wolfram_result['conversationID']
+    s_output = wolfram_result.get('s', None)
 
     # TODO: Is there a better option than storing the id in the fallback?
     # Here we store the conversation ID in the fallback so we can get it back later. We also store and indicator of this
@@ -151,7 +160,7 @@ async def handle_reply(evt: dict):
     bot.api.chat.update(channel=channel, attachments=[updated_attachments], ts=thread_ts)
 
 
-async def short_answer(command: Command):
+async def short_answer():
     """
     This uses wolfram's short answers api to just return a simple short plaintext response.
 
@@ -170,7 +179,7 @@ async def short_answer(command: Command):
         bot.post_message(command.channel, "There was a problem getting the response")
         return
 
-    bot.post_message(command.channel, http_response.content)
+    return http_response.content
 
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
     """
