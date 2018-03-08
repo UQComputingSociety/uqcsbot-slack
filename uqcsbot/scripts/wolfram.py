@@ -173,7 +173,11 @@ async def short_answer(command: Command):
     bot.post_message(command.channel, http_response.content)
 
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
-    """Yields sublots in the order they should be displayed"""
+    """
+    Yields subpods in the order they should be displayed
+
+    Yield: (pod_or_subpod_title, subpod)
+    """
     for pod in pods:
         for subpod in pod["subpods"]:
             # Use the pods title if the subpod doesn't have its own title (general case)
