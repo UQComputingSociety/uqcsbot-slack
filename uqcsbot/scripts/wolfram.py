@@ -1,9 +1,10 @@
 from uqcsbot import bot, Command
 from typing import Iterable, Tuple, Optional
+from base64 import b64decode
 import requests
 import json
 
-APP_ID = "UVKV2V-5XW2TETT69"
+APP_ID = b64decode('RzU0S1VBLVVHWTdHR0hWUlg=').decode('utf-8')
 
 # TODO: Better naming of commands
 @bot.on_command("wolframfull")
