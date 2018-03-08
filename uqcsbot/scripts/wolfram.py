@@ -5,7 +5,6 @@ import json
 
 APP_ID = "UVKV2V-5XW2TETT69"
 
-# IDEA: Show the assumptions made?
 # TODO: Better naming of commands
 @bot.on_command("wolframfull")
 async def handle_wolframfull(command: Command):
@@ -79,10 +78,7 @@ async def handle_wolfram(command: Command):
             return
 
     # Unpack the response in order to construct the reply message
-    result = wolfram_result['result']  # This is the answer to our question
-    reply_host = wolfram_result['host']  # This is the hostname to ask the next question to
-    conversation_id = wolfram_result['conversationID']  # Used to continue the conversation
-    s_output = wolfram_result.get('s', None)  # s is only sometimes returned but is vital if it is returned
+    result, conversation_id, reply_host, s_output = extract_reply(wolfram_result)
 
     # TODO: Is there a better option than storing the id in the fallback?
     # Here we store the conversation ID in the fallback so we can get it back later.
@@ -110,7 +106,8 @@ async def handle_reply(evt: dict):
         bot.post_message(channel, 'Sorry, something went wrong with slack', thread_ts=thread_ts)
         return
 
-    parent_message = thread_parent['messages'][0]  # Limit=1 was used so the first (and only) message is what we want
+    # Limit=1 was used so the first (and only) message is what we want
+    parent_message = thread_parent['messages'][0]
     # If the threads parent wasn't by a bot ignore it
     if parent_message.get('subtype') != 'bot_message':
         return
@@ -126,9 +123,10 @@ async def handle_reply(evt: dict):
     # Recall the format of the fallback "identifier hostname s_output conversationID"
     _, reply_host, s_output, conversation_id = parent_fallback.split(' ')
     new_question = evt['text']  # This is the value of the message that triggered this whole response
-    s_output = '' if s_output == 'None' else s_output
+    s_output = '' if s_output == 'null' else s_output
 
     # Slack annoyingly formats the reply_host link so we have to extract what we want:
+    # The format is <http://www.domain.com|www.domain.com>
     reply_host = reply_host[1:-1].split('|')[0]
 
     # Now we can ask Wolfram for the next answer:
@@ -147,10 +145,7 @@ async def handle_reply(evt: dict):
         return
 
     # Otherwise grab the new stuff and post the reply.
-    reply = wolfram_answer['result']
-    conversation_id = wolfram_answer['conversationID']
-    reply_host = wolfram_answer['host']
-    s_output = wolfram_answer.get('s', None)
+    reply, conversation_id, reply_host, s_output = extract_reply(wolfram_answer)
 
     bot.post_message(channel, reply, thread_ts=thread_ts)
 
@@ -178,6 +173,16 @@ async def short_answer(search_query: str):
 
     return http_response.content
 
+def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
+    """
+    Takes the response from the conversations API and returns it as a tuple containing the reply, conversation id,
+    reply host and s parameters. In that order.
+    """
+
+    return (wolfram_response['result'], # This is the answer to our question
+            wolfram_response['conversationId'], # Used to continue the conversation
+            wolfram_response['host'], # This is the hostname to ask the next question to
+            wolfram_response.get('s', 'null')) # s is only sometimes returned but is vital if it is returned
 
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
     """
