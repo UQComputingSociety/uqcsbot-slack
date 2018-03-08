@@ -62,7 +62,6 @@ async def handle_wolfram(command: Command):
         error = json_response['error']
         if error == "No result is available":
             # If no conversational result is available just return a normal short answer
-            # TODO: Should the user be told they can't reply to the result?
             await short_answer(command)
             return
         else:
@@ -70,35 +69,85 @@ async def handle_wolfram(command: Command):
             return
 
     result = json_response['result']
+    reply_host = json_response['host']
     conversation_id = json_response['conversationID']
+    s_output = json_response.get('s', None)
 
     # TODO: Is there a better option than storing the id in the fallback?
-    # TODO: The footer is actually used in a check in handle_reply. This is probably fine unless someone else uses this footer but why would they? In any case a better solution would be good. Another non visible field would work.
+    # Here we store the conversation ID in the fallback so we can get it back later. We also store and indicator of this
     attachments = [{
-        'fallback': conversation_id,
+        'fallback': f'WolframCanReply {reply_host} {s_output} {conversation_id}',
         'footer': 'Further questions may be asked',
-        'text': result
+        'text': result,
     }]
 
     bot.post_message(command.channel, "", attachments=attachments)
 
+# TODO: Add 'ok' checks
 @bot.on('message')
-def handle_reply(evt: dict):
-    channel = evt['channel']
-
-    # If the message is not in a thread ignore it
-    if 'thread_ts' not in evt:
+async def handle_reply(evt: dict):
+    # If the message isn't from a thread or is from a bot ignore it (avoid those infinite loops)
+    if 'thread_ts' not in evt or ('subtype' in evt and evt['subtype'] == 'bot_message'):
         return
 
+    channel = evt['channel']
+
     thread_ts = evt['thread_ts']
-    thread_parent = bot.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts).paginate()
-    thread_parent = bot.api.conversations.history(limit=1).paginate()
-    bot.post_message(channel, thread_parent)
+    thread_parent = bot.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts)
 
+    if not thread_parent['ok']:
+        bot.post_message(channel, 'Sorry, something went wrong with slack', thread_ts=thread_ts)
+        return
 
-# @bot.on('message')
-# def temp(evt: dict):
-#     print(evt)
+    parent_message = thread_parent['messages'][0]
+    # If the threads parent wasn't by a bot ignore
+    if 'subtype' not in parent_message or parent_message['subtype'] != 'bot_message':
+        return
+
+    # Finally, we have to check that this is a Wolfram replyable message
+    # It is rare we would reach this point and not pass as who replies to a bot in a thread for another reason
+    parent_attachments = parent_message['attachments'][0]
+    parent_fallback = parent_attachments['fallback']
+    if 'WolframCanReply' not in parent_fallback:
+        return
+
+    # Now we can grab the conversation_id from the message and get the new question (s only sometimes appears)
+    _, reply_host, s_output, conversation_id = parent_fallback.split(' ')
+    new_question = evt['text']
+    s_output = '' if s_output == 'None' else s_output
+
+    # Slack annoyingly formats the reply_host link so we have to extract what we want:
+    reply_host = reply_host[1:-1].split('|')[0]
+
+    # Now we can ask Wolfram for the next answer:
+    api_url = f'{reply_host}/api/v1/conversation.jsp?'
+    params = {'appid': APP_ID, 'i': new_question, 'conversationid': conversation_id, 's': s_output}
+    http_response = await bot.run_async(requests.get, api_url, params=params)
+
+    if http_response.status_code != requests.codes.ok:
+        bot.post_message(channel, "There was a problem getting the response", thread_ts=thread_ts)
+        return
+
+    # Convert to json and check for an error
+    json_response = json.loads(http_response.content)
+    if 'error' in json_response:
+        bot.post_message(channel, json_response['error'], thread_ts=thread_ts)
+        return
+
+    # Otherwise grab the new stuff and post the reply.
+    reply = json_response['result']
+    conversation_id = json_response['conversationID']
+    reply_host = json_response['host']
+    s_output = json_response.get('s', None)
+
+    bot.post_message(channel, reply, thread_ts=thread_ts)
+
+    # Update the old conversation_id to indicate the new state
+    updated_attachments = parent_attachments.copy()
+    updated_attachments['fallback'] = f'WolframCanReply {reply_host} {s_output} {conversation_id}'
+
+    bot.api.chat.update(channel=channel, attachments=[updated_attachments], ts=thread_ts)
+
 
 async def short_answer(command: Command):
     """
