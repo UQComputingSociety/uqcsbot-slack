@@ -2,6 +2,7 @@ from uqcsbot import bot, Command
 from typing import Iterable, Tuple
 import requests
 import json
+import pprint
 
 APP_ID = "UVKV2V-5XW2TETT69"
 
@@ -85,17 +86,19 @@ async def handle_wolfram(command: Command):
 def handle_reply(evt: dict):
     channel = evt['channel']
 
-    # if 'thread_ts' in evt:
-    #     bot.post_message(channel, evt)
-
-    print(bot.api.channels.info(channel=channel)['channel']['latest'])
-    # We only care about replies to messages that have been set up for conversation
-    if 'subtype' not in evt or evt['subtype'] != 'message_replied':
+    # If the message is not in a thread ignore it
+    if 'thread_ts' not in evt:
         return
 
+    thread_ts = evt['thread_ts']
+    thread_parent = bot.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts).paginate()
+    thread_parent = bot.api.conversations.history(limit=1).paginate()
+    bot.post_message(channel, thread_parent)
 
-    bot.post_message(channel, evt)
 
+# @bot.on('message')
+# def temp(evt: dict):
+#     print(evt)
 
 async def short_answer(command: Command):
     """
