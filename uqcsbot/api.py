@@ -229,7 +229,7 @@ class ChannelWrapper(object):
                     if im['is_user_deleted']:
                         continue
 
-                    im['is_private'] = True
+                    im['name'] = im['id']
                     self._add_channel(im)
 
             self._initialised = True
