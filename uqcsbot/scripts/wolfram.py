@@ -1,5 +1,5 @@
 from uqcsbot import bot, Command
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Optional
 import requests
 import json
 
@@ -54,31 +54,20 @@ async def handle_wolfram(command: Command):
     !wolfram Solve Newton's Second Law for mass
     !wolfram What is the distance from Earth to Mars?
 
-    and then start a thread to continue to conversation
+    and then start a thread to continue the conversation
     """
-    api_url = r"http://api.wolframalpha.com/v1/conversation.jsp"
     search_query = command.arg
-    http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
+    result, conversation_id, reply_host, s_output = await conversation_request(search_query)
 
-    # Check if the response is okay
-    if http_response.status_code != requests.codes.ok:
-        bot.post_message(command.channel, "There was a problem getting the response")
-        return
-
-    wolfram_result = json.loads(http_response.content)
-    if 'error' in wolfram_result:
-        error = wolfram_result['error']
-        if error == "No result is available":
+    if conversation_id is None:
+        if result == "No result is available":
             # If no conversational result is available just return a normal short answer
             short_response = await short_answer(search_query)
             bot.post_message(command.channel, short_response)
             return
         else:
-            bot.post_message(command.channel, error)
+            bot.post_message(command.channel, result)
             return
-
-    # Unpack the response in order to construct the reply message
-    result, conversation_id, reply_host, s_output = extract_reply(wolfram_result)
 
     # TODO: Is there a better option than storing the id in the fallback?
     # Here we store the conversation ID in the fallback so we can get it back later.
@@ -129,30 +118,17 @@ async def handle_reply(evt: dict):
     # The format is <http://www.domain.com|www.domain.com>
     reply_host = reply_host[1:-1].split('|')[0]
 
-    # Now we can ask Wolfram for the next answer:
-    api_url = f'{reply_host}/api/v1/conversation.jsp?'
-    params = {'appid': APP_ID, 'i': new_question, 'conversationid': conversation_id, 's': s_output}
-    http_response = await bot.run_async(requests.get, api_url, params=params)
-
-    if http_response.status_code != requests.codes.ok:
-        bot.post_message(channel, "There was a problem getting the response", thread_ts=thread_ts)
-        return
-
-    # Convert to json and check for an error
-    wolfram_answer = json.loads(http_response.content)
-    if 'error' in wolfram_answer:
-        bot.post_message(channel, wolfram_answer['error'], thread_ts=thread_ts)
-        return
-
-    # Otherwise grab the new stuff and post the reply.
-    reply, conversation_id, reply_host, s_output = extract_reply(wolfram_answer)
+    # Ask Wolfram for the new answer grab the new stuff and post the reply.
+    reply, conversation_id, reply_host, s_output = await conversation_request(new_question, reply_host, conversation_id, s_output)
 
     bot.post_message(channel, reply, thread_ts=thread_ts)
 
-    # Update the old fallback to reflect the new state of the conversation
-    parent_attachments['fallback'] = f'WolframCanReply {reply_host} {s_output} {conversation_id}'
+    # If getting a the conversation request results in an error then conversation_id will be None
+    if conversation_id is not None:
+        # Update the old fallback to reflect the new state of the conversation
+        parent_attachments['fallback'] = f'WolframCanReply {reply_host} {s_output} {conversation_id}'
 
-    bot.api.chat.update(channel=channel, attachments=[parent_attachments], ts=thread_ts)
+        bot.api.chat.update(channel=channel, attachments=[parent_attachments], ts=thread_ts)
 
 
 async def short_answer(search_query: str):
@@ -173,16 +149,47 @@ async def short_answer(search_query: str):
 
     return http_response.content
 
+
 def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
     """
     Takes the response from the conversations API and returns it as a tuple containing the reply, conversation id,
     reply host and s parameters. In that order.
     """
 
-    return (wolfram_response['result'], # This is the answer to our question
-            wolfram_response['conversationId'], # Used to continue the conversation
-            wolfram_response['host'], # This is the hostname to ask the next question to
-            wolfram_response.get('s', 'null')) # s is only sometimes returned but is vital if it is returned
+    return (wolfram_response['result'],  # This is the answer to our question
+            wolfram_response['conversationId'],  # Used to continue the conversation
+            wolfram_response['host'],  # This is the hostname to ask the next question to
+            wolfram_response.get('s', 'null'))  # s is only sometimes returned but is vital if it is returned
+
+
+async def conversation_request(search_query: str, host_name: Optional[str]=None, conversation_id: Optional[str]=None, s_output: Optional[str]=None):
+    """
+    Makes a request for either the first stage of the conversation (don't supply a conversation_id and s_output or
+    for a continued stage of the conversation (do supply them). It will return four values. In the case of an error
+    it will return an error string that can be posted to the user and 3 Nones or it will return the result of the question,
+    the new conversation_id, the new host name and the new s_output. In that order.
+    """
+    # The format of the api urls is slightly different if a conversation is being continued (has a conversation_id)
+    # Any of the following would suffice but may as well be thorough
+    if host_name is None or conversation_id is None or s_output is None:
+        api_url = f'{host_name}/api/v1/conversation.jsp?'
+        params = {'appid': APP_ID, 'i': search_query, 'conversationid': conversation_id, 's': s_output}
+    else:
+        api_url = "http://api.wolframalpha.com/v1/conversation.jsp?"
+        params = {'appid': APP_ID, 'i': search_query}
+
+    http_response = await bot.run_async(requests.get, api_url, params=params)
+
+    if http_response.status_code != requests.codes.ok:
+        return "There was a problem getting the response", None, None, None
+
+    # Convert to json and check for an error
+    wolfram_answer = json.loads(http_response.content)
+    if 'error' in wolfram_answer:
+        return wolfram_answer['error'], None, None, None
+
+    return extract_reply(wolfram_answer)
+
 
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
     """
