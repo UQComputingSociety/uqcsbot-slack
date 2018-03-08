@@ -147,6 +147,7 @@ class Channel(object):
         bot: 'UQCSBot',
         channel_id: str,
         name: str,
+        is_im: bool = False,
         is_public: bool = False,
         is_private: bool = False,
         is_archived: bool = False,
@@ -156,6 +157,7 @@ class Channel(object):
         self.id = channel_id
         self.name = name
         self._member_ids = None
+        self._is_im = is_im
         self.is_public = is_public
         self.is_private = is_private
         self.is_archived = is_archived
@@ -200,6 +202,7 @@ class ChannelWrapper(object):
             bot=self._bot,
             channel_id=chan_dict['id'],
             name=chan_dict['name'],
+            is_im=chan_dict.get('is_im', False),
             is_public=chan_dict.get('is_public', False),
             is_private=chan_dict.get('is_private', False),
             is_archived=chan_dict.get('is_archived', False),
@@ -226,7 +229,6 @@ class ChannelWrapper(object):
                     if im['is_user_deleted']:
                         continue
 
-                    im['name'] = im['id']
                     im['is_private'] = True
                     self._add_channel(im)
 
@@ -259,7 +261,6 @@ class ChannelWrapper(object):
         chan = evt['channel']
 
         chan['name'] = chan['id']
-        chan['is_private'] = True
         self._add_channel(chan)
 
     def _on_member_joined_channel(self, evt):
