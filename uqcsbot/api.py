@@ -147,6 +147,7 @@ class Channel(object):
         bot: 'UQCSBot',
         channel_id: str,
         name: str,
+        is_group: bool = False,
         is_public: bool = False,
         is_private: bool = False,
         is_archived: bool = False,
@@ -156,6 +157,7 @@ class Channel(object):
         self.id = channel_id
         self.name = name
         self._member_ids = None
+        self.is_public = is_group
         self.is_public = is_public
         self.is_private = is_private
         self.is_archived = is_archived
@@ -200,6 +202,7 @@ class ChannelWrapper(object):
             bot=self._bot,
             channel_id=chan_dict['id'],
             name=chan_dict['name'],
+            is_group=chan_dict.get('is_group', False),
             is_public=chan_dict.get('is_public', False),
             is_private=chan_dict.get('is_private', False),
             is_archived=chan_dict.get('is_archived', False),
@@ -219,9 +222,8 @@ class ChannelWrapper(object):
             for page in self._bot.api.channels.list.paginate():
                 for chan in page['channels']:
                     self._add_channel(chan)
-            for page in self._bot.api.groups.list(exclude_member=True):
-                for chan in page['groups']:
-                    self._add_channel(chan)
+            for group in self._bot.api.groups.list(exclude_members=True).get('groups', []):
+                self._add_channel(group)
             self._initialised = True
 
     def reload(self):
@@ -261,10 +263,10 @@ class ChannelWrapper(object):
 
     def _on_channel_rename(self, evt):
         with self._lock:
-            chan = self.get(evt['channel'])
+            chan = self.get(evt['channel']['id'])
             self._channels_by_name.pop(chan.name)
-            chan.name = evt['name']
-            self._channels_by_name[chan.name] = chan.name
+            new_channel_name = evt['channel']['name']
+            self._channels_by_name[chan.name] = new_channel_name
 
     def _on_channel_archive(self, evt):
         chan = self.get(evt['channel'])
@@ -279,7 +281,7 @@ class ChannelWrapper(object):
 
     def _on_channel_deleted(self, evt):
         with self._lock:
-            chan = self.get(evt['channel'])
+            chan = self.get(evt['channel']['id'])
             self._channels_by_id.pop(chan.id)
             self._channels_by_name.pop(chan.name)
 
