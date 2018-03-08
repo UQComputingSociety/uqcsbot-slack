@@ -2,16 +2,20 @@ from uqcsbot import bot, Command
 from typing import Iterable, Tuple
 import requests
 import json
-import pprint
 
 APP_ID = "UVKV2V-5XW2TETT69"
 
 
-# TODO: Show the assumptions made?
+# IDEA: Show the assumptions made?
 # TODO: Better naming of commands
 @bot.on_command("wolframfull")
 async def handle_wolframfull(command: Command):
-    """This posts the full results from wolfram query. Images and all"""
+    """
+    This posts the full results from wolfram query. Images and all
+
+    Example usage:
+    !wolframfull y = 2x + c
+    """
     api_url = r"http://api.wolframalpha.com/v2/query?&output=json"
     search_query = command.arg
     http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
@@ -22,13 +26,11 @@ async def handle_wolframfull(command: Command):
         return
 
     # Get the result of the query and determine if wolfram succeeded in evaluating it
-    # TODO: success and error mean slightly different things. The message could indicate this?
     result = json.loads(http_response.content)['queryresult']
     if not result['success'] or result["error"]:
         bot.post_message(command.channel, "Please rephrase your query. Wolfram could not compute.")
 
     subpods = get_subpods(result['pods'])
-
     message = ""
     for title, subpod in subpods:
         plaintext = subpod["plaintext"]
