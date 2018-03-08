@@ -64,13 +64,15 @@ def get_test_bot_token():
     respective BOT_TOKEN.
     '''
     api_url = 'https://slack.com/api/conversations.members'
-    response = requests.get(api_url, params={'token': API_TOKEN, 'channe': SECRET_BOT_MEETING_ROOM})
+    response = requests.get(api_url, params={'token': API_TOKEN, 'channel': SECRET_BOT_MEETING_ROOM})
     if response.status_code != requests.codes['ok']:
-        return None
+        print(f'Error: received status code {response.status.code}')
+        sys.exit(1)
 
     json_contents = json.loads(response.content)
     if not json_contents['ok']:
-        return None
+        print('Error: {0}'.format(json_contents['error']))
+        sys.exit(1)
 
     for user_id in json_contents['members']:
         if is_available_bot(user_id):
