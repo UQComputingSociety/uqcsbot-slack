@@ -114,10 +114,6 @@ async def handle_reply(evt: dict):
     new_question = evt['text']  # This is the value of the message that triggered this whole response
     s_output = '' if s_output == 'null' else s_output
 
-    # Slack annoyingly formats the reply_host link so we have to extract what we want:
-    # The format is <http://www.domain.com|www.domain.com>
-    reply_host = reply_host[1:-1].split('|')[0]
-
     # Ask Wolfram for the new answer grab the new stuff and post the reply.
     reply, conversation_id, reply_host, s_output = await conversation_request(new_question, reply_host, conversation_id, s_output)
 
@@ -157,7 +153,7 @@ def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
     """
 
     return (wolfram_response['result'],  # This is the answer to our question
-            wolfram_response['conversationId'],  # Used to continue the conversation
+            wolfram_response['conversationID'],  # Used to continue the conversation
             wolfram_response['host'],  # This is the hostname to ask the next question to
             wolfram_response.get('s', 'null'))  # s is only sometimes returned but is vital if it is returned
 
@@ -172,11 +168,15 @@ async def conversation_request(search_query: str, host_name: Optional[str]=None,
     # The format of the api urls is slightly different if a conversation is being continued (has a conversation_id)
     # Any of the following would suffice but may as well be thorough
     if host_name is None or conversation_id is None or s_output is None:
-        api_url = f'{host_name}/api/v1/conversation.jsp?'
-        params = {'appid': APP_ID, 'i': search_query, 'conversationid': conversation_id, 's': s_output}
-    else:
         api_url = "http://api.wolframalpha.com/v1/conversation.jsp?"
         params = {'appid': APP_ID, 'i': search_query}
+    else:
+        # Slack annoyingly formats the reply_host link so we have to extract what we want:
+        # The format is <http://www.domain.com|www.domain.com>
+        host_name = host_name[1:-1].split('|')[0]
+        api_url = f'{host_name}/api/v1/conversation.jsp?'
+        params = {'appid': APP_ID, 'i': search_query, 'conversationid': conversation_id, 's': s_output}
+
 
     http_response = await bot.run_async(requests.get, api_url, params=params)
 
