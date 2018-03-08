@@ -151,7 +151,7 @@ class Channel(object):
         is_private: bool = False,
         is_archived: bool = False,
         previous_names: List[str] = None
-    ): 
+    ):
         self._bot = bot
         self.id = channel_id
         self.name = name
@@ -219,6 +219,9 @@ class ChannelWrapper(object):
             for page in self._bot.api.channels.list.paginate():
                 for chan in page['channels']:
                     self._add_channel(chan)
+            for page in self._bot.api.groups.list(exclude_member=True):
+                for chan in page['groups']:
+                    self._add_channel(chan)
             self._initialised = True
 
     def reload(self):
@@ -280,6 +283,20 @@ class ChannelWrapper(object):
             self._channels_by_id.pop(chan.id)
             self._channels_by_name.pop(chan.name)
 
+    def _on_group_rename(self, evt):
+        self._on_channel_rename(evt)
+
+    def _on_group_archive(self, evt):
+        self._on_channel_archive(evt)
+
+    def _on_group_unarchive(self, evt):
+        self._on_channel_unarchive(evt)
+
+    def _on_group_joined(self, evt):
+        self._on_channel_created(evt)
+
+    def _on_group_left(self, evt):
+        self._on_channel_deleted(evt)
 
 class MembersWrapper(object):
     pass
