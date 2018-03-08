@@ -79,13 +79,15 @@ async def handle_wolfram(command: Command):
             bot.post_message(command.channel, error)
             return
 
-    result = wolfram_result['result']
-    reply_host = wolfram_result['host']
-    conversation_id = wolfram_result['conversationID']
-    s_output = wolfram_result.get('s', None)
+    # Unpack the response in order to construct the reply message
+    result = wolfram_result['result']  # This is the answer to our question
+    reply_host = wolfram_result['host']  # This is the hostname to ask the next question to
+    conversation_id = wolfram_result['conversationID']  # This is the conversations identifier. Used to continue the conversation
+    s_output = wolfram_result.get('s', None)  # s is only sometimes returned but is vital if it is returned (no idea what is stands for)
 
     # TODO: Is there a better option than storing the id in the fallback?
-    # Here we store the conversation ID in the fallback so we can get it back later. We also store and indicator of this
+    # Here we store the conversation ID in the fallback so we can get it back later.
+    # We also store an identifier string to check against later and the reply_host and s_output string
     attachments = [{
         'fallback': f'WolframCanReply {reply_host} {s_output} {conversation_id}',
         'footer': 'Further questions may be asked',
