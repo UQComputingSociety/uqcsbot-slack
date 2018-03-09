@@ -7,8 +7,6 @@ import json
 APP_ID = b64decode('RzU0S1VBLVVHWTdHR0hWUlg=').decode('utf-8')
 
 
-
-
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
     """
     Yields subpods in the order they should be displayed. A subpod is essentially an element of a wolfram response.
@@ -33,7 +31,7 @@ async def handle_wolframfull(command: Command):
     Example usage:
     !wolframfull y = 2x + c
     """
-    api_url = r"http://api.wolframalpha.com/v2/query?&output=json"
+    api_url = "http://api.wolframalpha.com/v2/query?&output=json"
     search_query = command.arg
     http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
 
@@ -73,7 +71,7 @@ async def get_short_answer(search_query: str):
     This is used if the conversation api fails to get a result (for instance !wolfram pineapple is not a great
     conversation starter but may be interesting.
     """
-    api_url = r"http://api.wolframalpha.com/v1/result?"
+    api_url = "http://api.wolframalpha.com/v2/result?"
     http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
 
     # Check if the response is ok. A status code of 501 signifies that no result could be found.
@@ -218,9 +216,3 @@ async def handle_reply(evt: dict):
         parent_attachments['fallback'] = f'WolframCanReply {reply_host} {s_output} {conversation_id}'
 
         bot.api.chat.update(channel=channel, attachments=[parent_attachments], ts=thread_ts)
-
-
-
-
-
-
