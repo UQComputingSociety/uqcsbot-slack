@@ -157,7 +157,7 @@ class Channel(object):
         self.id = channel_id
         self.name = name
         self._member_ids = None
-        self._is_im = is_im
+        self.is_im = is_im
         self.is_public = is_public
         self.is_private = is_private
         self.is_archived = is_archived
