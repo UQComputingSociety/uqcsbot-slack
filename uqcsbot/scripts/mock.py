@@ -1,6 +1,9 @@
 from random import random
 from uqcsbot import bot, Command
 
+# Maximum number of posts back a user can try to mock
+MAX_NUM_POSTS_BACK = 100
+
 def get_nth_most_recent_message(channel_id: str, message_index: int):
     '''
     Given a channel and a message index, will find the message at that index;
@@ -12,7 +15,9 @@ def get_nth_most_recent_message(channel_id: str, message_index: int):
     # 0th message (i.e the first message) can be retrieved by limiting the
     # number of messages to 1.
     message_index += 1
-    for page in bot.api.conversations.history.paginate(channel=channel_id, limit=message_index):
+    # As we have set a MAX_NUM_POSTS_BACK upper limit of 100, pagination is not
+    # necessary as the first page will contain 100 results by default.
+    for page in bot.api.conversations.history(channel=channel_id, limit=message_index):
         messages = page.get('messages', [])
         message_count += len(messages)
         # If we've reached the limit of messages, the final message in this page
@@ -39,8 +44,12 @@ async def handle_mock(command: Command):
     # Add 1 here to account for the calling user's message, which we don't want
     # to mock.
     num_posts_back = int(command.arg) + 1 if command.has_arg() else 1
+    if num_posts_back > MAX_NUM_POSTS_BACK:
+        bot.post_message(command.channel, f'Cannot recall messages that far back, try under {MAX_NUM_POSTS_BACK}.')
+        return
+
     message_to_mock = get_nth_most_recent_message(command.channel.id, num_posts_back)
     if message_to_mock is None:
-        bot.post_message(command.channel, 'Could not recall message.')
+        bot.post_message(command.channel, 'No messages exist that far back.')
     else:
         bot.post_message(command.channel, mock_message(message_to_mock))
