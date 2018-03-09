@@ -22,28 +22,46 @@ def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
             yield (title, subpod)
 
 
-# TODO: Better naming of commands
-@bot.on_command("wolframfull")
-async def handle_wolframfull(command: Command):
+@bot.on_command('wolfram')
+async def handle_wolfram(command: Command):
+    """
+    Determines whether to use the full version or the short version. The full version is used if the --full
+    argument is supplied before or after the search query. See wolfram_full and wolfram_normal for the differences.
+    """
+    if command.has_arg():
+        cmd = command.arg.strip()
+        # Doing it specific to the start and end just in case someone has --full inside their query for whatever reason
+        if cmd.startswith('--full'):
+            cmd = cmd[len('--full'):]  # removes the --full
+            await wolfram_full(cmd, command.channel)
+        elif cmd.endswith('--full'):
+            cmd = cmd[:-len('--full')]  # removes the --full
+            await wolfram_full(cmd, command.channel)
+        else:
+            await wolfram_normal(cmd, command.channel)
+    else:
+        bot.post_message(command.channel, "You need to ask something")
+
+
+async def wolfram_full(search_query: str, channel):
     """
     This posts the full results from wolfram query. Images and all
 
     Example usage:
-    !wolframfull y = 2x + c
+    !wolfram --full y = 2x + c
     """
     api_url = "http://api.wolframalpha.com/v2/query?&output=json"
-    search_query = command.arg
     http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
 
     # Check if the response is ok
     if http_response.status_code != requests.codes.ok:
-        bot.post_message(command.channel, "There was a problem getting the response")
+        bot.post_message(channel, "There was a problem getting the response")
         return
 
     # Get the result of the query and determine if wolfram succeeded in evaluating it
     result = json.loads(http_response.content)['queryresult']
     if not result['success'] or result["error"]:
-        bot.post_message(command.channel, "Please rephrase your query. Wolfram could not compute.")
+        bot.post_message(channel, "Please rephrase your query. Wolfram could not compute.")
         return
 
     # A pod is the name wolfram gives to the different "units" that make up its result.
@@ -61,7 +79,7 @@ async def handle_wolframfull(command: Command):
             image_title = subpod['img']['title']
             message += f'{image_title}:\n{image_url}\n' if len(image_title) != 0 else f'{image_url}\n'
 
-    bot.post_message(command.channel, message)
+    bot.post_message(channel, message)
 
 
 async def get_short_answer(search_query: str):
@@ -83,8 +101,7 @@ async def get_short_answer(search_query: str):
     return http_response.content
 
 
-@bot.on_command("wolfram")
-async def handle_wolfram(command: Command):
+async def wolfram_normal(search_query: str, channel):
     """
     This uses wolfram's conversation api to return a short response that can be replied to in a thread.
     If the response cannot be replied to a general short answer response is displayed instead.
@@ -95,17 +112,16 @@ async def handle_wolfram(command: Command):
 
     and then start a thread to continue the conversation
     """
-    search_query = command.arg
     result, conversation_id, reply_host, s_output = await conversation_request(search_query)
 
     if conversation_id is None:
         if result == "No result is available":
             # If no conversational result is available just return a normal short answer
             short_response = await get_short_answer(search_query)
-            bot.post_message(command.channel, short_response)
+            bot.post_message(channel, short_response)
             return
         else:
-            bot.post_message(command.channel, result)
+            bot.post_message(channel, result)
             return
 
     # TODO: Is there a better option than storing the id in the fallback?
@@ -119,7 +135,7 @@ async def handle_wolfram(command: Command):
         'text': result,
     }]
 
-    bot.post_message(command.channel, "", attachments=attachments)
+    bot.post_message(channel, "", attachments=attachments)
 
 
 def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
