@@ -147,6 +147,7 @@ class Channel(object):
         bot: 'UQCSBot',
         channel_id: str,
         name: str,
+        is_im: bool = False,
         is_public: bool = False,
         is_private: bool = False,
         is_archived: bool = False,
@@ -156,6 +157,7 @@ class Channel(object):
         self.id = channel_id
         self.name = name
         self._member_ids = None
+        self.is_im = is_im
         self.is_public = is_public
         self.is_private = is_private
         self.is_archived = is_archived
@@ -200,6 +202,7 @@ class ChannelWrapper(object):
             bot=self._bot,
             channel_id=chan_dict['id'],
             name=chan_dict['name'],
+            is_im=chan_dict.get('is_im', False),
             is_public=chan_dict.get('is_public', False),
             is_private=chan_dict.get('is_private', False),
             is_archived=chan_dict.get('is_archived', False),
@@ -219,6 +222,16 @@ class ChannelWrapper(object):
             for page in self._bot.api.channels.list.paginate():
                 for chan in page['channels']:
                     self._add_channel(chan)
+
+            # The ims cover the direct messages between the bot and users
+            for page in self._bot.api.im.list.paginate():
+                for im in page['ims']:
+                    if im['is_user_deleted']:
+                        continue
+
+                    im['name'] = im['id']
+                    self._add_channel(im)
+
             self._initialised = True
 
     def reload(self):
@@ -243,6 +256,12 @@ class ChannelWrapper(object):
 
     def __iter__(self):
         return iter(self._channels_by_id.values())
+
+    def _on_im_created(self, evt):
+        chan = evt['channel']
+
+        chan['name'] = chan['id']
+        self._add_channel(chan)
 
     def _on_member_joined_channel(self, evt):
         chan = self.get(evt['channel'])
