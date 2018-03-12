@@ -16,6 +16,10 @@ install_requires = [
     'pytz',
 ]
 
+test_requires = [
+    'pytest',
+]
+
 setup(
     name='uqcsbot',
     version='0.0.1',
@@ -31,5 +35,8 @@ setup(
     keywords='slack async lightweight',
     packages=find_packages(),
     install_requires=install_requires,
-
+    test_requires=test_requires,
+    extras_require={
+        'test': test_requires,
+    }
 )

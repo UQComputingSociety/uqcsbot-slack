@@ -80,8 +80,7 @@ def get_test_bot_token():
     return None
 
 
-def main():
-    # Import scripts
+def import_scripts():
     dir_path = os.path.dirname(__file__)
     scripts_dir = os.path.join(dir_path, 'scripts')
     for sub_file in os.listdir(scripts_dir):
@@ -89,6 +88,11 @@ def main():
             continue
         module = f'uqcsbot.scripts.{sub_file[:-3]}'
         importlib.import_module(module)
+
+
+def main():
+    # Import scripts
+    import_scripts()
 
     # Setup the CLI argument parser
     parser = argparse.ArgumentParser(description='Run UQCSBot')
