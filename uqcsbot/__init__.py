@@ -29,13 +29,21 @@ logger = logging.getLogger("uqcsbot")
 def get_bot_info(user_id):
     '''
     Returns info about the bot
+
+    See https://api.slack.com/methods/users.info for the contents of info
     '''
     api_url = 'https://slack.com/api/users.info'
     response = requests.get(api_url, params={'token': API_TOKEN, 'user': user_id})
+
     if response.status_code != requests.codes['ok']:
-        return False
+        logger.error(f'Received status code {response.status.code}')
+        sys.exit(1)
 
     json_contents = json.loads(response.content)
+    if not json_contents['ok']:
+        logger.error(json_contents['error'])
+        sys.exit(1)
+
     return json_contents
 
 def is_bot_active(info):
