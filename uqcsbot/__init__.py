@@ -95,12 +95,6 @@ def get_free_test_bot():
             return info
     return None
 
-def get_bot_token(id):
-    '''
-    Returns the bot token associated with a user id. None if this is not associated with a bot
-    '''
-    return BOT_TOKENS.get(id, None)
-
 
 def main():
     # Import scripts
