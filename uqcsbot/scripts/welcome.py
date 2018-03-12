@@ -1,9 +1,11 @@
-# Welcomes new users to UQCS Slack and check for member milestones
+"""
+Welcomes new users to UQCS Slack and check for member milestones
+"""
 from uqcsbot import bot
 import asyncio
 
-MEMBER_MILESTONE = 50;  # Number of members between posting a celebration
-MESSAGE_PAUSE = 2.5;   # Number of seconds between sending bot messages
+MEMBER_MILESTONE = 50  # Number of members between posting a celebration
+MESSAGE_PAUSE = 2.5   # Number of seconds between sending bot messages
 WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "Hey there! Welcome to the UQCS slack!",
     "This is the first time I've seen you, so you're probably new here",
@@ -12,7 +14,8 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "Your friendly admins are @csa, @rob, @mb, @trm, @mitch, @guthers, and @artemis",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
     "and again, welcome :)"
-];
+]
+
 
 @bot.on("member_joined_channel")
 async def welcome(evt: dict):

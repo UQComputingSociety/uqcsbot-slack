@@ -14,6 +14,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 T = TypeVar('T')
 
+
 class Command(object):
     def __init__(self, command_name: str, arg: Optional[str], channel: Channel):
         self.command_name = command_name
