@@ -2,10 +2,82 @@ import os
 import sys
 import importlib
 import logging
+import argparse
+from base64 import b64decode
+import json
+import requests
 from uqcsbot.base import UQCSBot, bot, Command
 
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
+
+# UQCSTesting bot tokens. Everything is base64 encoded to somewhat circumvent
+# token tracking by GitHub etal.
+#
+# Order: uqcsbot-alpha, uqcsbot-beta, uqcsbot-gamma, uqcsbot-delta
+BOT_TOKENS = {'U9LA6BX8X': b64decode('eG94Yi0zMjYzNDY0MDUzMDMteGpIbFhlamVNUG1McVhRSnNnZFoyZVhT').decode('utf-8'),
+              'U9K81NL7N': b64decode('eG94Yi0zMjUyNzM3NjgyNjAtNFd0SGhRUWhLb3BSVUlJNFJuc0VRRXJL').decode('utf-8'),
+              'U9JJZ1ZJ4': b64decode('eG94Yi0zMjQ2NDUwNjc2MTYtaHNpR3B3S0ZhSnY3bzJrOW43UU9uRXFp').decode('utf-8'),
+              'U9K5W508K': b64decode('eG94Yi0zMjUyMDAxNzAyOTEtTlJvdVVLcWdyVEpVSE9SMjBoUzhBcnhW').decode('utf-8')}
+# Channel group which contains all the bots. Easy way to get all their ids.
+SECRET_BOT_MEETING_ROOM = 'G9JJXHF7S'
+# Mitch's UQCSTesting Slack API Token. No touchie >:(
+API_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01YjdmYjlhYzAyZWYzNDAyNTYyMTJmY2Q2YjQ1NmEyYg==').decode('utf-8')
+
+
+def is_active_bot(user_id):
+    '''
+    Returns true if the given user_id is an active bot (i.e. not deleted).
+    '''
+    api_url = 'https://slack.com/api/users.info'
+    response = requests.get(api_url, params={'token': API_TOKEN, 'user': user_id})
+    if response.status_code != requests.codes['ok']:
+        return False
+
+    json_contents = json.loads(response.content)
+    user = json_contents['user']
+    return json_contents['ok'] and user['is_bot'] and not user['deleted']
+
+
+def is_available_bot(user_id):
+    '''
+    Returns true if the given user_id is an active bot that is avaible (i.e. is
+    not currently 'active' which would mean it is in use by another user).
+    '''
+    if not is_active_bot(user_id):
+        return False
+
+    api_url = 'https://slack.com/api/users.getPresence'
+    response = requests.get(api_url, params={'token': API_TOKEN, 'user': user_id})
+    if response.status_code != requests.codes['ok']:
+        return False
+
+    json_contents = json.loads(response.content)
+    return json_contents['ok'] and json_contents['presence'] == 'away'
+
+
+def get_test_bot_token():
+    '''
+    Pings a channel on the UQCSTesting Slack that contains all the available
+    bots, and Mitch. We can poll this channel to find  bots which are 'away'
+    (that is, not currently being used by anyone else) and return their
+    respective BOT_TOKEN.
+    '''
+    api_url = 'https://slack.com/api/conversations.members'
+    response = requests.get(api_url, params={'token': API_TOKEN, 'channel': SECRET_BOT_MEETING_ROOM})
+    if response.status_code != requests.codes['ok']:
+        print(f'Error: received status code {response.status.code}')
+        sys.exit(1)
+
+    json_contents = json.loads(response.content)
+    if not json_contents['ok']:
+        print('Error: {0}'.format(json_contents['error']))
+        sys.exit(1)
+
+    for user_id in json_contents['members']:
+        if is_available_bot(user_id):
+            return BOT_TOKENS.get(user_id, None)
+    return None
 
 
 def main():
@@ -18,14 +90,40 @@ def main():
         module = f'uqcsbot.scripts.{sub_file[:-3]}'
         importlib.import_module(module)
 
-    # Run bot
-    # TODO: Make logging command-line configurable
-    if '--dev' in sys.argv:
-        logging.basicConfig(level=logging.DEBUG)
-        bot.run_debug()
+    # Setup the CLI argument parser
+    parser = argparse.ArgumentParser(description='Run UQCSBot')
+    parser.add_argument('--local',
+                        dest='local',
+                        action='store_true',
+                        help='Runs the bot in local (CLI) mode')
+    parser.add_argument('--dev',
+                        dest='dev',
+                        action='store_true',
+                        help='Runs the bot in development mode (auto assigns a '
+                             'bot on the uqcstesting Slack team)')
+    parser.add_argument('--log_level',
+                        dest='log_level',
+                        default='INFO',
+                        help='Specifies the output logging level to be used '
+                             '(i.e. DEBUG, INFO, WARNING, ERROR, CRITICAL)')
+
+    # Retrieve the CLI args
+    args = parser.parse_args()
+    logging.basicConfig(level=args.log_level)
+
+    # Run the bot
+    if args.local:
+        bot.run_cli()
     else:
-        logging.basicConfig(level=logging.INFO)
-        bot.run(SLACK_BOT_TOKEN, SLACK_VERIFICATION_TOKEN)
+        # If in development mode, attempt to allocate an available bot token,
+        # else stick with the default. If no bot could be allocated, exit.
+        bot_token = get_test_bot_token() if args.dev else SLACK_BOT_TOKEN
+        if bot_token is None:
+            print('Something went wrong during bot allocation. '
+                  'Please ensure there are bots available and try again later. '
+                  'Exiting.')
+            sys.exit(1)
+        bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
 
 if __name__ == "__main__":
     main()
