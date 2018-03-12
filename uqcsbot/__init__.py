@@ -24,6 +24,7 @@ SECRET_BOT_MEETING_ROOM = 'G9JJXHF7S'
 # Mitch's UQCSTesting Slack API Token. No touchie >:(
 API_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01YjdmYjlhYzAyZWYzNDAyNTYyMTJmY2Q2YjQ1NmEyYg==').decode('utf-8')
 
+logger = logging.getLogger("uqcsbot")
 
 def is_active_bot(user_id):
     '''
@@ -60,24 +61,42 @@ def get_test_bot_token():
     '''
     Pings a channel on the UQCSTesting Slack that contains all the available
     bots, and Mitch. We can poll this channel to find  bots which are 'away'
-    (that is, not currently being used by anyone else) and return their
-    respective BOT_TOKEN.
+    (that is, not currently being used by anyone else)
+
+    Returns the bot user id and token in a dictionary: {'id': ..., 'token': ...}
     '''
     api_url = 'https://slack.com/api/conversations.members'
     response = requests.get(api_url, params={'token': API_TOKEN, 'channel': SECRET_BOT_MEETING_ROOM})
     if response.status_code != requests.codes['ok']:
-        print(f'Error: received status code {response.status.code}')
+        logger.error(f'Received status code {response.status.code}')
         sys.exit(1)
 
     json_contents = json.loads(response.content)
     if not json_contents['ok']:
-        print('Error: {0}'.format(json_contents['error']))
+        logger.error('{0}'.format(json_contents['error']))
         sys.exit(1)
 
     for user_id in json_contents['members']:
         if is_available_bot(user_id):
-            return BOT_TOKENS.get(user_id, None)
+            return {'id': user_id, 'token': BOT_TOKENS.get(user_id, None)}
     return None
+
+def get_test_bot_name(id):
+    '''
+    Get's a bot's name from their id
+    '''
+    api_url = 'https://slack.com/api/users.info'
+    response = requests.get(api_url, params={'token': API_TOKEN, 'user': id})
+    if response.status_code != requests.codes['ok']:
+        logger.error(f'Received status code {response.status.code}')
+        sys.exit(1)
+
+    json_contents = json.loads(response.content)
+    if not json_contents['ok']:
+        logger.error('{0}'.format(json_contents['error']))
+        sys.exit(1)
+
+    return json_contents['user']['name']
 
 
 def main():
@@ -117,13 +136,14 @@ def main():
     else:
         # If in development mode, attempt to allocate an available bot token,
         # else stick with the default. If no bot could be allocated, exit.
-        bot_token = get_test_bot_token() if args.dev else SLACK_BOT_TOKEN
-        if bot_token is None:
-            print('Something went wrong during bot allocation. '
+        bot_info = get_test_bot_token() if args.dev else SLACK_BOT_TOKEN
+        if bot_info is not None:
+            logger.error('Something went wrong during bot allocation. '
                   'Please ensure there are bots available and try again later. '
                   'Exiting.')
             sys.exit(1)
-        bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
+        logger.info("Bot name: " + get_test_bot_name(bot_info['id']))
+        bot.run(bot_info['token'], SLACK_VERIFICATION_TOKEN)
 
 if __name__ == "__main__":
     main()
