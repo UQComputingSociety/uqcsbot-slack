@@ -46,11 +46,11 @@ def get_user_info(user_id):
 
     return json_contents
 
-def is_bot_active(bot_info):
+def is_active_bot(user_info):
     '''
-    Returns true if the provided bot info describes an active bot (i.e. not deleted)
+    Returns true if the provided user info describes an active bot (i.e. not deleted)
     '''
-    return bot_info['ok'] and bot_info['user']['is_bot'] and not bot_info['user']['deleted']
+    return user_info['ok'] and user_info['user'].get('is_bot', False) and not user_info['user']['deleted']
 
 
 def is_bot_avaliable(user_id):
@@ -91,7 +91,7 @@ def get_free_test_bot():
 
     for user_id in json_contents['members']:
         info = get_user_info(user_id)
-        if is_bot_active(info) and is_bot_avaliable(user_id):
+        if is_active_bot(info) and is_bot_avaliable(user_id):
             return info
     return None
 
@@ -139,6 +139,7 @@ def main():
     else:
         # If in development mode, attempt to allocate an available bot token,
         # else stick with the default. If no bot could be allocated, exit.
+        bot_token = SLACK_BOT_TOKEN
         if args.dev:
             test_bot = get_free_test_bot()
             if test_bot is None:
@@ -146,12 +147,14 @@ def main():
                       'Please ensure there are bots available and try again later. '
                       'Exiting.')
                 sys.exit(1)
-            token = get_bot_token(test_bot['user']['id'])
+            bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
             logger.info("Bot name: " + test_bot['user']['name'])
-        else:
-            token = SLACK_BOT_TOKEN
 
-        bot.run(token, SLACK_VERIFICATION_TOKEN)
+        if bot_token is None or bot_token is "":
+            logger.error("No bot token found!")
+            sys.exit(1)
+
+        bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
 
 if __name__ == "__main__":
     main()
