@@ -46,11 +46,11 @@ def get_user_info(user_id):
 
     return json_contents
 
-def is_bot_active(info):
+def is_bot_active(bot_info):
     '''
     Returns true if the provided bot info describes an active bot (i.e. not deleted)
     '''
-    return info['ok'] and info['user']['is_bot'] and not info['user']['deleted']
+    return bot_info['ok'] and bot_info['user']['is_bot'] and not bot_info['user']['deleted']
 
 
 def is_bot_avaliable(user_id):
