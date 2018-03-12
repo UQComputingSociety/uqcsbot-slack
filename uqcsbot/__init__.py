@@ -26,9 +26,9 @@ API_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExN
 
 logger = logging.getLogger("uqcsbot")
 
-def get_bot_info(user_id):
+def get_user_info(user_id):
     '''
-    Returns info about the bot
+    Returns info about a user
 
     See https://api.slack.com/methods/users.info for the contents of info
     '''
@@ -53,7 +53,7 @@ def is_bot_active(info):
     return info['ok'] and info['user']['is_bot'] and not info['user']['deleted']
 
 
-def is_bot_avaliable(info, user_id):
+def is_bot_avaliable(user_id):
     '''
     Returns true if the given user_id is an active bot that is avaliable (i.e. is
     not currently 'active' which would mean it is in use by another user).
@@ -74,7 +74,7 @@ def get_free_test_bot():
     bots, and Mitch. We can poll this channel to find  bots which are 'away'
     (that is, not currently being used by anyone else)
 
-    Returns some bot info, and token in a dictionary: {'info': ..., 'token': ...}
+    Returns info about the bot
 
     See https://api.slack.com/methods/users.info for the contents of info
     '''
@@ -90,16 +90,16 @@ def get_free_test_bot():
         sys.exit(1)
 
     for user_id in json_contents['members']:
-        info = get_bot_info(user_id)
-        if is_bot_active(info) and is_bot_avaliable(info, user_id):
-            return {'info': info, 'token': BOT_TOKENS.get(user_id, None)}
+        info = get_user_info(user_id)
+        if is_bot_active(info) and is_bot_avaliable(user_id):
+            return info
     return None
 
-def get_test_bot_name(info):
+def get_bot_token(id):
     '''
-    Get's a bot's name from provided info
+    Returns the bot token associated with a user id. None if this is not associated with a bot
     '''
-    return info['user']['name']
+    return BOT_TOKENS.get(id, None)
 
 
 def main():
@@ -139,14 +139,19 @@ def main():
     else:
         # If in development mode, attempt to allocate an available bot token,
         # else stick with the default. If no bot could be allocated, exit.
-        test_bot = get_free_test_bot() if args.dev else SLACK_BOT_TOKEN
-        if test_bot is None:
-            logger.error('Something went wrong during bot allocation. '
-                  'Please ensure there are bots available and try again later. '
-                  'Exiting.')
-            sys.exit(1)
-        logger.info("Bot name: " + get_test_bot_name(test_bot['info']))
-        bot.run(test_bot['token'], SLACK_VERIFICATION_TOKEN)
+        if args.dev:
+            test_bot = get_free_test_bot()
+            if test_bot is None:
+                logger.error('Something went wrong during bot allocation. '
+                      'Please ensure there are bots available and try again later. '
+                      'Exiting.')
+                sys.exit(1)
+            token = get_bot_token(test_bot['user']['id'])
+            logger.info("Bot name: " + test_bot['user']['name'])
+        else:
+            token = SLACK_BOT_TOKEN
+
+        bot.run(token, SLACK_VERIFICATION_TOKEN)
 
 if __name__ == "__main__":
     main()
