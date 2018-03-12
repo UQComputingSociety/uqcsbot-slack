@@ -137,7 +137,7 @@ def main():
         # If in development mode, attempt to allocate an available bot token,
         # else stick with the default. If no bot could be allocated, exit.
         bot_info = get_test_bot_token() if args.dev else SLACK_BOT_TOKEN
-        if bot_info is not None:
+        if bot_info is None:
             logger.error('Something went wrong during bot allocation. '
                   'Please ensure there are bots available and try again later. '
                   'Exiting.')
