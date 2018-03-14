@@ -52,8 +52,8 @@ See the [README](README.md) for getting started on local development.
      ```
 
 1. Create your patch, **including test cases where appropriate**.
-1. Run the full test suite, as described in the [README](README.md),
-  and ensure that all tests pass.
+1. All Python code must adhere to the [PEP-8 Styleguide](https://www.python.org/dev/peps/pep-0008/) as closely as possible.
+1. Run the full test suite, as described in the [README](README.md), and ensure that all tests pass.
 1. Commit your changes using a descriptive commit message.
 
      ```shell
@@ -75,28 +75,6 @@ See the [README](README.md) for getting started on local development.
 1. If the PR is a small addition, one approval should suffice before merging. Else for more complicated PRs, multiple approvals may be necessary.
 
 That's it! Thank you for your contribution!
-
-## Styleguides
-
-### Git Commit Messages
-
-* Use the present tense ("Add feature" not "Added feature")
-* Reference issues and pull requests liberally after the first line
-* Consider starting the commit message with an applicable emoji:
-    * :art: `:art:` when improving the format/structure of the code
-    * :racehorse: `:racehorse:` when improving performance
-    * :memo: `:memo:` when writing docs
-    * :bug: `:bug:` when fixing a bug
-    * :fire: `:fire:` when removing code or files
-    * :white_check_mark: `:white_check_mark:` when adding tests
-    * :lock: `:lock:` when dealing with security
-    * :arrow_up: `:arrow_up:` when upgrading dependencies
-    * :arrow_down: `:arrow_down:` when downgrading dependencies
-    * :shirt: `:shirt:` when removing linter warnings
-
-### Python Styleguide
-
-All Python code must adhere to the [PEP-8 Styleguide](https://www.python.org/dev/peps/pep-0008/) as closely as possible.
 
 ## Additional Notes
 
