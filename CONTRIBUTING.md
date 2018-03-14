@@ -12,9 +12,9 @@ This project and everyone participating in it is governed by the [UQCS Code of C
 
 If you would like to chat about the question in real-time, you can reach out via [our slack](https://uqcs.slack.com/) and ask for help on any of the following appropriate channels:
 
-* \#bot-testing - For any bot-related questions (APIs, interaction)
-* \#python - For any language specific questions
-* \#projects - For any general implementation questions
+* \#bot-testing - bot-related questions (i.e. APIs)
+* \#python - language specific questions
+* \#projects - general implementation questions
 
 ## How Can I Contribute?
 
@@ -37,10 +37,10 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/UQComp
 
 ### Your First Code Contribution
 
-Unsure where to begin contributing to uqcsbot? You can start by looking through these `beginner` and `help-wanted` issues:
+Unsure where to begin contributing to uqcsbot? You can start by looking through these `entry level` and `help-wanted` issues:
 
 * [Entry level issues](https://github.com/UQComputingSociety/uqcsbot/issues?q=is%3Aissue+is%3Aopen+label%3A%22entry+level%22) - issues which should only require a few lines of code, and a test or two.
-* [Help wanted issues](https://github.com/UQComputingSociety/uqcsbot/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) - issues which should be a bit more involved than `beginner` issues.
+* [Help wanted issues](https://github.com/UQComputingSociety/uqcsbot/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) - issues which should be a bit more involved than `entry level` issues.
 
 #### Local development
 
@@ -56,7 +56,7 @@ See the [README](README.md) for getting started on local development.
      ```
 
 1. Create your patch, **including test cases where appropriate**.
-1. All Python code must adhere to the [PEP-8 Styleguide](https://www.python.org/dev/peps/pep-0008/) as closely as possible.
+1. All Python code must adhere to the [PEP-8 Styleguide](https://www.python.org/dev/peps/pep-0008/) as closely as possible. Line lengths are usually not an issue, but do try and keep them under 80/100 characters where possible.
 1. Run the full test suite, as described in the [README](README.md), and ensure that all tests pass.
 1. Commit your changes using a descriptive commit message.
 
