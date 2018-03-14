@@ -49,6 +49,11 @@ See the [README](README.md) for getting started on local development.
 ### <a name="submit-pr"></a> Pull Requests
 
 1. Fork the UQComputingSociety/uqcsbot repo.
+1. Clone the repo locally:
+
+     ```shell
+     git clone https://github.com/your-username-here/uqcsbot.git
+     ```
 1. Make your changes in a new git branch:
 
      ```shell
