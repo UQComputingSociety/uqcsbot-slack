@@ -24,10 +24,13 @@ def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
 
 @bot.on_command('wolfram')
 async def handle_wolfram(command: Command):
-    """
-    Determines whether to use the full version or the short version. The full version is used if the --full
-    argument is supplied before or after the search query. See wolfram_full and wolfram_normal for the differences.
-    """
+    '''
+    `!wolfram [--full] <QUERY>` - Returns the wolfram response for the given
+    query. If `--full` is specified, will return the full reponse.
+    '''
+    # Determines whether to use the full version or the short version. The full
+    # version is used if the --full. argument is supplied before or after the
+    # search query. See wolfram_full and wolfram_normal for the differences.
     if command.has_arg():
         cmd = command.arg.strip()
         # Doing it specific to the start and end just in case someone has --full inside their query for whatever reason

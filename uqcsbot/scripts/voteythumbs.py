@@ -24,6 +24,10 @@ def strip(message: str, prefixes=VOTEYTHUMBS_STRIP_PREFIXES):
 
 @bot.on('message')
 async def voteythumbs(evt: dict):
+    '''
+    `!voteythumbs <TOPIC>` - Starts a :thumbsup: :thumbsdown: vote on the given
+    topic. If unspecified, will not set a topic.
+    '''
     if "!voteythumbs" not in evt.get("text", ""):
         return
     evt["text"] = strip(evt["text"])

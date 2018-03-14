@@ -1,5 +1,4 @@
 from uqcsbot import bot, Command
-from functools import partial
 
 def sanitize_doc(doc):
     '''
@@ -10,16 +9,11 @@ def sanitize_doc(doc):
 
 def is_valid_doc(doc):
     '''
-    Returns true if a doc was found and it was not the doc for partial, else
-    returns false.
-
-    The check for `partial` doc equality is necessary as some commands are
-    declared as async, which gets wrapped in a `partial` by uqcsbot. If the
-    async commands possess no docstring of their own, they will by default adopt
-    the `partial` docstring instead of None (which is the case for non-async
-    commands with no docstring).
+    Returns true if a helper docstring was found. Ignores docstrings that have
+    specified they are not a helper docstring by including '@no_help' within
+    them.
     '''
-    return doc != None and doc != partial.__doc__
+    return doc != None and '@no_help' not in doc
 
 def get_helper_docs():
     '''
@@ -35,7 +29,8 @@ def get_helper_docs():
 @bot.on_command('help')
 async def handle_help(command: Command):
     """
-    TODO(mcdermottm): write this command docstring, and every other docstring
+    `!help [COMMAND]` - Display the helper docstring for the given command. If
+    unspecified, will return the helper docstrings for all commands.
     """
     helper_docs = [sanitize_doc(helper_doc)
                    for command_name, helper_doc in get_helper_docs()

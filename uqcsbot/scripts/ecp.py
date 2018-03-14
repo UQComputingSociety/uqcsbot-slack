@@ -8,6 +8,11 @@ COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 
 @bot.on_command('ecp')
 async def handle_ecp(command: Command):
+    '''
+    `!ecp [COURSE CODE]` - Returns the link to the latest ECP for the given
+    course code. If unspecified, will attempt to find the ECP for the channel
+    the command was called from.
+    '''
     channel = command.channel
     course_name = channel.name if not command.has_arg() else command.arg
     http_response = await bot.run_async(requests.get, f"{COURSE_URL}{quote(course_name)}")

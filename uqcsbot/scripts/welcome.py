@@ -18,17 +18,19 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
 async def welcome(evt: dict):
     """
     Welcomes new users to UQCS Slack and checks for member milestones
+
+    @no_help
     """
     chan = bot.channels.get(evt.get('channel'))
     if chan is None or chan.name != "announcements":
         return
-    
+
     announcements = chan
     general = bot.channels.get("general")
-    
+
     user_info = await bot.run_async(bot.api.users.info, user=evt.get("user"))
     display_name = user_info.get("user", {}).get("profile", {}).get("display_name")
-    
+
     if display_name:
         await bot.run_async(bot.post_message, general, f"Welcome, {display_name}")
 

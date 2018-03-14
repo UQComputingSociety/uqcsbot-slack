@@ -88,6 +88,11 @@ class Event(object):
 
 @bot.on_command('events')
 async def handle_events(command: Command):
+    '''
+    `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - Lists all the UQCS
+    events that are scheduled to occur within the given filter. If unspecified,
+    will return the next 2 weeks of events.
+    '''
     event_filter = EventFilter.from_command(command)
     if not event_filter.is_valid:
         bot.post_message(command.channel, "Invalid events filter.")

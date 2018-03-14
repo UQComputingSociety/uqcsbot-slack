@@ -150,7 +150,10 @@ class UQCSBot(object):
         Wrap a function to run it asynchronously if it's not already a coroutine function
         """
         if not asyncio.iscoroutinefunction(fn):
+            fn_doc = fn.__doc__
             fn = partial(self.run_async, fn)
+            # Ensure the function's docstring is copied over.
+            fn.__doc__ = fn_doc
         return fn
 
     async def run_async(self, fn, *args, **kwargs):

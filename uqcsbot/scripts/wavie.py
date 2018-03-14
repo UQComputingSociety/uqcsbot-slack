@@ -8,7 +8,9 @@ logger = logging.getLogger(__name__)
 @bot.on('message')
 def wave(evt):
     """
-    Wave reacts to "person joined/left this channel"
+    :wave: reacts to "person joined/left this channel"
+
+    @no_help
     """
     if evt.get('subtype') not in ['channel_join', 'channel_leave']:
         return
