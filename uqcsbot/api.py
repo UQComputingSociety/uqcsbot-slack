@@ -147,16 +147,18 @@ class Channel(object):
         bot: 'UQCSBot',
         channel_id: str,
         name: str,
+        is_group: bool = False,
         is_im: bool = False,
         is_public: bool = False,
         is_private: bool = False,
         is_archived: bool = False,
         previous_names: List[str] = None
-    ): 
+    ):
         self._bot = bot
         self.id = channel_id
         self.name = name
         self._member_ids = None
+        self.is_group = is_group
         self.is_im = is_im
         self.is_public = is_public
         self.is_private = is_private
@@ -202,6 +204,7 @@ class ChannelWrapper(object):
             bot=self._bot,
             channel_id=chan_dict['id'],
             name=chan_dict['name'],
+            is_group=chan_dict.get('is_group', False),
             is_im=chan_dict.get('is_im', False),
             is_public=chan_dict.get('is_public', False),
             is_private=chan_dict.get('is_private', False),
@@ -222,16 +225,15 @@ class ChannelWrapper(object):
             for page in self._bot.api.channels.list.paginate():
                 for chan in page['channels']:
                     self._add_channel(chan)
-
+            for group in self._bot.api.groups.list(exclude_members=True).get('groups', []):
+                self._add_channel(group)
             # The ims cover the direct messages between the bot and users
             for page in self._bot.api.im.list.paginate():
                 for im in page['ims']:
                     if im['is_user_deleted']:
                         continue
-
                     im['name'] = im['id']
                     self._add_channel(im)
-
             self._initialised = True
 
     def reload(self):
@@ -277,10 +279,10 @@ class ChannelWrapper(object):
 
     def _on_channel_rename(self, evt):
         with self._lock:
-            chan = self.get(evt['channel'])
+            chan = self.get(evt['channel']['id'])
             self._channels_by_name.pop(chan.name)
-            chan.name = evt['name']
-            self._channels_by_name[chan.name] = chan.name
+            new_channel_name = evt['channel']['name']
+            self._channels_by_name[chan.name] = new_channel_name
 
     def _on_channel_archive(self, evt):
         chan = self.get(evt['channel'])
@@ -295,10 +297,24 @@ class ChannelWrapper(object):
 
     def _on_channel_deleted(self, evt):
         with self._lock:
-            chan = self.get(evt['channel'])
+            chan = self.get(evt['channel']['id'])
             self._channels_by_id.pop(chan.id)
             self._channels_by_name.pop(chan.name)
 
+    def _on_group_rename(self, evt):
+        self._on_channel_rename(evt)
+
+    def _on_group_archive(self, evt):
+        self._on_channel_archive(evt)
+
+    def _on_group_unarchive(self, evt):
+        self._on_channel_unarchive(evt)
+
+    def _on_group_joined(self, evt):
+        self._on_channel_created(evt)
+
+    def _on_group_left(self, evt):
+        self._on_channel_deleted(evt)
 
 class MembersWrapper(object):
     pass
