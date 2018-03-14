@@ -10,7 +10,11 @@ This project and everyone participating in it is governed by the [UQCS Code of C
 
 ## Got a Question or Problem?
 
-If you would like to chat about the question in real-time, you can reach out via [our slack channel](https://uqcs.slack.com/).
+If you would like to chat about the question in real-time, you can reach out via [our slack](https://uqcs.slack.com/) and ask for help on any of the following appropriate channels:
+
+* \#bot-testing - For any bot-related questions (APIs, interaction)
+* \#python - For any language specific questions
+* \#projects - For any general implementation questions
 
 ## How Can I Contribute?
 
