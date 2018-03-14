@@ -232,7 +232,10 @@ class ChannelWrapper(object):
                 for im in page['ims']:
                     if im['is_user_deleted']:
                         continue
-                    im['name'] = im['id']
+                    # Set the channel name to the user being directly messaged
+                    # for easier reverse lookups. Note: `user` here is the
+                    # user_id.
+                    im['name'] = im['user']
                     self._add_channel(im)
             self._initialised = True
 
@@ -261,8 +264,9 @@ class ChannelWrapper(object):
 
     def _on_im_created(self, evt):
         chan = evt['channel']
-
-        chan['name'] = chan['id']
+        # Set the channel name to the user being directly messaged for easier
+        # reverse lookups. Note: `user` here is the user_id.
+        chan['name'] = evt['user']
         self._add_channel(chan)
 
     def _on_member_joined_channel(self, evt):
