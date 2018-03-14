@@ -48,7 +48,7 @@ See the [README](README.md) for getting started on local development.
 1. Make your changes in a new git branch:
 
      ```shell
-     git checkout -b my-fix-branch master
+     git checkout -b my-fix-branch
      ```
 
 1. Create your patch, **including test cases where appropriate**.
@@ -71,6 +71,8 @@ See the [README](README.md) for getting started on local development.
     * If we suggest changes then:
     * Make the required updates.
     * Re-run the test suite to ensure tests are still passing.
+
+1. If the PR is a small addition, one approval should suffice before merging. Else for more complicated PRs, multiple approvals may be necessary.
 
 That's it! Thank you for your contribution!
 
