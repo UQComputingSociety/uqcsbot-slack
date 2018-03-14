@@ -7,11 +7,11 @@ def sanitize_doc(doc):
     '''
     return ' '.join([line.strip() for line in doc.split('\n')])
 
-def is_valid_doc(doc):
+def is_valid_helper_doc(doc):
     '''
-    Returns true if a helper docstring was found. Ignores docstrings that have
-    specified they are not a helper docstring by including '@no_help' within
-    them.
+    Returns true if the given docstring is a valid helper docstring. Ignores
+    docstrings that have specified they are not a helper docstring by including
+    '@no_help' within them.
     '''
     return doc != None and '@no_help' not in doc
 
@@ -19,12 +19,12 @@ def get_helper_docs():
     '''
     Returns a generator of all the bot's command names and their associated
     helper docstrings. Will filter out any commands that do not have valid
-    docstrings (see: is_valid_doc).
+    docstrings (see: is_valid_helper_doc).
     '''
     return ((command_name, fn.__doc__)
             for command_name, functions in bot.command_registry.items()
             for fn in functions
-            if is_valid_doc(fn.__doc__))
+            if is_valid_helper_doc(fn.__doc__))
 
 @bot.on_command('help')
 async def handle_help(command: Command):
