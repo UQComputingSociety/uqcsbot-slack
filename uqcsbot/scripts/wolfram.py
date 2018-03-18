@@ -150,12 +150,17 @@ def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
             wolfram_response.get('s', 'null'))  # s is only sometimes returned but is vital if it is returned
 
 
-async def conversation_request(search_query: str, host_name: Optional[str]=None, conversation_id: Optional[str]=None, s_output: Optional[str]=None):
+async def conversation_request(
+        search_query: str,
+        host_name: Optional[str]=None,
+        conversation_id: Optional[str]=None,
+        s_output: Optional[str]=None
+):
     """
     Makes a request for either the first stage of the conversation (don't supply a conversation_id and s_output or
     for a continued stage of the conversation (do supply them). It will return four values. In the case of an error
-    it will return an error string that can be posted to the user and 3 Nones or it will return the result of the question,
-    the new conversation_id, the new host name and the new s_output. In that order.
+    it will return an error string that can be posted to the user and 3 Nones or it will return the result of the
+    question, the new conversation_id, the new host name and the new s_output. In that order.
     """
     # The format of the api urls is slightly different if a conversation is being continued (has a conversation_id)
     # Any of the following would suffice but may as well be thorough
@@ -168,7 +173,6 @@ async def conversation_request(search_query: str, host_name: Optional[str]=None,
         host_name = host_name[1:-1].split('|')[0]
         api_url = f'{host_name}/api/v1/conversation.jsp?'
         params = {'appid': APP_ID, 'i': search_query, 'conversationid': conversation_id, 's': s_output}
-
 
     http_response = await bot.run_async(requests.get, api_url, params=params)
 
@@ -222,7 +226,12 @@ async def handle_reply(evt: dict):
     s_output = '' if s_output == 'null' else s_output
 
     # Ask Wolfram for the new answer grab the new stuff and post the reply.
-    reply, conversation_id, reply_host, s_output = await conversation_request(new_question, reply_host, conversation_id, s_output)
+    reply, conversation_id, reply_host, s_output = await conversation_request(
+        new_question,
+        reply_host,
+        conversation_id,
+        s_output,
+    )
 
     bot.post_message(channel, reply, thread_ts=thread_ts)
 
