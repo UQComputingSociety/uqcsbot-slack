@@ -27,7 +27,8 @@ async def handle_wiki(command: Command):
         bot.post_message(command.channel, "Sorry, there was something funny about the result")
         return
 
-    # Detect if there are multiple references to the query, if so, use the first reference (i.e. the second item in the lists).
+    # Detect if there are multiple references to the query
+    # if so, use the first reference (i.e. the second item in the lists).
     multiple_reference_instances = ("may refer to:", "may have several meanings:")
     if any(instance in snippet for instance in multiple_reference_instances):
         title, snippet, url = title_list[1], snippet_list[1], url_list[1]
