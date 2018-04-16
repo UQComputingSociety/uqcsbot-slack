@@ -1,4 +1,4 @@
-from random import random
+from random import choice
 from uqcsbot import bot, Command
 
 # Maximum number of posts back a user can try to mock
@@ -7,24 +7,24 @@ MAX_NUM_POSTS_BACK = 100
 def get_nth_most_recent_message(channel_id: str, message_index: int):
     '''
     Given a channel and a message index, will find the message at that index;
-    where messages are ordered from most recent to least recent. If the index is
-    greater than the number of messages in the channel, will return None.
+    where messages are ordered from most recent to least recent.
     '''
-    message_count = 0
     # Add 1 to message_index as the 'limit' field is 1-indexed. For example, the
     # 0th message (i.e the first message) can be retrieved by limiting the
     # number of messages to 1.
-    message_index += 1
+    message_limit = message_index + 1
     # As we have set a MAX_NUM_POSTS_BACK upper limit of 100, pagination is not
     # necessary as the first page will contain 100 results by default.
-    for page in bot.api.conversations.history(channel=channel_id, limit=message_index):
-        messages = page.get('messages', [])
-        message_count += len(messages)
-        # If we've reached the limit of messages, the final message in this page
-        # is the nth most recent message.
-        if message_count == message_index:
-            return messages[-1]['text']
-    return None
+    history = bot.api.conversations.history(channel=channel_id, limit=message_limit)
+    if history['ok'] is not True:
+        return None
+    messages = history.get('messages', [])
+    # Because of the message limit, the final message will be the one we want to
+    # mock. If the number of messages does not equal the message limit there was
+    # either something wrong with the request or there was not enough
+    # conversation history to mock the requested message, so we return None to
+    # signify a failure.
+    return None if len(messages) != message_limit else messages[-1]['text']
 
 def mock_message(message: str):
     '''
@@ -37,19 +37,23 @@ def mock_message(message: str):
 
     See: http://knowyourmeme.com/memes/mocking-spongebob
     '''
-    return ''.join(list(map(lambda l: l.upper() if random() <= 0.5 else l.lower(), message)))
+    return ''.join(choice((c.upper, c.lower))() for c in message)
 
 @bot.on_command("mock")
 async def handle_mock(command: Command):
     # Add 1 here to account for the calling user's message, which we don't want
-    # to mock.
+    # to mock by default.
     num_posts_back = int(command.arg) + 1 if command.has_arg() else 1
-    if num_posts_back > MAX_NUM_POSTS_BACK:
-        bot.post_message(command.channel, f'Cannot recall messages that far back, try under {MAX_NUM_POSTS_BACK}.')
-        return
 
-    message_to_mock = get_nth_most_recent_message(command.channel.id, num_posts_back)
-    if message_to_mock is None:
-        bot.post_message(command.channel, 'No messages exist that far back.')
+    if num_posts_back > MAX_NUM_POSTS_BACK:
+        response = f'Cannot recall messages that far back, try under {MAX_NUM_POSTS_BACK}.'
+    elif num_posts_back < 0:
+        response = 'Cannot mock into the future (yet)!'
     else:
-        bot.post_message(command.channel, mock_message(message_to_mock))
+        message_to_mock = get_nth_most_recent_message(command.channel.id, num_posts_back)
+        if message_to_mock is None:
+            response = 'Something went wrong (likely insufficient conversation history).'
+        else:
+            response = mock_message(message_to_mock)
+
+    bot.post_message(command.channel, response)
