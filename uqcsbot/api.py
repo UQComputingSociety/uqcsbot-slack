@@ -148,7 +148,6 @@ class Channel(object):
         channel_id: str,
         name: str,
         is_group: bool = False,
-        is_user_deleted: bool = False,
         is_im: bool = False,
         is_public: bool = False,
         is_private: bool = False,
@@ -160,7 +159,6 @@ class Channel(object):
         self.name = name
         self._member_ids = None
         self.is_group = is_group
-        self.is_user_deleted = is_user_deleted
         self.is_im = is_im
         self.is_public = is_public
         self.is_private = is_private
@@ -207,7 +205,6 @@ class ChannelWrapper(object):
             channel_id=chan_dict['id'],
             name=chan_dict['name'],
             is_group=chan_dict.get('is_group', False),
-            is_user_deleted=chan_dict.get('is_user_deleted', False),
             is_im=chan_dict.get('is_im', False),
             is_public=chan_dict.get('is_public', False),
             is_private=chan_dict.get('is_private', False),

@@ -31,9 +31,12 @@ class MockUQCSBot(UQCSBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_posted_messages = defaultdict(deque)
-        self.test_channels = [generate_channel(TEST_CHANNEL_ID, TEST_CHANNEL_ID, False, False, False, True, False, False, [TEST_USER_ID]),
-                              generate_channel(TEST_GROUP_ID, TEST_GROUP_ID, True, False, False, False, True, False, [TEST_USER_ID]),
-                              generate_channel(TEST_DIRECT_ID, TEST_DIRECT_ID, False, True, False, False, True, False, [TEST_USER_ID])]
+        self.test_channels = {TEST_CHANNEL_ID: generate_channel(TEST_CHANNEL_ID, TEST_CHANNEL_ID, False, False, False,
+                                                                True, False, False, [TEST_USER_ID]),
+                               TEST_GROUP_ID: generate_channel(TEST_GROUP_ID, TEST_GROUP_ID, True, False, False, False,
+                                                               True, False, [TEST_USER_ID]),
+                               TEST_DIRECT_ID: generate_channel(TEST_DIRECT_ID, TEST_DIRECT_ID, False, True, False,
+                                                                False, True, False, [TEST_USER_ID])}
 
         def mocked_api_call(method, **kwargs):
             if method == 'channels.list':
@@ -82,7 +85,7 @@ class MockUQCSBot(UQCSBot):
             cursor = None
         return {'ok': True, 'messages': sliced_messages, 'cursor': cursor}
 
-    def channel_list(self, channel_type, **kwargs):
+    def channel_list(self, channel_type=None, **kwargs):
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
         if channel_type == 'channels':
@@ -93,7 +96,7 @@ class MockUQCSBot(UQCSBot):
             filter_function = lambda x: x.get('is_im', False)
         else:
             filter_function = lambda *_: True
-        all_channels = list(filter(filter_function, self.test_channels))
+        all_channels = list(filter(filter_function, self.test_channels.values()))
         sliced_channels = all_channels[cursor : cursor + limit + 1]
         cursor += len(sliced_channels)
         if cursor == len(all_channels):
@@ -102,7 +105,8 @@ class MockUQCSBot(UQCSBot):
 
     def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
         channel_id = channel.id if isinstance(channel, Channel) else channel
-        self.test_posted_messages[channel_id].appendleft({'channel_id': channel_id, 'text': text})
+        message = {'channel_id': channel_id, 'text': text}
+        self.test_posted_messages.get(channel_id, []).appendleft(message)
 
     async def post_and_handle_command(self, channel, text, user=TEST_USER_ID, ts=None):
         self.post_message(channel, text)
