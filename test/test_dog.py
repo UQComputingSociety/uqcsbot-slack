@@ -8,5 +8,6 @@ from .helpers import generate_message_object
 
 @pytest.mark.asyncio
 async def test_dog(uqcsbot: MockUQCSBot):
-    await uqcsbot.post_and_handle_command(TEST_CHANNEL_ID, '!dog')
+    message = generate_message_object(TEST_CHANNEL_ID, '!dog')
+    await uqcsbot.post_and_handle_command(message)
     assert len(uqcsbot.test_posted_messages.get(TEST_CHANNEL_ID, [])) == 2

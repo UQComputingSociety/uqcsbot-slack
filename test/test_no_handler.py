@@ -3,11 +3,11 @@ Tests that the bot correctly finds no handlers for an invalid command and ignore
 """
 import pytest
 
-from .conftest import MockUQCSBot, UnmatchedHandleException
+from .conftest import MockUQCSBot, TEST_CHANNEL_ID, UnmatchedHandleException
 from .helpers import generate_message_object
 
-
-def test_invalid_script_doesnt_match(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!thiscommanddoesntexist")
+@pytest.mark.asyncio
+async def test_invalid_script_doesnt_match(uqcsbot: MockUQCSBot):
     with pytest.raises(UnmatchedHandleException):
-        uqcsbot.test_handle_event(message)
+        message = generate_message_object(TEST_CHANNEL_ID, '!thiscommanddoesntexist')
+        await uqcsbot.post_and_handle_command(message)

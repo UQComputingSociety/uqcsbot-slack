@@ -2,12 +2,6 @@
 Configuration for Pytest
 """
 
-# Arbitrary channel and user ids for use in testing
-TEST_CHANNEL_ID = "C1234567890"
-TEST_GROUP_ID = "G1234567890"
-TEST_DIRECT_ID = "D1234567890"
-TEST_USER_ID = "U1234567890"
-
 import pytest
 import asyncio
 from slackclient import SlackClient
@@ -15,15 +9,36 @@ from unittest.mock import MagicMock
 from typing import List, Union, Optional, Callable, DefaultDict, Dict
 from collections import defaultdict, deque
 from itertools import islice
-from .helpers import generate_message_object
 
 import uqcsbot as uqcsbot_module
 from uqcsbot.api import Channel, APIWrapper
 from uqcsbot.base import UQCSBot, Command
 
+# Arbitrary channel and user ids for use in testing
+TEST_CHANNEL_ID = "C1234567890"
+TEST_GROUP_ID = "G1234567890"
+TEST_DIRECT_ID = "D1234567890"
+TEST_USER_ID = "U1234567890"
+
 def generate_channel(channel_id, name, is_group, is_im, is_user_deleted, is_public, is_private, is_archived, users):
     return {'id': channel_id, 'name': name, 'is_group': is_group, 'is_im': is_im, 'is_user_deleted': is_user_deleted,
             'is_public': is_public, 'is_private': is_private, 'is_archived': is_archived, 'users': users}
+
+
+class UnparsedCommandException(Exception):
+    """
+    Unlike the actual bot, an unparsable command will result in this exception rather than being ignored
+    Allows the tests to expect this result
+    """
+    pass
+
+
+class UnmatchedHandleException(Exception):
+    """
+    Unlike the actual bot, a message which doesn't match any handlers will raise this exception rather than being ignored
+    Allows the tests to expect this result
+    """
+    pass
 
 class MockUQCSBot(UQCSBot):
     test_posted_messages = None
@@ -106,11 +121,17 @@ class MockUQCSBot(UQCSBot):
     def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
         channel_id = channel.id if isinstance(channel, Channel) else channel
         message = {'channel_id': channel_id, 'text': text}
-        self.test_posted_messages.get(channel_id, []).appendleft(message)
+        self.test_posted_messages[channel_id].appendleft(message)
 
-    async def post_and_handle_command(self, channel, text, user=TEST_USER_ID, ts=None):
-        self.post_message(channel, text)
-        await self._handle_command(generate_message_object(channel, text, user, ts))
+    async def post_and_handle_command(self, message):
+        self.post_message(message['channel'], message['text'])
+        command = Command.from_message(self, message)
+        print(command)
+        if command is None:
+            raise UnparsedCommandException()
+        if command.command_name not in self._command_registry:
+            raise UnmatchedHandleException()
+        await self._handle_command(message)
 
 @pytest.fixture(scope="session")
 def _uqcsbot():
