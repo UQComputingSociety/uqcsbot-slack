@@ -1,11 +1,12 @@
 """
 Tests for uqcsbot.scripts.cat
 """
-from .conftest import MockUQCSBot
+import pytest
+
+from .conftest import MockUQCSBot, TEST_CHANNEL_ID
 from .helpers import generate_message_object
 
-
-def test_cat(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!cat")
-    uqcsbot.test_handle_event(message)
-    assert len(uqcsbot.test_posted_messages) == 1
+@pytest.mark.asyncio
+async def test_cat(uqcsbot: MockUQCSBot):
+    await uqcsbot.post_and_handle_command(TEST_CHANNEL_ID, '!cat')
+    assert len(uqcsbot.test_posted_messages.get(TEST_CHANNEL_ID, [])) == 2

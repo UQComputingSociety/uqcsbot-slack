@@ -64,9 +64,9 @@ class UQCSBot(object):
     executor: Optional[concurrent.futures.ThreadPoolExecutor] = underscored_getter("executor")
     scheduler: Optional[AsyncIOScheduler] = underscored_getter("scheduler")
 
-    def __init__(self, logger=None):
+    def __init__(self, logger=None, client=None):
         self._api_token = None
-        self._client = None
+        self._client = client
         self._verification_token = None
         self._evt_loop = asyncio.new_event_loop()
         self._executor = concurrent.futures.ThreadPoolExecutor()
@@ -222,28 +222,6 @@ class UQCSBot(object):
                     if message.get('type') == "goodbye":
                         break
                 time.sleep(0.5)
-
-    def run_cli(self):
-        """
-        Run in local (CLI) mode
-        """
-
-        def cli_api_call(method, **kwargs):
-            if method == "chat.postMessage":
-                print(kwargs['text'])
-            else:
-                print(kwargs)
-
-        self.api_call = cli_api_call
-        with self._async_context():
-            while True:
-                response = input("> ")
-                self._run_handlers({
-                    "text": response,
-                    "channel": "general",
-                    "subtype": "user",
-                    "type": "message"
-                })
 
 
 class AsyncBotWrapper(object):

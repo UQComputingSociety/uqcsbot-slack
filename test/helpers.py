@@ -88,7 +88,7 @@ def generate_event_object(event_type, **additional_data):
     return data
 
 
-def generate_message_object(text, channel=TEST_CHANNEL_ID, user=TEST_USER_ID, ts=None):
+def generate_message_object(channel, text, user=TEST_USER_ID, ts=None):
     """
     Create a Slack message object
     Timestamp will default to now
