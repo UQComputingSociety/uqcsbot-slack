@@ -33,5 +33,4 @@ async def define(command: Command):
         # This gets the first subsense if there are otherwise just uses senses.
         message = senses.get('subsenses', [senses])[0].get('definition', "Definition not available")
 
-    attachments = [{"text": message}]
-    bot.post_message(command.channel, "", attachments=attachments)
+    bot.post_message(command.channel, f">>>{message}")
