@@ -1,4 +1,5 @@
 from functools import partial
+import time
 from slackclient import SlackClient
 import asyncio
 import threading
@@ -73,11 +74,22 @@ class APIMethodProxy(object):
             self._method,
             **kwargs
         )
-        if self._async:
-            loop = asyncio.get_event_loop()
-            return loop.run_in_executor(None, fn)
+        retry_count = 0
+        while retry_count < 5:
+            if self._async:
+                loop = asyncio.get_event_loop()
+                result = loop.run_in_executor(None, fn)
+            else:
+                result = fn()
+            if not result['ok'] and result['error'] == 'ratelimited':
+                retry_after_secs = int(result['headers']['Retry-After'])
+                time.sleep(retry_after_secs)
+                retry_count += 1
+            else:
+                break
         else:
-            return fn()
+            result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
+        return result
 
     def paginate(self, **kwargs) -> Paginator:
         """
