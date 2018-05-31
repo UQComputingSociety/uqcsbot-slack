@@ -68,6 +68,8 @@ class APIMethodProxy(object):
         If the APIMethodProxy was constructed with `is_async=True` runs the
         request asynchronously via:
             asyncio.get_event_loop().run_in_executor(None, req)
+
+        Attempts to retry the API call if rate-limited.
         """
         fn = partial(
             self._client.api_call,
