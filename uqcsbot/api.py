@@ -80,7 +80,7 @@ class APIMethodProxy(object):
         while retry_count < 5:
             if self._async:
                 loop = asyncio.get_event_loop()
-                result = loop.run_in_executor(None, fn)
+                result = await loop.run_in_executor(None, fn)
             else:
                 result = fn()
             if not result['ok'] and result['error'] == 'ratelimited':
