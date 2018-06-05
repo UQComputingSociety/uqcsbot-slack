@@ -8,7 +8,7 @@ import threading
 import logging
 import time
 from contextlib import contextmanager
-from typing import Callable, Optional, Union, TypeVar
+from typing import Callable, Optional, Union, TypeVar, DefaultDict
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
@@ -16,9 +16,10 @@ T = TypeVar('T')
 
 
 class Command(object):
-    def __init__(self, command_name: str, arg: Optional[str], channel: Channel):
+    def __init__(self, command_name: str, arg: Optional[str], channel: Channel, user_id: str):
         self.command_name = command_name
         self.arg = arg
+        self.user_id = user_id
         self.channel = channel
 
     def has_arg(self) -> bool:
@@ -34,6 +35,7 @@ class Command(object):
             command_name=command_name,
             channel=bot.channels.get(message["channel"]),
             arg=None if not arg else arg[0],
+            user_id=message["user"]
         )
 
 
@@ -63,6 +65,7 @@ class UQCSBot(object):
     evt_loop: Optional[asyncio.AbstractEventLoop] = underscored_getter("evt_loop")
     executor: Optional[concurrent.futures.ThreadPoolExecutor] = underscored_getter("executor")
     scheduler: Optional[AsyncIOScheduler] = underscored_getter("scheduler")
+    command_registry: Optional[DefaultDict[str, list]] = underscored_getter("command_registry")
 
     def __init__(self, logger=None):
         self._api_token = None
@@ -99,13 +102,13 @@ class UQCSBot(object):
             return
         await asyncio.gather(*[
             self._await_error(cmd(command))
-            for cmd in self._command_registry[command.command_name]
+            for cmd in self.command_registry[command.command_name]
         ])
 
     def on_command(self, command_name: str):
         def decorator(fn):
             fn = self._wrap_async(fn)
-            self._command_registry[command_name].append(fn)
+            self.command_registry[command_name].append(fn)
             return fn
         return decorator
 
@@ -148,7 +151,10 @@ class UQCSBot(object):
         Wrap a function to run it asynchronously if it's not already a coroutine function
         """
         if not asyncio.iscoroutinefunction(fn):
+            fn_doc = fn.__doc__
             fn = partial(self.run_async, fn)
+            # Ensure the function's docstring is copied over.
+            fn.__doc__ = fn_doc
         return fn
 
     async def run_async(self, fn, *args, **kwargs):
