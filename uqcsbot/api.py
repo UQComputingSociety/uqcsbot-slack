@@ -1,8 +1,9 @@
 from functools import partial
+import time
 from slackclient import SlackClient
 import asyncio
 import threading
-from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar
+from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar, Awaitable
 if TYPE_CHECKING:
     from .base import UQCSBot
 
@@ -59,7 +60,7 @@ class APIMethodProxy(object):
         self._method = method
         self._async = is_async
 
-    def __call__(self, **kwargs) -> dict:
+    def __call__(self, **kwargs) -> Union[dict, Awaitable[dict]]:
         """
         Perform the relevant API request. Equivalent to SlackClient.api_call
         except the `method` argument is filled in.
@@ -67,17 +68,32 @@ class APIMethodProxy(object):
         If the APIMethodProxy was constructed with `is_async=True` runs the
         request asynchronously via:
             asyncio.get_event_loop().run_in_executor(None, req)
+
+        Attempts to retry the API call if rate-limited.
         """
         fn = partial(
             self._client.api_call,
             self._method,
             **kwargs
         )
+        def call_inner():
+            retry_count = 0
+            while retry_count < 5:
+                result = fn()
+                if not result['ok'] and result['error'] == 'ratelimited':
+                    retry_after_secs = int(result['headers']['Retry-After'])
+                    time.sleep(retry_after_secs)
+                    retry_count += 1
+                else:
+                    break
+            else:
+                result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
+            return result
         if self._async:
             loop = asyncio.get_event_loop()
-            return loop.run_in_executor(None, fn)
+            return loop.run_in_executor(None, call_inner)
         else:
-            return fn()
+            return call_inner()
 
     def paginate(self, **kwargs) -> Paginator:
         """
