@@ -188,7 +188,7 @@ class Channel(object):
         self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
         members = []
         for page in self._bot.api.conversations.members.paginate(channel=self.id):
-            members += page["members"]
+            members += page.get("members", [])
         self._member_ids = members
         return self._member_ids
 
