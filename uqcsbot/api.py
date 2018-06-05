@@ -91,9 +91,9 @@ class APIMethodProxy(object):
             return result
         if self._is_async:
             loop = asyncio.get_event_loop()
-            loop.run_in_executor(None, call_inner)
+            return loop.run_in_executor(None, call_inner)
         else:
-            return call_inner
+            return call_inner()
 
     def paginate(self, **kwargs) -> Paginator:
         """
