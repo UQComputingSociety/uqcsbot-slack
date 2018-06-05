@@ -25,7 +25,7 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
     def _gen(self) -> Generator[dict, Any, None]:
         kwargs = self._kwargs.copy()
         while True:
-            page = self._client.api_call(self._method, **self._kwargs)
+            page = self._client.api_call(self._method, **kwargs)
             yield page
             cursor = page.get('response_metadata', {}).get('next_cursor')
             if not cursor:
@@ -188,7 +188,7 @@ class Channel(object):
         self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
         members = []
         for page in self._bot.api.conversations.members.paginate(channel=self.id):
-            members += page["members"]
+            members += page.get("members", [])
         self._member_ids = members
         return self._member_ids
 
