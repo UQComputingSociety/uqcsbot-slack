@@ -60,53 +60,6 @@ class APIMethodProxy(object):
         self._method = method
         self._async = is_async
 
-    def _make_fn(self, **kwargs):
-        """
-        Makes a partially applied version of the method call
-        """
-        return partial(
-            self._client.api_call,
-            self._method,
-            **kwargs
-        )
-
-    async def _async_call(self, **kwargs) -> Awaitable[dict]:
-        """
-        Makes API method call asynchronously, with rate limit control logic
-        """
-        fn = self._make_fn(**kwargs)
-        loop = asyncio.get_event_loop()
-        retry_count = 0
-        while retry_count < 5:
-            result = await loop.run_in_executor(None, fn)
-            if not result['ok'] and result['error'] == 'ratelimited':
-                retry_after_secs = int(result['headers']['Retry-After'])
-                await asyncio.sleep(retry_after_secs)
-                retry_count += 1
-            else:
-                break
-        else:
-            result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
-        return result
-
-    def _sync_call(self, **kwargs) -> dict:
-        """
-        Makes API method call synchronously, with rate limit control logic
-        """
-        fn = self._make_fn(**kwargs)
-        retry_count = 0
-        while retry_count < 5:
-            result = fn()
-            if not result['ok'] and result['error'] == 'ratelimited':
-                retry_after_secs = int(result['headers']['Retry-After'])
-                time.sleep(retry_after_secs)
-                retry_count += 1
-            else:
-                break
-        else:
-            result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
-        return result
-
     def __call__(self, **kwargs) -> Union[dict, Awaitable[dict]]:
         """
         Perform the relevant API request. Equivalent to SlackClient.api_call
@@ -118,10 +71,29 @@ class APIMethodProxy(object):
 
         Attempts to retry the API call if rate-limited.
         """
+        fn = partial(
+            self._client.api_call,
+            self._method,
+            **kwargs
+        )
+        def call_inner():
+            retry_count = 0
+            while retry_count < 5:
+                result = fn()
+                if not result['ok'] and result['error'] == 'ratelimited':
+                    retry_after_secs = int(result['headers']['Retry-After'])
+                    time.sleep(retry_after_secs)
+                    retry_count += 1
+                else:
+                    break
+            else:
+                result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
+            return result
         if self._is_async:
-            return self._async_call(**kwargs)
+            loop = asyncio.get_event_loop()
+            loop.run_in_executor(None, call_inner)
         else:
-            return self._sync_call(**kwargs)
+            return call_inner
 
     def paginate(self, **kwargs) -> Paginator:
         """
