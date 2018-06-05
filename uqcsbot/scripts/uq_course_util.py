@@ -39,6 +39,9 @@ async def get_course_assessment(profile_ids):
     return list(map(get_parsed_assessment_item, assessment))
 
 def get_inner_html(dom_element):
+    '''
+    TODO(mitch): this
+    '''
     return dom_element.decode_contents(formatter='html')
 
 def get_parsed_assessment_item(assessment_item):

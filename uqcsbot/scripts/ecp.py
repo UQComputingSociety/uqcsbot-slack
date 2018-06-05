@@ -14,4 +14,4 @@ async def handle_ecp(command: Command):
     if profile_url is None:
         bot.post_message(channel, f'Could not retrieve a Profile ID for `{course_name}`.')
     else:
-        bot.post_message(channel, profile_url)
+        bot.post_message(channel, f'*{course_name}*: <{profile_url}|ECP>')
