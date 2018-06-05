@@ -89,7 +89,7 @@ class APIMethodProxy(object):
             else:
                 result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
             return result
-        if self._is_async:
+        if self._async:
             loop = asyncio.get_event_loop()
             return loop.run_in_executor(None, call_inner)
         else:
