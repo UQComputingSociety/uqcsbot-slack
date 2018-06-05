@@ -25,7 +25,7 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
     def _gen(self) -> Generator[dict, Any, None]:
         kwargs = self._kwargs.copy()
         while True:
-            page = self._client.api_call(self._method, **self._kwargs)
+            page = self._client.api_call(self._method, **kwargs)
             yield page
             cursor = page.get('response_metadata', {}).get('next_cursor')
             if not cursor:
