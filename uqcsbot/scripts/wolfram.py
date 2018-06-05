@@ -200,10 +200,10 @@ async def handle_reply(evt: dict):
     channel = evt['channel']
     thread_ts = evt['thread_ts']  # This refers to time the original message
     thread_parent = bot.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts)
-
+    
     if not thread_parent['ok']:
         # The most likely reason for this error is auth issues or possibly rate limiting
-        bot.post_message(channel, 'Sorry, something went wrong with slack', thread_ts=thread_ts)
+        bot.logger.error(f'Error with wolfram script thread history: {thread_parent}')
         return
 
     # Limit=1 was used so the first (and only) message is what we want
