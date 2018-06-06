@@ -46,11 +46,11 @@ def get_inner_html(dom_element):
 
 def get_parsed_assessment_item(assessment_item):
     '''
-    TODO(mitch): this
+    TODO(mitch): this. explain assumptions
     '''
-    course, task, due, weight = assessment_item.findAll('td')
-    course = course.text[:8]
-    task = get_inner_html(task.find('div')).strip().replace('<br/>', ' - ')
-    due = get_inner_html(due.find('div')).strip().split('<br/>')[0]
-    weight = get_inner_html(weight.find('div')).strip().split('<br/>')[0]
-    return (course, task, due, weight)
+    course, task, due_date, weight = assessment_item.findAll('div')
+    course = course.text.strip().split(' - ')[0]
+    task = get_inner_html(task).strip().replace('<br/>', ' - ')
+    due_date = get_inner_html(due_date).strip().split('<br/>')[0]
+    weight = get_inner_html(weight).strip().split('<br/>')[0]
+    return (course, task, due_date, weight)

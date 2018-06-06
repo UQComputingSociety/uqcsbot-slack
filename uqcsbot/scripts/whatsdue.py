@@ -13,6 +13,8 @@ async def handle_whatsdue(command: Command):
     '''
     TODO(mitch): helper doc
     '''
+    # TODO(mitch): limit number of courses to 5
+    # TODO(mitch): add cli command that ignores assessment before today
     channel = command.channel
     course_names = command.arg.split() if command.has_arg() else [channel.name]
     profile_ids = [await get_course_profile_id(name) for name in course_names]
