@@ -95,7 +95,7 @@ async def handle_events(command: Command):
     '''
     event_filter = EventFilter.from_command(command)
     if not event_filter.is_valid:
-        bot.post_message(command.channel, "Invalid events filter.")
+        await bot.as_async.post_message(command.channel, "Invalid events filter.")
         return
 
     http_response = await bot.run_async(requests.get, CALENDAR_URL)
@@ -130,4 +130,4 @@ async def handle_events(command: Command):
     else:
         message = f"{event_filter.get_header()}\r\n" + '\r\n'.join(str(e) for e in events)
 
-    bot.post_message(command.channel, message)
+    await bot.as_async.post_message(command.channel, message)

@@ -45,6 +45,6 @@ async def handle_help(command: Command):
     if user_direct_channel is None:
         logger.error(f'Could not find the calling user\'s channel: {command.user_id}')
     elif len(helper_docs) == 0:
-        bot.post_message(user_direct_channel, f'Could not find any helper docstrings.')
+        await bot.as_async.post_message(user_direct_channel, f'Could not find any helper docstrings.')
     else:
-        bot.post_message(user_direct_channel, '>>>' + '\n'.join(helper_docs))
+        await bot.as_async.post_message(user_direct_channel, '>>>' + '\n'.join(helper_docs))
