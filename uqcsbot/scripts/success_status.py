@@ -1,8 +1,8 @@
 from uqcsbot import bot, Command
 from random import choice
 
-# TODO(mitch): add other success emojis
-SUCCESS_REACTS = ['thumbsup']
+SUCCESS_REACTS = ['thumbsup', 'thumbsup_all', 'msn_thumbsup', 'mint', 'nice',
+                  'noice', 'feels_good']
 
 def success_status(fn):
     '''
