@@ -97,7 +97,7 @@ async def get_short_answer(search_query: str):
 
     # Check if the response is ok. A status code of 501 signifies that no result could be found.
     if http_response.status_code == 501:
-        return "No short answer available. Try !wolframfull"
+        return "No short answer available. Try !wolfram --full"
     elif http_response.status_code != requests.codes.ok:
         return "There was a problem getting the response"
 
