@@ -1,8 +1,7 @@
 from uqcsbot import bot, Command
 from random import choice
 
-LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid', 'keen',
-                  'fiestaparrot', 'exclamation']
+LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid']
 
 def loading_status(fn):
     '''
