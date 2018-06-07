@@ -2,7 +2,7 @@ from uqcsbot import bot, Command
 import requests
 from requests.utils import quote
 from bs4 import BeautifulSoup
-from uqcsbot.scripts.loading_status import loading_status
+from uqcsbot.scripts.status_reacts import loading_status
 
 COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 

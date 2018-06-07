@@ -1,8 +1,6 @@
 from uqcsbot import bot
 from random import choice, sample
-from uqcsbot.scripts.loading_status import LOADING_REACTS
-
-HYPE_REACTS = ['nice', 'noice', 'mint', 'exclamation', 'fiestaparrot']
+from uqcsbot.scripts.status_reacts import LOADING_REACTS, HYPE_REACTS
 
 @bot.on_schedule('cron', hour=17, timezone='Australia/Brisbane')
 async def wakie():
