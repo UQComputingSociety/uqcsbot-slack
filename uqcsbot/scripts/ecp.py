@@ -18,10 +18,10 @@ async def handle_ecp(command: Command):
     http_response = await bot.run_async(requests.get, f"{COURSE_URL}{quote(course_name)}")
     html = BeautifulSoup(http_response.content, 'html.parser')
     if html.find(id="course-notfound"):
-        bot.post_message(channel, f"Not a valid course code.")
+        await bot.as_async.post_message(channel, f"Not a valid course code.")
         return
     ecp_link = html.find_all("a", class_="profile-available")
     if not ecp_link:
-        bot.post_message(channel, f"No available course profiles.")
+        await bot.as_async.post_message(channel, f"No available course profiles.")
     else:
-        bot.post_message(channel, ecp_link[0]['href'])
+        await bot.as_async.post_message(channel, ecp_link[0]['href'])

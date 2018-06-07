@@ -58,4 +58,4 @@ async def handle_mock(command: Command):
             response = 'Something went wrong (likely insufficient conversation history).'
         else:
             response = mock_message(message_to_mock)
-    bot.post_message(command.channel, response)
+    await bot.as_async.post_message(command.channel, response)

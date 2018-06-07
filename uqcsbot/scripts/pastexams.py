@@ -15,7 +15,7 @@ async def handle_pastexams(command: Command):
     past_exams = await get_past_exams(course_code)
 
     # We use attachments to improve the formatting
-    bot.post_message(command.channel, "", attachments=[{'text': past_exams}])
+    await bot.as_async.post_message(command.channel, "", attachments=[{'text': past_exams}])
 
 
 def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
