@@ -4,7 +4,8 @@ from random import choice
 LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid']
 SUCCESS_REACTS = ['thumbsup', 'thumbsup_all', 'msn_thumbsup', 'mint', 'nice',
                   'noice', 'feels_good']
-HYPE_REACTS = ['nice', 'noice', 'mint', 'exclamation', 'fiestaparrot']
+HYPE_REACTS = ['nice', 'noice', 'mint', 'exclamation', 'fiestaparrot',
+               'github_square3', 'sweating']
 
 def success_status(command_fn):
     '''
