@@ -3,7 +3,6 @@ from uqcsbot import bot, Command
 from uqcsbot.scripts.uq_course_util import (get_course_profile_id,
                                             get_course_assessment,
                                             HttpException,
-                                            DateSyntaxException,
                                             CourseNotFoundException)
 
 def get_formatted_assessment_item(assessment_item):
@@ -54,10 +53,6 @@ async def handle_whatsdue(command: Command):
         assessment = await get_course_assessment(profile_ids, cutoff_datetime)
     except HttpException as e:
         error_message = f'TODO(mitch): this (http exception)'
-        await bot.as_async.post_message(channel, error_message)
-        return
-    except DateSyntaxException as e:
-        error_message = f'TODO(mitch): this (date exception)'
         await bot.as_async.post_message(channel, error_message)
         return
 
