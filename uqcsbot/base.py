@@ -16,11 +16,11 @@ T = TypeVar('T')
 
 
 class Command(object):
-    def __init__(self, command_name: str, arg: Optional[str], channel: Channel, user_id: str):
+    def __init__(self, command_name: str, arg: Optional[str], channel: Channel, message: dict):
         self.command_name = command_name
-        self.arg = arg
-        self.user_id = user_id
         self.channel = channel
+        self.arg = arg
+        self.message = message
 
     def has_arg(self) -> bool:
         return self.arg is not None
@@ -29,13 +29,13 @@ class Command(object):
     def from_message(cls: T, bot, message: dict) -> Optional[T]:
         text = message.get("text")
         if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
-            return
+            return None
         command_name, *arg = text[1:].split(" ", 1)
         return cls(
             command_name=command_name,
             channel=bot.channels.get(message["channel"]),
             arg=None if not arg else arg[0],
-            user_id=message["user"]
+            message=message
         )
 
 
@@ -221,7 +221,7 @@ class UQCSBot(object):
         self._verification_token = verification_token
         with self._async_context():
             # Initialise channels at start so we don't have to block
-            self.channels._initialise() 
+            self.channels._initialise()
 
             if not self.client.rtm_connect():
                 raise OSError("Error connecting to RTM API")
