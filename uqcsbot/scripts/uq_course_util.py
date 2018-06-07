@@ -26,6 +26,15 @@ class CourseNotFoundException(Exception):
         self.course_name = course_name
         bot.logger.error(f'Could not find course \'{course_name}\'.')
 
+class ProfileNotFoundException(Exception):
+    '''
+    TODO(mitch): this
+    '''
+    def __init__(self, course_name):
+        super().__init__()
+        self.course_name = course_name
+        bot.logger.error(f'Could not find profile for course \'{course_name}\'.')
+
 class HttpException(Exception):
     '''
     TODO(mitch): this
@@ -47,7 +56,10 @@ async def get_course_profile_url(course_name):
     html = BeautifulSoup(http_response.content, 'html.parser')
     if html.find(id='course-notfound'):
         raise CourseNotFoundException(course_name)
-    return html.find('a', class_='profile-available').get('href')
+    profile = html.find('a', class_='profile-available')
+    if profile is None or profile.get('href') is None:
+        raise ProfileNotFoundException(course_name)
+    return profile.get('href')
 
 async def get_course_profile_id(course_name):
     '''

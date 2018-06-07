@@ -3,7 +3,8 @@ from uqcsbot import bot, Command
 from uqcsbot.scripts.uq_course_util import (get_course_profile_id,
                                             get_course_assessment,
                                             HttpException,
-                                            CourseNotFoundException)
+                                            CourseNotFoundException,
+                                            ProfileNotFoundException)
 
 def get_formatted_assessment_item(assessment_item):
     '''
@@ -37,11 +38,15 @@ async def handle_whatsdue(command: Command):
     try:
         profile_ids = [await get_course_profile_id(name) for name in course_names]
     except HttpException as e:
-        error_message = f'TODO(mitch): this (http exception)'
+        error_message = f'An error occurred, please try again.'
         await bot.as_async.post_message(channel, error_message)
         return
     except CourseNotFoundException as e:
-        error_message = f'TODO(mitch): this (course exception)'
+        error_message = f'Could not find course `{e.course_name}`.'
+        await bot.as_async.post_message(channel, error_message)
+        return
+    except ProfileNotFoundException as e:
+        error_message = f'Could not retrieve a Profile ID for `{e.course_name}`.'
         await bot.as_async.post_message(channel, error_message)
         return
 
