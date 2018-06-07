@@ -15,5 +15,5 @@ async def wakie():
     channel = bot.channels.get("general")
     victims = sample(channel.members, 2)
     lines = [f'Hey <@{v}>! Tell us about something cool you are working on!' for v in victims]
-    msg = await bot.run_async(bot.post_message, channel, '\r\n'.join(lines))
-    bot.api.reactions.add(name=choice(REACTS), channel=channel.id, timestamp=msg['ts'])
+    msg = await bot.as_async.post_message(channel, '\r\n'.join(lines))
+    await bot.as_async.api.reactions.add(name=choice(REACTS), channel=channel.id, timestamp=msg['ts'])

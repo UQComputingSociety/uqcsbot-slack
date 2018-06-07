@@ -139,8 +139,8 @@ class UQCSBot(object):
         return APIWrapper(self.client)
 
     @property
-    def async(self):
-        return AsyncBotWrapper(self.client)
+    def as_async(self):
+        return AsyncBotWrapper(self)
 
     def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
         channel_id = channel if isinstance(channel, str) else channel.id
@@ -220,6 +220,9 @@ class UQCSBot(object):
         self._client = SlackClient(api_token)
         self._verification_token = verification_token
         with self._async_context():
+            # Initialise channels at start so we don't have to block
+            self.channels._initialise() 
+
             if not self.client.rtm_connect():
                 raise OSError("Error connecting to RTM API")
             while True:
@@ -260,9 +263,17 @@ class AsyncBotWrapper(object):
 
     def __getattr__(self, name):
         attr = getattr(self.bot, name)
-        if not callable(attr) or not asyncio.iscoroutinefunction(attr):
+        if not callable(attr) or asyncio.iscoroutinefunction(attr):
             return attr
         return partial(bot.run_async, attr)
+
+    @property
+    def as_async(self):
+        return self
+
+    @property
+    def api(self):
+        return self.bot.api(is_async=True)
 
 
 bot = UQCSBot()

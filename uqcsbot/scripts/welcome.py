@@ -31,18 +31,17 @@ async def welcome(evt: dict):
     announcements = chan
     general = bot.channels.get("general")
 
-    user_info = await bot.run_async(bot.api.users.info, user=evt.get("user"))
+    user_info = await bot.as_async.api.users.info(user=evt.get("user"))
     display_name = user_info.get("user", {}).get("profile", {}).get("display_name")
 
     if display_name:
-        await bot.run_async(bot.post_message, general, f"Welcome, {display_name}")
+        await bot.as_async.post_message(general, f"Welcome, {display_name}")
 
     for message in WELCOME_MESSAGES:
         await asyncio.sleep(MESSAGE_PAUSE)
-        await bot.run_async(bot.post_message, evt.get("user"), message)
+        await bot.as_async.post_message(evt.get("user"), message)
     if len(announcements.members) % MEMBER_MILESTONE == 0:
-        await bot.run_async(
-            bot.post_message,
+        await bot.as_async.post_message(
             general,
             f":tada: {len(announcements.members)} members! :tada:"
         )

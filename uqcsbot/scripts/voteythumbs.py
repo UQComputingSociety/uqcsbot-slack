@@ -35,16 +35,15 @@ async def voteythumbs(evt: dict):
     if cmd is None:
         return
     if not cmd.has_arg() and "!voteythumbs" in evt["text"]:
-        await bot.run_async(bot.post_message, cmd.channel, "Invalid voteythumbs command")
+        await bot.as_async.post_message(cmd.channel, "Invalid voteythumbs command")
     if not cmd.has_arg():
         bot.logger.error("Invalid voteythumbs command")
         return
     cmd.arg = strip(cmd.arg)
 
-    result = await bot.run_async(bot.post_message, cmd.channel, f"Starting vote: {cmd.arg}")
+    result = await bot.as_async.post_message(cmd.channel, f"Starting vote: {cmd.arg}")
     add_reaction = partial(
-        bot.run_async,
-        bot.api.reactions.add,
+        bot.as_async.api.reactions.add,
         channel=cmd.channel.id,
         timestamp=result['ts'],
     )

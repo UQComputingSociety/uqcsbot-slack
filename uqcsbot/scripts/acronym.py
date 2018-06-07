@@ -30,10 +30,10 @@ async def handle_acronym(command: Command):
     if len(words) == 1:
         word = words[0]
         if word.lower() in [":horse:", "horse"]:
-            bot.post_message(command.channel, ">:taco:")
+            await bot.as_async.post_message(command.channel, ">:taco:")
             return
-        if word.lower() in [":rachel:", "rachel"]:
-            bot.post_message(command.channel, ">:older_woman:")
+        elif word.lower() in [":rachel:", "rachel"]:
+            await bot.as_async.post_message(command.channel, ">:older_woman:")
             return
 
     acronym_futures = [get_acronyms(word) for word in words[:ACRONYM_LIMIT]]
@@ -48,4 +48,4 @@ async def handle_acronym(command: Command):
     if len(words) > ACRONYM_LIMIT:
         response += f">I am limited to {ACRONYM_LIMIT} acronyms at once"
 
-    bot.post_message(command.channel, response)
+    await bot.as_async.post_message(command.channel, response)
