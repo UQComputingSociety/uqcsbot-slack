@@ -1,8 +1,9 @@
 from functools import partial
+import time
 from slackclient import SlackClient
 import asyncio
 import threading
-from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar
+from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar, Awaitable
 if TYPE_CHECKING:
     from .base import UQCSBot
 
@@ -24,7 +25,7 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
     def _gen(self) -> Generator[dict, Any, None]:
         kwargs = self._kwargs.copy()
         while True:
-            page = self._client.api_call(self._method, **self._kwargs)
+            page = self._client.api_call(self._method, **kwargs)
             yield page
             cursor = page.get('response_metadata', {}).get('next_cursor')
             if not cursor:
@@ -59,7 +60,7 @@ class APIMethodProxy(object):
         self._method = method
         self._async = is_async
 
-    def __call__(self, **kwargs) -> dict:
+    def __call__(self, **kwargs) -> Union[dict, Awaitable[dict]]:
         """
         Perform the relevant API request. Equivalent to SlackClient.api_call
         except the `method` argument is filled in.
@@ -67,17 +68,32 @@ class APIMethodProxy(object):
         If the APIMethodProxy was constructed with `is_async=True` runs the
         request asynchronously via:
             asyncio.get_event_loop().run_in_executor(None, req)
+
+        Attempts to retry the API call if rate-limited.
         """
         fn = partial(
             self._client.api_call,
             self._method,
             **kwargs
         )
+        def call_inner():
+            retry_count = 0
+            while retry_count < 5:
+                result = fn()
+                if not result['ok'] and result['error'] == 'ratelimited':
+                    retry_after_secs = int(result['headers']['Retry-After'])
+                    time.sleep(retry_after_secs)
+                    retry_count += 1
+                else:
+                    break
+            else:
+                result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
+            return result
         if self._async:
             loop = asyncio.get_event_loop()
-            return loop.run_in_executor(None, fn)
+            return loop.run_in_executor(None, call_inner)
         else:
-            return fn()
+            return call_inner()
 
     def paginate(self, **kwargs) -> Paginator:
         """
@@ -172,7 +188,7 @@ class Channel(object):
         self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
         members = []
         for page in self._bot.api.conversations.members.paginate(channel=self.id):
-            members += page["members"]
+            members += page.get("members", [])
         self._member_ids = members
         return self._member_ids
 
@@ -232,7 +248,10 @@ class ChannelWrapper(object):
                 for im in page['ims']:
                     if im['is_user_deleted']:
                         continue
-                    im['name'] = im['id']
+                    # Set the channel name to the user being directly messaged
+                    # for easier reverse lookups. Note: `user` here is the
+                    # user_id.
+                    im['name'] = im['user']
                     self._add_channel(im)
             self._initialised = True
 
@@ -261,8 +280,9 @@ class ChannelWrapper(object):
 
     def _on_im_created(self, evt):
         chan = evt['channel']
-
-        chan['name'] = chan['id']
+        # Set the channel name to the user being directly messaged for easier
+        # reverse lookups. Note: `user` here is the user_id.
+        chan['name'] = evt['user']
         self._add_channel(chan)
 
     def _on_member_joined_channel(self, evt):

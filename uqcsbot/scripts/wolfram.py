@@ -24,10 +24,13 @@ def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
 
 @bot.on_command('wolfram')
 async def handle_wolfram(command: Command):
-    """
-    Determines whether to use the full version or the short version. The full version is used if the --full
-    argument is supplied before or after the search query. See wolfram_full and wolfram_normal for the differences.
-    """
+    '''
+    `!wolfram [--full] <QUERY>` - Returns the wolfram response for the given
+    query. If `--full` is specified, will return the full reponse.
+    '''
+    # Determines whether to use the full version or the short version. The full
+    # version is used if the --full. argument is supplied before or after the
+    # search query. See wolfram_full and wolfram_normal for the differences.
     if command.has_arg():
         cmd = command.arg.strip()
         # Doing it specific to the start and end just in case someone has --full inside their query for whatever reason
@@ -40,7 +43,7 @@ async def handle_wolfram(command: Command):
         else:
             await wolfram_normal(cmd, command.channel)
     else:
-        bot.post_message(command.channel, "You need to ask something")
+        await bot.as_async.post_message(command.channel, "You need to ask something")
 
 
 async def wolfram_full(search_query: str, channel):
@@ -55,13 +58,13 @@ async def wolfram_full(search_query: str, channel):
 
     # Check if the response is ok
     if http_response.status_code != requests.codes.ok:
-        bot.post_message(channel, "There was a problem getting the response")
+        await bot.as_async.post_message(channel, "There was a problem getting the response")
         return
 
     # Get the result of the query and determine if wolfram succeeded in evaluating it
     result = json.loads(http_response.content)['queryresult']
     if not result['success'] or result["error"]:
-        bot.post_message(channel, "Please rephrase your query. Wolfram could not compute.")
+        await bot.as_async.post_message(channel, "Please rephrase your query. Wolfram could not compute.")
         return
 
     # A pod is the name wolfram gives to the different "units" that make up its result.
@@ -118,10 +121,10 @@ async def wolfram_normal(search_query: str, channel):
         if result == "No result is available":
             # If no conversational result is available just return a normal short answer
             short_response = await get_short_answer(search_query)
-            bot.post_message(channel, short_response)
+            await bot.as_async.post_message(channel, short_response)
             return
         else:
-            bot.post_message(channel, result)
+            await bot.as_async.post_message(channel, result)
             return
 
     # TODO: Is there a better option than storing the id in the fallback?
@@ -135,7 +138,7 @@ async def wolfram_normal(search_query: str, channel):
         'text': result,
     }]
 
-    bot.post_message(channel, "", attachments=attachments)
+    await bot.as_async.post_message(channel, "", attachments=attachments)
 
 
 def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
@@ -199,11 +202,11 @@ async def handle_reply(evt: dict):
 
     channel = evt['channel']
     thread_ts = evt['thread_ts']  # This refers to time the original message
-    thread_parent = bot.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts)
-
+    thread_parent = await bot.as_async.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts)
+    
     if not thread_parent['ok']:
         # The most likely reason for this error is auth issues or possibly rate limiting
-        bot.post_message(channel, 'Sorry, something went wrong with slack', thread_ts=thread_ts)
+        bot.logger.error(f'Error with wolfram script thread history: {thread_parent}')
         return
 
     # Limit=1 was used so the first (and only) message is what we want
@@ -233,11 +236,11 @@ async def handle_reply(evt: dict):
         s_output,
     )
 
-    bot.post_message(channel, reply, thread_ts=thread_ts)
+    await bot.as_async.post_message(channel, reply, thread_ts=thread_ts)
 
     # If getting a the conversation request results in an error then conversation_id will be None
     if conversation_id is not None:
         # Update the old fallback to reflect the new state of the conversation
         parent_attachments['fallback'] = f'WolframCanReply {reply_host} {s_output} {conversation_id}'
 
-        bot.api.chat.update(channel=channel, attachments=[parent_attachments], ts=thread_ts)
+        await bot.as_async.api.chat.update(channel=channel, attachments=[parent_attachments], ts=thread_ts)
