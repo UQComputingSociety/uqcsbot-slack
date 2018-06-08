@@ -32,7 +32,7 @@ def handle_yt(command: Command):
 def yt_normal(search_query: str, channel):
     '''
     The normal method for using !yt searches based on query
-    and returns the first result. "I'm feeling lucky"
+    and returns the first video result. "I'm feeling lucky"
     '''
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
         developerKey=YOUTUBE_API_KEY)
