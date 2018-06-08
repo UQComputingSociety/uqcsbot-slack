@@ -47,24 +47,21 @@ async def handle_whatsdue(command: Command):
 
     try:
         profile_ids = [await get_course_profile_id(name) for name in course_names]
-    except HttpException as e:
-        error_message = f'An error occurred, please try again.'
-        await bot.as_async.post_message(channel, error_message)
-        return
-    except CourseNotFoundException as e:
-        error_message = f'Could not find course `{e.course_name}`.'
-        await bot.as_async.post_message(channel, error_message)
-        return
-    except ProfileNotFoundException as e:
-        error_message = f'Could not retrieve a Profile ID for `{e.course_name}`.'
-        await bot.as_async.post_message(channel, error_message)
+    except (HttpException, CourseNotFoundException, ProfileNotFoundException) as e:
+        if isinstance(e, HttpException):
+            message = f'An error occurred, please try again.'
+        elif isinstance(e, CourseNotFoundException):
+            message = f'Could not find course `{e.course_name}`.'
+        elif isinstance(e, ProfileNotFoundException):
+            message = f'Could not retrieve a Profile ID for `{e.course_name}`.'
+        await bot.as_async.post_message(channel, message)
         return
 
     try:
         assessment = await get_course_assessment(profile_ids, cutoff_datetime)
     except HttpException as e:
-        error_message = f'An error occurred, please try again.'
-        await bot.as_async.post_message(channel, error_message)
+        message = f'An error occurred, please try again.'
+        await bot.as_async.post_message(channel, message)
         return
 
     message = '_*WARNING:* Assessment information may vary/change/be entirely' \
