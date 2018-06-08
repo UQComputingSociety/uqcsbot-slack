@@ -69,5 +69,5 @@ async def handle_whatsdue(command: Command):
     message += '\n'.join(map(get_formatted_assessment_item, assessment))
     if not is_full_output:
         message += '\n_Note: This may not be the full assessment list. Use -f' \
-                   + '/--full to print out the full list.'
+                   + '/--full to print out the full list._'
     await bot.as_async.post_message(channel, message)
