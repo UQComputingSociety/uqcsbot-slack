@@ -8,7 +8,8 @@ from uqcsbot.scripts.uq_course_util import (get_course_profile_id,
 
 def get_formatted_assessment_item(assessment_item):
     '''
-    TODO(mitch): this
+    Returns the given assessment item in a pretty message format to display to
+    a user.
     '''
     course, task, due, weight = assessment_item
     return f'*{course}*: `{weight}` _{task}_ *({due})*'
@@ -16,7 +17,11 @@ def get_formatted_assessment_item(assessment_item):
 @bot.on_command('whatsdue')
 async def handle_whatsdue(command: Command):
     '''
-    TODO(mitch): helper doc. Talk about is_full_output behaviour
+    `!whatsdue [-f] [--full] [COURSE CODE 1] [COURSE CODE 2] ...` - Returns all
+    the assessment for a given list of course codes that are scheduled to occur
+    after today. If unspecified, will attempt to return the assessment for the
+    channel that the command was called from. If -f/--full is provided, will
+    return the full assessment list without filtering by cutoff dates.
     '''
     channel = command.channel
     course_names = command.arg.split() if command.has_arg() else [channel.name]
@@ -28,6 +33,11 @@ async def handle_whatsdue(command: Command):
     if '-f' in course_names:
         course_names.remove('-f')
         is_full_output = True
+    # If unspecified, set the cutoff to today's date. Else, set the cutoff to
+    # UNIX epoch (i.e. filter nothing).
+    cutoff_datetime = datetime.today()
+    if is_full_output:
+        cutoff_datetime = datetime.fromtimestamp(0)
 
     course_limit = 6
     if len(course_names) > course_limit:
@@ -50,18 +60,17 @@ async def handle_whatsdue(command: Command):
         await bot.as_async.post_message(channel, error_message)
         return
 
-    cutoff_datetime = datetime.today()
-    if is_full_output:
-        cutoff_datetime = datetime.fromtimestamp(0)
-
     try:
         assessment = await get_course_assessment(profile_ids, cutoff_datetime)
     except HttpException as e:
-        error_message = f'TODO(mitch): this (http exception)'
+        error_message = f'An error occurred, please try again.'
         await bot.as_async.post_message(channel, error_message)
         return
 
     message = '_*WARNING:* Assessment information may vary/change/be entirely' \
                + ' different! Use at your own discretion_\n>>>'
     message += '\n'.join(map(get_formatted_assessment_item, assessment))
+    if not is_full_output:
+        message += '\n_Note: This may not be the full assessment list. Use -f' \
+                   + '/--full to print out the full list.'
     await bot.as_async.post_message(channel, message)
