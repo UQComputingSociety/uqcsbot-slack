@@ -1,11 +1,9 @@
 import os
 from uqcsbot import bot, Command
-import argparse
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-YOUTUBE_API_KEY = 'AIzaSyCtxVMs6So6x2WL5WkDV4rm01hzddCCGH4'
 YOUTUBE_API_SERVICE_NAME = 'youtube'
 YOUTUBE_API_VERSION = 'v3'
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
@@ -15,8 +13,6 @@ YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
 def handle_yt(command: Command):
     '''
     `!yt <QUERY>` - Returns the top search result based on the query string.
-    
-    handle_yt checks the usage of yt command and appropriately selects logic.
     '''
     # Makes sure the query is not empty.
     if command.has_arg():
@@ -35,7 +31,7 @@ def yt_normal(search_query: str, channel):
     and returns the first video result. "I'm feeling lucky"
     '''
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-        developerKey=YOUTUBE_API_KEY)
+        developerKey=os.environ.get('YOUTUBE_API_KEY'))
 
     search_response = youtube.search().list(
         q=search_query,
