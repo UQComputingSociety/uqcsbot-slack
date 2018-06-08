@@ -40,8 +40,9 @@ class EventFilter(object):
         if self._weeks is not None:
             end_time = start_time + timedelta(weeks=self._weeks)
             return [e for e in events if e.start < end_time]
-        if self._cap is not None:
+        elif self._cap is not None:
             return events[:self._cap]
+        return events
 
     def get_header(self):
         if self._full:
@@ -72,10 +73,10 @@ class Event(object):
         # ical 'dt' properties are parsed as a 'DDD' (datetime, date, duration)
         # type. The below code converts a date to a datetime, where time is set
         # to midnight.
-        if isinstance(start, date):
+        if isinstance(start, date) and not isinstance(start, datetime):
             start = datetime.combine(start, datetime.min.time()).astimezone(utc)
-        if isinstance(end, date):
-            end = datetime.combine(end, datetime.min.time()).astimezone(utc)
+        if isinstance(end, date) and not isinstance(end, datetime):
+            end = datetime.combine(end, datetime.max.time()).astimezone(utc)
         location = cal_event.get('location', 'TBA')
         summary = cal_event.get('summary')
         return cls(start, end, location, summary)
