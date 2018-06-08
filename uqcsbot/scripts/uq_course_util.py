@@ -3,6 +3,7 @@ import requests
 from datetime import datetime
 from dateutil import parser
 from bs4 import BeautifulSoup
+from functools import partial
 
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds='
@@ -37,7 +38,8 @@ class ProfileNotFoundException(Exception):
 
 class HttpException(Exception):
     '''
-    Raised when a HTTP request returns an unsuccessful (i.e. not 200) status code.
+    Raised when a HTTP request returns an unsuccessful (i.e. not 200 OK) status
+    code.
     '''
     def __init__(self, url, status_code):
         super().__init__()
@@ -45,31 +47,31 @@ class HttpException(Exception):
         self.status_code = status_code
         bot.logger.error(f'Received status code {status_code} from \'{url}\'.')
 
-async def get_course_profile_url(course_name):
+def get_course_profile_url(course_name):
     '''
     Returns the URL to the latest course profile for the given course.
     '''
     course_url = BASE_COURSE_URL + course_name
-    http_response = await bot.run_async(requests.get, course_url)
-    if http_response.status_code != 200:
+    http_response = requests.get(course_url)
+    if http_response.status_code != requests.codes.ok:
         raise HttpException(course_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
     if html.find(id='course-notfound'):
         raise CourseNotFoundException(course_name)
     profile = html.find('a', class_='profile-available')
-    if profile is None or profile.get('href') is None:
+    if profile is None:
         raise ProfileNotFoundException(course_name)
     return profile.get('href')
 
-async def get_course_profile_id(course_name):
+def get_course_profile_id(course_name):
     '''
     Returns the ID to the latest course profile for the given course.
     '''
-    profile_url = await get_course_profile_url(course_name)
+    profile_url = get_course_profile_url(course_name)
     profile_id_index = profile_url.index('profileId=') + len('profileId=')
     return profile_url[profile_id_index:]
 
-async def get_current_exam_period():
+def get_current_exam_period():
     '''
     Returns the start and end datetimes for the current semester's exam period.
 
@@ -78,67 +80,69 @@ async def get_current_exam_period():
     '''
     today = datetime.today()
     current_calendar_url = BASE_CALENDAR_URL + str(today.year)
-    http_response = await bot.run_async(requests.get, current_calendar_url)
-    if http_response.status_code != 200:
+    http_response = requests.get(current_calendar_url)
+    if http_response.status_code != requests.codes.ok:
         raise HttpException(current_calendar_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
     event_date_elements = html.findAll('li', class_='description-calendar-view')
     event_date_texts = [element.text for element in event_date_elements]
     current_semester = '1' if today.month <= 6 else '2'
-    current_exam_snippet = f'Semester {current_semester} examination period '
+    exam_snippet = f'Semester {current_semester} examination period '
     # The first event encountered is the one which states the commencement of
-    # the semester's exams and also provides the exam period.
-    exam_date_text = [t[len(current_exam_snippet):] for t in event_date_texts
-                      if current_exam_snippet in t][0]
-    start_day, end_date = exam_date_text.split(' - ')
+    # the current semester's exams and also provides the exam period.
+    exam_date_text = [t for t in event_date_texts if exam_snippet in t][0]
+    start_day, end_date = exam_date_text[len(exam_snippet):].split(' - ')
     end_datetime = parser.parse(end_date)
     start_datetime = end_datetime.replace(day=int(start_day))
     return start_datetime, end_datetime
 
-async def get_parsed_assessment_due_date(assessment):
+def get_parsed_assessment_due_date(assessment):
     '''
     Returns the parsed due date for the given assessment as a datetime object.
     If the date cannot be parsed, a DateSyntaxException is raised.
     '''
     _, _, due_date, _ = assessment
     if due_date == 'Examination Period':
-        return await get_current_exam_period()
+        return get_current_exam_period()
+    parser_info = parser.parserinfo(dayfirst=True)
     try:
-        day_first_info = parser.parserinfo(dayfirst=True)
         # If a date range is detected, attempt to split into start and end
         # dates. Else, attempt to just parse the whole thing.
         if ' - ' in due_date:
             start_date, end_date = due_date.split(' - ', 1)
-            return (parser.parse(start_date, day_first_info),
-                    parser.parse(end_date, day_first_info))
-        return parser.parse(due_date, day_first_info), None
+            start_datetime = parser.parse(start_date, parser_info)
+            end_datetime = parser.parse(end_date, parser_info)
+            return start_datetime, end_datetime
+        due_datetime = parser.parse(due_date, parser_info)
+        return due_datetime, due_datetime
     except:
         raise DateSyntaxException(due_date)
 
-async def is_assessment_after_cutoff(assessment, cutoff):
+def is_assessment_after_cutoff(assessment, cutoff):
     '''
-    Returns whether the assessment occurs after the given cutoff datetime.
+    Returns whether the assessment occurs after the given cutoff.
     '''
-    start_datetime, end_datetime = await get_parsed_assessment_due_date(assessment)
+    start_datetime, end_datetime = get_parsed_assessment_due_date(assessment)
     return end_datetime >= cutoff if end_datetime else start_datetime >= cutoff
 
-async def get_course_assessment(course_names, cutoff):
+def get_course_assessment(course_names, cutoff):
     '''
     Returns all the course assessment for the given courses that occur after
-    the given cutoff datetime.
+    the given cutoff.
     '''
-    profile_ids = [await get_course_profile_id(name) for name in course_names]
+    profile_ids = map(get_course_profile_id, course_names)
     joined_assessment_url = BASE_ASSESSMENT_URL + ','.join(profile_ids)
-    http_response = await bot.run_async(requests.get, joined_assessment_url)
-    if http_response.status_code != 200:
+    http_response = requests.get(joined_assessment_url)
+    if http_response.status_code != requests.codes.ok:
         raise HttpException(joined_assessment_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
     assessment_table = html.find('table', class_='tblborder')
+    # Start from 1st index to skip over the row containing column names.
     assessment = assessment_table.findAll('tr')[1:]
     parsed_assessment = map(get_parsed_assessment_item, assessment)
-    filtered_assessment = [a for a in parsed_assessment
-                           if await is_assessment_after_cutoff(a, cutoff)]
-    return filtered_assessment
+    assessment_filter = partial(is_assessment_after_cutoff, cutoff=cutoff)
+    filtered_assessment = filter(assessment_filter, parsed_assessment)
+    return list(filtered_assessment)
 
 def get_element_inner_html(dom_element):
     '''

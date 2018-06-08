@@ -1,7 +1,6 @@
 from datetime import datetime
 from uqcsbot import bot, Command
-from uqcsbot.scripts.uq_course_util import (get_course_profile_id,
-                                            get_course_assessment,
+from uqcsbot.scripts.uq_course_util import (get_course_assessment,
                                             HttpException,
                                             CourseNotFoundException,
                                             ProfileNotFoundException)
@@ -15,7 +14,7 @@ def get_formatted_assessment_item(assessment_item):
     return f'*{course}*: `{weight}` _{task}_ *({due})*'
 
 @bot.on_command('whatsdue')
-async def handle_whatsdue(command: Command):
+def handle_whatsdue(command: Command):
     '''
     `!whatsdue [-f] [--full] [COURSE CODE 1] [COURSE CODE 2] ...` - Returns all
     the assessment for a given list of course codes that are scheduled to occur
@@ -41,23 +40,19 @@ async def handle_whatsdue(command: Command):
 
     course_limit = 6
     if len(course_names) > course_limit:
-        error_message = f'Cannot process more than {course_limit} courses.'
-        await bot.as_async.post_message(channel, error_message)
+        bot.post_message(channel, f'Cannot process more than {course_limit} courses.')
         return
 
     try:
-        assessment = await get_course_assessment(course_names, cutoff_datetime)
+        assessment = get_course_assessment(course_names, cutoff_datetime)
     except HttpException as e:
-        error_message = f'An error occurred, please try again.'
-        await bot.as_async.post_message(channel, error_message)
+        bot.post_message(channel, f'An error occurred, please try again.')
         return
     except CourseNotFoundException as e:
-        error_message = f'Could not find course `{e.course_name}`.'
-        await bot.as_async.post_message(channel, error_message)
+        bot.post_message(channel, f'Could not find course `{e.course_name}`.')
         return
     except ProfileNotFoundException as e:
-        error_message = f'Could not retrieve a Profile ID for `{e.course_name}`.'
-        await bot.as_async.post_message(channel, error_message)
+        bot.post_message(channel, f'Could not retrieve profile for `{e.course_name}`.')
         return
 
     message = '_*WARNING:* Assessment information may vary/change/be entirely' \
@@ -66,4 +61,4 @@ async def handle_whatsdue(command: Command):
     if not is_full_output:
         message += '\n_Note: This may not be the full assessment list. Use -f' \
                    + '/--full to print out the full list._'
-    await bot.as_async.post_message(channel, message)
+    bot.post_message(channel, message)
