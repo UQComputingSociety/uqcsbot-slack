@@ -122,11 +122,12 @@ async def is_assessment_after_cutoff(assessment, cutoff):
     start_datetime, end_datetime = await get_parsed_assessment_due_date(assessment)
     return end_datetime >= cutoff if end_datetime else start_datetime >= cutoff
 
-async def get_course_assessment(profile_ids, cutoff):
+async def get_course_assessment(course_names, cutoff):
     '''
-    Returns all the course assessment for the given course profiles that occur
-    after the given cutoff datetime.
+    Returns all the course assessment for the given courses that occur after
+    the given cutoff datetime.
     '''
+    profile_ids = [await get_course_profile_id(name) for name in course_names]
     joined_assessment_url = BASE_ASSESSMENT_URL + ','.join(profile_ids)
     http_response = await bot.run_async(requests.get, joined_assessment_url)
     if http_response.status_code != 200:

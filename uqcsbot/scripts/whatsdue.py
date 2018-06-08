@@ -46,7 +46,7 @@ async def handle_whatsdue(command: Command):
         return
 
     try:
-        profile_ids = [await get_course_profile_id(name) for name in course_names]
+        assessment = await get_course_assessment(course_names, cutoff_datetime)
     except (HttpException, CourseNotFoundException, ProfileNotFoundException) as e:
         if isinstance(e, HttpException):
             message = f'An error occurred, please try again.'
@@ -54,13 +54,6 @@ async def handle_whatsdue(command: Command):
             message = f'Could not find course `{e.course_name}`.'
         elif isinstance(e, ProfileNotFoundException):
             message = f'Could not retrieve a Profile ID for `{e.course_name}`.'
-        await bot.as_async.post_message(channel, message)
-        return
-
-    try:
-        assessment = await get_course_assessment(profile_ids, cutoff_datetime)
-    except HttpException as e:
-        message = f'An error occurred, please try again.'
         await bot.as_async.post_message(channel, message)
         return
 
