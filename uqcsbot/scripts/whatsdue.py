@@ -5,6 +5,9 @@ from uqcsbot.scripts.uq_course_util import (get_course_assessment,
                                             CourseNotFoundException,
                                             ProfileNotFoundException)
 
+# Maximum number of courses supported by !whatsdue to reduce call abuse.
+COURSE_LIMIT = 6
+
 def get_formatted_assessment_item(assessment_item):
     '''
     Returns the given assessment item in a pretty message format to display to
@@ -37,9 +40,8 @@ def handle_whatsdue(command: Command):
     # attempt to instead use the channel name as the course name.
     course_names = command_args if len(command_args) > 0 else [channel.name]
 
-    course_limit = 6
-    if len(course_names) > course_limit:
-        bot.post_message(channel, f'Cannot process more than {course_limit} courses.')
+    if len(course_names) > COURSE_LIMIT:
+        bot.post_message(channel, f'Cannot process more than {COURSE_LIMIT} courses.')
         return
 
     # If no full output specified, set the cutoff to today's date. Else, set the
