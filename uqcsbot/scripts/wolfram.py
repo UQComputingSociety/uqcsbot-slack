@@ -3,7 +3,7 @@ from typing import Iterable, Tuple, Optional
 from base64 import b64decode
 import requests
 import json
-from uqcsbot.scripts.loading_status import loading_status
+from uqcsbot.scripts.status_reacts import loading_status
 
 APP_ID = b64decode('RzU0S1VBLVVHWTdHR0hWUlg=').decode('utf-8')
 
