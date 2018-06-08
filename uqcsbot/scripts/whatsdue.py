@@ -23,26 +23,28 @@ def handle_whatsdue(command: Command):
     return the full assessment list without filtering by cutoff dates.
     '''
     channel = command.channel
-    course_names = command.arg.split() if command.has_arg() else [channel.name]
+    command_args = command.arg.split() if command.has_arg() else []
 
     is_full_output = False
-    if '--full' in course_names:
-        course_names.remove('--full')
+    if '--full' in command_args:
+        command_args.remove('--full')
         is_full_output = True
-    if '-f' in course_names:
-        course_names.remove('-f')
+    if '-f' in command_args:
+        command_args.remove('-f')
         is_full_output = True
-    # If unspecified, set the cutoff to today's date. Else, set the cutoff to
-    # UNIX epoch (i.e. filter nothing).
-    cutoff_datetime = datetime.today()
-    if is_full_output:
-        cutoff_datetime = datetime.fromtimestamp(0)
+
+    # If we have any command args left, they're course names. If we don't,
+    # attempt to instead use the channel name as the course name.
+    course_names = command_args if len(command_args) > 0 else [channel.name]
 
     course_limit = 6
     if len(course_names) > course_limit:
         bot.post_message(channel, f'Cannot process more than {course_limit} courses.')
         return
 
+    # If no full output specified, set the cutoff to today's date. Else, set the
+    # cutoff to UNIX epoch (i.e. filter nothing).
+    cutoff_datetime = datetime.fromtimestamp(0) if is_full_output else datetime.today()
     try:
         assessment = get_course_assessment(course_names, cutoff_datetime)
     except HttpException as e:

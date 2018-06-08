@@ -26,9 +26,9 @@ class Command(object):
         return self.arg is not None
 
     @classmethod
-    def from_message(cls: T, bot, message: dict) -> Optional[T]:
-        text = message.get("text")
-        if message.get("subtype") == "bot_message" or text is None or not text.startswith("!"):
+    def from_message(cls: T, message: dict) -> Optional[T]:
+        text = message.get("text", '')
+        if message.get("subtype") == "bot_message" or not text.startswith("!"):
             return
         command_name, *arg = text[1:].split(" ", 1)
         return cls(
@@ -97,7 +97,7 @@ class UQCSBot(object):
         self.logger.info(f"Server is about to disconnect")
 
     async def _handle_command(self, message: dict) -> None:
-        command = Command.from_message(self, message)
+        command = Command.from_message(message)
         if command is None:
             return
         await asyncio.gather(*[
@@ -221,7 +221,7 @@ class UQCSBot(object):
         self._verification_token = verification_token
         with self._async_context():
             # Initialise channels at start so we don't have to block
-            self.channels._initialise() 
+            self.channels._initialise()
 
             if not self.client.rtm_connect():
                 raise OSError("Error connecting to RTM API")
