@@ -1,9 +1,9 @@
 from datetime import datetime
 from uqcsbot import bot, Command
-from uqcsbot.scripts.uq_course_util import (get_course_assessment,
-                                            HttpException,
-                                            CourseNotFoundException,
-                                            ProfileNotFoundException)
+from uqcsbot.util.uq_course_util import (get_course_assessment,
+                                         HttpException,
+                                         CourseNotFoundException,
+                                         ProfileNotFoundException)
 
 # Maximum number of courses supported by !whatsdue to reduce call abuse.
 COURSE_LIMIT = 6

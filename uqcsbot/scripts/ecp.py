@@ -1,8 +1,8 @@
 from uqcsbot import bot, Command
-from uqcsbot.scripts.uq_course_util import (get_course_profile_url,
-                                            HttpException,
-                                            CourseNotFoundException,
-                                            ProfileNotFoundException)
+from uqcsbot.util.uq_course_util import (get_course_profile_url,
+                                         HttpException,
+                                         CourseNotFoundException,
+                                         ProfileNotFoundException)
 
 @bot.on_command('ecp')
 def handle_ecp(command: Command):
