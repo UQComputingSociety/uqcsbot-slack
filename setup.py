@@ -14,7 +14,7 @@ install_requires = [
     'apscheduler',
     'icalendar',
     'pytz',
-    'dateutil',
+    'python-dateutil',
 ]
 
 test_requires = [

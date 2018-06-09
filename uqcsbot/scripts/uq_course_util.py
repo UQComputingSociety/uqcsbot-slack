@@ -14,27 +14,27 @@ class DateSyntaxException(Exception):
     Raised when an unparsable date syntax is encountered.
     '''
     def __init__(self, date):
-        super().__init__()
+        self.message = f'Could not parse date \'{date}\'.'
         self.date = date
-        bot.logger.error(f'Could not parse date \'{date}\'.')
+        super().__init__(self.message, self.date)
 
 class CourseNotFoundException(Exception):
     '''
     Raised when a given course cannot be found for UQ.
     '''
     def __init__(self, course_name):
-        super().__init__()
+        self.message = f'Could not find course \'{course_name}\'.'
         self.course_name = course_name
-        bot.logger.error(f'Could not find course \'{course_name}\'.')
+        super().__init__(self.message, self.course_name)
 
 class ProfileNotFoundException(Exception):
     '''
     Raised when a profile cannot be found for a given course.
     '''
     def __init__(self, course_name):
-        super().__init__()
+        self.message = f'Could not find profile for course \'{course_name}\'.'
         self.course_name = course_name
-        bot.logger.error(f'Could not find profile for course \'{course_name}\'.')
+        super().__init__(self.message, self.course_name)
 
 class HttpException(Exception):
     '''
@@ -42,10 +42,10 @@ class HttpException(Exception):
     code.
     '''
     def __init__(self, url, status_code):
-        super().__init__()
+        self.message = f'Received status code {status_code} from \'{url}\'.'
         self.url = url
         self.status_code = status_code
-        bot.logger.error(f'Received status code {status_code} from \'{url}\'.')
+        super().__init__(self.message, self.url, self.status_code)
 
 def get_course_profile_url(course_name):
     '''

@@ -50,13 +50,11 @@ def handle_whatsdue(command: Command):
     try:
         assessment = get_course_assessment(course_names, cutoff_datetime)
     except HttpException as e:
+        bot.logger.error(e.message)
         bot.post_message(channel, f'An error occurred, please try again.')
         return
-    except CourseNotFoundException as e:
-        bot.post_message(channel, f'Could not find course `{e.course_name}`.')
-        return
-    except ProfileNotFoundException as e:
-        bot.post_message(channel, f'Could not retrieve profile for `{e.course_name}`.')
+    except (CourseNotFoundException, ProfileNotFoundException) as e:
+        bot.post_message(channel, e.message)
         return
 
     message = '_*WARNING:* Assessment information may vary/change/be entirely' \
