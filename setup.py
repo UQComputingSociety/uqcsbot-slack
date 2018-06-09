@@ -14,7 +14,7 @@ install_requires = [
     'apscheduler',
     'icalendar',
     'pytz',
-    'googleapiclient'
+    'google-api-python-client'
 ]
 
 test_requires = [
