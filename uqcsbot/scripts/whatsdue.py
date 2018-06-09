@@ -1,5 +1,6 @@
 from datetime import datetime
 from uqcsbot import bot, Command
+from uqcsbot.util.status_reacts import loading_status
 from uqcsbot.util.uq_course_util import (get_course_assessment,
                                          HttpException,
                                          CourseNotFoundException,
@@ -17,6 +18,7 @@ def get_formatted_assessment_item(assessment_item):
     return f'*{course}*: `{weight}` _{task}_ *({due})*'
 
 @bot.on_command('whatsdue')
+@loading_status
 def handle_whatsdue(command: Command):
     '''
     `!whatsdue [-f] [--full] [COURSE CODE 1] [COURSE CODE 2] ...` - Returns all
