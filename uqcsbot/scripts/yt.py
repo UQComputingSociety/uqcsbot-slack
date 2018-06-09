@@ -8,16 +8,18 @@ YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 YOUTUBE_API_SERVICE_NAME = 'youtube'
 YOUTUBE_API_VERSION = 'v3'
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
+NO_QUERY_MESSAGE = "You can't look for nothing. !yt <QUERY>"
 
 
 @bot.on_command('yt')
+@bot.on_command('youtube')
 def handle_yt(command: Command):
     '''
     `!yt <QUERY>` - Returns the top video search result based on the query string.
     '''
     # Makes sure the query is not empty.
     if not command.has_arg():
-        bot.post_message(command.channel, "You can't look for nothing. !yt <QUERY>")
+        bot.post_message(command.channel, NO_QUERY_MESSAGE)
         return
 
     search_query = command.arg.strip()
