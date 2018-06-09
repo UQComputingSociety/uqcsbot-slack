@@ -2,7 +2,7 @@
 Welcomes new users to UQCS Slack and check for member milestones
 """
 from uqcsbot import bot
-import asyncio
+import time
 
 MEMBER_MILESTONE = 50  # Number of members between posting a celebration
 MESSAGE_PAUSE = 2.5   # Number of seconds between sending bot messages
@@ -18,7 +18,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
 
 
 @bot.on("member_joined_channel")
-async def welcome(evt: dict):
+def welcome(evt: dict):
     """
     Welcomes new users to UQCS Slack and checks for member milestones
 
@@ -31,17 +31,17 @@ async def welcome(evt: dict):
     announcements = chan
     general = bot.channels.get("general")
 
-    user_info = await bot.as_async.api.users.info(user=evt.get("user"))
+    user_info = bot.api.users.info(user=evt.get("user"))
     display_name = user_info.get("user", {}).get("profile", {}).get("display_name")
 
     if display_name:
-        await bot.as_async.post_message(general, f"Welcome, {display_name}")
+        bot.post_message(general, f"Welcome, {display_name}")
 
     for message in WELCOME_MESSAGES:
-        await asyncio.sleep(MESSAGE_PAUSE)
-        await bot.as_async.post_message(evt.get("user"), message)
+        time.sleep(MESSAGE_PAUSE)
+        bot.post_message(evt.get("user"), message)
     if len(announcements.members) % MEMBER_MILESTONE == 0:
-        await bot.as_async.post_message(
+        bot.post_message(
             general,
             f":tada: {len(announcements.members)} members! :tada:"
         )

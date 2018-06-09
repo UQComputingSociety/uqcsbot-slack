@@ -95,7 +95,7 @@ class Event(object):
 
 
 @bot.on_command('events')
-async def handle_events(command: Command):
+def handle_events(command: Command):
     '''
     `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - Lists all the UQCS
     events that are scheduled to occur within the given filter. If unspecified,
@@ -103,10 +103,10 @@ async def handle_events(command: Command):
     '''
     event_filter = EventFilter.from_command(command)
     if not event_filter.is_valid:
-        await bot.as_async.post_message(command.channel, "Invalid events filter.")
+        bot.post_message(command.channel, "Invalid events filter.")
         return
 
-    http_response = await bot.run_async(requests.get, CALENDAR_URL)
+    http_response = requests.get(CALENDAR_URL)
     cal = Calendar.from_ical(http_response.content)
 
     current_time = datetime.now(tz=BRISBANE_TZ).astimezone(utc)
@@ -138,4 +138,4 @@ async def handle_events(command: Command):
     else:
         message = f"{event_filter.get_header()}\r\n" + '\r\n'.join(str(e) for e in events)
 
-    await bot.as_async.post_message(command.channel, message)
+    bot.post_message(command.channel, message)

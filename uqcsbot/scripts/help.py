@@ -30,7 +30,7 @@ def get_helper_docs():
 
 @bot.on_command('help')
 @success_status
-async def handle_help(command: Command):
+def handle_help(command: Command):
     """
     `!help [COMMAND]` - Display the helper docstring for the given command. If
     unspecified, will return the helper docstrings for all commands.
@@ -44,6 +44,6 @@ async def handle_help(command: Command):
     if user_direct_channel is None:
         bot.logger.error(f'Could not find the calling user\'s channel: {command.user_id}')
     elif len(helper_docs) == 0:
-        await bot.as_async.post_message(user_direct_channel, f'Could not find any helper docstrings.')
+        bot.post_message(user_direct_channel, f'Could not find any helper docstrings.')
     else:
-        await bot.as_async.post_message(user_direct_channel, '>>>' + '\n'.join(helper_docs))
+        bot.post_message(user_direct_channel, '>>>' + '\n'.join(helper_docs))

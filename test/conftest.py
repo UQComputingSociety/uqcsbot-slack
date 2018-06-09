@@ -2,7 +2,6 @@
 Configuration for Pytest
 """
 import pytest
-import asyncio
 from typing import List, Union, Optional, Callable
 
 import uqcsbot as uqcsbot_module
@@ -37,21 +36,12 @@ class UnmatchedHandleException(Exception):
     pass
 
 class MockUQCSBot(UQCSBot):
-    """
-    Overwrites a bunch of async stuff to make tests work.
-    """
     test_posted_messages: List[PostedMessage] = None
 
     def __init__(self, logger=None):
         super().__init__(logger)
         self.test_posted_messages = []  # A list of posted messages for unit testing
         self.channels = {}  # Allows get to fail. TODO mock channel object
-
-    def on_command(self, command_name: str):
-        def decorator(fn):
-            self._command_registry[command_name].append(fn)
-            return fn
-        return decorator
 
     def test_handle_event(self, message):
         command = Command.from_message(self, message)

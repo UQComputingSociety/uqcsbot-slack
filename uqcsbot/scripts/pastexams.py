@@ -7,17 +7,17 @@ from uqcsbot.util.status_reacts import loading_status
 
 @bot.on_command('pastexams')
 @loading_status
-async def handle_pastexams(command: Command):
+def handle_pastexams(command: Command):
     '''
     `!pastexams [COURSE CODE]` - Retrieves past exams for a given course code.
     If unspecified, will attempt to find the ECP for the channel the command was
     called from.
     '''
     course_code = command.arg if command.has_arg() else command.channel.name
-    past_exams = await get_past_exams(course_code)
+    past_exams = get_past_exams(course_code)
 
     # We use attachments to improve the formatting
-    await bot.as_async.post_message(command.channel, "", attachments=[{'text': past_exams}])
+    bot.post_message(command.channel, "", attachments=[{'text': past_exams}])
 
 
 def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
@@ -51,7 +51,7 @@ async def get_past_exams(course_code: str) -> str:
     Gets the past exams for the course with the specified course code. Returns intuitive error messages if this fails.
     """
     url = 'https://www.library.uq.edu.au/exams/papers.php?'
-    http_response = await bot.run_async(requests.get, url, params={'stub': course_code})
+    http_response = requests.get(url, params={'stub': course_code})
 
     if http_response.status_code != requests.codes.ok:
         return "There was a problem getting a response"
