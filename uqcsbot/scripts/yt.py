@@ -16,15 +16,18 @@ def handle_yt(command: Command):
     `!yt <QUERY>` - Returns the top video search result based on the query string.
     '''
     # Makes sure the query is not empty.
-    if command.has_arg():
-        search_query = command.arg.strip()
-        try:
-            videoID = get_top_video_result(search_query, command.channel)
-        except HttpError as e:
-            # Googleapiclient should handle http errors
-            bot.logger.error(f'An HTTP error {e.resp.status} occurred:\n{e.content}')
-    else:
+    if not command.has_arg():
         bot.post_message(command.channel, "You can't look for nothing. !yt <QUERY>")
+        return
+
+    search_query = command.arg.strip()
+    try:
+        videoID = get_top_video_result(search_query, command.channel)
+    except HttpError as e:
+        # Googleapiclient should handle http errors
+        bot.logger.error(f'An HTTP error {e.resp.status} occurred:\n{e.content}')
+        # Force return to ensure no message is sent.
+        return
     
     if videoID:
         bot.post_message(command.channel, f'{YOUTUBE_VIDEO_URL}{videoID}')
@@ -46,9 +49,7 @@ def get_top_video_result(search_query: str, channel):
         type='video' # Only want videos no pesky channels or playlists
     ).execute()
     
-    search_result = search_response.get('items', [])
-
-    if len(search_result):
-        return search_result[0]['id']['videoId']
-    else:
+    search_result = search_response.get('items')
+    if search_result is None:
         return None
+    return search_result[0]['id']['videoId']
