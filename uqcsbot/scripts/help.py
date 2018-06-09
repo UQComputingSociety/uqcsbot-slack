@@ -1,5 +1,5 @@
 from uqcsbot import bot, Command
-from uqcsbot.scripts.status_reacts import success_status
+from uqcsbot.util.status_reacts import success_status
 
 def sanitize_doc(doc):
     '''

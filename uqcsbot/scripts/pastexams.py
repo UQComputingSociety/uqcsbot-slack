@@ -2,7 +2,7 @@ from uqcsbot import bot, Command
 from bs4 import BeautifulSoup
 from typing import Iterable, Tuple
 import requests
-from uqcsbot.scripts.status_reacts import loading_status
+from uqcsbot.util.status_reacts import loading_status
 
 
 @bot.on_command('pastexams')
