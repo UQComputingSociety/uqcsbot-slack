@@ -2,11 +2,12 @@ from uqcsbot import bot, Command
 import requests
 from requests.utils import quote
 from bs4 import BeautifulSoup
+from uqcsbot.util.status_reacts import loading_status
 
 COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 
-
 @bot.on_command('ecp')
+@loading_status
 async def handle_ecp(command: Command):
     '''
     `!ecp [COURSE CODE]` - Returns the link to the latest ECP for the given

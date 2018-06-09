@@ -1,7 +1,5 @@
 from uqcsbot import bot, Command
-import logging
-
-logger = logging.getLogger(__name__)
+from uqcsbot.util.status_reacts import success_status
 
 def sanitize_doc(doc):
     '''
@@ -31,6 +29,7 @@ def get_helper_docs():
 
 
 @bot.on_command('help')
+@success_status
 async def handle_help(command: Command):
     """
     `!help [COMMAND]` - Display the helper docstring for the given command. If
@@ -41,9 +40,9 @@ async def handle_help(command: Command):
     helper_docs = [sanitize_doc(helper_doc)
                    for command_name, helper_doc in get_helper_docs()
                    if not command.has_arg() or command.arg == command_name]
-    user_direct_channel = bot.channels.get(command.user_id, None)
+    user_direct_channel = bot.channels.get(command.message['user'], None)
     if user_direct_channel is None:
-        logger.error(f'Could not find the calling user\'s channel: {command.user_id}')
+        bot.logger.error(f'Could not find the calling user\'s channel: {command.user_id}')
     elif len(helper_docs) == 0:
         await bot.as_async.post_message(user_direct_channel, f'Could not find any helper docstrings.')
     else:

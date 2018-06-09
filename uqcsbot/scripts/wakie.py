@@ -1,8 +1,6 @@
 from uqcsbot import bot
 from random import choice, sample
-
-REACTS = ['waiting', 'apple_waiting', 'waiting_droid', 'keen', 'fiestaparrot']
-
+from uqcsbot.util.status_reacts import LOADING_REACTS, HYPE_REACTS
 
 @bot.on_schedule('cron', hour=17, timezone='Australia/Brisbane')
 async def wakie():
@@ -15,5 +13,7 @@ async def wakie():
     channel = bot.channels.get("general")
     victims = sample(channel.members, 2)
     lines = [f'Hey <@{v}>! Tell us about something cool you are working on!' for v in victims]
-    msg = await bot.as_async.post_message(channel, '\r\n'.join(lines))
-    await bot.as_async.api.reactions.add(name=choice(REACTS), channel=channel.id, timestamp=msg['ts'])
+    wakie_message = await bot.as_async.post_message(channel, '\r\n'.join(lines))
+    await bot.as_async.api.reactions.add(name=choice(HYPE_REACTS + LOADING_REACTS),
+                                         channel=channel.id,
+                                         timestamp=wakie_message['ts'])

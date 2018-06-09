@@ -3,6 +3,7 @@ from typing import Iterable, Tuple, Optional
 from base64 import b64decode
 import requests
 import json
+from uqcsbot.util.status_reacts import loading_status
 
 APP_ID = b64decode('RzU0S1VBLVVHWTdHR0hWUlg=').decode('utf-8')
 
@@ -23,6 +24,7 @@ def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
 
 
 @bot.on_command('wolfram')
+@loading_status
 async def handle_wolfram(command: Command):
     '''
     `!wolfram [--full] <QUERY>` - Returns the wolfram response for the given
@@ -203,7 +205,7 @@ async def handle_reply(evt: dict):
     channel = evt['channel']
     thread_ts = evt['thread_ts']  # This refers to time the original message
     thread_parent = await bot.as_async.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts)
-    
+
     if not thread_parent['ok']:
         # The most likely reason for this error is auth issues or possibly rate limiting
         bot.logger.error(f'Error with wolfram script thread history: {thread_parent}')

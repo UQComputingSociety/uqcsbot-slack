@@ -2,9 +2,11 @@ from uqcsbot import bot, Command
 from bs4 import BeautifulSoup
 from typing import Iterable, Tuple
 import requests
+from uqcsbot.util.status_reacts import loading_status
 
 
 @bot.on_command('pastexams')
+@loading_status
 async def handle_pastexams(command: Command):
     '''
     `!pastexams [COURSE CODE]` - Retrieves past exams for a given course code.
