@@ -15,6 +15,7 @@ install_requires = [
     'icalendar',
     'pytz',
     'python-dateutil',
+    'google-api-python-client'
 ]
 
 test_requires = [
