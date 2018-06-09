@@ -168,10 +168,10 @@ class UQCSBot(object):
     def _handle_command(self, message: dict) -> None:
         """
         Run handlers for commands, wrapping messages in a `Command` object
-        before passing them to the handler. Handlers are executed by a 
+        before passing them to the handler. Handlers are executed by a
         ThreadPoolExecutor.
         """
-        command = Command.from_message(self, message)
+        command = Command.from_message(message)
         if command is None:
             return
         for handler in self.command_registry[command.command_name]:
