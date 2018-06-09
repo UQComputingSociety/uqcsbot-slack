@@ -2,7 +2,6 @@
 Configuration for Pytest
 """
 import pytest
-import asyncio
 from typing import List, Union, Optional, Callable
 
 import uqcsbot as uqcsbot_module
@@ -37,9 +36,6 @@ class UnmatchedHandleException(Exception):
     pass
 
 class MockUQCSBot(UQCSBot):
-    """
-    Overwrites a bunch of async stuff to make tests work.
-    """
     test_posted_messages: List[PostedMessage] = None
 
     def __init__(self, logger=None):

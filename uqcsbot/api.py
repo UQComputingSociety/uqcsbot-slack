@@ -49,10 +49,6 @@ class APIMethodProxy(object):
         Perform the relevant API request. Equivalent to SlackClient.api_call
         except the `method` argument is filled in.
 
-        If the APIMethodProxy was constructed with `is_async=True` runs the
-        request asynchronously via:
-            asyncio.get_event_loop().run_in_executor(None, req)
-
         Attempts to retry the API call if rate-limited.
         """
         fn = partial(
@@ -75,8 +71,7 @@ class APIMethodProxy(object):
 
     def paginate(self, **kwargs) -> Paginator:
         """
-        Returns a `Paginator` which can be used as both a synchronous and an
-        asynchronous iterable, allowing you to iterate over each page of
+        Returns a `Paginator` which allows you to iterate over each page of
         response data from a Slack response that is paginated in the
         cursor-style.
 
@@ -109,12 +104,6 @@ class APIWrapper(object):
     Example usage:
         > api = APIWrapper(client)
         > api.chat.postMessage(channel="general", text="message")
-
-        > async_api = APIWrapper(client, True)
-        > await async_api.chat.postMessage(channel="general", text="message")
-
-        > async_api = api(is_async=True)
-        > await async_api.chat.postMessage(channel="general", text="message")
     """
     def __init__(self, client: SlackClient) -> None:
         self._client = client
@@ -152,17 +141,23 @@ class Channel(object):
         self.is_private = is_private
         self.is_archived = is_archived
         self.previous_names = previous_names or []
+        self._lock = threading.Lock()
 
     @property
     def members(self) -> List[str]:
         if self._member_ids is not None:
+            # Quick exit without lock
             return self._member_ids
-        self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
-        members_ls = []  # type: List[str]
-        for page in self._bot.api.conversations.members.paginate(channel=self.id):
-            members_ls += page.get("members", [])
-        self._member_ids = members_ls
-        return self._member_ids
+        with self._lock:
+            if self._member_ids is not None:
+                # Quick exit with lock
+                return self._member_ids
+            self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
+            members_ids = []  # type: List[str]
+            for page in self._bot.api.conversations.members.paginate(channel=self.id):
+                members_ids += page.get("members", [])
+            self._member_ids = members_ids
+            return self._member_ids
 
     def update_members(self) -> List[str]:
         self._member_ids = None

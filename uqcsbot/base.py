@@ -91,17 +91,6 @@ class UQCSBot(object):
             self.logger.debug(f"Goodbye event has unexpected extras: {evt}")
         self.logger.info(f"Server is about to disconnect")
 
-    def _handle_command(self, message: dict) -> None:
-        command = Command.from_message(self, message)
-        if command is None:
-            return
-        for handler in self.command_registry[command.command_name]:
-            self.executor.submit(
-                self._execute_catching_error,
-                handler,
-                command,
-            )
-
     def on_command(self, command_name: str):
         def decorator(fn):
             self.command_registry[command_name].append(fn)
@@ -131,6 +120,9 @@ class UQCSBot(object):
 
     @property
     def api(self):
+        """
+        See uqcsbot.api.APIWrapper for usage information.
+        """
         return APIWrapper(self.client)
 
     def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
@@ -150,6 +142,9 @@ class UQCSBot(object):
 
     @contextmanager
     def _execution_context(self):
+        """
+        Starts the scheduler for timed tasks, and on error does cleanup
+        """
         self._scheduler.start()
         try:
             yield
@@ -160,13 +155,37 @@ class UQCSBot(object):
             raise
 
     def _execute_catching_error(self, handler, evt):
+        """
+        Wraps handler execution so that any errors that occur in a handler are
+        logged and ignored.
+        """
         try:
             return handler(evt)
         except Exception:
             self.logger.exception('Error in handler')
             return None
 
-    def _run_handlers(self, event):
+    def _handle_command(self, message: dict) -> None:
+        """
+        Run handlers for commands, wrapping messages in a `Command` object
+        before passing them to the handler. Handlers are executed by a 
+        ThreadPoolExecutor.
+        """
+        command = Command.from_message(self, message)
+        if command is None:
+            return
+        for handler in self.command_registry[command.command_name]:
+            self.executor.submit(
+                self._execute_catching_error,
+                handler,
+                command,
+            )
+
+    def _run_handlers(self, event: dict):
+        """
+        Run handlers for raw messages based on message type. Handlers are
+        executed by a ThreadPoolExecutor.
+        """
         self.logger.debug(f"Running handlers for {event}")
         if "type" not in event:
             self.logger.error(f"No type in message: {event}")
