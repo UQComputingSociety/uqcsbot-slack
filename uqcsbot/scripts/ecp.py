@@ -7,7 +7,7 @@ from uqcsbot.util.uq_course_util import (get_course_profile_url,
 
 @bot.on_command('ecp')
 @loading_status
-async def handle_ecp(command: Command):
+def handle_ecp(command: Command):
     '''
     `!ecp [COURSE CODE]` - Returns the link to the latest ECP for the given
     course code. If unspecified, will attempt to find the ECP for the channel

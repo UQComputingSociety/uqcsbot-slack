@@ -25,7 +25,7 @@ def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
 
 @bot.on_command('wolfram')
 @loading_status
-async def handle_wolfram(command: Command):
+def handle_wolfram(command: Command):
     '''
     `!wolfram [--full] <QUERY>` - Returns the wolfram response for the given
     query. If `--full` is specified, will return the full reponse.
@@ -38,17 +38,17 @@ async def handle_wolfram(command: Command):
         # Doing it specific to the start and end just in case someone has --full inside their query for whatever reason
         if cmd.startswith('--full'):
             cmd = cmd[len('--full'):]  # removes the --full
-            await wolfram_full(cmd, command.channel)
+            wolfram_full(cmd, command.channel)
         elif cmd.endswith('--full'):
             cmd = cmd[:-len('--full')]  # removes the --full
-            await wolfram_full(cmd, command.channel)
+            wolfram_full(cmd, command.channel)
         else:
-            await wolfram_normal(cmd, command.channel)
+            wolfram_normal(cmd, command.channel)
     else:
-        await bot.as_async.post_message(command.channel, "You need to ask something")
+        bot.post_message(command.channel, "You need to ask something")
 
 
-async def wolfram_full(search_query: str, channel):
+def wolfram_full(search_query: str, channel):
     """
     This posts the full results from wolfram query. Images and all
 
@@ -56,17 +56,17 @@ async def wolfram_full(search_query: str, channel):
     !wolfram --full y = 2x + c
     """
     api_url = "http://api.wolframalpha.com/v2/query?&output=json"
-    http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
+    http_response = requests.get(api_url, params={'input': search_query, 'appid': APP_ID})
 
     # Check if the response is ok
     if http_response.status_code != requests.codes.ok:
-        await bot.as_async.post_message(channel, "There was a problem getting the response")
+        bot.post_message(channel, "There was a problem getting the response")
         return
 
     # Get the result of the query and determine if wolfram succeeded in evaluating it
     result = json.loads(http_response.content)['queryresult']
     if not result['success'] or result["error"]:
-        await bot.as_async.post_message(channel, "Please rephrase your query. Wolfram could not compute.")
+        bot.post_message(channel, "Please rephrase your query. Wolfram could not compute.")
         return
 
     # A pod is the name wolfram gives to the different "units" that make up its result.
@@ -87,7 +87,7 @@ async def wolfram_full(search_query: str, channel):
     bot.post_message(channel, message)
 
 
-async def get_short_answer(search_query: str):
+def get_short_answer(search_query: str):
     """
     This uses wolfram's short answers api to just return a simple short plaintext response.
 
@@ -95,7 +95,7 @@ async def get_short_answer(search_query: str):
     conversation starter but may be interesting.
     """
     api_url = "http://api.wolframalpha.com/v2/result?"
-    http_response = await bot.run_async(requests.get, api_url, params={'input': search_query, 'appid': APP_ID})
+    http_response = requests.get(api_url, params={'input': search_query, 'appid': APP_ID})
 
     # Check if the response is ok. A status code of 501 signifies that no result could be found.
     if http_response.status_code == 501:
@@ -106,7 +106,7 @@ async def get_short_answer(search_query: str):
     return http_response.content
 
 
-async def wolfram_normal(search_query: str, channel):
+def wolfram_normal(search_query: str, channel):
     """
     This uses wolfram's conversation api to return a short response that can be replied to in a thread.
     If the response cannot be replied to a general short answer response is displayed instead.
@@ -117,16 +117,16 @@ async def wolfram_normal(search_query: str, channel):
 
     and then start a thread to continue the conversation
     """
-    result, conversation_id, reply_host, s_output = await conversation_request(search_query)
+    result, conversation_id, reply_host, s_output = conversation_request(search_query)
 
     if conversation_id is None:
         if result == "No result is available":
             # If no conversational result is available just return a normal short answer
-            short_response = await get_short_answer(search_query)
-            await bot.as_async.post_message(channel, short_response)
+            short_response = get_short_answer(search_query)
+            bot.post_message(channel, short_response)
             return
         else:
-            await bot.as_async.post_message(channel, result)
+            bot.post_message(channel, result)
             return
 
     # TODO: Is there a better option than storing the id in the fallback?
@@ -140,7 +140,7 @@ async def wolfram_normal(search_query: str, channel):
         'text': result,
     }]
 
-    await bot.as_async.post_message(channel, "", attachments=attachments)
+    bot.post_message(channel, "", attachments=attachments)
 
 
 def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
@@ -155,7 +155,7 @@ def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
             wolfram_response.get('s', 'null'))  # s is only sometimes returned but is vital if it is returned
 
 
-async def conversation_request(
+def conversation_request(
         search_query: str,
         host_name: Optional[str]=None,
         conversation_id: Optional[str]=None,
@@ -179,7 +179,7 @@ async def conversation_request(
         api_url = f'{host_name}/api/v1/conversation.jsp?'
         params = {'appid': APP_ID, 'i': search_query, 'conversationid': conversation_id, 's': s_output}
 
-    http_response = await bot.run_async(requests.get, api_url, params=params)
+    http_response = requests.get(api_url, params=params)
 
     if http_response.status_code != requests.codes.ok:
         return "There was a problem getting the response", None, None, None
@@ -193,7 +193,7 @@ async def conversation_request(
 
 
 @bot.on('message')
-async def handle_reply(evt: dict):
+def handle_reply(evt: dict):
     """
     Handles a message event. Whenever a message is a reply to one of !wolframs conversational results this handles
     getting the next response and updating the old stored information.
@@ -204,8 +204,8 @@ async def handle_reply(evt: dict):
 
     channel = evt['channel']
     thread_ts = evt['thread_ts']  # This refers to time the original message
-    thread_parent = await bot.as_async.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts)
-
+    thread_parent = bot.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts)
+    
     if not thread_parent['ok']:
         # The most likely reason for this error is auth issues or possibly rate limiting
         bot.logger.error(f'Error with wolfram script thread history: {thread_parent}')
@@ -231,18 +231,18 @@ async def handle_reply(evt: dict):
     s_output = '' if s_output == 'null' else s_output
 
     # Ask Wolfram for the new answer grab the new stuff and post the reply.
-    reply, conversation_id, reply_host, s_output = await conversation_request(
+    reply, conversation_id, reply_host, s_output = conversation_request(
         new_question,
         reply_host,
         conversation_id,
         s_output,
     )
 
-    await bot.as_async.post_message(channel, reply, thread_ts=thread_ts)
+    bot.post_message(channel, reply, thread_ts=thread_ts)
 
     # If getting a the conversation request results in an error then conversation_id will be None
     if conversation_id is not None:
         # Update the old fallback to reflect the new state of the conversation
         parent_attachments['fallback'] = f'WolframCanReply {reply_host} {s_output} {conversation_id}'
 
-        await bot.as_async.api.chat.update(channel=channel, attachments=[parent_attachments], ts=thread_ts)
+        bot.api.chat.update(channel=channel, attachments=[parent_attachments], ts=thread_ts)

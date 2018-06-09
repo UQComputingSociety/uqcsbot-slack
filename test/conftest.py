@@ -47,12 +47,6 @@ class MockUQCSBot(UQCSBot):
         self.test_posted_messages = []  # A list of posted messages for unit testing
         self.channels = {}  # Allows get to fail. TODO mock channel object
 
-    def on_command(self, command_name: str):
-        def decorator(fn):
-            self._command_registry[command_name].append(fn)
-            return fn
-        return decorator
-
     def test_handle_event(self, message):
         command = Command.from_message(self, message)
         if command is None:

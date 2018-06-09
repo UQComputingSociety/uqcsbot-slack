@@ -40,7 +40,7 @@ def mock_message(message: str):
     return ''.join(choice((c.upper, c.lower))() for c in message)
 
 @bot.on_command("mock")
-async def handle_mock(command: Command):
+def handle_mock(command: Command):
     '''
     `!mock [NUM POSTS]` - Mocks the message from the specified number of
     messages back. If no number is specified, mocks the most recent message.
@@ -58,4 +58,4 @@ async def handle_mock(command: Command):
             response = 'Something went wrong (likely insufficient conversation history).'
         else:
             response = mock_message(message_to_mock)
-    await bot.as_async.post_message(command.channel, response)
+    bot.post_message(command.channel, response)

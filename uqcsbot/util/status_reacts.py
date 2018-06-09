@@ -1,4 +1,5 @@
 from uqcsbot import bot, Command
+from functools import wraps
 from random import choice
 
 LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid']
@@ -13,13 +14,15 @@ def success_status(command_fn):
     has run. This gives a visual cue to users in the calling channel that
     the wrapped command was carried out successfully.
     '''
-    async def wrapper(command: Command):
+    @wraps(command_fn)
+    def wrapper(command: Command):
         success_react = choice(SUCCESS_REACTS)
         reaction_kwargs = {'name': success_react,
                            'channel': command.channel.id,
                            'timestamp': command.message['ts']}
-        await command_fn(command)
-        await bot.as_async.api.reactions.add(**reaction_kwargs)
+        res = command_fn(command)
+        bot.api.reactions.add(**reaction_kwargs)
+        return res
     return wrapper
 
 def loading_status(command_fn):
@@ -28,12 +31,14 @@ def loading_status(command_fn):
     has run and removes it once it has successfully completed. This gives a
     visual cue to users in the calling channel that the command is in progress.
     '''
-    async def wrapper(command: Command):
+    @wraps(command_fn)
+    def wrapper(command: Command):
         loading_react = choice(LOADING_REACTS)
         reaction_kwargs = {'name': loading_react,
                            'channel': command.channel.id,
                            'timestamp': command.message['ts']}
-        await bot.as_async.api.reactions.add(**reaction_kwargs)
-        await command_fn(command)
-        await bot.as_async.api.reactions.remove(**reaction_kwargs)
+        bot.api.reactions.add(**reaction_kwargs)
+        res = command_fn(command)
+        bot.api.reactions.remove(**reaction_kwargs)
+        return res
     return wrapper
