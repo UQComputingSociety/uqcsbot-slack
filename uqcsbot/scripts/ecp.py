@@ -1,10 +1,12 @@
 from uqcsbot import bot, Command
+from uqcsbot.util.status_reacts import loading_status
 from uqcsbot.util.uq_course_util import (get_course_profile_url,
                                          HttpException,
                                          CourseNotFoundException,
                                          ProfileNotFoundException)
 
 @bot.on_command('ecp')
+@loading_status
 def handle_ecp(command: Command):
     '''
     `!ecp [COURSE CODE]` - Returns the link to the latest ECP for the given
@@ -16,12 +18,10 @@ def handle_ecp(command: Command):
     try:
         profile_url = get_course_profile_url(course_name)
     except HttpException as e:
+        bot.logger.error(e.message)
         bot.post_message(channel, f'An error occurred, please try again.')
         return
-    except CourseNotFoundException as e:
-        bot.post_message(channel, f'Could not find course `{e.course_name}`.')
-        return
-    except ProfileNotFoundException as e:
-        bot.post_message(channel, f'Could not retrieve profile for `{e.course_name}`.')
+    except (CourseNotFoundException, ProfileNotFoundException) as e:
+        bot.post_message(channel, e.message)
         return
     bot.post_message(channel, f'*{course_name}*: <{profile_url}|ECP>')
