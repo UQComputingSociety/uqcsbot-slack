@@ -1,10 +1,9 @@
 from uqcsbot import bot, Command
-import requests
-from requests.utils import quote
-from bs4 import BeautifulSoup
 from uqcsbot.util.status_reacts import loading_status
-
-COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
+from uqcsbot.util.uq_course_util import (get_course_profile_url,
+                                         HttpException,
+                                         CourseNotFoundException,
+                                         ProfileNotFoundException)
 
 @bot.on_command('ecp')
 @loading_status
@@ -16,13 +15,13 @@ async def handle_ecp(command: Command):
     '''
     channel = command.channel
     course_name = channel.name if not command.has_arg() else command.arg
-    http_response = await bot.run_async(requests.get, f"{COURSE_URL}{quote(course_name)}")
-    html = BeautifulSoup(http_response.content, 'html.parser')
-    if html.find(id="course-notfound"):
-        await bot.as_async.post_message(channel, f"Not a valid course code.")
+    try:
+        profile_url = get_course_profile_url(course_name)
+    except HttpException as e:
+        bot.logger.error(e.message)
+        bot.post_message(channel, f'An error occurred, please try again.')
         return
-    ecp_link = html.find_all("a", class_="profile-available")
-    if not ecp_link:
-        await bot.as_async.post_message(channel, f"No available course profiles.")
-    else:
-        await bot.as_async.post_message(channel, ecp_link[0]['href'])
+    except (CourseNotFoundException, ProfileNotFoundException) as e:
+        bot.post_message(channel, e.message)
+        return
+    bot.post_message(channel, f'*{course_name}*: <{profile_url}|ECP>')
