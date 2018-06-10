@@ -122,7 +122,12 @@ def is_assessment_after_cutoff(assessment, cutoff):
     '''
     Returns whether the assessment occurs after the given cutoff.
     '''
-    start_datetime, end_datetime = get_parsed_assessment_due_date(assessment)
+    try:
+        start_datetime, end_datetime = get_parsed_assessment_due_date(assessment)
+    except DateSyntaxException as e:
+        bot.logger.Error(e.message)
+        # If we can't parse a date, we're better off keeping it just in case.
+        return True
     return end_datetime >= cutoff if end_datetime else start_datetime >= cutoff
 
 def get_course_assessment(course_names, cutoff):
