@@ -14,11 +14,7 @@ def handle_pastexams(command: Command):
     called from.
     '''
     course_code = command.arg if command.has_arg() else command.channel.name
-    past_exams = get_past_exams(course_code)
-
-    # We use attachments to improve the formatting
-    bot.post_message(command.channel, "", attachments=[{'text': past_exams}])
-
+    bot.post_message(command.channel, get_past_exams(course_code))
 
 def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
     """
@@ -45,8 +41,7 @@ def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
         semester_str = semester_id.replace('.', ' ')
         yield f'{year} {semester_str}', link
 
-
-async def get_past_exams(course_code: str) -> str:
+def get_past_exams(course_code: str) -> str:
     """
     Gets the past exams for the course with the specified course code. Returns intuitive error messages if this fails.
     """
@@ -62,6 +57,5 @@ async def get_past_exams(course_code: str) -> str:
     if "Sorry. We have not found any past exams for this course" in no_course:
         return f"The course code {course_code} did not return any results"
 
-    exam_data = get_exam_data(soup)
-    # The message is formatted as per slacks standards to have bold semester headings and links called 'PDF'
-    return ''.join((f'*{semester}*: <{link}|PDF>\n' for semester, link in exam_data))
+    return '>>>' + '\n'.join((f'*{semester}*: <{link}|PDF>'
+                              for semester, link in get_exam_data(soup)))
