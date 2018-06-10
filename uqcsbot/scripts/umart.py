@@ -6,7 +6,8 @@ from bs4 import BeautifulSoup
 
 DEFAULT_RESULT_LENGTH = 5
 
-NO_QUERY_MESSAGE = "You can't look for nothing. !umart <QUERY>"
+NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
+NO_RESULTS_MESSAGE = "I can't find anything. Try `!umart <SOMETHING NOT AS SPECIFIC>`"
 
 UMART_SEARCH_URL = 'https://www.umart.com.au/umart1/pro/products_list_searchnew_min.phtml'
 
@@ -21,9 +22,18 @@ def handle_umart(command: Command):
         bot.post_message(command.channel, NO_QUERY_MESSAGE)
         return
     search_query = command.arg.strip()
+    if 'SOMETHING NOT AS SPECIFIC' in search_query:
+        bot.post_message(command.channel, 'Not literally...')
+        return
     search_results = get_umart_results(DEFAULT_RESULT_LENGTH, search_query)
-
-    bot.post_message(command.channel, f'{search_results}')
+    if not len(search_results):
+        bot.post_message(command.channel, NO_RESULTS_MESSAGE)
+        return
+    message = '```'
+    for result in search_results:
+        message += f'Name: {result["name"]}\nPrice: {result["price"]}\n'
+    message += '```'
+    bot.post_message(command.channel, message)
 
 def get_umart_results(limit, search_query):
     '''
@@ -47,8 +57,6 @@ def get_results_from_page(search_page):
         price = li.select('dl:nth-of-type(2) > dd > span')[0].get_text()
         search_items.append({'name': name, 'price': price})
     return search_items
-
-
     
 def get_search_page(search_query):
     '''
