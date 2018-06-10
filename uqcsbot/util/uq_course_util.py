@@ -127,6 +127,8 @@ def is_assessment_after_cutoff(assessment, cutoff):
     except DateSyntaxException as e:
         bot.logger.Error(e.message)
         # If we can't parse a date, we're better off keeping it just in case.
+        # TODO(mitch): Keep track of these instances to attempt to accurately
+        # parse them in future. Will require manual detection + parsing.
         return True
     return end_datetime >= cutoff if end_datetime else start_datetime >= cutoff
 
