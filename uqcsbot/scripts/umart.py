@@ -8,6 +8,7 @@ DEFAULT_RESULT_LENGTH = 5
 
 NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
 NO_RESULTS_MESSAGE = "I can't find anything. Try `!umart <SOMETHING NOT AS SPECIFIC>`"
+ERROR_MESSAGE = "I tried to get the things but alas I could not. Error with HTTP Request."
 
 UMART_SEARCH_URL = 'https://www.umart.com.au/umart1/pro/products_list_searchnew_min.phtml'
 
@@ -15,7 +16,7 @@ UMART_SEARCH_URL = 'https://www.umart.com.au/umart1/pro/products_list_searchnew_
 @bot.on_command('umart')
 def handle_umart(command: Command):
     '''
-    `!umart <QUERY>` - Returns the top 5 results for products from umart matching the search query.
+    `!umart <QUERY>` - Returns up to 5 top results for products from umart matching the search query.
     '''
     # Makes sure the query is not empty
     if not command.has_arg():
@@ -26,7 +27,10 @@ def handle_umart(command: Command):
         bot.post_message(command.channel, 'Not literally...')
         return
     search_results = get_umart_results(DEFAULT_RESULT_LENGTH, search_query)
-    if not len(search_results):
+    if not search_results:
+        bot.post_message(command.channel, ERROR_MESSAGE)
+        return
+    else if not len(search_results):
         bot.post_message(command.channel, NO_RESULTS_MESSAGE)
         return
     message = '```'
