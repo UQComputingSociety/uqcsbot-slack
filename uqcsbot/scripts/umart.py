@@ -30,7 +30,7 @@ def handle_umart(command: Command):
     if not search_results:
         bot.post_message(command.channel, ERROR_MESSAGE)
         return
-    else if not len(search_results):
+    if not len(search_results):
         bot.post_message(command.channel, NO_RESULTS_MESSAGE)
         return
     message = '```'
