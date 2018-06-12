@@ -14,7 +14,7 @@ def pretty_hoogle_result(result: dict, is_verbose: bool) -> str:
     docs = result['docs']
 
     if is_verbose:
-        return f"`{type_sig}` <{url}|link> {docs}"
+        return f"`{type_sig}` <{url}|link>\n{docs}"
     else:
         return f"`{type_sig}` <{url}|link>"
         
