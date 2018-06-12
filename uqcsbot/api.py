@@ -6,8 +6,11 @@ import threading
 from typing import TYPE_CHECKING, List, Iterable, Optional, Generator, Any, Union, TypeVar, Dict
 if TYPE_CHECKING:
     from .base import UQCSBot
+import logging
 
 T = TypeVar('T')
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Paginator(Iterable[dict]):
@@ -61,12 +64,16 @@ class APIMethodProxy(object):
             result = fn()
             if not result['ok'] and result['error'] == 'ratelimited':
                 retry_after_secs = int(result['headers']['Retry-After'])
+                LOGGER.info(f'Rate limited, retrying in {retry_after_secs} seconds')
                 time.sleep(retry_after_secs)
                 retry_count += 1
             else:
                 break
         else:
             result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
+        if not result['ok']:
+            LOGGER.error(f'Slack API error calling {self._method} with kwargs' \
+                         + f' {kwargs}: ' + result['error'])
         return result
 
     def paginate(self, **kwargs) -> Paginator:
@@ -115,21 +122,21 @@ class APIWrapper(object):
         )
 
     def __repr__(self) -> str:
-        return f"<APIWrapper of {repr(client)}>"
+        return f"<APIWrapper of {repr(self._client)}>"
 
 
 class Channel(object):
     def __init__(
-        self,
-        bot: 'UQCSBot',
-        channel_id: str,
-        name: str,
-        is_group: bool = False,
-        is_im: bool = False,
-        is_public: bool = False,
-        is_private: bool = False,
-        is_archived: bool = False,
-        previous_names: List[str] = None
+            self,
+            bot: 'UQCSBot',
+            channel_id: str,
+            name: str,
+            is_group: bool = False,
+            is_im: bool = False,
+            is_public: bool = False,
+            is_private: bool = False,
+            is_archived: bool = False,
+            previous_names: List[str] = None
     ) -> None:
         self._bot = bot
         self.id = channel_id
@@ -158,11 +165,6 @@ class Channel(object):
                 members_ids += page.get("members", [])
             self._member_ids = members_ids
             return self._member_ids
-
-    def update_members(self) -> List[str]:
-        self._member_ids = None
-        return self.members
-
 
 class ChannelWrapper(object):
     def __init__(self, bot: 'UQCSBot') -> None:

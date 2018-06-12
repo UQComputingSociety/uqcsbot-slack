@@ -44,7 +44,7 @@ class MockUQCSBot(UQCSBot):
         self.channels = {}  # Allows get to fail. TODO mock channel object
 
     def test_handle_event(self, message):
-        command = Command.from_message(self, message)
+        command = Command.from_message(message)
         if command is None:
             raise UnparsedCommandException()
         handlers = self._command_registry[command.command_name]
