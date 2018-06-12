@@ -125,7 +125,7 @@ def is_assessment_after_cutoff(assessment, cutoff):
     try:
         start_datetime, end_datetime = get_parsed_assessment_due_date(assessment)
     except DateSyntaxException as e:
-        bot.logger.Error(e.message)
+        bot.logger.error(e.message)
         # If we can't parse a date, we're better off keeping it just in case.
         # TODO(mitch): Keep track of these instances to attempt to accurately
         # parse them in future. Will require manual detection + parsing.
