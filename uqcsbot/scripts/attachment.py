@@ -17,9 +17,8 @@ def handle_button(command: Command):
 
     Att2 = Attachment("Fallback2","attachement text 2")
     
-    # lb = LinkButton("Btn?","https://github.com/UQComputingSociety/uqcsbot/issues/311", ButtonStyle.STYLE_DANGER)
-    # aa = AttachmentActions("Fallback for buttion",[lb])
-    # Att2.attachment_actions = aa
+    lb = LinkButtonAction("Btn?","https://github.com/UQComputingSociety/uqcsbot/issues/311", None)
+    Att2.attachment_actions = [lb]
 
     # Att2.attachment_color = AttachmentColor.COLOUR_DANGER
 
@@ -35,4 +34,4 @@ def handle_button(command: Command):
     if Atts.validate() == False:
         bot.logger.error("Fucked up?")
 
-    bot.logger.error(bot.post_message(command.channel, "message text",  attachments=Atts.toJSON()))
+    bot.post_message(command.channel, "message text",  attachments=Atts.toJSON())

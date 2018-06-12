@@ -16,33 +16,25 @@ class AttachmentAction:
     action_type:str
     action_text:str
     action_url:str
-    action_type:str = None
+
+    # Optional Depending on if it is used in the action type
+    button_style:str = None
 
     def validate(self):
         return (not validateURL(self.action_url)) or (self.action_type == None)
 
-class LinkButton(AttachmentAction):
-    action_type:str = ActionType.TYPE_BUTTON.value
-    
-    # Optional
-    button_style:str = ButtonStyle.STYLE_PRIMARY.value
-
+class LinkButtonAction(AttachmentAction):   
     def __init__(self, text:str, url:str, button_style:Optional[ButtonStyle]):
+        self.action_type = ActionType.TYPE_BUTTON.value
         self.action_text = text
         self.action_url = url
         if not button_style == None:
             self.button_style = button_style.value
+        else:
+            button_style = ButtonStyle.STYLE_PRIMARY.value
 
     def set_button_style(self,bs:ButtonStyle):
         self.button_style = bs.value
-
-class AttachmentActions:
-    actions_fallback:str
-    list_actions:List[AttachmentAction]
-    
-    def __init__(self, fallback:str, actions:List[AttachmentAction]):
-        self.actions_fallback = fallback
-        self.list_actions = actions
 
 class AttachmentFields:
     field_title:str
@@ -80,7 +72,7 @@ class Attachment:
     # Should have at most 2 or 3 (as per the docs)
     attachment_fields:List[AttachmentFields] = None
     attachment_footer:str = None
-    attachment_actions:AttachmentActions = None # At most 5
+    attachment_actions:List[AttachmentAction] = [] # At most 5
 
     # Unimplemented Params
     # Author paramaters
@@ -111,8 +103,8 @@ class Attachment:
             # to ignore this item
             if self.attachment_fields > 3:
                 return False
-        if not self.attachment_actions == None:
-            actionsCount:int = len(self.attachment_actions.list_actions)
+        if not self.attachment_actions == []:
+            actionsCount:int = len(self.attachment_actions)
             # Should not add empty actions list
             if actionsCount == 0:
                 return False
@@ -121,7 +113,8 @@ class Attachment:
                 return False
 
             # Validates each of the actions to make sure they are valid
-            for act in self.attachment_actions.list_actions:
+            act:AttachmentAction
+            for act in self.attachment_actions:
                 if not act.validate:
                     return False
 
