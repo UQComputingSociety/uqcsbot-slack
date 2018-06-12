@@ -36,7 +36,7 @@ class LinkButtonAction(AttachmentAction):
     def set_button_style(self,bs:ButtonStyle):
         self.button_style = bs.value
 
-class AttachmentFields:
+class AttachmentField:
     field_title:str
     field_value:str
 
@@ -45,7 +45,7 @@ class AttachmentFields:
     #  enough to be shown beside others
     field_short:bool = False
 
-    def __init__(self, title:str, value:str, short:Optional[str]):
+    def __init__(self, title:str, value:str, short:Optional[bool]):
         self.field_title = title
         self.field_value = value
         if not short == None:
@@ -70,7 +70,7 @@ class Attachment:
     # Supplying the link will automatically hyperlink the title
     attachment_title_link:str = None
     # Should have at most 2 or 3 (as per the docs)
-    attachment_fields:List[AttachmentFields] = []
+    attachment_fields:List[AttachmentField] = []
     attachment_footer:str = None
     attachment_actions:List[AttachmentAction] = [] # At most 5
 
@@ -101,7 +101,7 @@ class Attachment:
             # This limit could be removed if needs be,
             # or some strict_validate could be added
             # to ignore this item
-            if self.attachment_fields > 3:
+            if len(self.attachment_fields) > 3:
                 return False
         if not self.attachment_actions == []:
             actionsCount:int = len(self.attachment_actions)
@@ -122,7 +122,10 @@ class Attachment:
     
 
 class Attachments_Util:
-    list_attachments:List[Attachment] = []
+    list_attachments:List[Attachment] = None
+
+    def __init__(self):
+        self.list_attachments = []
     
     def add_attachment(self,att:Attachment):
         self.list_attachments.append(att)
