@@ -162,31 +162,8 @@ class Channel(object):
             members_ids = []  # type: List[str]
             for page in self._bot.api.conversations.members.paginate(channel=self.id):
                 members_ids += page.get("members", [])
-            self._member_ids = self.get_active_members(members_ids)
+            self._member_ids = members_ids
             return self._member_ids
-
-    async def get_member_info(self, loop, member_id) -> dict:
-        '''
-        Returns the user information for the given member id.
-        '''
-        info_api_call = partial(self._bot.api.users.info, user=member_id)
-        return await loop.run_in_executor(None, info_api_call)
-
-    def get_active_members(self, members_ids: List[str]) -> List[str]:
-        '''
-        Returns a list of active members' ids by filtering out deleted members.
-        '''
-        loop = self._bot.get_event_loop()
-        member_futures = list(map(partial(self.get_member_info, loop), members_ids))
-        active_members = []
-        for response in loop.run_until_complete(asyncio.gather(*member_futures)):
-            if not response['ok']:
-                continue
-            user = response['user']
-            if user['deleted']:
-                continue
-            active_members.append(user['id'])
-        return active_members
 
 class ChannelWrapper(object):
     def __init__(self, bot: 'UQCSBot') -> None:
