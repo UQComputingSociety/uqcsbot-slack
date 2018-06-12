@@ -33,7 +33,7 @@ def handle_hoogle(command: Command):
         verbose = True
 
     if len(command_args) == 0:
-        bot.post_message(command.channel, handle_hoogle.__doc__)
+        bot.post_message(command.channel, "usage: " + handle_hoogle.__doc__)
         return
 
     type_sig = ' '.join(command_args)
