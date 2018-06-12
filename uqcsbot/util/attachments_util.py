@@ -15,23 +15,33 @@ class ActionType(Enum):
 class AttachmentAction:
     action_type:str
     action_text:str
-    action_url:str
+    
 
     # Optional Depending on if it is used in the action type
+    
+    # URL has to be used or value 
+    # and name has to be supplied
+    action_url:str = None
+    # 
+    action_name:str = None
+    action_value:str = None
+    
+    
     button_style:str = None
 
     def validate(self):
-        return (not validateURL(self.action_url)) or (self.action_type == None)
+        if not self.action_url == None:
+            return (not validateURL(self.action_url)) or (self.action_type == None)
+        else:
+            if (self.action_name == None) and (self.action_value == None):
+                return False
+        return (self.action_type == None)
 
 class LinkButtonAction(AttachmentAction):   
-    def __init__(self, text:str, url:str, button_style:Optional[ButtonStyle]):
+    def __init__(self, text:str):
         self.action_type = ActionType.TYPE_BUTTON.value
         self.action_text = text
-        self.action_url = url
-        if not button_style == None:
-            self.button_style = button_style.value
-        else:
-            button_style = ButtonStyle.STYLE_PRIMARY.value
+        self.button_style = ButtonStyle.STYLE_PRIMARY.value
 
     def set_button_style(self,bs:ButtonStyle):
         self.button_style = bs.value
