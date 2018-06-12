@@ -1,73 +1,42 @@
 # uqcsbot
 
-uqcsbot is a chat bot built on the [Hubot][hubot] framework for use on our [UQCS Slack Team](uqcs.slack.com).
+uqcsbot is a chat bot built in python for use on our [UQCS Slack Team](uqcs.slack.com).
 
-#### Set-up in Windows (with cygwin)
+## Setting up the bot
 
-0. Ensure node, npm and cygwin are installed
-1. `npm install`
-2. `dos2unix bin/hubot`
-3. `bin/hubot`
+Run `pip install -e .`
 
-### Running uqcsbot locally
+## Running the bot in a local development environment
 
-**If you're having trouble building/running the bot, don't be afraid to ask for help in the UQCS slack**
+Run `python3 -m uqcsbot --local`
 
-You can test your hubot by running the following, however some plugins will not
-behave as expected unless the environment variables they rely
-upon have been set.
+**Note**: If you're wanting to test/interact with Slack-specific features (e.g. reactions, channels), you _must_ be running the bot with Slack (See following sections).
 
-You can start uqcsbot locally by running:
+## Running the bot in the communal dev Slack team
 
-    % bin/hubot
+1. Ensure you've joined the [uqcstesting Slack team](https://uqcstest-inviter.herokuapp.com/)
+2. Run `python3 -m uqcsbot --dev`
 
-You'll see some start up output and a prompt:
+If a bot was available, it will now be running on uqcstesting.
 
-    [Sat Feb 28 2015 12:38:27 GMT+0000 (GMT)] INFO Using default redis on localhost:6379
-    uqcsbot>
+## Running the bot in a custom Slack team
 
-Then you can interact with uqcsbot by typing `uqcsbot help`.
+1. [Create a Slack workspace](https://slack.com/create)
+2. [Create a new Slack app](https://api.slack.com/apps/)
+3. Add a bot user to your app
+4. Install your app to your workspace. Install App > Install App to Workspace
+5. Copy the Bot User OAuth Access Token and set it as an environment variable under `SLACK_BOT_TOKEN`
+6. Go to Basic Information, copy your Verification Token and set it as an environment variable under `SLACK_VERIFICATION_TOKEN`
+7. Run `python3 -m uqcsbot`
 
-    uqcsbot> uqcsbot help
-    uqcsbot animate me <query> - The same thing as `image me`, except adds [snip]
-    uqcsbot help - Displays all of the help commands that uqcsbot knows about.
-    ...
+The bot will now be running on your custom Slack.
 
-### Running the bot on our test slack
+## Tests
 
-We've created a test slack just for testing bot features out.
+Run `pip install -e .[test]` to install the additional packages for testing.
 
-How to use:
-1. [Join the test slack by clicking here](https://uqcstest-inviter.herokuapp.com/)
-2. Pick one of the bots to use (make sure no one else is using them first!)
-3. Run your bot like so: `bin/hubot --adapter slack [0-3]` where the number is the number of the bot you want to run.
-4. Enjoy testing :)
+The bot uses [pytest](https://docs.pytest.org/en/latest/). You can run the tests with the command `pytest` from the project's root directory. It should automatically discover the tests (which are located in the `tests` directory).
 
-There's currently 4 public bot tokens avaliable for usage, please check others aren't using them before you use one. If you want to test our more complicated/advanced features it's probably easier to setup your own dummy slack as described below.
+You don't need to have set up a Slack team to run the tests; they capture the messages which would have been sent to Slack by the bot.
 
-Tokens (name: number):
-- alpha: 0
-- beta: 1
-- gamma: 2
-- delta: 3
-
-### Running the bot locally on a dummy slack
-
-If you want to test some slack specific features (e.g. emoji's):
-
-0. Ensure you have the bot running in it's command line form as above (ask in slack if you're having trouble)
-1. Create a [slack team](https://slack.com/get-started)
-2. Now you need to add a new bot go [here](https://slack.com/apps), ensuring you have your newly created team selected
-3. Search for "Bots"
-4. Add a new configuration
-5. Setup a new enviromental variable: `HUBOT_SLACK_TOKEN=xoxb-YOUR-TOKEN-HERE`
-6. Run your bot like so: `bin/hubot --adapter slack`
-7. Your bot should now connect to your slack, make sure you invite your bot to any channels you want it to work in.
-
-### Scripting
-
-Looking through the existing scripts (/scripts) is a great way to learn how to interact with Hubot and write your first script. Be sure to check out Hubot's own [Scripting Guide](scripting-docs) for more examples.
-
-For any further help or information, the `bot-testing` channel on UQCS slack is the best place to ask any questions!
-
-[scripting-docs]: https://github.com/hubotio/hubot/blob/master/docs/scripting.md
+All new scripts must come with tests before they will be accepted into the bot.
