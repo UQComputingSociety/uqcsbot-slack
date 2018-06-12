@@ -70,7 +70,7 @@ class Attachment:
     # Supplying the link will automatically hyperlink the title
     attachment_title_link:str = None
     # Should have at most 2 or 3 (as per the docs)
-    attachment_fields:List[AttachmentFields] = None
+    attachment_fields:List[AttachmentFields] = []
     attachment_footer:str = None
     attachment_actions:List[AttachmentAction] = [] # At most 5
 
@@ -96,7 +96,7 @@ class Attachment:
             if not validateURL(self.attachment_title_link):
                 # Attachment Link should be valid if not None
                 return None
-        if not self.attachment_fields == None:
+        if not self.attachment_fields == []:
             # There is the strongly suggested limit of 3
             # This limit could be removed if needs be,
             # or some strict_validate could be added
@@ -122,10 +122,7 @@ class Attachment:
     
 
 class Attachments_Util:
-    list_attachments:List[Attachment] = None
-
-    def __init__(self):
-        self.list_attachments = []
+    list_attachments:List[Attachment] = []
     
     def add_attachment(self,att:Attachment):
         self.list_attachments.append(att)
