@@ -9,22 +9,23 @@ def handle_button(command: Command):
     `!button` - Shows the test button.
     '''
     Att1 = Attachment("Fallback1","attachement text 1")
-    # Att1.attachment_color = AttachmentColour.COLOUR_GOOD
+    # Att1.attachment_color = AttachmentColor.COLOUR_GOOD
     Att1.attachment_title = "Some title text!"
     Att1.attachment_title_link = "https://github.com/UQComputingSociety/uqcsbot/issues/311"
     Att1.attachment_footer = "Small footer?"
+    # Att1.attachment_color = "danger" # American spelling required
 
     Att2 = Attachment("Fallback2","attachement text 2")
     
-    
-    lb = LinkButton("Btn?","https://github.com/UQComputingSociety/uqcsbot/issues/311", ButtonStyle.STYLE_DANGER)
-    aa = AttachmentActions("Fallback for buttion",[lb])
+    # lb = LinkButton("Btn?","https://github.com/UQComputingSociety/uqcsbot/issues/311", ButtonStyle.STYLE_DANGER)
+    # aa = AttachmentActions("Fallback for buttion",[lb])
+    # Att2.attachment_actions = aa
 
-    Att2.attachment_actions = aa
-    # Att2.attachment_color = AttachmentColour.COLOUR_DANGER
+    # Att2.attachment_color = AttachmentColor.COLOUR_DANGER
 
     Att3 = Attachment("Fallback3","attachement text 3")
-    # Att3.attachment_color = AttachmentColour.COLOUR_WARNING
+    Att3.set_color(AttachmentColor.COLOUR_WARNING)
+    # bot.logger.error(Att3.attachment_color)
 
     Atts = Attachments_Util()
     Atts.add_attachment(Att1)

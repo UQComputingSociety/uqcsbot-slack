@@ -54,7 +54,7 @@ class AttachmentFields:
             self.field_short = short
 
 
-class AttachmentColour(Enum):
+class AttachmentColor(Enum):
     COLOUR_GOOD = "good"
     COLOUR_WARNING = "warning"
     COLOUR_DANGER = "danger"
@@ -66,7 +66,7 @@ class Attachment:
     attachment_text:str
 
     # Optional Params
-    attachment_color:AttachmentColour = None
+    attachment_color:str = None
     attachment_pretext:str = None
     attachment_title:str = None
     # Supplying the link will automatically hyperlink the title
@@ -86,6 +86,9 @@ class Attachment:
     def __init__(self, fallback:str, text:str):
         self.attachment_fallback = fallback
         self.attachment_text = text
+
+    def set_color(self, ac:AttachmentColor):
+        self.attachment_color = ac.value
 
     def validate(self) -> bool:
         if not self.attachment_title_link == None:
