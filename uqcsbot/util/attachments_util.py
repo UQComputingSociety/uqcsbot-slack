@@ -143,6 +143,9 @@ class Attachments_Util:
         return initalJSON
 
     def validate(self) -> bool:
+        attCount = len(self.list_attachments)
+        if (attCount > 20) or (attCount == 0):
+            return False
         for Att in self.list_attachments:
             if Att.validate() == False:
                 return False
