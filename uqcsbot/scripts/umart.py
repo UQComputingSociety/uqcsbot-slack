@@ -10,7 +10,8 @@ NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
 NO_RESULTS_MESSAGE = "I can't find anything. Try `!umart <SOMETHING NOT AS SPECIFIC>`"
 ERROR_MESSAGE = "I tried to get the things but alas I could not. Error with HTTP Request."
 
-UMART_SEARCH_URL = 'https://www.umart.com.au/umart1/pro/products_list_searchnew_min.phtml'
+UMART_SEARCH_URL = "https://www.umart.com.au/umart1/pro/products_list_searchnew_min.phtml"
+UMART_PRODUCT_URL = "https://www.umart.com.au/umart1/pro/"
 
 
 @bot.on_command('umart')
@@ -35,7 +36,7 @@ def handle_umart(command: Command):
         return
     message = '```'
     for result in search_results:
-        message += f'Name: {result["name"]}\nPrice: {result["price"]}\n'
+        message += f'Name: <{UMART_PRODUCT_URL}{result["link"]}|{result["name"]}>\nPrice: {result["price"]}\n'
     message += '```'
     bot.post_message(command.channel, message)
 
@@ -59,7 +60,8 @@ def get_results_from_page(search_page):
     for li in html.select('li'):
         name = li.select('a.proname')[0].get_text()
         price = li.select('dl:nth-of-type(2) > dd > span')[0].get_text()
-        search_items.append({'name': name, 'price': price})
+        link = li.select('a.proname')[0]['href']
+        search_items.append({'name': name, 'price': price,'link':link})
     return search_items
     
 def get_search_page(search_query):
@@ -78,9 +80,9 @@ def get_search_page(search_query):
         return None
 
 def is_good_response(resp):
-    """
+    '''
     Returns true if the response seems to be HTML, false otherwise
-    """
+    '''
     content_type = resp.headers['Content-Type'].lower()
     return (resp.status_code == 200 
             and content_type is not None 
