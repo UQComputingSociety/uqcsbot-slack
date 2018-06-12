@@ -52,3 +52,25 @@ def handle_button(command: Command):
         bot.logger.error("Fucked up?")
 
     bot.post_message(command.channel, "message text",  attachments=Atts.toJSON())
+
+
+@bot.on_command("buttonArray")
+def handle_button_array(command: Command):
+    '''
+    `!buttonArray` - Shows the most amount of buttons.
+    '''
+
+    Atts = Attachments_Util()
+    AttachmentArray = []
+    for i in range(20):
+        attachment = Attachment("","")
+        btnArray = []
+        for j in range(5):
+            btnArray.append(LinkButtonAction(f"{i:02d},{j:02d}","https://github.com/UQComputingSociety/uqcsbot/issues/311", None))
+        attachment.attachment_actions = btnArray
+        Atts.add_attachment(attachment)
+
+    if Atts.validate() == False:
+        bot.logger.error("Fucked up?")
+
+    bot.post_message(command.channel, "message text",  attachments=Atts.toJSON())
