@@ -10,7 +10,7 @@ import time
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type
 from apscheduler.schedulers.background import BackgroundScheduler
-
+from uqcsbot.util.attachments_util import Attachments_Util
 
 CmdT = TypeVar('CmdT', bound='Command')
 
@@ -128,6 +128,9 @@ class UQCSBot(object):
     def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
         channel_id = channel if isinstance(channel, str) else channel.id
         return self.api.chat.postMessage(channel=channel_id, text=text, **kwargs)
+
+    def post_message_with_attachments(self, channel: Union[Channel, str], text: str, attach:Attachments_Util,**kwargs):
+        return self.post_message(channel, text, attachments=attach.toJSON, **kwargs)
 
     def get_event_loop(self) -> asyncio.AbstractEventLoop:
         """
