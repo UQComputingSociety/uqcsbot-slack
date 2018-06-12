@@ -31,10 +31,22 @@ def handle_button(command: Command):
     f3 = AttachmentField("Title 3","baz",True)
     Att3.attachment_fields = [f1, f2, f3]
 
+    # Monster
+    Att4 = Attachment("Fallback4", "I wonder what happens if I put all the things together?")
+    Att4.attachment_title = "Some title text attachment 4!"
+    Att4.attachment_title_link = "https://github.com/UQComputingSociety/uqcsbot/issues/311"
+    Att4.attachment_footer = "Small footer for attachment 4?"
+    Att4.set_color(AttachmentColor.COLOUR_DANGER)
+    Att4.attachment_actions = [lb1,lb2,lb3,lb4,lb5]
+    Att4.attachment_pretext = "pretext for attachment 4 looks like normal text, sort of..."
+    Att4.attachment_fields = [f1, f2, f3]
+
+
     Atts = Attachments_Util()
     Atts.add_attachment(Att1)
     Atts.add_attachment(Att2)
     Atts.add_attachment(Att3)
+    Atts.add_attachment(Att4)
 
     if Atts.validate() == False:
         bot.logger.error("Fucked up?")
