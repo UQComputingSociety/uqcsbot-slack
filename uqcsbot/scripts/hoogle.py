@@ -21,7 +21,7 @@ def pretty_hoogle_result(result: dict, is_verbose: bool) -> str:
 @bot.on_command("hoogle")
 def handle_hoogle(command: Command):
     '''
-    `!hoogle [--verbose] <TYPE_SIGNATURE>` - Queries the Hoogle Haskell API search engine, 
+    `!hoogle [-v] [--verbose] <TYPE_SIGNATURE>` - Queries the Hoogle Haskell API search engine, 
     searching Haskell libraries by either function name, or by approximate type signature.
     '''
     command_args = command.arg.split() if command.has_arg() else []
@@ -30,6 +30,10 @@ def handle_hoogle(command: Command):
 
     if '--verbose' in command_args:
         command_args.remove('--verbose')
+        verbose = True
+
+    if '-v' in command_args:
+        command_args.remove('-v')
         verbose = True
 
     if len(command_args) == 0:
