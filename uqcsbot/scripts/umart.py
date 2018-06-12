@@ -24,6 +24,7 @@ def handle_umart(command: Command):
         bot.post_message(command.channel, NO_QUERY_MESSAGE)
         return
     search_query = command.arg.strip()
+    # Detects if user is being smart
     if 'SOMETHING NOT AS SPECIFIC' in search_query:
         bot.post_message(command.channel, 'Not literally...')
         return
@@ -36,9 +37,11 @@ def handle_umart(command: Command):
         return
     message = '```'
     for result in search_results:
-        message += f'Name: <{UMART_PRODUCT_URL}{result["link"]}|{result["name"]}>\nPrice: {result["price"]}\n'
+        message += f'Name: <{UMART_PRODUCT_URL}{result["link"]}|{result["name"]}>\n'
+        message += f'Price: {result["price"]}\n'
     message += '```'
     bot.post_message(command.channel, message)
+
 
 def get_umart_results(limit, search_query):
     '''
@@ -47,23 +50,24 @@ def get_umart_results(limit, search_query):
     search_page = get_search_page(search_query)
     if search_page is None:
         return None
-    
     search_results = get_results_from_page(search_page)
     return search_results
+
 
 def get_results_from_page(search_page):
     '''
     Strips results from html page
     '''
-    html = BeautifulSoup(search_page,'html.parser')
+    html = BeautifulSoup(search_page, 'html.parser')
     search_items = []
     for li in html.select('li'):
         name = li.select('a.proname')[0].get_text()
         price = li.select('dl:nth-of-type(2) > dd > span')[0].get_text()
         link = li.select('a.proname')[0]['href']
-        search_items.append({'name': name, 'price': price,'link':link})
+        search_items.append({'name': name, 'price': price, 'link': link})
     return search_items
-    
+
+
 def get_search_page(search_query):
     '''
     Gets the search page HTML
@@ -74,16 +78,17 @@ def get_search_page(search_query):
                 return resp.content
             else:
                 return None
-    
     except RequestException as e:
-        bot.logger.error(f'A request error {e.resp.status} occurred:\n{e.content}')
+        bot.logger.error(
+            f'A request error {e.resp.status} occurred:\n{e.content}')
         return None
+
 
 def is_good_response(resp):
     '''
-    Returns true if the response seems to be HTML, false otherwise
+    Returns true if the response seems to be HTML, false otherwise.
     '''
     content_type = resp.headers['Content-Type'].lower()
-    return (resp.status_code == 200 
-            and content_type is not None 
+    return (resp.status_code == 200
+            and content_type is not None
             and content_type.find('html') > -1)
