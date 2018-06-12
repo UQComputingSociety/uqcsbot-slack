@@ -72,7 +72,8 @@ class APIMethodProxy(object):
         else:
             result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
         if not result['ok']:
-            LOGGER.error('Slack API Error: ' + result['error'])
+            LOGGER.error(f'Slack API error calling {self._method} with kwargs' \
+                         + f' {kwargs}: ' + result['error'])
         return result
 
     def paginate(self, **kwargs) -> Paginator:
