@@ -130,7 +130,7 @@ class UQCSBot(object):
         return self.api.chat.postMessage(channel=channel_id, text=text, **kwargs)
 
     def post_message_with_attachments(self, channel: Union[Channel, str], text: str, attach:Attachments_Util,**kwargs):
-        return self.post_message(channel, text, attachments=attach.toJSON, **kwargs)
+        return self.post_message(channel, text, attachments=attach.toJSON(), **kwargs)
 
     def get_event_loop(self) -> asyncio.AbstractEventLoop:
         """
