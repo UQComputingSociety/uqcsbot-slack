@@ -31,7 +31,7 @@ def voteythumbs(evt: dict):
     if "!voteythumbs" not in evt.get("text", ""):
         return
     evt["text"] = strip(evt["text"])
-    cmd = Command.from_message(bot, evt)
+    cmd = Command.from_message(evt)
     if cmd is None:
         return
     if not cmd.has_arg() and "!voteythumbs" in evt["text"]:
