@@ -9,6 +9,9 @@ class ButtonStyle(Enum):
      STYLE_PRIMARY = "primary"
      STYLE_DANGER = "danger"
 
+class ActionType(Enum):
+    TYPE_BUTTON = "button"
+
 class AttachmentAction:
     action_type:str
     action_text:str
@@ -19,16 +22,19 @@ class AttachmentAction:
         return (not validateURL(self.action_url)) or (self.action_type == None)
 
 class LinkButton(AttachmentAction):
-    action_type:str = "button"
+    action_type:str = ActionType.TYPE_BUTTON.value
     
     # Optional
-    button_style:ButtonStyle = ButtonStyle.STYLE_PRIMARY
+    button_style:str = ButtonStyle.STYLE_PRIMARY.value
 
     def __init__(self, text:str, url:str, button_style:Optional[ButtonStyle]):
         self.action_text = text
         self.action_url = url
         if not button_style == None:
-            self.button_style = button_style
+            self.button_style = button_style.value
+
+    def set_button_style(self,bs:ButtonStyle):
+        self.button_style = bs.value
 
 class AttachmentActions:
     actions_fallback:str
