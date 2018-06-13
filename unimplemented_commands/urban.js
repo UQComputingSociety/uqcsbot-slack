@@ -36,18 +36,19 @@ module.exports = function (robot) {
         }
 
         // Parse Urban Dictionary response and send result.
+        var room = res.envelope.room; // Room the command was sent in.
         var firstResult = udResp["list"][0];
         var definition = firstResult["definition"];
         var example = firstResult["example"];
-        var response = phrase.toUpperCase() + ":\n" + definition + "\n";
+        var response = "*" + phrase.toLowerCase().replace(/\b\w/g, l => l.toUpperCase()) + ":* \n" + definition + "\n";
         if (example) {
           response += ">>> " + example;
         }
         var more = "";
         if (udResp["list"].length > 1) {
-          more += "- more definitions at www.urbandictionary.com/define.php?term=" + encodeURI(phrase);
+          more += "_ more definitions at www.urbandictionary.com/define.php?term=" + encodeURI(phrase) + " _";
         }
-        res.send(response, more);
+        robot.send({room: room}, response)[0].then(res => robot.send({room: room}, more));
       });
   });
 };
