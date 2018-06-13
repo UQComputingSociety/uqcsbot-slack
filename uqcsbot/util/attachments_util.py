@@ -144,7 +144,15 @@ class Attachments_Util:
     # property type without conflict 
     class Encoder(json.JSONEncoder):
         def default(self, o):
-            return {"_".join(k.split("_")[1:]): v for k, v in vars(o).items()}
+            if ((isinstance(o, Attachments_Util)) or
+                (isinstance(o, AttachmentAction)) or
+                (isinstance(o, LinkButtonAction)) or
+                (isinstance(o, AttachmentField)) or
+                (isinstance(o, Attachment))):
+               return {"_".join(k.split("_")[1:]): v for k, v in vars(o).items()}
+            # Let the base class default method raise the TypeError
+            return json.JSONEncoder.default(self, o)
+            
 
     def toJSON(self):
         initalJSON:str = json.dumps(self, cls=Attachments_Util.Encoder)
