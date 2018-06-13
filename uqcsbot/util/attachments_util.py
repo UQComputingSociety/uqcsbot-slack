@@ -228,7 +228,7 @@ class Attachments_Util:
 #     if Atts.validate() == False:
 #         bot.logger.error("Fucked up?")
 
-#     bot.post_message(command.channel, "message text",  attachments=Atts.toJSON())
+#     bot.post_message(command.channel, "message text",  attachments=Atts, cls=Attachments_Util.Encoder)
 
 
 # @bot.on_command("buttonArray")
@@ -250,5 +250,5 @@ class Attachments_Util:
 #     if Atts.validate() == False:
 #         bot.logger.error("Fucked up?")
 
-#     bot.post_message(command.channel, "message text",  attachments=Atts.toJSON())
+#     bot.post_message(command.channel, "message text",  attachments=Atts, cls=Attachments_Util.Encoder)
 
