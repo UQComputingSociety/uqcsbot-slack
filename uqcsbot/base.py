@@ -213,7 +213,7 @@ class UQCSBot(object):
             # Initialise channels at start so we don't have to block
             self.channels._initialise()
 
-            if not self.client.rtm_connect():
+            if not self.client.rtm_connect(with_team_state=False, auto_reconnect=True):
                 raise OSError("Error connecting to RTM API")
             while True:
                 for message in self.client.rtm_read():
