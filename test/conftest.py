@@ -27,7 +27,7 @@ class MockUQCSBot(UQCSBot):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.test_posted_messages = defaultdict(deque)
+        self.test_posted_messages = defaultdict(list)
         self.test_channels = [
             # Public channel
             {'id': TEST_CHANNEL_ID, 'name': TEST_CHANNEL_ID, 'is_public': True},
@@ -74,7 +74,7 @@ class MockUQCSBot(UQCSBot):
         if channel is None:
             return {'ok': False}
 
-        all_users = channel.get('users')
+        all_users = channel.get('users', [])
         sliced_users = all_users[cursor : cursor + limit + 1]
         cursor += len(sliced_users)
         if cursor == len(all_users):
@@ -92,7 +92,8 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
 
         all_messages = self.test_posted_messages.get(channel_id, [])
-        sliced_messages = list(islice(all_messages, cursor, cursor + limit + 1))
+        ordered_messages = all_messages[::-1] # Most recent first
+        sliced_messages = list(islice(ordered_messages, cursor, cursor + limit + 1))
         cursor += len(sliced_messages)
         if cursor == len(all_messages):
             cursor = None
@@ -129,12 +130,12 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
 
         message = {'text': text}
-        self.test_posted_messages[channel.id].appendleft(message)
+        self.test_posted_messages[channel.id].append(message)
 
-        return {'ok': True, 'channel': channel.id, 'ts': time.time(),
+        return {'ok': True, 'channel': channel.id, 'ts': str(time.time()),
                 'message': message}
 
-    def post_and_handle_command(self, message):
+    def post_and_handle_message(self, message):
         self.post_message(message['channel'], message['text'])
         command = Command.from_message(message)
         if command.command_name not in self._command_registry:

@@ -10,6 +10,5 @@ def test_cat(uqcsbot: MockUQCSBot):
     test !cat
     '''
     message = generate_message_object(TEST_CHANNEL_ID, '!cat')
-    uqcsbot.post_and_handle_command(message)
-    channel_messages = uqcsbot.test_posted_messages.get(TEST_CHANNEL_ID, [])
-    assert len(channel_messages) == 2
+    uqcsbot.post_and_handle_message(message)
+    assert len(uqcsbot.test_posted_messages.get(TEST_CHANNEL_ID, [])) == 2
