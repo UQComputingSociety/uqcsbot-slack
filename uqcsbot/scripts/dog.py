@@ -16,4 +16,4 @@ def handle_dog(command: Command):
           "        (( (               (( (         hjw\n" + \
           "         \`\`-\'               \`\`-\'\n\n```"
 
-    bot.post_message(command.channel, dog)
+    bot.post_message(command.channel_id, dog)

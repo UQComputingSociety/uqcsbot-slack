@@ -27,7 +27,7 @@ def handle_whatsdue(command: Command):
     channel that the command was called from. If -f/--full is provided, will
     return the full assessment list without filtering by cutoff dates.
     '''
-    channel = command.channel
+    channel = bot.channels.get(command.channel_id)
     command_args = command.arg.split() if command.has_arg() else []
 
     is_full_output = False
