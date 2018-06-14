@@ -8,4 +8,4 @@ def test_not_implemented_command(uqcsbot: MockUQCSBot):
     '''
     with pytest.raises(NotImplementedError):
         message = generate_message_object(TEST_CHANNEL_ID, '!thiscommanddoesntexist')
-        uqcsbot.post_and_handle_command(message)
+        uqcsbot.post_and_handle_message(message)
