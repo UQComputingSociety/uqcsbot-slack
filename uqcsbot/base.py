@@ -16,9 +16,8 @@ CmdT = TypeVar('CmdT', bound='Command')
 
 
 class Command(object):
-    def __init__(self, command_name: str, arg: Optional[str], channel_id: str, message: dict) -> None:
+    def __init__(self, command_name: str, arg: Optional[str], message: dict) -> None:
         self.command_name = command_name
-        self.channel_id = channel_id
         self.arg = arg
         self.message = message
 
@@ -33,7 +32,6 @@ class Command(object):
         command_name, *arg = text[1:].split(" ", 1)
         return cls(
             command_name=command_name,
-            channel_id=message["channel"],
             arg=None if not arg else arg[0],
             message=message
         )
@@ -44,6 +42,13 @@ class Command(object):
         Returns the id of the user who called the command.
         '''
         return self.message['user']
+
+    @property
+    def channel_id(self):
+        '''
+        Returns the id of the channel that the command was called in.
+        '''
+        return self.message['channel']
 
 
 CommandHandler = Callable[[Command], None]
