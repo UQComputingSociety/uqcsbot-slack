@@ -7,8 +7,6 @@ def test_echo(uqcsbot: MockUQCSBot):
     '''
     message = generate_message_object(TEST_CHANNEL_ID, '!echo Hello, World!')
     uqcsbot.post_and_handle_message(message)
-    channel = uqcsbot.test_channels.get(TEST_CHANNEL_ID)
-    assert channel is not None
-    messages = channel.get('messages', [])
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[-1]['text'] == 'Hello, World!'
