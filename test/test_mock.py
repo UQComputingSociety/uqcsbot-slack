@@ -12,10 +12,12 @@ def test_mock_previous_message(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, LONG_MESSAGE)
     mock_call = generate_message_object(TEST_CHANNEL_ID, '!mock')
     uqcsbot.post_and_handle_message(mock_call)
-    channel_messages = uqcsbot.test_posted_messages.get(TEST_CHANNEL_ID, [])
-    assert len(channel_messages) == 3
-    assert channel_messages[-1]['text'].lower() == LONG_MESSAGE.lower()
-    assert channel_messages[-1]['text'] != LONG_MESSAGE
+    channel = uqcsbot.test_channels.get(TEST_CHANNEL_ID)
+    assert channel is not None
+    messages = channel.get('messages', [])
+    assert len(messages) == 3
+    assert messages[-1]['text'].lower() == LONG_MESSAGE.lower()
+    assert messages[-1]['text'] != LONG_MESSAGE
 
 def test_mock_past_message(uqcsbot: MockUQCSBot):
     '''
@@ -28,8 +30,9 @@ def test_mock_past_message(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, 'padding')
     mock_call = generate_message_object(TEST_CHANNEL_ID, '!mock 4')
     uqcsbot.post_and_handle_message(mock_call)
-    channel_messages = uqcsbot.test_posted_messages.get(TEST_CHANNEL_ID, [])
-    print(channel_messages)
-    assert len(channel_messages) == 7
-    assert channel_messages[-1]['text'].lower() == LONG_MESSAGE.lower()
-    assert channel_messages[-1]['text'] != LONG_MESSAGE
+    channel = uqcsbot.test_channels.get(TEST_CHANNEL_ID)
+    assert channel is not None
+    messages = channel.get('messages', [])
+    assert len(messages) == 7
+    assert messages[-1]['text'].lower() == LONG_MESSAGE.lower()
+    assert messages[-1]['text'] != LONG_MESSAGE
