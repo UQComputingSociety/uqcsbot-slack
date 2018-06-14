@@ -78,7 +78,7 @@ def handle_attic(command: Command) -> None:
     # Check course folder exists by checking for the course code in the 'name' of each file/folder.
     course = next((item for item in root_directory_data['files'] if item['name'] == course_code), None)
     if course is None:
-        bot.post_message(command.channel, 'No course folder found for ' + course_code + '.')
+        bot.post_message(command.channel, f'No course folder found for {course_code}.')
         return
 
     # Get all files in directory and subdirectories.
