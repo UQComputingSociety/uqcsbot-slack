@@ -20,41 +20,34 @@ TEST_DIRECT_ID = "D1234567890"
 TEST_USER_ID = "U1234567890"
 
 
-def generate_channel(channel_id, name, users=[], is_group=False, is_im=False, is_user_deleted=False, is_public=False,
-                     is_private=False, is_archived=False):
-    return {'id': channel_id, 'name': name, 'is_group': is_group, 'is_im': is_im, 'is_user_deleted': is_user_deleted,
-            'is_public': is_public, 'is_private': is_private, 'is_archived': is_archived, 'users': users}
-
-class MockChannel:
-    messages = None
-    id = None
-
-    # TODO(mitch): this to replace channels + generated channels
-    def __init__(self):
-        pass
-
 class MockUQCSBot(UQCSBot):
     test_posted_messages = None
+    test_channels = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_posted_messages = defaultdict(deque)
-        self.channels = {
-            TEST_CHANNEL_ID: generate_channel(TEST_CHANNEL_ID, TEST_CHANNEL_ID, [TEST_USER_ID], is_public=True),
-            TEST_GROUP_ID: generate_channel(TEST_GROUP_ID, TEST_GROUP_ID, [TEST_USER_ID], is_group=True, is_private=True),
-            TEST_DIRECT_ID: generate_channel(TEST_DIRECT_ID, TEST_DIRECT_ID, [TEST_USER_ID], is_im=True, is_private=True)
-        }
+        self.test_channels = [
+            # Public channel
+            {'id': TEST_CHANNEL_ID, 'name': TEST_CHANNEL_ID, 'is_public': True},
+            # Group channel
+            {'id': TEST_GROUP_ID, 'name': TEST_GROUP_ID, 'is_group': True,
+             'is_private': True},
+            # Direct channel
+            {'id': TEST_DIRECT_ID, 'name': TEST_DIRECT_ID, 'is_im': True,
+             'is_private': True, 'is_user_deleted': False, 'user': TEST_USER_ID},
+        ]
 
         def mocked_api_call(method, **kwargs):
             '''
             Mocks Slack API call methods.
             '''
             if method == 'channels.list':
-                return self.channel_list('is_public', **kwargs)
+                return self.channels_list('channels', **kwargs)
             elif method == 'groups.list':
-                return self.channel_list('is_group', **kwargs)
+                return self.channels_list('groups', **kwargs)
             elif method == 'im.list':
-                return self.channel_list('is_im', **kwargs)
+                return self.channels_list('ims', **kwargs)
             elif method == 'conversations.members':
                 return self.conversations_members(**kwargs)
             elif method == 'conversations.history':
@@ -64,12 +57,14 @@ class MockUQCSBot(UQCSBot):
 
         self.mocked_client = MagicMock(spec=SlackClient)
         self.mocked_client.api_call = mocked_api_call
+        self._client = self.mocked_client
 
     @property
     def api(self):
         return APIWrapper(self.mocked_client)
 
     def conversations_members(self, **kwargs):
+        print('trying members')
         channel_id = kwargs.get('channel')
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
@@ -87,6 +82,7 @@ class MockUQCSBot(UQCSBot):
         return {'ok': True, 'members': sliced_users, 'cursor': cursor}
 
     def conversations_history(self, **kwargs):
+        print('trying history')
         channel_id = kwargs.get('channel')
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
@@ -99,16 +95,21 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, 'messages': sliced_messages, 'cursor': cursor}
 
-    def channel_list(self, channel_type=None, **kwargs):
+    def channels_list(self, channel_type=None, **kwargs):
+        print('trying channels')
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
 
-        if channel_type is None:
-            filter_function = lambda *_: True
+        if channel_type == 'channels':
+            filter_function = lambda x: x.get('is_public', False)
+        elif channel_type == 'groups':
+            filter_function = lambda x: x.get('is_group', False)
+        elif channel_type == 'ims':
+            filter_function = lambda x: x.get('is_im', False)
         else:
-            filter_function = lambda x: x.get(channel_type, False) is True
+            filter_function = lambda *_: True
 
-        all_channels = list(filter(filter_function, self.channels.values()))
+        all_channels = list(filter(filter_function, self.test_channels))
         sliced_channels = all_channels[cursor : cursor + limit + 1]
         cursor += len(sliced_channels)
         if cursor == len(all_channels):
@@ -117,7 +118,9 @@ class MockUQCSBot(UQCSBot):
         return {'ok': True, channel_type: sliced_channels, 'cursor': cursor}
 
     def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
+        print(channel)
         channel_id = channel.id if isinstance(channel, Channel) else channel
+        print(channel_id)
         message = {'channel_id': channel_id, 'text': text}
         self.test_posted_messages[channel_id].appendleft(message)
 
@@ -126,7 +129,8 @@ class MockUQCSBot(UQCSBot):
         command = Command.from_message(message)
         if command.command_name not in self._command_registry:
             raise NotImplementedError()
-        self._handle_command(message)
+        for handler in self.command_registry[command.command_name]:
+            handler(command)
 
 
 @pytest.fixture(scope="session")

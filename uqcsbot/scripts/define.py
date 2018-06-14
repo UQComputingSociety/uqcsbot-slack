@@ -12,14 +12,14 @@ def define(command: Command):
     query = command.arg
     # Fun Fact: Empty searches return the definition of adagio (a piece of music to be played or sung slowly)
     if not command.has_arg():
-        bot.post_message(command.channel, "Please specify a word")
+        bot.post_message(command.channel_id, "Please specify a word")
         return
 
     http_response = requests.get(API_URL, params={'headword': query})
 
     # Check if the response is OK
     if http_response.status_code != requests.codes.ok:
-        bot.post_message(command.channel, "Problem fetching definition")
+        bot.post_message(command.channel_id, "Problem fetching definition")
         return
 
     json_data = json.loads(http_response.content)
@@ -33,4 +33,4 @@ def define(command: Command):
         # This gets the first subsense if there are otherwise just uses senses.
         message = senses.get('subsenses', [senses])[0].get('definition', "Definition not available")
 
-    bot.post_message(command.channel, f">>>{message}")
+    bot.post_message(command.channel_id, f">>>{message}")
