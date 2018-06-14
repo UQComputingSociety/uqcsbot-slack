@@ -185,7 +185,6 @@ class ChannelWrapper(object):
             self._bot.on(mtype, attr)
 
     def _add_channel(self, chan_dict: dict) -> Channel:
-        print('adding', chan_dict)
         chan = Channel(
             bot=self._bot,
             channel_id=chan_dict['id'],
@@ -198,11 +197,9 @@ class ChannelWrapper(object):
         )
         self._channels_by_name[chan.name] = chan
         self._channels_by_id[chan.id] = chan
-        print(self._channels_by_name, self._channels_by_id)
         return chan
 
     def _initialise(self):
-        print('init')
         with self._lock:
             if self._initialised:
                 # Prevent double-calls after lock release
