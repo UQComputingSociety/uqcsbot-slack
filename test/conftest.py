@@ -2,13 +2,12 @@
 Configuration for Pytest
 """
 
-import pytest
-import asyncio
-from slackclient import SlackClient
 from unittest.mock import MagicMock
-from typing import List, Union, Optional, Callable, DefaultDict, Dict
-from collections import defaultdict, deque
 from itertools import islice
+from collections import defaultdict, deque
+from typing import List, Union, Optional, Callable, DefaultDict, Dict
+import pytest
+from slackclient import SlackClient
 
 import uqcsbot as uqcsbot_module
 from uqcsbot.api import Channel, APIWrapper
@@ -21,20 +20,6 @@ TEST_DIRECT_ID = "D1234567890"
 TEST_USER_ID = "U1234567890"
 
 
-class UnparsedCommandException(Exception):
-    """
-    Unlike the actual bot, an unparsable command will result in this exception rather than being ignored
-    Allows the tests to expect this result
-    """
-    pass
-
-class UnmatchedHandleException(Exception):
-    """
-    Unlike the actual bot, a message which doesn't match any handlers will raise this exception rather than being ignored
-    Allows the tests to expect this result
-    """
-    pass
-
 def generate_channel(channel_id, name, users=[], is_group=False, is_im=False, is_user_deleted=False, is_public=False,
                      is_private=False, is_archived=False):
     return {'id': channel_id, 'name': name, 'is_group': is_group, 'is_im': is_im, 'is_user_deleted': is_user_deleted,
@@ -46,11 +31,16 @@ class MockUQCSBot(UQCSBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_posted_messages = defaultdict(deque)
-        self.test_channels = {TEST_CHANNEL_ID: generate_channel(TEST_CHANNEL_ID, TEST_CHANNEL_ID, [TEST_USER_ID], is_public=True),
-                               TEST_GROUP_ID: generate_channel(TEST_GROUP_ID, TEST_GROUP_ID, [TEST_USER_ID], is_group=True, is_private=True),
-                               TEST_DIRECT_ID: generate_channel(TEST_DIRECT_ID, TEST_DIRECT_ID, [TEST_USER_ID], is_im=True, is_private=True)}
+        self.test_channels = {
+            TEST_CHANNEL_ID: generate_channel(TEST_CHANNEL_ID, TEST_CHANNEL_ID, [TEST_USER_ID], is_public=True),
+            TEST_GROUP_ID: generate_channel(TEST_GROUP_ID, TEST_GROUP_ID, [TEST_USER_ID], is_group=True, is_private=True),
+            TEST_DIRECT_ID: generate_channel(TEST_DIRECT_ID, TEST_DIRECT_ID, [TEST_USER_ID], is_im=True, is_private=True)
+        }
 
         def mocked_api_call(method, **kwargs):
+            '''
+            Mocks Slack API call methods.
+            '''
             if method == 'channels.list':
                 return self.channel_list('channels', **kwargs)
             elif method == 'groups.list':
@@ -62,8 +52,7 @@ class MockUQCSBot(UQCSBot):
             elif method == 'conversations.history':
                 return self.conversations_history(**kwargs)
             else:
-                # TODO(mitch): should probably log/throw error here so it's clear during testing
-                return None
+                raise NotImplementedError
 
         self.mocked_client = MagicMock(spec=SlackClient)
         self.mocked_client.api_call = mocked_api_call
@@ -131,10 +120,8 @@ class MockUQCSBot(UQCSBot):
     async def post_and_handle_command(self, message):
         self.post_message(message['channel'], message['text'])
         command = Command.from_message(self, message)
-        if command is None:
-            raise UnparsedCommandException()
         if command.command_name not in self._command_registry:
-            raise UnmatchedHandleException()
+            raise NotImplementedError()
         await self._handle_command(message)
 
 @pytest.fixture(scope="session")
