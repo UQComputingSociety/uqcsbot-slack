@@ -22,24 +22,24 @@ TEST_USER_ID = "U1234567890"
 
 
 class MockUQCSBot(UQCSBot):
-    test_posted_messages = None
     test_channels = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.test_posted_messages = defaultdict(list)
         self.test_channels = {
             # Public channel
             TEST_CHANNEL_ID: {'id': TEST_CHANNEL_ID, 'name': TEST_CHANNEL_ID,
-                              'is_public': True, 'members': [TEST_USER_ID]},
+                              'is_public': True, 'members': [TEST_USER_ID],
+                              'messages': []},
             # Group channel
             TEST_GROUP_ID: {'id': TEST_GROUP_ID, 'name': TEST_GROUP_ID,
                             'is_group': True, 'is_private': True,
-                            'members': [TEST_USER_ID]},
+                            'members': [TEST_USER_ID], 'messages': []},
             # Direct channel
             TEST_DIRECT_ID: {'id': TEST_DIRECT_ID, 'name': TEST_DIRECT_ID,
                              'is_im': True, 'is_private': True,
-                             'is_user_deleted': False, 'user': TEST_USER_ID}
+                             'is_user_deleted': False, 'user': TEST_USER_ID,
+                             'messages': []}
         }
 
         def mocked_api_call(method, **kwargs):
@@ -90,11 +90,11 @@ class MockUQCSBot(UQCSBot):
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
 
-        channel = self.channels.get(channel_id)
+        channel = self.test_channels.get(channel_id)
         if channel is None:
             return {'ok': False}
 
-        all_messages = self.test_posted_messages.get(channel_id, [])
+        all_messages = channel.get('messages', [])
         ordered_messages = all_messages[::-1] # Most recent first
         sliced_messages = list(islice(ordered_messages, cursor, cursor + limit + 1))
         cursor += len(sliced_messages)
@@ -133,7 +133,7 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
 
         message = {'text': text}
-        self.test_posted_messages[channel.id].append(message)
+        self.test_channels.get(channel.id, {}).get('messages', []).append(message)
 
         return {'ok': True, 'channel': channel.id, 'ts': str(time.time()),
                 'message': message}
@@ -163,5 +163,7 @@ def uqcsbot(_uqcsbot: MockUQCSBot):
     """
     Clears the `_uqcsbot` fixture before each test
     """
-    _uqcsbot.test_posted_messages.clear()
+    # Clear channel messages
+    for channel in _uqcsbot.test_channels.values():
+        channel['messages'] = []
     return _uqcsbot

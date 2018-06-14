@@ -11,4 +11,6 @@ def test_dog(uqcsbot: MockUQCSBot):
     '''
     message = generate_message_object(TEST_CHANNEL_ID, '!dog')
     uqcsbot.post_and_handle_message(message)
-    assert len(uqcsbot.test_posted_messages.get(TEST_CHANNEL_ID, [])) == 2
+    channel = uqcsbot.test_channels.get(TEST_CHANNEL_ID)
+    assert channel is not None
+    assert len(channel.get('messages', [])) == 2
