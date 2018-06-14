@@ -72,7 +72,7 @@ class MockUQCSBot(UQCSBot):
 
         channel = self.channels.get(channel_id)
         if channel is None:
-            return {'ok', False}
+            return {'ok': False}
 
         all_users = channel.get('users')
         sliced_users = all_users[cursor : cursor + limit + 1]
@@ -86,6 +86,10 @@ class MockUQCSBot(UQCSBot):
         channel_id = kwargs.get('channel')
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
+
+        channel = self.channels.get(channel_id)
+        if channel is None:
+            return {'ok': False}
 
         all_messages = self.test_posted_messages.get(channel_id, [])
         sliced_messages = list(islice(all_messages, cursor, cursor + limit + 1))
@@ -106,7 +110,7 @@ class MockUQCSBot(UQCSBot):
         elif channel_type == 'ims':
             filter_function = lambda x: x.get('is_im', False)
         else:
-            filter_function = lambda *_: True
+            return {'ok': False}
 
         all_channels = list(filter(filter_function, self.test_channels))
         sliced_channels = all_channels[cursor : cursor + limit + 1]
@@ -118,8 +122,11 @@ class MockUQCSBot(UQCSBot):
 
     def mocked_chat_post_message(self, **kwargs):
         channel_id_or_name = kwargs.get('channel')
-        channel = self.channels.get(channel_id_or_name)
         text = kwargs.get('text')
+
+        channel = self.channels.get(channel_id_or_name)
+        if channel is None:
+            return {'ok': False}
 
         message = {'text': text}
         self.test_posted_messages[channel.id].appendleft(message)
