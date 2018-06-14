@@ -28,16 +28,19 @@ class MockUQCSBot(UQCSBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_posted_messages = defaultdict(list)
-        self.test_channels = [
+        self.test_channels = {
             # Public channel
-            {'id': TEST_CHANNEL_ID, 'name': TEST_CHANNEL_ID, 'is_public': True},
+            TEST_CHANNEL_ID: {'id': TEST_CHANNEL_ID, 'name': TEST_CHANNEL_ID,
+                              'is_public': True, 'members': [TEST_USER_ID]},
             # Group channel
-            {'id': TEST_GROUP_ID, 'name': TEST_GROUP_ID, 'is_group': True,
-             'is_private': True},
+            TEST_GROUP_ID: {'id': TEST_GROUP_ID, 'name': TEST_GROUP_ID,
+                            'is_group': True, 'is_private': True,
+                            'members': [TEST_USER_ID]},
             # Direct channel
-            {'id': TEST_DIRECT_ID, 'name': TEST_DIRECT_ID, 'is_im': True,
-             'is_private': True, 'is_user_deleted': False, 'user': TEST_USER_ID},
-        ]
+            TEST_DIRECT_ID: {'id': TEST_DIRECT_ID, 'name': TEST_DIRECT_ID,
+                             'is_im': True, 'is_private': True,
+                             'is_user_deleted': False, 'user': TEST_USER_ID}
+        }
 
         def mocked_api_call(method, **kwargs):
             '''
@@ -70,11 +73,11 @@ class MockUQCSBot(UQCSBot):
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
 
-        channel = self.channels.get(channel_id)
+        channel = self.test_channels.get(channel_id)
         if channel is None:
             return {'ok': False}
 
-        all_users = channel.get('users', [])
+        all_users = channel.get('members', [])
         sliced_users = all_users[cursor : cursor + limit + 1]
         cursor += len(sliced_users)
         if cursor == len(all_users):
@@ -113,7 +116,7 @@ class MockUQCSBot(UQCSBot):
         else:
             return {'ok': False}
 
-        all_channels = list(filter(filter_function, self.test_channels))
+        all_channels = list(filter(filter_function, self.test_channels.values()))
         sliced_channels = all_channels[cursor : cursor + limit + 1]
         cursor += len(sliced_channels)
         if cursor == len(all_channels):
