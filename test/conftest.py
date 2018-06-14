@@ -57,7 +57,6 @@ class MockUQCSBot(UQCSBot):
 
         self.mocked_client = MagicMock(spec=SlackClient)
         self.mocked_client.api_call = mocked_api_call
-        self._client = self.mocked_client
 
     @property
     def api(self):
