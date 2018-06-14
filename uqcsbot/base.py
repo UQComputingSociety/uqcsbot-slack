@@ -225,7 +225,6 @@ class UQCSBot(object):
                         break
                 time.sleep(0.5)
 
-    # TODO(mitch): remove this, it's pointless and broken.
     def run_cli(self):
         """
         Run in local (CLI) mode

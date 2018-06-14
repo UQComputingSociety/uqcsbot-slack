@@ -21,7 +21,5 @@ def test_yt_normal(uqcsbot: MockUQCSBot):
     message = generate_message_object(TEST_CHANNEL_ID, "!yt dog")
     uqcsbot.post_and_handle_command(message)
     channel_messages = uqcsbot.test_posted_messages.get(TEST_CHANNEL_ID, [])
-    print(channel_messages)
-    print(uqcsbot.channels)
     assert len(channel_messages) == 2
     assert channel_messages[0]['text'][0:len(YOUTUBE_VIDEO_URL)] == YOUTUBE_VIDEO_URL

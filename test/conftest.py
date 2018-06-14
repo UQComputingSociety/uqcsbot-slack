@@ -7,6 +7,7 @@ from itertools import islice
 from collections import defaultdict, deque
 from typing import List, Union, Optional, Callable, DefaultDict, Dict
 import pytest
+import time
 from slackclient import SlackClient
 
 import uqcsbot as uqcsbot_module
@@ -43,15 +44,17 @@ class MockUQCSBot(UQCSBot):
             Mocks Slack API call methods.
             '''
             if method == 'channels.list':
-                return self.channels_list('channels', **kwargs)
+                return self.mocked_channels_list('channels', **kwargs)
             elif method == 'groups.list':
-                return self.channels_list('groups', **kwargs)
+                return self.mocked_channels_list('groups', **kwargs)
             elif method == 'im.list':
-                return self.channels_list('ims', **kwargs)
+                return self.mocked_channels_list('ims', **kwargs)
             elif method == 'conversations.members':
-                return self.conversations_members(**kwargs)
+                return self.mocked_conversations_members(**kwargs)
             elif method == 'conversations.history':
-                return self.conversations_history(**kwargs)
+                return self.mocked_conversations_history(**kwargs)
+            elif method == 'chat.postMessage':
+                return self.mocked_chat_post_message(**kwargs)
             else:
                 raise NotImplementedError
 
@@ -62,8 +65,7 @@ class MockUQCSBot(UQCSBot):
     def api(self):
         return APIWrapper(self.mocked_client)
 
-    def conversations_members(self, **kwargs):
-        print('trying members')
+    def mocked_conversations_members(self, **kwargs):
         channel_id = kwargs.get('channel')
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
@@ -80,8 +82,7 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, 'members': sliced_users, 'cursor': cursor}
 
-    def conversations_history(self, **kwargs):
-        print('trying history')
+    def mocked_conversations_history(self, **kwargs):
         channel_id = kwargs.get('channel')
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
@@ -94,8 +95,7 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, 'messages': sliced_messages, 'cursor': cursor}
 
-    def channels_list(self, channel_type=None, **kwargs):
-        print('trying channels')
+    def mocked_channels_list(self, channel_type=None, **kwargs):
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
 
@@ -116,12 +116,16 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, channel_type: sliced_channels, 'cursor': cursor}
 
-    def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
-        print(channel)
-        channel_id = channel.id if isinstance(channel, Channel) else channel
-        print(channel_id)
-        message = {'channel_id': channel_id, 'text': text}
-        self.test_posted_messages[channel_id].appendleft(message)
+    def mocked_chat_post_message(self, **kwargs):
+        channel_id_or_name = kwargs.get('channel')
+        channel = self.channels.get(channel_id_or_name)
+        text = kwargs.get('text')
+
+        message = {'text': text}
+        self.test_posted_messages[channel.id].appendleft(message)
+
+        return {'ok': True, 'channel': channel.id, 'ts': time.time(),
+                'message': message}
 
     def post_and_handle_command(self, message):
         self.post_message(message['channel'], message['text'])
