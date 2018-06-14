@@ -40,11 +40,14 @@ def mock_message(message: str):
     return ''.join(choice((c.upper, c.lower))() for c in message)
 
 @bot.on_command("mock")
-async def handle_mock(command: Command):
+def handle_mock(command: Command):
+    '''
+    `!mock [NUM POSTS]` - Mocks the message from the specified number of
+    messages back. If no number is specified, mocks the most recent message.
+    '''
     # Add 1 here to account for the calling user's message, which we don't want
     # to mock by default.
     num_posts_back = int(command.arg) + 1 if command.has_arg() else 1
-
     if num_posts_back > MAX_NUM_POSTS_BACK:
         response = f'Cannot recall messages that far back, try under {MAX_NUM_POSTS_BACK}.'
     elif num_posts_back < 0:
@@ -55,5 +58,4 @@ async def handle_mock(command: Command):
             response = 'Something went wrong (likely insufficient conversation history).'
         else:
             response = mock_message(message_to_mock)
-
     bot.post_message(command.channel, response)

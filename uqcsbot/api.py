@@ -1,15 +1,19 @@
 from functools import partial
+import time
 from slackclient import SlackClient
 import asyncio
 import threading
-from typing import TYPE_CHECKING, List, Iterable, AsyncIterable, AsyncGenerator, Generator, Any, Union, TypeVar
+from typing import TYPE_CHECKING, List, Iterable, Optional, Generator, Any, Union, TypeVar, Dict
 if TYPE_CHECKING:
     from .base import UQCSBot
+import logging
 
 T = TypeVar('T')
 
+LOGGER = logging.getLogger(__name__)
 
-class Paginator(Iterable[dict], AsyncIterable[dict]):
+
+class Paginator(Iterable[dict]):
     """
     Provides synchronous and asynchronous iterators over the pages of responses
     from a cursor-based paginated Slack
@@ -24,7 +28,7 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
     def _gen(self) -> Generator[dict, Any, None]:
         kwargs = self._kwargs.copy()
         while True:
-            page = self._client.api_call(self._method, **self._kwargs)
+            page = self._client.api_call(self._method, **kwargs)
             yield page
             cursor = page.get('response_metadata', {}).get('next_cursor')
             if not cursor:
@@ -34,55 +38,47 @@ class Paginator(Iterable[dict], AsyncIterable[dict]):
     def __iter__(self):
         return self._gen()
 
-    async def _agen(self):
-        loop = asyncio.get_event_loop()
-        kwargs = self._kwargs.copy()
-        request_fn = partial(self._client.api_call, self._method, **kwargs)
-        while True:
-            page = await loop.run_in_executor(None, request_fn)
-            yield page
-            cursor = page.get('response_metadata', {}).get('next_cursor')
-            if not cursor:
-                break
-            kwargs["cursor"] = cursor
-
-    def __aiter__(self) -> AsyncGenerator[dict, Any]:
-        return self._agen()
-
 
 class APIMethodProxy(object):
     """
     Helper class used to implement APIWrapper
     """
-    def __init__(self, client: SlackClient, method: str, is_async: bool = False):
+    def __init__(self, client: SlackClient, method: str) -> None:
         self._client = client
         self._method = method
-        self._async = is_async
 
     def __call__(self, **kwargs) -> dict:
         """
         Perform the relevant API request. Equivalent to SlackClient.api_call
         except the `method` argument is filled in.
 
-        If the APIMethodProxy was constructed with `is_async=True` runs the
-        request asynchronously via:
-            asyncio.get_event_loop().run_in_executor(None, req)
+        Attempts to retry the API call if rate-limited.
         """
         fn = partial(
             self._client.api_call,
             self._method,
             **kwargs
         )
-        if self._async:
-            loop = asyncio.get_event_loop()
-            return loop.run_in_executor(None, fn)
+        retry_count = 0
+        while retry_count < 5:
+            result = fn()
+            if not result['ok'] and result['error'] == 'ratelimited':
+                retry_after_secs = int(result['headers']['Retry-After'])
+                LOGGER.info(f'Rate limited, retrying in {retry_after_secs} seconds')
+                time.sleep(retry_after_secs)
+                retry_count += 1
+            else:
+                break
         else:
-            return fn()
+            result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
+        if not result['ok']:
+            LOGGER.error(f'Slack API error calling {self._method} with kwargs' \
+                         + f' {kwargs}: ' + result['error'])
+        return result
 
     def paginate(self, **kwargs) -> Paginator:
         """
-        Returns a `Paginator` which can be used as both a synchronous and an
-        asynchronous iterable, allowing you to iterate over each page of
+        Returns a `Paginator` which allows you to iterate over each page of
         response data from a Slack response that is paginated in the
         cursor-style.
 
@@ -104,7 +100,6 @@ class APIMethodProxy(object):
         return APIMethodProxy(
             client=self._client,
             method=f'{self._method}.{item}',
-            is_async=self._async,
         )
 
 
@@ -116,77 +111,67 @@ class APIWrapper(object):
     Example usage:
         > api = APIWrapper(client)
         > api.chat.postMessage(channel="general", text="message")
-
-        > async_api = APIWrapper(client, True)
-        > await async_api.chat.postMessage(channel="general", text="message")
-
-        > async_api = api(is_async=True)
-        > await async_api.chat.postMessage(channel="general", text="message")
     """
-    def __init__(self, client: SlackClient, is_async: bool = False):
+    def __init__(self, client: SlackClient) -> None:
         self._client = client
-        self._async = is_async
 
     def __getattr__(self, item) -> APIMethodProxy:
         return APIMethodProxy(
             client=self._client,
             method=item,
-            is_async=self._async
         )
 
-    def __call__(self, **kwargs) -> 'APIWrapper':
-        """
-        On call, reconfigure the API Wrapper
-        """
-        return type(self)(self._client, **kwargs)
+    def __repr__(self) -> str:
+        return f"<APIWrapper of {repr(self._client)}>"
 
 
 class Channel(object):
     def __init__(
-        self,
-        bot: 'UQCSBot',
-        channel_id: str,
-        name: str,
-        is_group: bool = False,
-        is_im: bool = False,
-        is_public: bool = False,
-        is_private: bool = False,
-        is_archived: bool = False,
-        previous_names: List[str] = None
-    ):
+            self,
+            bot: 'UQCSBot',
+            channel_id: str,
+            name: str,
+            is_group: bool = False,
+            is_im: bool = False,
+            is_public: bool = False,
+            is_private: bool = False,
+            is_archived: bool = False,
+            previous_names: List[str] = None
+    ) -> None:
         self._bot = bot
         self.id = channel_id
         self.name = name
-        self._member_ids = None
+        self._member_ids = None  # type: Optional[List[str]]
         self.is_group = is_group
         self.is_im = is_im
         self.is_public = is_public
         self.is_private = is_private
         self.is_archived = is_archived
         self.previous_names = previous_names or []
+        self._lock = threading.Lock()
 
     @property
     def members(self) -> List[str]:
         if self._member_ids is not None:
+            # Quick exit without lock
             return self._member_ids
-        self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
-        members = []
-        for page in self._bot.api.conversations.members.paginate(channel=self.id):
-            members += page["members"]
-        self._member_ids = members
-        return self._member_ids
-
-    def update_members(self) -> List[str]:
-        self._member_ids = None
-        return self.members
-
+        with self._lock:
+            if self._member_ids is not None:
+                # Quick exit with lock
+                return self._member_ids
+            self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
+            members_ids = []  # type: List[str]
+            for page in self._bot.api.conversations.members.paginate(channel=self.id):
+                members_ids += page.get("members", [])
+            self._member_ids = members_ids
+            return self._member_ids
 
 class ChannelWrapper(object):
-    def __init__(self, bot: 'UQCSBot'):
+    def __init__(self, bot: 'UQCSBot') -> None:
         self._bot = bot
         self._initialised = False
-        self._channels_by_id = {}
-        self._channels_by_name = {}
+        self._channels_by_id = {}  # type: Dict[str, dict]
+        self._channels_by_name = {}  # type: Dict[str, dict]
         self._lock = threading.RLock()
         self._bind_handlers()
 
@@ -232,7 +217,10 @@ class ChannelWrapper(object):
                 for im in page['ims']:
                     if im['is_user_deleted']:
                         continue
-                    im['name'] = im['id']
+                    # Set the channel name to the user being directly messaged
+                    # for easier reverse lookups. Note: `user` here is the
+                    # user_id.
+                    im['name'] = im['user']
                     self._add_channel(im)
             self._initialised = True
 
@@ -261,8 +249,9 @@ class ChannelWrapper(object):
 
     def _on_im_created(self, evt):
         chan = evt['channel']
-
-        chan['name'] = chan['id']
+        # Set the channel name to the user being directly messaged for easier
+        # reverse lookups. Note: `user` here is the user_id.
+        chan['name'] = evt['user']
         self._add_channel(chan)
 
     def _on_member_joined_channel(self, evt):

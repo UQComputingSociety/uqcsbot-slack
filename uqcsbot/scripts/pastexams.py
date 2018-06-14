@@ -2,25 +2,19 @@ from uqcsbot import bot, Command
 from bs4 import BeautifulSoup
 from typing import Iterable, Tuple
 import requests
+from uqcsbot.util.status_reacts import loading_status
 
 
 @bot.on_command('pastexams')
-async def handle_pastexams(command: Command):
-    """
-    Posts a list of past exams for a a course given its course code. Defaults to the channels name if no course
-    code is supplied.
-
-    Usage:
-    !pastexams CSSE2310
-    or if in a course channel:
-    !pastexams
-    """
+@loading_status
+def handle_pastexams(command: Command):
+    '''
+    `!pastexams [COURSE CODE]` - Retrieves past exams for a given course code.
+    If unspecified, will attempt to find the ECP for the channel the command was
+    called from.
+    '''
     course_code = command.arg if command.has_arg() else command.channel.name
-    past_exams = await get_past_exams(course_code)
-
-    # We use attachments to improve the formatting
-    bot.post_message(command.channel, "", attachments=[{'text': past_exams}])
-
+    bot.post_message(command.channel, get_past_exams(course_code))
 
 def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
     """
@@ -47,13 +41,12 @@ def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
         semester_str = semester_id.replace('.', ' ')
         yield f'{year} {semester_str}', link
 
-
-async def get_past_exams(course_code: str) -> str:
+def get_past_exams(course_code: str) -> str:
     """
     Gets the past exams for the course with the specified course code. Returns intuitive error messages if this fails.
     """
     url = 'https://www.library.uq.edu.au/exams/papers.php?'
-    http_response = await bot.run_async(requests.get, url, params={'stub': course_code})
+    http_response = requests.get(url, params={'stub': course_code})
 
     if http_response.status_code != requests.codes.ok:
         return "There was a problem getting a response"
@@ -64,6 +57,5 @@ async def get_past_exams(course_code: str) -> str:
     if "Sorry. We have not found any past exams for this course" in no_course:
         return f"The course code {course_code} did not return any results"
 
-    exam_data = get_exam_data(soup)
-    # The message is formatted as per slacks standards to have bold semester headings and links called 'PDF'
-    return ''.join((f'*{semester}*: <{link}|PDF>\n' for semester, link in exam_data))
+    return '>>>' + '\n'.join((f'*{semester}*: <{link}|PDF>'
+                              for semester, link in get_exam_data(soup)))

@@ -4,11 +4,14 @@ import json
 
 
 @bot.on_command("wiki")
-async def handle_wiki(command: Command):
+def handle_wiki(command: Command):
+    '''
+    `!wiki <TOPIC>` - Returns a snippet of text from a relevent wikipedia entry.
+    '''
     search_query = command.arg
     api_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&format=json&limit=2"
 
-    http_response = await bot.run_async(requests.get, api_url, params={'search': search_query})
+    http_response = requests.get(api_url, params={'search': search_query})
     if http_response.status_code != requests.codes.ok:
         bot.post_message(command.channel, "Problem fetching data")
         return

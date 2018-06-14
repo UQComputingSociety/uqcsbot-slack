@@ -2,7 +2,7 @@ from typing import List
 from uqcsbot import bot, Command
 from icalendar import Calendar, vText
 import requests
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pytz import timezone, utc
 import re
 
@@ -40,8 +40,9 @@ class EventFilter(object):
         if self._weeks is not None:
             end_time = start_time + timedelta(weeks=self._weeks)
             return [e for e in events if e.start < end_time]
-        if self._cap is not None:
+        elif self._cap is not None:
             return events[:self._cap]
+        return events
 
     def get_header(self):
         if self._full:
@@ -69,6 +70,13 @@ class Event(object):
     def from_cal_event(cls, cal_event):
         start = cal_event.get('dtstart').dt
         end = cal_event.get('dtend').dt
+        # ical 'dt' properties are parsed as a 'DDD' (datetime, date, duration)
+        # type. The below code converts a date to a datetime, where time is set
+        # to midnight.
+        if isinstance(start, date) and not isinstance(start, datetime):
+            start = datetime.combine(start, datetime.min.time()).astimezone(utc)
+        if isinstance(end, date) and not isinstance(end, datetime):
+            end = datetime.combine(end, datetime.max.time()).astimezone(utc)
         location = cal_event.get('location', 'TBA')
         summary = cal_event.get('summary')
         return cls(start, end, location, summary)
@@ -87,13 +95,18 @@ class Event(object):
 
 
 @bot.on_command('events')
-async def handle_events(command: Command):
+def handle_events(command: Command):
+    '''
+    `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - Lists all the UQCS
+    events that are scheduled to occur within the given filter. If unspecified,
+    will return the next 2 weeks of events.
+    '''
     event_filter = EventFilter.from_command(command)
     if not event_filter.is_valid:
         bot.post_message(command.channel, "Invalid events filter.")
         return
 
-    http_response = await bot.run_async(requests.get, CALENDAR_URL)
+    http_response = requests.get(CALENDAR_URL)
     cal = Calendar.from_ical(http_response.content)
 
     current_time = datetime.now(tz=BRISBANE_TZ).astimezone(utc)
