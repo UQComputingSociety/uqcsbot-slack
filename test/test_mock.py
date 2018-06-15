@@ -1,5 +1,4 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
-from test.helpers import generate_message_object
 
 LONG_MESSAGE = 'I\'m going to say a really long sentence that has a really low'\
                + ' probability of outputting a random-case mocked message that'\

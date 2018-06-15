@@ -21,9 +21,6 @@ TEST_USER_ID = "U1234567890"
 
 
 class MockUQCSBot(UQCSBot):
-    test_messages = None
-    test_channels = None
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_users = {

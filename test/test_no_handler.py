@@ -1,5 +1,4 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
-from test.helpers import generate_message_object
 import pytest
 
 def test_not_implemented_command(uqcsbot: MockUQCSBot):
