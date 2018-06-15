@@ -137,7 +137,6 @@ def get_course_assessment(course_names, cutoff=None):
     Returns all the course assessment for the given courses that occur after
     the given cutoff.
     '''
-    cutoff = cutoff or datetime.fromtimestamp(0)
     profile_ids = map(get_course_profile_id, course_names)
     joined_assessment_url = BASE_ASSESSMENT_URL + ','.join(profile_ids)
     http_response = requests.get(joined_assessment_url)
@@ -148,6 +147,8 @@ def get_course_assessment(course_names, cutoff=None):
     # Start from 1st index to skip over the row containing column names.
     assessment = assessment_table.findAll('tr')[1:]
     parsed_assessment = map(get_parsed_assessment_item, assessment)
+    # If no cutoff is specified, set cutoff to UNIX epoch (i.e. filter nothing).
+    cutoff = cutoff or datetime.fromtimestamp(0)
     assessment_filter = partial(is_assessment_after_cutoff, cutoff=cutoff)
     filtered_assessment = filter(assessment_filter, parsed_assessment)
     return list(filtered_assessment)
