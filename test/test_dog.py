@@ -9,6 +9,5 @@ def test_dog(uqcsbot: MockUQCSBot):
     '''
     test !dog
     '''
-    message = generate_message_object(TEST_CHANNEL_ID, '!dog')
-    uqcsbot.post_and_handle_message(message)
+    uqcsbot.post_message(TEST_CHANNEL_ID, '!dog')
     assert len(uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])) == 2
