@@ -222,27 +222,5 @@ class UQCSBot(object):
                         break
                 time.sleep(0.5)
 
-    def run_cli(self):
-        """
-        Run in local (CLI) mode
-        """
-
-        def cli_api_call(method, **kwargs):
-            if method == "chat.postMessage":
-                print(kwargs['text'])
-            else:
-                print(kwargs)
-
-        self.api_call = cli_api_call
-        with self._execution_context():
-            while True:
-                response = input("> ")
-                self._run_handlers({
-                    "text": response,
-                    "channel": "general",
-                    "subtype": "user",
-                    "type": "message"
-                })
-
 
 bot = UQCSBot()
