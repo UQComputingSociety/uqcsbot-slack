@@ -65,6 +65,7 @@ def handle_calendar(command: Command):
         bot.post_message(channel, e.message)
         return
 
+    user_direct_channel = bot.channels.get(command.user_id)
     bot.api.files.upload(title='Importable calendar containing your assessment!',
-                         channels=channel.id, filetype='text/calendar',
+                         channels=user_direct_channel.id, filetype='text/calendar',
                          filename='assessment.ics', file=get_calendar(assessment))
