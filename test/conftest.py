@@ -26,6 +26,10 @@ class MockUQCSBot(UQCSBot):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.test_users = {
+            TEST_USER_ID: {'id': TEST_USER_ID, 'name': TEST_USER_ID, 'deleted': False,
+                           'profile': {'display_name': TEST_USER_ID}}
+        }
         self.test_messages = defaultdict(list)
         self.test_channels = {
             # Public channel
@@ -43,22 +47,12 @@ class MockUQCSBot(UQCSBot):
 
         def mocked_api_call(method, **kwargs):
             '''
-            Mocks Slack API call methods.
+            Called the mocked version of a Slack API call.
             '''
-            if method == 'channels.list':
-                return self.mocked_channels_list('channels', **kwargs)
-            elif method == 'groups.list':
-                return self.mocked_channels_list('groups', **kwargs)
-            elif method == 'im.list':
-                return self.mocked_channels_list('ims', **kwargs)
-            elif method == 'conversations.members':
-                return self.mocked_conversations_members(**kwargs)
-            elif method == 'conversations.history':
-                return self.mocked_conversations_history(**kwargs)
-            elif method == 'chat.postMessage':
-                return self.mocked_chat_post_message(**kwargs)
-            else:
-                raise NotImplementedError
+            mocked_method = 'mocked_' + method.replace('.', '_')
+            if mocked_method not in dir(type(self)):
+                raise NotImplementedError(f'{method} has not been mocked.')
+            return getattr(self, mocked_method)(**kwargs)
 
         self.mocked_client = MagicMock(spec=SlackClient)
         self.mocked_client.api_call = mocked_api_call
@@ -67,7 +61,22 @@ class MockUQCSBot(UQCSBot):
     def api(self):
         return APIWrapper(self.mocked_client)
 
+    def mocked_users_info(self, **kwargs):
+        '''
+        Mocks users.info api call.
+        '''
+        user_id = kwargs.get('user')
+
+        user = self.test_users.get(user_id)
+        if user is None:
+            return {'ok': False}
+
+        return {'ok': True, 'user': user}
+
     def mocked_conversations_members(self, **kwargs):
+        '''
+        Mocks conversations.members api call.
+        '''
         channel_id = kwargs.get('channel')
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
@@ -85,6 +94,9 @@ class MockUQCSBot(UQCSBot):
         return {'ok': True, 'members': sliced_users, 'cursor': cursor}
 
     def mocked_conversations_history(self, **kwargs):
+        '''
+        Mocks conversations.history api call.
+        '''
         channel_id = kwargs.get('channel')
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
@@ -101,7 +113,22 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, 'messages': sliced_messages, 'cursor': cursor}
 
-    def mocked_channels_list(self, channel_type=None, **kwargs):
+    def mocked_groups_list(self, **kwargs):
+        '''
+        Mocks groups.list api call.
+        '''
+        return self.mocked_channels_list(channel_type='groups', **kwargs)
+
+    def mocked_im_list(self, **kwargs):
+        '''
+        Mocks im.list api call.
+        '''
+        return self.mocked_channels_list(channel_type='ims', **kwargs)
+
+    def mocked_channels_list(self, channel_type='channels', **kwargs):
+        '''
+        Mocks channels.list api call.
+        '''
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
 
@@ -122,7 +149,10 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, channel_type: sliced_channels, 'cursor': cursor}
 
-    def mocked_chat_post_message(self, **kwargs):
+    def mocked_chat_postMessage(self, **kwargs):
+        '''
+        Mocks chat.postMessage api call.
+        '''
         channel_id_or_name = kwargs.get('channel')
         text = kwargs.get('text')
 
@@ -130,26 +160,39 @@ class MockUQCSBot(UQCSBot):
         if channel is None:
             return {'ok': False}
 
-        message = {'text': text}
+        message = {'text': text, 'ts': str(time.time())}
         self.test_messages[channel.id].append(message)
+        message_event = {'type': 'message', 'channel': channel.id, **message}
+        self._run_handlers(message_event)
 
-        return {'ok': True, 'channel': channel.id, 'ts': str(time.time()),
+        return {'ok': True, 'channel': channel.id, 'ts': message['ts'],
                 'message': message}
 
-    def post_and_handle_message(self, message):
-        self.post_message(message['channel'], message['text'])
+    def _handle_command(self, message: dict) -> None:
+        '''
+        Handles commands without using an executor.
+        '''
         command = Command.from_message(message)
+        if command is None:
+            return None
         if command.command_name not in self._command_registry:
-            raise NotImplementedError()
+            raise NotImplementedError('{command.command_name} is not a registered command.')
         for handler in self.command_registry[command.command_name]:
             handler(command)
+
+    def _run_handlers(self, event: dict):
+        '''
+        Runs handlers without using an executor.
+        '''
+        handlers = self._handlers[event['type']] + self._handlers['']
+        return [handler(event) for handler in handlers]
 
 
 @pytest.fixture(scope="session")
 def _uqcsbot():
     """
-    Create a mocked UQCSBot and allow it to find handlers
-    Persists for the whole test session
+    Create a mocked UQCSBot and allow it to find handlers. Persists for the
+    whole test session.
     """
     uqcsbot_module.bot = MockUQCSBot()
     uqcsbot_module.import_scripts()
@@ -159,8 +202,12 @@ def _uqcsbot():
 @pytest.fixture()
 def uqcsbot(_uqcsbot: MockUQCSBot):
     """
-    Clears the `_uqcsbot` fixture before each test
+    Setup and tear-down steps to run around tests.
     """
+    # Anything before yield will be run before test
+    # Initialise channels
+    _uqcsbot.channels._initialise()
+    yield _uqcsbot
+    # Anything after yield will be run after test
     # Clear channel messages
     _uqcsbot.test_messages.clear()
-    return _uqcsbot

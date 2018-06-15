@@ -11,7 +11,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "This is the first time I've seen you, so you're probably new here",
     "I'm UQCSbot, your friendly (open source) robot helper",
     "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many subject-specific ones",
-    "Your friendly admins are @csa, @rob, @mb, @trm, @mitch, @guthers, and @artemis",
+    "Your friendly admins are @csa, @rob, @mb, @tomgr, @mitch, @guthers, and @artemis",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
     "and again, welcome :)"
 ]
@@ -35,11 +35,12 @@ def welcome(evt: dict):
     display_name = user_info.get("user", {}).get("profile", {}).get("display_name")
 
     if display_name:
-        bot.post_message(general, f"Welcome, {display_name}")
+        bot.post_message(general, f"Welcome, {display_name}!")
 
     for message in WELCOME_MESSAGES:
         time.sleep(MESSAGE_PAUSE)
         bot.post_message(evt.get("user"), message)
+
     if len(announcements.members) % MEMBER_MILESTONE == 0:
         bot.post_message(
             general,
