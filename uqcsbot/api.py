@@ -238,9 +238,12 @@ class ChannelWrapper(object):
             self._channels_by_id = {}
             self._channels_by_name = {}
             chan_types = ['channels', 'groups', 'ims']
+            loaded_so_far = 0
             for ctype in chan_types:
                 for chan in data[ctype]:
                     self._add_channel(chan)
+                self._bot.logger.info(f"Loaded {len(self._channels_by_id) - loaded_so_far} {ctype} from team state")
+                loaded_so_far = len(self._channels_by_id)
 
     def reload(self):
         self._initialised = False
@@ -379,6 +382,7 @@ class UsersWrapper(object):
             self._empty_store()
             for user in data_dict['users']:
                 self._add_user(user)
+            self._bot.logger.info(f"Loaded {len(self._users_by_id)} users from team state")
 
     def _bind_handlers(self) -> None:
         PREFIX = "_on_"

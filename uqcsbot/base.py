@@ -217,7 +217,6 @@ class UQCSBot(object):
             connect_state = self.client.server.login_data
             self.channels.populate_from_team_state(connect_state)
             self.users.populate_from_team_state(connect_state)
-            import pdb; pdb.set_trace()
             while True:
                 for message in self.client.rtm_read():
                     self._run_handlers(message)
