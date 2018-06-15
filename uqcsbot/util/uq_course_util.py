@@ -96,12 +96,12 @@ def get_current_exam_period():
     start_datetime = end_datetime.replace(day=int(start_day))
     return start_datetime, end_datetime
 
-def get_parsed_assessment_due_date(assessment):
+def get_parsed_assessment_due_date(assessment_item):
     '''
-    Returns the parsed due date for the given assessment as a datetime object.
-    If the date cannot be parsed, a DateSyntaxException is raised.
+    Returns the parsed due date for the given assessment item as a datetime
+    object. If the date cannot be parsed, a DateSyntaxException is raised.
     '''
-    _, _, due_date, _ = assessment
+    _, _, due_date, _ = assessment_item
     if due_date == 'Examination Period':
         return get_current_exam_period()
     parser_info = parser.parserinfo(dayfirst=True)
@@ -132,11 +132,12 @@ def is_assessment_after_cutoff(assessment, cutoff):
         return True
     return end_datetime >= cutoff if end_datetime else start_datetime >= cutoff
 
-def get_course_assessment(course_names, cutoff):
+def get_course_assessment(course_names, cutoff=None):
     '''
     Returns all the course assessment for the given courses that occur after
     the given cutoff.
     '''
+    cutoff = cutoff or datetime.fromtimestamp(0)
     profile_ids = map(get_course_profile_id, course_names)
     joined_assessment_url = BASE_ASSESSMENT_URL + ','.join(profile_ids)
     http_response = requests.get(joined_assessment_url)
