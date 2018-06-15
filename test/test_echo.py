@@ -1,5 +1,4 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
-from test.helpers import generate_message_object
 
 def test_echo(uqcsbot: MockUQCSBot):
     '''

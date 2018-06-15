@@ -2,7 +2,6 @@
 Tests for yt.py
 """
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
-from test.helpers import generate_message_object
 
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
 # TODO(mitch): work out a way to get this from yt.py without triggering
