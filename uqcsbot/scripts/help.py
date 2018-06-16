@@ -18,14 +18,14 @@ def is_valid_helper_doc(doc):
 
 def get_helper_docs():
     '''
-    Returns a generator of all the bot's command names and their associated
+    Returns a sorted list of all the bot's command names and their associated
     helper docstrings. Will filter out any commands that do not have a valid
-    helper docstring (see: is_valid_helper_doc).
+    helper docstring (see 'is_valid_helper_doc' function above).
     '''
-    return ((command_name, fn.__doc__)
-            for command_name, functions in bot.command_registry.items()
-            for fn in functions
-            if is_valid_helper_doc(fn.__doc__))
+    return sorted((command_name, fn.__doc__)
+                  for command_name, functions in bot.command_registry.items()
+                  for fn in functions
+                  if is_valid_helper_doc(fn.__doc__))
 
 
 @bot.on_command('help')
