@@ -237,9 +237,8 @@ class ChannelWrapper(object):
             self._initialised = True
             self._channels_by_id = {}
             self._channels_by_name = {}
-            chan_types = ['channels', 'groups', 'ims']
             loaded_so_far = 0
-            for ctype in chan_types:
+            for ctype in ['channels', 'groups', 'ims']:
                 for chan in data[ctype]:
                     self._add_channel(chan)
                 self._bot.logger.info(f"Loaded {len(self._channels_by_id) - loaded_so_far} {ctype} from team state")
@@ -401,6 +400,7 @@ class UsersWrapper(object):
             if user.display_name != old_display_name:
                 self._users_by_display[old_display_name].remove(user)
                 if len(self._users_by_display[old_display_name]) == 0:
+                    # remove the dict key so "in" checks don't return True
                     self._users_by_display.pop(old_display_name, None)
                 self._users_by_display[user.display_name].append(user)
 
