@@ -33,7 +33,7 @@ def welcome(evt: dict):
     user = bot.users.get(evt.get("user"))
 
     if user:
-        bot.post_message(general, f"Welcome, {user.display_name}")
+        bot.post_message(general, f"Welcome, {user.display_name}!")
 
     if user and not user.is_bot:
         for message in WELCOME_MESSAGES:
