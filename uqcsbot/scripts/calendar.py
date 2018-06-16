@@ -48,7 +48,7 @@ def handle_calendar(command: Command):
     `!calendar <COURSE CODE 1> [COURSE CODE 2] ...` - Returns a compiled
     calendar containing all the assessment for a given list of course codes.
     '''
-    channel = command.channel
+    channel = bot.channels.get(command.channel_id)
     course_names = command.arg.split() if command.has_arg() else [channel.name]
 
     if len(course_names) > COURSE_LIMIT:
