@@ -1,5 +1,5 @@
 from slackclient import SlackClient
-from .api import APIWrapper, ChannelWrapper, Channel
+from .api import APIWrapper, ChannelWrapper, Channel, UsersWrapper, User
 from functools import partial
 import collections
 import asyncio
@@ -7,6 +7,7 @@ import concurrent.futures
 import threading
 import logging
 import time
+import json
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -88,6 +89,7 @@ class UQCSBot(object):
         self.register_handler('goodbye', self._handle_goodbye)
 
         self.channels = ChannelWrapper(self)
+        self.users = UsersWrapper(self)
 
     def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
@@ -156,7 +158,7 @@ class UQCSBot(object):
         self._scheduler.start()
         try:
             yield
-        except:
+        except Exception:
             self.logger.exception("An error occurred, exiting")
             self._scheduler.shutdown()
             self._executor.shutdown()
@@ -218,11 +220,11 @@ class UQCSBot(object):
         self._client = SlackClient(api_token)
         self._verification_token = verification_token
         with self._execution_context():
-            # Initialise channels at start so we don't have to block
-            self.channels._initialise()
-
-            if not self.client.rtm_connect(with_team_state=False, auto_reconnect=True):
+            if not self.client.rtm_connect(with_team_state=True, auto_reconnect=True):
                 raise OSError("Error connecting to RTM API")
+            connect_state = self.client.server.login_data
+            self.channels.populate_from_team_state(connect_state)
+            self.users.populate_from_team_state(connect_state)
             while True:
                 for message in self.client.rtm_read():
                     self._run_handlers(message)
