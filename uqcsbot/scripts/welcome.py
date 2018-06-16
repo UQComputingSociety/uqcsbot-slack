@@ -33,24 +33,20 @@ def welcome(evt: dict):
 
     user = bot.users.get(evt.get("user"))
 
-    def welcome_messages():
+    if user:
+        bot.post_message(general, f"Welcome, {user.display_name}")
+
+    if user and not user.is_bot:
         for message in WELCOME_MESSAGES:
             time.sleep(MESSAGE_PAUSE)
             bot.post_message(evt.get("user"), message)
-    if user and not user.is_bot:
-        bot.executor.submit(welcome_messages)
-
-    if user:
-        bot.post_message(general, f"Welcome, {user.display_name}")
 
     valid_users = len([
         member_id
         for member_id in announcements.members
+        # getattr used so `None` members count as "deleted"
         if not getattr(bot.users.get(member_id), "deleted", True)
     ])
     bot.logger.info(f"Currently at {valid_users} members")
     if valid_users % MEMBER_MILESTONE == 0:
-        bot.post_message(
-            general,
-            f":tada: {valid_users} members! :tada:"
-        )
+        bot.post_message(general, f":tada: {valid_users} members! :tada:")
