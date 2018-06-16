@@ -6,14 +6,13 @@ import re
 def handle_latex_internal(channel, data):
     url = f"http://latex.codecogs.com/gif.latex?{quote(data)}"
     bot.post_message(
-        channel, 
+        channel,
         text=f"LaTeX render for \"{data}\"",
         attachments=[
             {
                 "fallback": f"Codecogs LaTeX image for {data}",
                 "image_url": url,
-                "from_url": url,
-                "id": 1,
+                "footer": "From latex.codecogs.com"
             }
         ],
         unfurl_links=False,
@@ -22,14 +21,14 @@ def handle_latex_internal(channel, data):
 
 
 @bot.on_command("latex")
-def handle_latex_cmd(cmd: Command):
+def handle_latex_cmd(command: Command):
     """
     `!latex CONTENT` - Renders `CONTENT` to LaTeX and sends it to Slack.
     `$$ CONTENT $$` also works.
     """
-    if not cmd.has_arg():
-        bot.post_message(cmd.channel, "No data provided")
-    handle_latex_internal(cmd.channel, cmd.arg.strip())
+    if not command.has_arg():
+        bot.post_message(command.channel_id, "No data provided")
+    handle_latex_internal(command.channel_id, command.arg.strip())
 
 
 @bot.on('message')
