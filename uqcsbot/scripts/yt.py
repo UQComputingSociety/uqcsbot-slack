@@ -18,12 +18,12 @@ def handle_yt(command: Command):
     '''
     # Makes sure the query is not empty.
     if not command.has_arg():
-        bot.post_message(command.channel, NO_QUERY_MESSAGE)
+        bot.post_message(command.channel_id, NO_QUERY_MESSAGE)
         return
 
     search_query = command.arg.strip()
     try:
-        videoID = get_top_video_result(search_query, command.channel)
+        videoID = get_top_video_result(search_query, command.channel_id)
     except HttpError as e:
         # Googleapiclient should handle http errors
         bot.logger.error(f'An HTTP error {e.resp.status} occurred:\n{e.content}')
@@ -31,11 +31,11 @@ def handle_yt(command: Command):
         return
     
     if videoID:
-        bot.post_message(command.channel, f'{YOUTUBE_VIDEO_URL}{videoID}')
+        bot.post_message(command.channel_id, f'{YOUTUBE_VIDEO_URL}{videoID}')
     else:
         bot.post_message(command.channel_id, "Your query returned no results.")
 
-def get_top_video_result(search_query: str, channel):
+def get_top_video_result(search_query: str):
     '''
     The normal method for using !yt searches based on query
     and returns the first video result. "I'm feeling lucky"
@@ -57,9 +57,9 @@ def execute_search(search_query: str, search_part: str, search_type: str, max_re
 
     search_response = youtube.search().list(
         q=search_query,
-        part='id', 
-        maxResults=1, 
-        type='video' 
+        part=search_part, 
+        maxResults=max_results, 
+        type=search_type 
     ).execute()
 
     return search_response
