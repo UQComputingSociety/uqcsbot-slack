@@ -358,7 +358,7 @@ class UsersWrapper(object):
                 return
             self._empty_store()
             for page in self._bot.api.users.list.paginate():
-                for user in page['users']:
+                for user in page['members']:
                     self._add_user(user)
 
     def reload(self):
