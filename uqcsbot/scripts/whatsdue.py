@@ -46,11 +46,10 @@ def handle_whatsdue(command: Command):
         bot.post_message(channel, f'Cannot process more than {COURSE_LIMIT} courses.')
         return
 
-    # If no full output specified, set the cutoff to today's date. Else, set the
-    # cutoff to UNIX epoch (i.e. filter nothing).
-    cutoff_datetime = datetime.fromtimestamp(0) if is_full_output else datetime.today()
+    # If full output is not specified, set the cutoff to today's date.
+    cutoff = None if is_full_output else datetime.today()
     try:
-        assessment = get_course_assessment(course_names, cutoff_datetime)
+        assessment = get_course_assessment(course_names, cutoff)
     except HttpException as e:
         bot.logger.error(e.message)
         bot.post_message(channel, f'An error occurred, please try again.')
