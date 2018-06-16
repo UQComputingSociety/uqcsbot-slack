@@ -146,6 +146,21 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, channel_type: sliced_channels, 'cursor': cursor}
 
+    def mocked_users_list(self, **kwargs):
+        '''
+        Mocks users.list api call.
+        '''
+        cursor = kwargs.get('cursor', 0)
+        limit = kwargs.get('limit', 100)
+
+        all_users = list(self.test_users.values())
+        sliced_users = all_users[cursor : cursor + limit + 1]
+        cursor += len(sliced_users)
+        if cursor == len(all_users):
+            cursor = None
+
+        return {'ok': True, 'members': sliced_users, 'cursor': cursor}
+
     def mocked_chat_postMessage(self, **kwargs):
         '''
         Mocks chat.postMessage api call.
