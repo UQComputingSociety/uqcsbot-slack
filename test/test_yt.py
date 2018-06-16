@@ -2,6 +2,7 @@
 Tests for yt.py
 """
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
+import pytest
 
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
 # TODO(mitch): work out a way to get this from yt.py without triggering
@@ -15,6 +16,7 @@ def test_yt_no_query(uqcsbot: MockUQCSBot):
     assert len(messages) == 2
     assert messages[-1]['text'] == NO_QUERY_MESSAGE
 
+@pytest.mark.skip
 def test_yt_normal(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!yt dog")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
