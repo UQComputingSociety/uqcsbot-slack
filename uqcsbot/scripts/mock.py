@@ -53,9 +53,9 @@ def handle_mock(command: Command):
     elif num_posts_back < 0:
         response = 'Cannot mock into the future (yet)!'
     else:
-        message_to_mock = get_nth_most_recent_message(command.channel.id, num_posts_back)
+        message_to_mock = get_nth_most_recent_message(command.channel_id, num_posts_back)
         if message_to_mock is None:
             response = 'Something went wrong (likely insufficient conversation history).'
         else:
             response = mock_message(message_to_mock)
-    bot.post_message(command.channel, response)
+    bot.post_message(command.channel_id, response)

@@ -17,9 +17,8 @@ CmdT = TypeVar('CmdT', bound='Command')
 
 
 class Command(object):
-    def __init__(self, command_name: str, arg: Optional[str], channel: Channel, message: dict) -> None:
+    def __init__(self, command_name: str, arg: Optional[str], message: dict) -> None:
         self.command_name = command_name
-        self.channel = channel
         self.arg = arg
         self.message = message
 
@@ -34,14 +33,23 @@ class Command(object):
         command_name, *arg = text[1:].split(" ", 1)
         return cls(
             command_name=command_name,
-            channel=bot.channels.get(message["channel"]),
             arg=None if not arg else arg[0],
             message=message
         )
 
     @property
     def user_id(self):
+        '''
+        Returns the id of the user who called the command.
+        '''
         return self.message['user']
+
+    @property
+    def channel_id(self):
+        '''
+        Returns the id of the channel that the command was called in.
+        '''
+        return self.message['channel']
 
 
 CommandHandler = Callable[[Command], None]
@@ -223,28 +231,6 @@ class UQCSBot(object):
                     if message.get('type') == "goodbye":
                         break
                 time.sleep(0.5)
-
-    def run_cli(self):
-        """
-        Run in local (CLI) mode
-        """
-
-        def cli_api_call(method, **kwargs):
-            if method == "chat.postMessage":
-                print(kwargs['text'])
-            else:
-                print(kwargs)
-
-        self.api_call = cli_api_call
-        with self._execution_context():
-            while True:
-                response = input("> ")
-                self._run_handlers({
-                    "text": response,
-                    "channel": "general",
-                    "subtype": "user",
-                    "type": "message"
-                })
 
 
 bot = UQCSBot()

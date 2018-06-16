@@ -11,7 +11,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "This is the first time I've seen you, so you're probably new here",
     "I'm UQCSbot, your friendly (open source) robot helper",
     "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many subject-specific ones",
-    "Your friendly admins are @csa, @rob, @mb, @trm, @mitch, @guthers, and @artemis",
+    "Your friendly admins are @csa, @rob, @mb, @tomgr, @mitch, @guthers, and @artemis",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
     "and again, welcome :)"
 ]
@@ -30,7 +30,6 @@ def welcome(evt: dict):
 
     announcements = chan
     general = bot.channels.get("general")
-
     user = bot.users.get(evt.get("user"))
 
     if user:

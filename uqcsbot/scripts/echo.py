@@ -6,7 +6,4 @@ def handle_echo(command: Command):
     '''
     `!echo [TEXT]` - Echos back the given text.
     '''
-    if command.has_arg():
-        bot.post_message(command.channel, command.arg)
-    else:
-        bot.post_message(command.channel, "ECHO!")
+    bot.post_message(command.channel_id, command.arg if command.has_arg() else 'ECHO!')

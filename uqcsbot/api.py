@@ -153,21 +153,25 @@ class Channel(object):
         self.previous_names = previous_names or []
         self._lock = threading.Lock()
 
-    @property
-    def members(self) -> List[str]:
+    def load_members(self):
         if self._member_ids is not None:
             # Quick exit without lock
-            return self._member_ids
+            return
         with self._lock:
             if self._member_ids is not None:
                 # Quick exit with lock
-                return self._member_ids
+                return
             self._bot.logger.debug(f"Loading members for {self.name}<{self.id}>")
             members_ids = []  # type: List[str]
             for page in self._bot.api.conversations.members.paginate(channel=self.id):
                 members_ids += page.get("members", [])
             self._member_ids = members_ids
-            return self._member_ids
+
+    @property
+    def members(self) -> List[str]:
+        if self._member_ids is None:
+            self.load_members()
+        return self._member_ids
 
     @classmethod
     def from_dict(cls: Type[ChanT], bot, chan_dict: dict) -> ChanT:
@@ -279,21 +283,22 @@ class ChannelWrapper(object):
 
     def _on_member_joined_channel(self, evt):
         chan = self.get(evt['channel'])
-        if chan._member_ids is None:
-            return
-        chan._member_ids.append(evt['user'])
+        members = chan.members
+        with chan._lock:
+            members.append(evt['user'])
 
     def _on_member_left_channel(self, evt):
         chan = self.get(evt['channel'])
-        if chan._member_ids is None:
-            return
-        chan._member_ids.remove(evt['user'])
+        members = chan.members
+        with chan._lock:
+            members.remove(evt['user'])
 
     def _on_channel_rename(self, evt):
         with self._lock:
             chan = self.get(evt['channel']['id'])
             self._channels_by_name.pop(chan.name)
             new_channel_name = evt['channel']['name']
+            chan.name = new_channel_name
             self._channels_by_name[chan.name] = new_channel_name
 
     def _on_channel_archive(self, evt):
