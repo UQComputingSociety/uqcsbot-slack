@@ -40,10 +40,9 @@ def handle_help(command: Command):
     helper_docs = [sanitize_doc(helper_doc)
                    for command_name, helper_doc in get_helper_docs()
                    if not command.has_arg() or command.arg == command_name]
-    user_direct_channel = bot.channels.get(command.message['user'], None)
-    if user_direct_channel is None:
-        bot.logger.error(f'Could not find the calling user\'s channel: {command.user_id}')
-    elif len(helper_docs) == 0:
-        bot.post_message(user_direct_channel, f'Could not find any helper docstrings.')
+    if len(helper_docs) == 0:
+        response = f'Could not find any helper docstrings.'
     else:
-        bot.post_message(user_direct_channel, '>>>' + '\n'.join(helper_docs))
+        response = '>>>' + '\n'.join(helper_docs)
+    user_direct_channel = bot.channels.get(command.user_id)
+    bot.post_message(user_direct_channel, response)

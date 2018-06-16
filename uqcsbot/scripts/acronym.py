@@ -31,10 +31,10 @@ def handle_acronym(command: Command):
     if len(words) == 1:
         word = words[0]
         if word.lower() in [":horse:", "horse"]:
-            bot.post_message(command.channel, ">:taco:")
+            bot.post_message(command.channel_id, ">:taco:")
             return
         elif word.lower() in [":rachel:", "rachel"]:
-            bot.post_message(command.channel, ">:older_woman:")
+            bot.post_message(command.channel_id, ">:older_woman:")
             return
 
     loop = bot.get_event_loop()
@@ -50,4 +50,4 @@ def handle_acronym(command: Command):
     if len(words) > ACRONYM_LIMIT:
         response += f">I am limited to {ACRONYM_LIMIT} acronyms at once"
 
-    bot.post_message(command.channel, response)
+    bot.post_message(command.channel_id, response)

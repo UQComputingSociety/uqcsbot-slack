@@ -4,7 +4,7 @@ from uqcsbot import bot, Command
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-YOUTUBE_API_KEY = 'AIzaSyCtxVMs6So6x2WL5WkDV4rm01hzddCCGH4'
+YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 YOUTUBE_API_SERVICE_NAME = 'youtube'
 YOUTUBE_API_VERSION = 'v3'
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
@@ -26,16 +26,14 @@ def handle_yt(command: Command):
         videoID = get_top_video_result(search_query, command.channel)
     except HttpError as e:
         # Googleapiclient should handle http errors
-        bot.logger.error(
-            f'An HTTP error {e.resp.status} occurred:\n{e.content}')
+        bot.logger.error(f'An HTTP error {e.resp.status} occurred:\n{e.content}')
         # Force return to ensure no message is sent.
         return
-
+    
     if videoID:
         bot.post_message(command.channel, f'{YOUTUBE_VIDEO_URL}{videoID}')
     else:
-        bot.post_message(command.channel, "Your query returned no results.")
-
+        bot.post_message(command.channel_id, "Your query returned no results.")
 
 def get_top_video_result(search_query: str, channel):
     '''
