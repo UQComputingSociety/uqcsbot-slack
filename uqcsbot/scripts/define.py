@@ -4,6 +4,7 @@ import json
 
 API_URL = "http://api.pearson.com/v2/dictionaries/laad3/entries?limit=1"
 
+
 @bot.on_command("define")
 def define(command: Command):
     '''

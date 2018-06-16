@@ -26,6 +26,7 @@ API_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExN
 
 logger = logging.getLogger("uqcsbot")
 
+
 def get_user_info(user_id):
     '''
     Returns info about a user
@@ -45,6 +46,7 @@ def get_user_info(user_id):
         sys.exit(1)
 
     return json_contents
+
 
 def is_active_bot(user_info):
     '''
@@ -133,9 +135,9 @@ def main():
     if args.dev:
         test_bot = get_free_test_bot()
         if test_bot is None:
-            logger.error('Something went wrong during bot allocation. Please ' \
-                         + 'ensure there are bots available and try again ' \
-                         + 'later. Exiting.')
+            logger.error('Something went wrong during bot allocation. Please ' +
+                         'ensure there are bots available and try again ' +
+                         'later. Exiting.')
             sys.exit(1)
         bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
         logger.info("Bot name: " + test_bot['user']['name'])
@@ -145,6 +147,7 @@ def main():
         sys.exit(1)
 
     bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
+
 
 if __name__ == "__main__":
     main()
