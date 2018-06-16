@@ -1,11 +1,10 @@
-"""
-Tests for uqcsbot.scripts.echo
-"""
-from .conftest import MockUQCSBot
-from .helpers import generate_message_object
+from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 
-
-def test_echo_hello_world(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!echo Hello, World!")
-    uqcsbot.test_handle_event(message)
-    assert uqcsbot.test_posted_messages[0].text == "Hello, World!"
+def test_echo(uqcsbot: MockUQCSBot):
+    '''
+    Test !echo
+    '''
+    uqcsbot.post_message(TEST_CHANNEL_ID, '!echo Hello, World!')
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[-1]['text'] == 'Hello, World!'
