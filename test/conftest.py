@@ -153,13 +153,13 @@ class MockUQCSBot(UQCSBot):
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
 
-        all_users = list(self.test_users.values())
-        sliced_users = all_users[cursor : cursor + limit + 1]
-        cursor += len(sliced_users)
-        if cursor == len(all_users):
+        all_members = list(self.test_users.values())
+        sliced_members = all_members[cursor : cursor + limit + 1]
+        cursor += len(sliced_members)
+        if cursor == len(all_members):
             cursor = None
 
-        return {'ok': True, 'members': sliced_users, 'cursor': cursor}
+        return {'ok': True, 'members': sliced_members, 'cursor': cursor}
 
     def mocked_chat_postMessage(self, **kwargs):
         '''
