@@ -32,12 +32,18 @@ def handle_urban(command: Command) -> None:
         return
 
     # Get best definition (by most 'thumbs up') and construct response.
-    sorted_definitions = sorted(results['list'], key=lambda definition: definition['thumbs_up'], reverse=True)
-    best_definition = sorted_definitions[0]
-    response_example = best_definition.get('example', '').replace('\r\n', '\n> ')  # Format example with block quotes.
-    more_definitions = f'_ more definitions at {http_response.url.replace(URBAN_API_ENDPOINT, URBAN_USER_ENDPOINT)} _'
+    sorted_defs = sorted(results['list'], key=lambda definition: definition['thumbs_up'], reverse=True)
+    best_def = sorted_defs[0]
+    example = best_def.get('example', '').split('\r\n')  # Break example into individual lines.
+    formatted_example = '\n'.join(f'> {line}' for line in example)  # Put each line of the example in a block quote.
 
     # Format message and send response to user in channel query was sent from.
-    message = f'*{search_term.title()}*\n{best_definition["definition"].capitalize()}\n> ' \
-              f'{response_example}\n{more_definitions if len(sorted_definitions) > 1 else ""}'
+    message = f'*{search_term.title()}*\n' \
+              f'{best_def["definition"].capitalize()}\n> ' \
+              f'{formatted_example}'
+    # Only link back to Urban Dictionary if there are more definitions.
+    if len(sorted_defs) > 1:
+        endpoint_url = http_response.url.replace(URBAN_API_ENDPOINT, URBAN_USER_ENDPOINT)
+        message += f'\n_ more definitions at {endpoint_url} _'
+
     bot.post_message(command.channel, message)
