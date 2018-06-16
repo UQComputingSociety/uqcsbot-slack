@@ -18,7 +18,7 @@ def success_status(command_fn):
     def wrapper(command: Command):
         success_react = choice(SUCCESS_REACTS)
         reaction_kwargs = {'name': success_react,
-                           'channel': command.channel.id,
+                           'channel': command.channel_id,
                            'timestamp': command.message['ts']}
         res = command_fn(command)
         bot.api.reactions.add(**reaction_kwargs)
@@ -35,7 +35,7 @@ def loading_status(command_fn):
     def wrapper(command: Command):
         loading_react = choice(LOADING_REACTS)
         reaction_kwargs = {'name': loading_react,
-                           'channel': command.channel.id,
+                           'channel': command.channel_id,
                            'timestamp': command.message['ts']}
         bot.api.reactions.add(**reaction_kwargs)
         res = command_fn(command)

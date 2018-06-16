@@ -35,16 +35,16 @@ def voteythumbs(evt: dict):
     if cmd is None:
         return
     if not cmd.has_arg() and "!voteythumbs" in evt["text"]:
-        bot.post_message(cmd.channel, "Invalid voteythumbs command")
+        bot.post_message(cmd.channel_id, "Invalid voteythumbs command")
     if not cmd.has_arg():
         bot.logger.error("Invalid voteythumbs command")
         return
     cmd.arg = strip(cmd.arg)
 
-    result = bot.post_message(cmd.channel, f"Starting vote: {cmd.arg}")
+    result = bot.post_message(cmd.channel_id, f"Starting vote: {cmd.arg}")
     add_reaction = partial(
         bot.api.reactions.add,
-        channel=cmd.channel.id,
+        channel=cmd.channel_id,
         timestamp=result['ts'],
     )
     for emoji in ["thumbsup", "thumbsdown", "eyes"]:
