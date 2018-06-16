@@ -172,7 +172,7 @@ class UQCSBot(object):
         try:
             return handler(evt)
         except Exception:
-            self.logger.exception('Error in handler')
+            self.logger.exception(f'Error in handler while processing {evt}')
             return None
 
     def _handle_command(self, message: dict) -> None:
