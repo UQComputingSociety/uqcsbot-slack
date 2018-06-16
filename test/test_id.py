@@ -6,4 +6,4 @@ def test_id(uqcsbot: MockUQCSBot):
     '''
     uqcsbot.post_message(TEST_CHANNEL_ID, '!id')
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
-    assert messages[-1]['text'] == TEST_BOT_ID
+    assert messages[-1]['text'] == f'`{TEST_BOT_ID}`'
