@@ -112,10 +112,6 @@ def main():
 
     # Setup the CLI argument parser
     parser = argparse.ArgumentParser(description='Run UQCSBot')
-    parser.add_argument('--local',
-                        dest='local',
-                        action='store_true',
-                        help='Runs the bot in local (CLI) mode')
     parser.add_argument('--dev',
                         dest='dev',
                         action='store_true',
@@ -131,28 +127,24 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(level=args.log_level)
 
-    # Run the bot
-    if args.local:
-        bot.run_cli()
-    else:
-        # If in development mode, attempt to allocate an available bot token,
-        # else stick with the default. If no bot could be allocated, exit.
-        bot_token = SLACK_BOT_TOKEN
-        if args.dev:
-            test_bot = get_free_test_bot()
-            if test_bot is None:
-                logger.error('Something went wrong during bot allocation. '
-                      'Please ensure there are bots available and try again later. '
-                      'Exiting.')
-                sys.exit(1)
-            bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
-            logger.info("Bot name: " + test_bot['user']['name'])
-
-        if bot_token is None or bot_token is "":
-            logger.error("No bot token found!")
+    # If in development mode, attempt to allocate an available bot token,
+    # else stick with the default. If no bot could be allocated, exit.
+    bot_token = SLACK_BOT_TOKEN
+    if args.dev:
+        test_bot = get_free_test_bot()
+        if test_bot is None:
+            logger.error('Something went wrong during bot allocation. Please ' \
+                         + 'ensure there are bots available and try again ' \
+                         + 'later. Exiting.')
             sys.exit(1)
+        bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
+        logger.info("Bot name: " + test_bot['user']['name'])
 
-        bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
+    if bot_token is None or bot_token is "":
+        logger.error("No bot token found!")
+        sys.exit(1)
+
+    bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
 
 if __name__ == "__main__":
     main()
