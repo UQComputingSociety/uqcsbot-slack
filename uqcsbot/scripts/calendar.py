@@ -51,10 +51,7 @@ def handle_calendar(command: Command):
     channel = command.channel
     course_names = command.arg.split() if command.has_arg() else [channel.name]
 
-    if len(course_names) == 0:
-        bot.post_message(channel, f'Must specify at least 1 course.')
-        return
-    elif len(course_names) > COURSE_LIMIT:
+    if len(course_names) > COURSE_LIMIT:
         bot.post_message(channel, f'Cannot process more than {COURSE_LIMIT} courses.')
         return
 
