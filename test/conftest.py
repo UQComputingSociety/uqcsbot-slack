@@ -18,6 +18,7 @@ TEST_CHANNEL_ID = "C1234567890"
 TEST_GROUP_ID = "G1234567890"
 TEST_DIRECT_ID = "D1234567890"
 TEST_USER_ID = "U1234567890"
+TEST_BOT_ID = "B1234567890"
 
 
 class MockUQCSBot(UQCSBot):
@@ -166,16 +167,20 @@ class MockUQCSBot(UQCSBot):
         Mocks chat.postMessage api call.
         '''
         channel_id_or_name = kwargs.get('channel')
-        text = kwargs.get('text')
 
         channel = self.channels.get(channel_id_or_name)
         if channel is None:
             return {'ok': False}
 
-        message = {'text': text, 'ts': str(time.time())}
+        message = {**kwargs, 'ts': str(time.time()), 'type': 'message'}
+        # In case we were given a channel name, set channel strictly by the id.
+        message['channel'] = channel.id
+        # Note: Not a part of Slack API, just a convenient way to set the calling
+        # user during testing. If not passed, message is assumed to be from bot.
+        if 'user' not in message:
+            message['user'] = TEST_BOT_ID
         self.test_messages[channel.id].append(message)
-        message_event = {'type': 'message', 'channel': channel.id, **message}
-        self._run_handlers(message_event)
+        self._run_handlers(message)
 
         return {'ok': True, 'channel': channel.id, 'ts': message['ts'],
                 'message': message}
