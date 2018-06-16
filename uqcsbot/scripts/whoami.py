@@ -1,6 +1,7 @@
 from uqcsbot import bot, Command
 from uqcsbot.util.status_reacts import success_status
 
+
 @bot.on_command("whoami")
 @success_status
 def handle_whoami(command: Command):
