@@ -82,13 +82,13 @@ class MockUQCSBot(UQCSBot):
         if channel is None:
             return {'ok': False}
 
-        all_users = channel.get('members', [])
-        sliced_users = all_users[cursor : cursor + limit + 1]
-        cursor += len(sliced_users)
-        if cursor == len(all_users):
+        all_members = channel.get('members', [])
+        sliced_members = all_members[cursor : cursor + limit + 1]
+        cursor += len(sliced_members)
+        if cursor == len(all_members):
             cursor = None
 
-        return {'ok': True, 'members': sliced_users, 'cursor': cursor}
+        return {'ok': True, 'members': sliced_members, 'cursor': cursor}
 
     def mocked_conversations_history(self, **kwargs):
         '''
@@ -146,6 +146,21 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, channel_type: sliced_channels, 'cursor': cursor}
 
+    def mocked_users_list(self, **kwargs):
+        '''
+        Mocks users.list api call.
+        '''
+        cursor = kwargs.get('cursor', 0)
+        limit = kwargs.get('limit', 100)
+
+        all_members = list(self.test_users.values())
+        sliced_members = all_members[cursor : cursor + limit + 1]
+        cursor += len(sliced_members)
+        if cursor == len(all_members):
+            cursor = None
+
+        return {'ok': True, 'members': sliced_members, 'cursor': cursor}
+
     def mocked_chat_postMessage(self, **kwargs):
         '''
         Mocks chat.postMessage api call.
@@ -202,8 +217,9 @@ def uqcsbot(_uqcsbot: MockUQCSBot):
     Setup and tear-down steps to run around tests.
     """
     # Anything before yield will be run before test
-    # Initialise channels
+    # Initialise channels and users
     _uqcsbot.channels._initialise()
+    _uqcsbot.users._initialise()
     yield _uqcsbot
     # Anything after yield will be run after test
     # Clear channel messages
