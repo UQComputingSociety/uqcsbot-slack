@@ -8,6 +8,7 @@ SUCCESS_REACTS = ['thumbsup', 'thumbsup_all', 'msn_thumbsup', 'mint', 'nice',
 HYPE_REACTS = ['nice', 'noice', 'mint', 'exclamation', 'fiestaparrot',
                'github_square3', 'sweating']
 
+
 def success_status(command_fn):
     '''
     Decorator function which adds a success react after the wrapped command
@@ -24,6 +25,7 @@ def success_status(command_fn):
         bot.api.reactions.add(**reaction_kwargs)
         return res
     return wrapper
+
 
 def loading_status(command_fn):
     '''
