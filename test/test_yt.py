@@ -1,8 +1,7 @@
 """
 Tests for yt.py
 """
-from test.conftest import MockUQCSBot
-from test.helpers import generate_message_object
+from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 from unittest import mock
 
 import random
@@ -35,10 +34,10 @@ def mocked_search_execute(search_query: str, search_part: str, search_type: str,
 
 
 def test_yt_no_query(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!yt")
-    uqcsbot.test_handle_event(message)
-    assert len(uqcsbot.test_posted_messages) == 1
-    assert uqcsbot.test_posted_messages[0].text == NO_QUERY_MESSAGE
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!yt")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[1].get('text') == NO_QUERY_MESSAGE
 
 
 @mock.patch('uqcsbot.scripts.yt.execute_search', side_effect=mocked_search_execute)
