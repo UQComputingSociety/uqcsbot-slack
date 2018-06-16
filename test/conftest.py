@@ -172,13 +172,18 @@ class MockUQCSBot(UQCSBot):
         if channel is None:
             return {'ok': False}
 
-        message = {**kwargs, 'ts': str(time.time()), 'type': 'message'}
+        # Strip the kwargs down to only ones which are valid for this api call.
+        # Note: if there is an additional argument you need supported, add it
+        # here.
+        stripped_kwargs = {k: v for k, v in kwargs.items()
+                           if k in ('text', 'attachments', 'user')}
+        message = {'type': 'message', 'ts': str(time.time()), **stripped_kwargs}
         # In case we were given a channel name, set channel strictly by the id.
         message['channel'] = channel.id
-        # Note: Not a part of Slack API, just a convenient way to set the calling
-        # user during testing. If not passed, message is assumed to be from bot.
-        if 'user' not in message:
-            message['user'] = TEST_BOT_ID
+        # Note: 'user' is not a part of Slack API for chat.postMessage, just a
+        # convenient way to set the calling user during testing. If not passed,
+        # message is assumed to be from bot.
+        message['user'] = kwargs.get('user', TEST_BOT_ID)
         self.test_messages[channel.id].append(message)
         self._run_handlers(message)
 
