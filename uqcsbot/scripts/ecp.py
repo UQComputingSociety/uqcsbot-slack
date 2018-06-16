@@ -5,6 +5,7 @@ from uqcsbot.util.uq_course_util import (get_course_profile_url,
                                          CourseNotFoundException,
                                          ProfileNotFoundException)
 
+
 @bot.on_command('ecp')
 @loading_status
 def handle_ecp(command: Command):

@@ -3,10 +3,12 @@ import requests
 import json
 import html
 
+
 def get_endpoint(type_sig: str) -> str:
     unescaped = html.unescape(type_sig)
 
     return "https://www.haskell.org/hoogle/?mode=json&hoogle=" + unescaped + "&start=0&count=10"
+
 
 def pretty_hoogle_result(result: dict, is_verbose: bool) -> str:
     url = result['location']
@@ -17,6 +19,7 @@ def pretty_hoogle_result(result: dict, is_verbose: bool) -> str:
         return f"`{type_sig}` <{url}|link>\n{docs}"
     else:
         return f"`{type_sig}` <{url}|link>"
+
 
 @bot.on_command("hoogle")
 def handle_hoogle(command: Command):
