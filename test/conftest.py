@@ -82,13 +82,13 @@ class MockUQCSBot(UQCSBot):
         if channel is None:
             return {'ok': False}
 
-        all_users = channel.get('members', [])
-        sliced_users = all_users[cursor : cursor + limit + 1]
-        cursor += len(sliced_users)
-        if cursor == len(all_users):
+        all_members = channel.get('members', [])
+        sliced_members = all_members[cursor : cursor + limit + 1]
+        cursor += len(sliced_members)
+        if cursor == len(all_members):
             cursor = None
 
-        return {'ok': True, 'members': sliced_users, 'cursor': cursor}
+        return {'ok': True, 'members': sliced_members, 'cursor': cursor}
 
     def mocked_conversations_history(self, **kwargs):
         '''
