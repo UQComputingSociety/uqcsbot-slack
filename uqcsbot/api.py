@@ -1,11 +1,11 @@
 from functools import partial
-from collections import defaultdict
 import time
 from slackclient import SlackClient
-import asyncio
 import threading
 import logging
-from typing import TYPE_CHECKING, List, Iterable, Optional, Generator, Any, Union, TypeVar, Dict, Type
+from typing import (
+    TYPE_CHECKING, List, Iterable, Optional, Generator, Any, Union, TypeVar, Dict, Type
+)
 if TYPE_CHECKING:
     from .base import UQCSBot
 
@@ -76,7 +76,7 @@ class APIMethodProxy(object):
             result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
         if not result['ok']:
             LOGGER.error(f'Slack API error calling {self._method} with kwargs'
-                         + f' {kwargs}: ' + result['error'])
+                         f' {kwargs}: {result["error"]}')
         return result
 
     def paginate(self, **kwargs) -> Paginator:
@@ -171,7 +171,7 @@ class Channel(object):
     def members(self) -> List[str]:
         if self._member_ids is None:
             self.load_members()
-        return self._member_ids
+        return self._member_ids  # type: ignore
 
     @classmethod
     def from_dict(cls: Type[ChanT], bot, chan_dict: dict) -> ChanT:
@@ -253,14 +253,18 @@ class ChannelWrapper(object):
                         # is the user_id.
                         chan['name'] = chan['user']
                     self._add_channel(chan)
-                self._bot.logger.info(f"Loaded {len(self._channels_by_id) - loaded_so_far} {ctype} from team state")
+                self._bot.logger.info(
+                    f"Loaded {len(self._channels_by_id) - loaded_so_far} {ctype} from team state"
+                )
                 loaded_so_far = len(self._channels_by_id)
 
     def reload(self):
         self._initialised = False
         self._initialise()
 
-    def get(self, name_or_id: str, default: T = None, use_cache: bool =True) -> Union[Channel, T]:
+    def get(
+            self, name_or_id: str, default: Optional[T] = None, use_cache: bool =True
+    ) -> Union[Channel, Optional[T]]:
         if use_cache and not self._initialised:
             self._initialise()
         if name_or_id in self._channels_by_id:
@@ -370,7 +374,9 @@ class UsersWrapper(object):
         self._initialised = False
         self._initialise()
 
-    def get(self, user_id: str, default: T = None, use_cache: bool =True) -> Union['User', T]:
+    def get(
+            self, user_id: str, default: Optional[T] = None, use_cache: bool =True
+    ) -> Union['User', Optional[T]]:
         if use_cache and not self._initialised:
             self._initialise()
         if user_id in self._users_by_id:

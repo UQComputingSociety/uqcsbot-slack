@@ -60,7 +60,7 @@ class EventFilter(object):
 
 
 class Event(object):
-    def __init__(self, start: datetime, end: datetime, location: vText, summary: vText):
+    def __init__(self, start: datetime, end: datetime, location: vText, summary: vText) -> None:
         self.start = start
         self.end = end
         self.location = location
