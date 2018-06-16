@@ -166,15 +166,15 @@ class MockUQCSBot(UQCSBot):
         Mocks chat.postMessage api call.
         '''
         channel_id_or_name = kwargs.get('channel')
-        text = kwargs.get('text')
 
         channel = self.channels.get(channel_id_or_name)
         if channel is None:
             return {'ok': False}
 
-        message = {'text': text, 'ts': str(time.time())}
+        message = {'ts': str(time.time()), **kwargs}
         self.test_messages[channel.id].append(message)
-        message_event = {'type': 'message', 'channel': channel.id, **message}
+        message_event = {'type': 'message', **message}
+        message_event['channel'] = channel.id
         self._run_handlers(message_event)
 
         return {'ok': True, 'channel': channel.id, 'ts': message['ts'],
