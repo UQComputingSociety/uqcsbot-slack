@@ -217,8 +217,9 @@ def uqcsbot(_uqcsbot: MockUQCSBot):
     Setup and tear-down steps to run around tests.
     """
     # Anything before yield will be run before test
-    # Initialise channels
+    # Initialise channels and users
     _uqcsbot.channels._initialise()
+    _uqcsbot.users._initialise()
     yield _uqcsbot
     # Anything after yield will be run after test
     # Clear channel messages
