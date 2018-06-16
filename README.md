@@ -6,12 +6,6 @@ uqcsbot is a chat bot built in python for use on our [UQCS Slack Team](uqcs.slac
 
 Run `pip install -e .`
 
-## Running the bot in a local development environment
-
-Run `python3 -m uqcsbot --local`
-
-**Note**: If you're wanting to test/interact with Slack-specific features (e.g. reactions, channels), you _must_ be running the bot with Slack (See following sections).
-
 ## Running the bot in the communal dev Slack team
 
 1. Ensure you've joined the [uqcstesting Slack team](https://uqcstest-inviter.herokuapp.com/)
@@ -33,7 +27,8 @@ The bot will now be running on your custom Slack.
 
 ## Tests
 
-Run `pip install -e .[test]` to install the additional packages for testing.
+1. Ensure you have Tox installed (run `pip install -e tox`)
+2. Run `tox` from the same directory as this README
 
 The bot uses [pytest](https://docs.pytest.org/en/latest/). You can run the tests with the command `pytest` from the project's root directory. It should automatically discover the tests (which are located in the `tests` directory).
 

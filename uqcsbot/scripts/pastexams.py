@@ -17,6 +17,7 @@ def handle_pastexams(command: Command):
     course_code = command.arg if command.has_arg() else channel.name
     bot.post_message(channel, get_past_exams(course_code))
 
+
 def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
     """
     Takes the soup object of the page and generates each result in the format:
@@ -41,6 +42,7 @@ def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
     for (year, _, semester_id), link in zip(semesters, links):
         semester_str = semester_id.replace('.', ' ')
         yield f'{year} {semester_str}', link
+
 
 def get_past_exams(course_code: str) -> str:
     """
