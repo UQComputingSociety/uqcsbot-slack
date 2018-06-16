@@ -73,20 +73,8 @@ def get_search_page(search_query):
     """
     try:
         with closing(get(UMART_SEARCH_URL+"?search="+search_query+"&bid=2")) as resp:
-            if is_good_response(resp):
-                return resp.content
+            return resp.content
     except RequestException as e:
         bot.logger.error(
             f"A request error {e.resp.status} occurred:\n{e.content}")
         return None
-    return None
-
-
-def is_good_response(resp):
-    """
-    Returns true if the response seems to be HTML, false otherwise.
-    """
-    content_type = resp.headers["Content-Type"].lower()
-    return (resp.status_code == 200
-            and content_type is not None
-            and "html" in content_type)
