@@ -25,6 +25,8 @@ class MockUQCSBot(UQCSBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_users = {
+            TEST_BOT_ID: {'id': TEST_BOT_ID, 'name': TEST_BOT_ID, 'deleted': False,
+                           'profile': {'display_name': TEST_BOT_ID}, 'is_bot': True},
             TEST_USER_ID: {'id': TEST_USER_ID, 'name': TEST_USER_ID, 'deleted': False,
                            'profile': {'display_name': TEST_USER_ID}}
         }
