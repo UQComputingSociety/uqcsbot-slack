@@ -7,9 +7,8 @@ import concurrent.futures
 import threading
 import logging
 import time
-import json
 from contextlib import contextmanager
-from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type
+from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
@@ -55,7 +54,7 @@ class Command(object):
 CommandHandler = Callable[[Command], None]
 
 
-def protected_property(prop_name, attr_name):
+def protected_property(prop_name: str, attr_name: str):
     """
     Makes a read-only getter called `prop_name` that gets `attr_name`
     """
@@ -63,16 +62,17 @@ def protected_property(prop_name, attr_name):
         return getattr(self, attr_name)
     prop_fn.__name__ = prop_name
     return property(prop_fn)
-underscored_getter = lambda s: protected_property(s, '_' + s)
+
+
+def underscored_getter(s: str) -> Any:
+    return protected_property(s, '_' + s)
 
 
 class UQCSBot(object):
     api_token: Optional[str] = underscored_getter("api_token")
     client: Optional[SlackClient] = underscored_getter("client")
     verification_token: Optional[str] = underscored_getter("verification_token")
-    executor: Optional[concurrent.futures.ThreadPoolExecutor] = underscored_getter("executor")
-    scheduler: Optional[BackgroundScheduler] = underscored_getter("scheduler")
-    command_registry: Optional[DefaultDict[str, list]] = underscored_getter("command_registry")
+    executor: concurrent.futures.ThreadPoolExecutor = underscored_getter("executor")
 
     def __init__(self, logger=None):
         self._api_token = None
@@ -80,8 +80,8 @@ class UQCSBot(object):
         self._verification_token = None
         self._executor = concurrent.futures.ThreadPoolExecutor()
         self.logger = logger or logging.getLogger("uqcsbot")
-        self._handlers = collections.defaultdict(list)
-        self._command_registry = collections.defaultdict(list)
+        self._handlers: DefaultDict[str, list] = collections.defaultdict(list)
+        self._command_registry: DefaultDict[str, list] = collections.defaultdict(list)
         self._scheduler = BackgroundScheduler()
 
         self.register_handler('message', self._handle_command)
@@ -103,7 +103,7 @@ class UQCSBot(object):
 
     def on_command(self, command_name: str):
         def decorator(fn):
-            self.command_registry[command_name].append(fn)
+            self._command_registry[command_name].append(fn)
             return fn
         return decorator
 
@@ -172,7 +172,7 @@ class UQCSBot(object):
         try:
             return handler(evt)
         except Exception:
-            self.logger.exception('Error in handler')
+            self.logger.exception(f'Error in handler while processing {evt}')
             return None
 
     def _handle_command(self, message: dict) -> None:
@@ -184,7 +184,7 @@ class UQCSBot(object):
         command = Command.from_message(message)
         if command is None:
             return
-        for handler in self.command_registry[command.command_name]:
+        for handler in self._command_registry[command.command_name]:
             self.executor.submit(
                 self._execute_catching_error,
                 handler,

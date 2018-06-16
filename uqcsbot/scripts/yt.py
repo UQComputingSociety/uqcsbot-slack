@@ -35,6 +35,7 @@ def handle_yt(command: Command):
     else:
         bot.post_message(command.channel_id, "Your query returned no results.")
 
+
 def get_top_video_result(search_query: str, channel):
     '''
     The normal method for using !yt searches based on query
@@ -45,9 +46,9 @@ def get_top_video_result(search_query: str, channel):
 
     search_response = youtube.search().list(
         q=search_query,
-        part='id', # Only the video ID is needed to get video link
-        maxResults=1, # Since only one video is linked this is the only result we need
-        type='video' # Only want videos no pesky channels or playlists
+        part='id',  # Only the video ID is needed to get video link
+        maxResults=1,  # Since only one video is linked this is the only result we need
+        type='video'  # Only want videos no pesky channels or playlists
     ).execute()
 
     search_result = search_response.get('items')

@@ -1,6 +1,7 @@
 from uqcsbot import bot, Command
 from uqcsbot.util.status_reacts import success_status
 
+
 def sanitize_doc(doc):
     '''
     Returns the doc in sanitized form. This involves removing any newlines and
@@ -8,13 +9,15 @@ def sanitize_doc(doc):
     '''
     return ' '.join([line.strip() for line in doc.split('\n')])
 
+
 def is_valid_helper_doc(doc):
     '''
     Returns true if the given docstring is a valid helper docstring. Ignores
     docstrings that have specified they are not a helper docstring by including
     '@no_help' within them.
     '''
-    return doc != None and '@no_help' not in doc
+    return doc is not None and '@no_help' not in doc
+
 
 def get_helper_docs():
     '''

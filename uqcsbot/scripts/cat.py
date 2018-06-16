@@ -1,5 +1,6 @@
 from uqcsbot import bot, Command
 
+
 @bot.on_command("cat")
 def handle_cat(command: Command):
     '''
