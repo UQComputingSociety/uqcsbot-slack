@@ -1,6 +1,8 @@
 from uqcsbot import bot, Command
+from uqcsbot.util.status_reacts import success_status
 
 @bot.on_command("whoami")
+@success_status
 def handle_whoami(command: Command):
     '''
     `!whoami` - Returns the Slack information for the calling user.
@@ -11,4 +13,5 @@ def handle_whoami(command: Command):
     else:
         user_info = response['user']
         message = f'```{user_info}```'
-    bot.post_message(command.channel_id, message)
+    user_direct_channel = bot.channels.get(command.user_id)
+    bot.post_message(user_direct_channel, message)
