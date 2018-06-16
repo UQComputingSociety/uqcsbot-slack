@@ -39,7 +39,7 @@ def handle_urban(command: Command) -> None:
 
     # Format message and send response to user in channel query was sent from.
     message = f'*{search_term.title()}*\n' \
-              f'{best_def["definition"].capitalize()}\n> ' \
+              f'{best_def["definition"].capitalize()}\n' \
               f'{formatted_example}'
     # Only link back to Urban Dictionary if there are more definitions.
     if len(sorted_defs) > 1:
