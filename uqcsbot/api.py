@@ -340,12 +340,10 @@ class UsersWrapper(object):
 
     def _empty_store(self):
         self._users_by_id: Dict[str, User] = {}
-        self._users_by_display: defaultdict[str, List[User]] = defaultdict(list)
 
     def _add_user(self, data: dict):
         user = User.from_dict(data)
         self._users_by_id[user.user_id] = user
-        self._users_by_display[user.display_name].append(user)
         return user
 
     def _initialise(self):
@@ -362,15 +360,13 @@ class UsersWrapper(object):
         self._initialised = False
         self._initialise()
 
-    def get(self, display_name_or_id: str, default: T = None, use_cache: bool =True) -> Union['User', List['User'], T]:
+    def get(self, user_id: str, default: T = None, use_cache: bool =True) -> Union['User', T]:
         if use_cache and not self._initialised:
             self._initialise()
-        if display_name_or_id in self._users_by_id:
-            return self._users_by_id[display_name_or_id]
-        elif display_name_or_id in self._users_by_display:
-            return self._users_by_display[display_name_or_id]
+        if user_id in self._users_by_id:
+            return self._users_by_id[user_id]
         elif not use_cache:
-            resp = self._bot.api.users.info(user=display_name_or_id)
+            resp = self._bot.api.users.info(user=user_id)
             if not resp.get('ok'):
                 return default
             with self._lock:
@@ -397,15 +393,12 @@ class UsersWrapper(object):
 
     def _on_user_change(self, evt):
         user = self._users_by_id[evt['user']['id']]
-        old_display_name = user.display_name
-        with self._lock:
+        if user is not None:
             user.update_from_dict(evt['user'])
-            if user.display_name != old_display_name:
-                self._users_by_display[old_display_name].remove(user)
-                if len(self._users_by_display[old_display_name]) == 0:
-                    # remove the dict key so "in" checks don't return True
-                    self._users_by_display.pop(old_display_name, None)
-                self._users_by_display[user.display_name].append(user)
+        else:
+            LOGGER.error("User change event for unknown user - adding")
+            with self._lock:
+                self._add_user(evt['user'])
 
     def _on_team_join(self, evt):
         with self._lock:
