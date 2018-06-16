@@ -247,6 +247,11 @@ class ChannelWrapper(object):
             loaded_so_far = 0
             for ctype in ['channels', 'groups', 'ims']:
                 for chan in data[ctype]:
+                    if ctype == 'ims':
+                        # Set the channel name to the user being directly
+                        # messaged for easier reverse lookups. Note: `user` here
+                        # is the user_id.
+                        chan['name'] = chan['user']
                     self._add_channel(chan)
                 self._bot.logger.info(f"Loaded {len(self._channels_by_id) - loaded_so_far} {ctype} from team state")
                 loaded_so_far = len(self._channels_by_id)
