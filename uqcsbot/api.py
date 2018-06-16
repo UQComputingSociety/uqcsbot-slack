@@ -171,7 +171,7 @@ class Channel(object):
 
     @classmethod
     def from_dict(cls: Type[ChanT], bot, chan_dict: dict) -> ChanT:
-        return cls(
+        chan = cls(
             bot=bot,
             channel_id=chan_dict['id'],
             name=chan_dict['name'],
@@ -181,6 +181,9 @@ class Channel(object):
             is_private=chan_dict.get('is_private', False),
             is_archived=chan_dict.get('is_archived', False),
         )
+        if "members" in chan_dict:
+            chan._member_ids = chan_dict["members"]
+        return chan
 
 
 class ChannelWrapper(object):
@@ -278,13 +281,13 @@ class ChannelWrapper(object):
         chan = self.get(evt['channel'])
         if chan._member_ids is None:
             return
-        chan.member_ids.append(evt['user'])
+        chan._member_ids.append(evt['user'])
 
     def _on_member_left_channel(self, evt):
         chan = self.get(evt['channel'])
         if chan._member_ids is None:
             return
-        chan.member_ids.remove(evt['user'])
+        chan._member_ids.remove(evt['user'])
 
     def _on_channel_rename(self, evt):
         with self._lock:
