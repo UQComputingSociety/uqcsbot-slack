@@ -15,20 +15,20 @@ def handle_urban(command: Command) -> None:
     """
     # Check for search phase
     if not command.has_arg():
-        bot.post_message(command.channel, '> Usage: `!urban <SEARCH_PHRASE>`')
+        bot.post_message(command.channel_id, '> Usage: `!urban <SEARCH_PHRASE>`')
         return
     search_term = command.arg
 
     # Attempt to get definitions from the Urban Dictionary API.
     http_response = requests.get(URBAN_API_ENDPOINT, params={'term': search_term})
     if http_response.status_code != 200:
-        bot.post_message(command.channel, 'There was an error accessing the Urban Dictionary API.')
+        bot.post_message(command.channel_id, 'There was an error accessing the Urban Dictionary API.')
         return
     results = http_response.json()
 
     # If search phrase is not found, notify user.
     if results['result_type'] != 'exact':
-        bot.post_message(command.channel, f'> No results found for {search_term}. ¯\\_(ツ)_/¯')
+        bot.post_message(command.channel_id, f'> No results found for {search_term}. ¯\\_(ツ)_/¯')
         return
 
     # Get best definition (by most 'thumbs up') and construct response.
@@ -46,4 +46,4 @@ def handle_urban(command: Command) -> None:
         endpoint_url = http_response.url.replace(URBAN_API_ENDPOINT, URBAN_USER_ENDPOINT)
         message += f'\n_ more definitions at {endpoint_url} _'
 
-    bot.post_message(command.channel, message)
+    bot.post_message(command.channel_id, message)
