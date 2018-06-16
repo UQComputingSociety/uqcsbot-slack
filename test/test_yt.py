@@ -9,6 +9,9 @@ import random
 import string
 
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
+# TODO(mitch): work out a way to get this from yt.py without triggering
+# 'on_command' to be called and add '!yt' as a handler which messes with
+# testing.
 NO_QUERY_MESSAGE = "You can't look for nothing. !yt <QUERY>"
 
 
@@ -40,8 +43,7 @@ def test_yt_no_query(uqcsbot: MockUQCSBot):
 
 @mock.patch('uqcsbot.scripts.yt.execute_search', side_effect=mocked_search_execute)
 def test_yt_normal(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!yt dog")
-    uqcsbot.test_handle_event(message)
-    assert len(uqcsbot.test_posted_messages) == 1
-    assert uqcsbot.test_posted_messages[0].text[0:len(
-        YOUTUBE_VIDEO_URL)] == YOUTUBE_VIDEO_URL
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!yt dog")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[-1]['text'][0:len(YOUTUBE_VIDEO_URL)] == YOUTUBE_VIDEO_URL

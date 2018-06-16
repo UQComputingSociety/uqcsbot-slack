@@ -1,6 +1,5 @@
 from uqcsbot import bot, Command
 
-
 @bot.on_command("cat")
 def handle_cat(command: Command):
     '''
@@ -13,4 +12,4 @@ def handle_cat(command: Command):
           "((..-'    (< _     ;_..__               ; `'   fL\n" + \
           "           `-._,_)'      ``--...____..-'\n```"
 
-    bot.post_message(command.channel, cat)
+    bot.post_message(command.channel_id, cat)

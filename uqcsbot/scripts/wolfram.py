@@ -38,14 +38,14 @@ def handle_wolfram(command: Command):
         # Doing it specific to the start and end just in case someone has --full inside their query for whatever reason
         if cmd.startswith('--full'):
             cmd = cmd[len('--full'):]  # removes the --full
-            wolfram_full(cmd, command.channel)
+            wolfram_full(cmd, command.channel_id)
         elif cmd.endswith('--full'):
             cmd = cmd[:-len('--full')]  # removes the --full
-            wolfram_full(cmd, command.channel)
+            wolfram_full(cmd, command.channel_id)
         else:
-            wolfram_normal(cmd, command.channel)
+            wolfram_normal(cmd, command.channel_id)
     else:
-        bot.post_message(command.channel, "You need to ask something")
+        bot.post_message(command.channel_id, "You need to ask something")
 
 
 def wolfram_full(search_query: str, channel):
@@ -205,7 +205,7 @@ def handle_reply(evt: dict):
     channel = evt['channel']
     thread_ts = evt['thread_ts']  # This refers to time the original message
     thread_parent = bot.api.conversations.history(channel=channel, limit=1, inclusive=True, latest=thread_ts)
-    
+
     if not thread_parent['ok']:
         # The most likely reason for this error is auth issues or possibly rate limiting
         bot.logger.error(f'Error with wolfram script thread history: {thread_parent}')

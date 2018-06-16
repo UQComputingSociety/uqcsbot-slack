@@ -86,18 +86,3 @@ def generate_event_object(event_type, **additional_data):
     data = additional_data.copy()
     data[u'type'] = event_type
     return data
-
-
-def generate_message_object(text, channel=TEST_CHANNEL_ID, user=TEST_USER_ID, ts=None):
-    """
-    Create a Slack message object
-    Timestamp will default to now
-    """
-    ts = ts or str(time.time())
-    return generate_event_object(
-        event_type=MESSAGE_TYPE_MESSAGE,
-        channel=channel,
-        user=user,
-        text=text,
-        ts=ts,
-    )
