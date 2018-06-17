@@ -246,7 +246,8 @@ class MockUQCSBot(UQCSBot):
 
         # Removes the reaction from the message so that we can re-add the updated version.
         message['reactions'] = [r for r in message['reactions'] if r['name'] != name]
-        message['reactions'].append(reaction_object)
+        if reaction_object['count'] > 0:
+            message['reactions'].append(reaction_object)
         return {'ok': True}
 
     def mocked_chat_postMessage(self, **kwargs):
