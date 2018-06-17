@@ -1,5 +1,6 @@
 from random import choice
 from functools import wraps
+from typing import List
 import uqcsbot  # Necessary to avoid circular imports.
 
 LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid']
@@ -31,6 +32,20 @@ def is_valid_helper_doc(doc):
     '@no_help' within them.
     '''
     return doc is not None and '@no_help' not in doc
+
+
+def get_helper_docs(command_name=None) -> List[str]:
+    '''
+    Returns the helper docstring for the given command. If no command is
+    specified, returns a sorted list of all the bot's command helper docstrings.
+    Otherwise, will return a list of length 1. Will filter out any commands that
+    do not have a valid helper docstring (see 'is_valid_helper_doc' function).
+    '''
+    return sorted(sanitize_doc(fn.__doc__)
+                  for command, functions in uqcsbot.bot._command_registry.items()
+                  for fn in functions
+                  if is_valid_helper_doc(fn.__doc__)
+                  and (command_name is None or command_name == command))
 
 
 def success_status(command_fn):

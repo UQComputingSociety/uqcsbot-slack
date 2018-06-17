@@ -10,16 +10,15 @@ import time
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.background import BackgroundScheduler
-from uqcsbot.utils.command_utils import (UsageSyntaxException, sanitize_doc,
-                                         is_valid_helper_doc)
+from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_docs
 
 
 CmdT = TypeVar('CmdT', bound='Command')
 
 
 class Command(object):
-    def __init__(self, command_name: str, arg: Optional[str], message: dict) -> None:
-        self.command_name = command_name
+    def __init__(self, name: str, arg: Optional[str], message: dict) -> None:
+        self.name = name
         self.arg = arg
         self.message = message
 
@@ -31,9 +30,9 @@ class Command(object):
         text = message.get("text", '')
         if message.get("subtype") == "bot_message" or not text.startswith("!"):
             return None
-        command_name, *arg = text[1:].split(" ", 1)
+        name, *arg = text[1:].split(" ", 1)
         return cls(
-            command_name=command_name,
+            name=name,
             arg=None if not arg else arg[0],
             message=message
         )
@@ -115,10 +114,10 @@ class UQCSBot(object):
                 try:
                     return command_fn(command)
                 except UsageSyntaxException as e:
-                    helper_doc = sanitize_doc(command_fn.__doc__)
-                    if not is_valid_helper_doc(helper_doc):
+                    helper_doc = get_helper_docs(command.name)
+                    if len(helper_doc) == 0:
                         return None
-                    self.post_message(command.channel_id, f'usage: {helper_doc}')
+                    self.post_message(command.channel_id, f'usage: {helper_doc[0]}')
             # Adds the wrapped function as a handler for the given command
             self._command_registry[command_name].append(wrapper)
             return wrapper
@@ -201,7 +200,7 @@ class UQCSBot(object):
         command = Command.from_message(message)
         if command is None:
             return
-        for handler in self._command_registry[command.command_name]:
+        for handler in self._command_registry[command.name]:
             self.executor.submit(
                 self._execute_catching_error,
                 handler,

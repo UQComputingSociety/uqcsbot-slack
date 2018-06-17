@@ -22,7 +22,7 @@ def handle_latex_internal(channel, data):
 
 
 @bot.on_command("latex")
-def handle_latex_cmd(command: Command):
+def handle_latex_command(command: Command):
     """
     `!latex CONTENT` - Renders `CONTENT` to LaTeX and sends it to Slack.
     `$$ CONTENT $$` also works.
