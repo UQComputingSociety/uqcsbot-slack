@@ -216,7 +216,6 @@ class MockUQCSBot(UQCSBot):
         message['reactions'].append(reaction_object)
         return {'ok': True}
 
-
     def mocked_reactions_remove(self, **kwargs):
         '''
         Mocks reactions.remove api call.

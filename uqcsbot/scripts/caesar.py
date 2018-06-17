@@ -15,7 +15,7 @@ def handle_caesar(command: Command):
     arg_parser = argparse.ArgumentParser()
     def usage_error(*args, **kwargs):
         raise UsageSyntaxException()
-    arg_parser.error = usage_error
+    arg_parser.error = usage_error  # type: ignore
     arg_parser.add_argument('-n', type=int, default=47)
     arg_parser.add_argument('text')
 
