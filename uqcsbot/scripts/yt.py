@@ -42,7 +42,7 @@ def handle_yt(command: Command):
 
     search_query = command.arg.strip()
     try:
-        video_id = get_top_video_result(search_query, command.channel_id)
+        video_id = get_top_video_result(search_query)
     except HttpError as e:
         bot.logger.error(f'An HTTP error {e.resp.status} occurred:\n{e.content}')
         return

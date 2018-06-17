@@ -2,6 +2,7 @@ import os
 import json
 from typing import Iterable, Tuple, Optional
 import requests
+import argparse
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 
@@ -27,29 +28,26 @@ def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
 @loading_status
 def handle_wolfram(command: Command):
     '''
-    `!wolfram [--full] <QUERY>` - Returns the wolfram response for the given
-    query. If `--full` is specified, will return the full reponse.
+    `!wolfram [-f | --full] <QUERY>` - Returns the wolfram response for the given
+    query. If `-f`/`--full` is specified, will return the full response.
     '''
-    if not command.has_arg():
-        raise UsageSyntaxException()
-
     command_args = command.arg.split() if command.has_arg() else []
 
-    is_full_output = False
-    if '--full' in command_args:
-        command_args.remove('--full')
-        is_full_output = True
-    if '-f' in command_args:
-        command_args.remove('-f')
-        is_full_output = True
+    arg_parser = argparse.ArgumentParser()
+    def usage_error(*args, **kwargs):
+        raise UsageSyntaxException()
+    arg_parser.error = usage_error
+    arg_parser.add_argument('-f', '--full', action='store_false')
+    arg_parser.add_argument('query')
 
-    if is_full_output:
-        handle_wolfram_full(command_args, command.channel_id)
+    parsed_args = arg_parser.parse_args(command_args)
+    if parsed_args.full:
+        handle_wolfram_full(parsed_args.query, command.channel_id)
     else:
-        handle_wolfram_short(command_args, command.channel_id)
+        handle_wolfram_short(parsed_args.query, command.channel_id)
 
 
-def handle_wolfram_full(search_query: str, channel):
+def handle_wolfram_full(search_query: str, channel_id):
     """
     This posts the full results from wolfram query. Images and all
 
@@ -61,13 +59,13 @@ def handle_wolfram_full(search_query: str, channel):
 
     # Check if the response is ok
     if http_response.status_code != requests.codes.ok:
-        bot.post_message(channel, "There was a problem getting the response")
+        bot.post_message(channel_id, "There was a problem getting the response")
         return
 
     # Get the result of the query and determine if wolfram succeeded in evaluating it
     result = json.loads(http_response.content)['queryresult']
     if not result['success'] or result["error"]:
-        bot.post_message(channel, "Please rephrase your query. Wolfram could not compute.")
+        bot.post_message(channel_id, "Please rephrase your query. Wolfram could not compute.")
         return
 
     # A pod is the name wolfram gives to the different "units" that make up its result.
@@ -87,7 +85,7 @@ def handle_wolfram_full(search_query: str, channel):
                 message += f'{image_title}:\n{image_url}\n'
             else:
                 message += f'{image_url}\n'
-    bot.post_message(channel, message)
+    bot.post_message(channel_id, message)
 
 
 def get_short_answer(search_query: str):
@@ -109,7 +107,7 @@ def get_short_answer(search_query: str):
     return http_response.content
 
 
-def handle_wolfram_short(search_query: str, channel):
+def handle_wolfram_short(search_query: str, channel_id):
     """
     This uses wolfram's conversation api to return a short response that can be replied to in a
     thread. If the response cannot be replied to a general short answer response is displayed
@@ -127,10 +125,10 @@ def handle_wolfram_short(search_query: str, channel):
         if result == "No result is available":
             # If no conversational result is available just return a normal short answer
             short_response = get_short_answer(search_query)
-            bot.post_message(channel, short_response)
+            bot.post_message(channel_id, short_response)
             return
         else:
-            bot.post_message(channel, result)
+            bot.post_message(channel_id, result)
             return
 
     # TODO(mubiquity): Is there a better option than storing the id in the fallback?
@@ -144,7 +142,7 @@ def handle_wolfram_short(search_query: str, channel):
         'text': result,
     }]
 
-    bot.post_message(channel, "", attachments=attachments)
+    bot.post_message(channel_id, "", attachments=attachments)
 
 
 def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:

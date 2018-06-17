@@ -183,9 +183,8 @@ class MockUQCSBot(UQCSBot):
             return None
 
         channel_messages = self.test_messages.get(channel.id, [])
-        channel_message = [message for message in channel_messages
-                           if message['ts'] == timestamp]
-        return None if len(channel_message) != 1 else channel_message[0]
+        # Returns the message with the given timestamp if found, else None.
+        return next((m for m in channel_messages if m['ts'] == timestamp), None)
 
     def mocked_reactions_add(self, **kwargs):
         '''
@@ -203,15 +202,17 @@ class MockUQCSBot(UQCSBot):
         if 'reactions' not in message:
             message['reactions'] = []
 
+        # Retrieves the reaction with the given name if found, else None.
         reaction_object = next((r for r in message['reactions'] if r['name'] == name), None)
-        message['reactions'] = [r for r in message['reactions'] if r['name'] != name]
-
+        # If no reaction, add a blank one ready to update.
         if reaction_object is None:
             reaction_object = {'name': name, 'count': 0, 'users': []}
         if user not in reaction_object['users']:
             reaction_object['count'] += 1
             reaction_object['users'].append(user)
 
+        # Removes the reaction from the message so that we can re-add the updated version.
+        message['reactions'] = [r for r in message['reactions'] if r['name'] != name]
         message['reactions'].append(reaction_object)
         return {'ok': True}
 
@@ -232,16 +233,20 @@ class MockUQCSBot(UQCSBot):
         if 'reactions' not in message:
             return {'ok': False}
 
+        # Retrieves the reaction with the given name if found, else None.
         reaction_object = next((r for r in message['reactions'] if r['name'] == name), None)
-        message['reactions'] = [r for r in message['reactions'] if r['name'] != name]
 
+        # Error if there was no reaction or the calling user was not a reactee.
         if reaction_object is None:
             return {'ok': False}
         if user not in reaction_object['users']:
             return {'ok': False}
 
         reaction_object['count'] -= 1
-        reaction_object['users'].append(user)
+        reaction_object['users'].pop(user)
+
+        # Removes the reaction from the message so that we can re-add the updated version.
+        message['reactions'] = [r for r in message['reactions'] if r['name'] != name]
         message['reactions'].append(reaction_object)
         return {'ok': True}
 
