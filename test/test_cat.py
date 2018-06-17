@@ -4,6 +4,7 @@ from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 # 'on_command' to be called and add '!cat' as a handler which messes with
 # testing.
 
+
 def test_cat(uqcsbot: MockUQCSBot):
     '''
     test !cat

@@ -7,7 +7,7 @@ import pytest
 import random
 import string
 
-YOUTUBE_VIDEO_URL = "https://www.youtube.com/watch?v="
+YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
 # TODO(mitch): work out a way to get this from yt.py without triggering
 # 'on_command' to be called and add '!yt' as a handler which messes with
 # testing.
@@ -41,6 +41,5 @@ def test_yt_no_query(uqcsbot: MockUQCSBot):
 def test_yt_normal(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!yt dog")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
-    print(messages)
     assert len(messages) == 2
     assert messages[-1]['text'][0:len(YOUTUBE_VIDEO_URL)] == YOUTUBE_VIDEO_URL

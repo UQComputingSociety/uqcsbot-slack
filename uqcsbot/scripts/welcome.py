@@ -10,7 +10,8 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "Hey there! Welcome to the UQCS slack!",
     "This is the first time I've seen you, so you're probably new here",
     "I'm UQCSbot, your friendly (open source) robot helper",
-    "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many subject-specific ones",
+    "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many " \
+    "subject-specific ones (e.g #csse1001, #math1051, #csse2310)",
     "Your friendly admins are @csa, @rob, @mb, @tomgr, @mitch, @guthers, and @artemis",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
     "and again, welcome :)"
