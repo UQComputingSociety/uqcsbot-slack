@@ -35,7 +35,7 @@ def handle_hoogle(command: Command):
     def usage_error(*args, **kwargs):
         raise UsageSyntaxException()
     arg_parser.error = usage_error  # type: ignore
-    arg_parser.add_argument('-v', '--verbose', action='store_false')
+    arg_parser.add_argument('-v', '--verbose', action='store_true')
     arg_parser.add_argument('type_signature')
 
     parsed_args = arg_parser.parse_args(command_args)

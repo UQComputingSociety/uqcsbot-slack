@@ -37,11 +37,11 @@ def handle_whatsdue(command: Command):
     def usage_error(*args, **kwargs):
         raise UsageSyntaxException()
     arg_parser.error = usage_error  # type: ignore
-    arg_parser.add_argument('-f', '--full', action='store_false')
-    arg_parser.add_argument('course_codes', nargs='+')
+    arg_parser.add_argument('-f', '--full', action='store_true')
+    arg_parser.add_argument('course_codes', nargs='*')
 
     parsed_args = arg_parser.parse_args(command_args)
-    course_names = parsed_args.course_codes
+    course_names = parsed_args.course_codes if len(parsed_args.course_codes) > 0 else [channel.name]
     if len(course_names) > COURSE_LIMIT:
         bot.post_message(channel, f'Cannot process more than {COURSE_LIMIT} courses.')
         return

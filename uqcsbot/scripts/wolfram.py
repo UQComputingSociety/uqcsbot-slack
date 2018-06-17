@@ -37,7 +37,7 @@ def handle_wolfram(command: Command):
     def usage_error(*args, **kwargs):
         raise UsageSyntaxException()
     arg_parser.error = usage_error  # type: ignore
-    arg_parser.add_argument('-f', '--full', action='store_false')
+    arg_parser.add_argument('-f', '--full', action='store_true')
     arg_parser.add_argument('query')
 
     parsed_args = arg_parser.parse_args(command_args)
