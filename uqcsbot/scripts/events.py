@@ -1,10 +1,11 @@
 from typing import List
-from uqcsbot import bot, Command
+import re
+from datetime import date, datetime, timedelta
 from icalendar import Calendar, vText
 import requests
-from datetime import date, datetime, timedelta
 from pytz import timezone, utc
-import re
+from uqcsbot import bot, Command
+from uqcsbot.utils.command_utils import UsageSyntaxException
 
 CALENDAR_URL = "https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com" \
                "/public/basic.ics"
@@ -103,8 +104,7 @@ def handle_events(command: Command):
     '''
     event_filter = EventFilter.from_command(command)
     if not event_filter.is_valid:
-        bot.post_message(command.channel_id, "Invalid events filter.")
-        return
+        raise UsageSyntaxException()
 
     http_response = requests.get(CALENDAR_URL)
     cal = Calendar.from_ical(http_response.content)

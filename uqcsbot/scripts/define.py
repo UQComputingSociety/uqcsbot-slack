@@ -1,6 +1,7 @@
 from uqcsbot import bot, Command
 import requests
 import json
+from uqcsbot.utils.command_utils import UsageSyntaxException
 
 API_URL = "http://api.pearson.com/v2/dictionaries/laad3/entries?limit=1"
 
@@ -13,8 +14,7 @@ def define(command: Command):
     query = command.arg
     # Fun Fact: Empty searches return the definition of adagio (a piece of music to be played or sung slowly)
     if not command.has_arg():
-        bot.post_message(command.channel_id, "Please specify a word")
-        return
+        raise UsageSyntaxException()
 
     http_response = requests.get(API_URL, params={'headword': query})
 

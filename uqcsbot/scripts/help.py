@@ -1,13 +1,5 @@
 from uqcsbot import bot, Command
-from uqcsbot.util.status_reacts import success_status
-
-
-def sanitize_doc(doc):
-    '''
-    Returns the doc in sanitized form. This involves removing any newlines and
-    whitespace blocks at the start or end of lines.
-    '''
-    return ' '.join([line.strip() for line in doc.split('\n')])
+from uqcsbot.utils.command_utils import success_status, sanitize_doc
 
 
 def is_valid_helper_doc(doc):
@@ -26,7 +18,7 @@ def get_helper_docs():
     helper docstring (see 'is_valid_helper_doc' function above).
     '''
     return sorted((command_name, fn.__doc__)
-                  for command_name, functions in bot.command_registry.items()
+                  for command_name, functions in bot._command_registry.items()
                   for fn in functions
                   if is_valid_helper_doc(fn.__doc__))
 

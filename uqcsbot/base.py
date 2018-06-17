@@ -10,6 +10,7 @@ import time
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.background import BackgroundScheduler
+from uqcsbot.utils.command_utils import usage_helper
 
 
 CmdT = TypeVar('CmdT', bound='Command')
@@ -101,6 +102,7 @@ class UQCSBot(object):
             self.logger.debug(f"Goodbye event has unexpected extras: {evt}")
         self.logger.info(f"Server is about to disconnect")
 
+    @usage_helper
     def on_command(self, command_name: str):
         def decorator(fn):
             self._command_registry[command_name].append(fn)

@@ -2,6 +2,7 @@ from uqcsbot import bot, Command
 import requests
 import json
 import html
+from uqcsbot.utils.command_utils import UsageSyntaxException
 
 
 def get_endpoint(type_sig: str) -> str:
@@ -40,8 +41,7 @@ def handle_hoogle(command: Command):
         verbose = True
 
     if len(command_args) == 0:
-        bot.post_message(command.channel_id, "usage: " + handle_hoogle.__doc__)
-        return
+        raise UsageSyntaxException()
 
     type_sig = ' '.join(command_args)
 

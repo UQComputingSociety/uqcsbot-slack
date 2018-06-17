@@ -3,7 +3,7 @@ from typing import Iterable, Tuple, Optional
 from base64 import b64decode
 import requests
 import json
-from uqcsbot.util.status_reacts import loading_status
+from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 
 APP_ID = b64decode('RzU0S1VBLVVHWTdHR0hWUlg=').decode('utf-8')
 
@@ -30,25 +30,26 @@ def handle_wolfram(command: Command):
     `!wolfram [--full] <QUERY>` - Returns the wolfram response for the given
     query. If `--full` is specified, will return the full reponse.
     '''
-    # Determines whether to use the full version or the short version. The full
-    # version is used if the --full. argument is supplied before or after the
-    # search query. See wolfram_full and wolfram_normal for the differences.
-    if command.has_arg():
-        cmd = command.arg.strip()
-        # Doing it specific to the start and end just in case someone has --full inside their query for whatever reason
-        if cmd.startswith('--full'):
-            cmd = cmd[len('--full'):]  # removes the --full
-            wolfram_full(cmd, command.channel_id)
-        elif cmd.endswith('--full'):
-            cmd = cmd[:-len('--full')]  # removes the --full
-            wolfram_full(cmd, command.channel_id)
-        else:
-            wolfram_normal(cmd, command.channel_id)
+    if not command.has_arg():
+        raise UsageSyntaxException()
+
+    command_args = command.arg.split() if command.has_arg() else []
+
+    is_full_output = False
+    if '--full' in command_args:
+        command_args.remove('--full')
+        is_full_output = True
+    if '-f' in command_args:
+        command_args.remove('-f')
+        is_full_output = True
+
+    if is_full_output:
+        handle_wolfram_full(command_args, command.channel_id)
     else:
-        bot.post_message(command.channel_id, "You need to ask something")
+        handle_wolfram_short(command_args, command.channel_id)
 
 
-def wolfram_full(search_query: str, channel):
+def handle_wolfram_full(search_query: str, channel):
     """
     This posts the full results from wolfram query. Images and all
 
@@ -106,7 +107,7 @@ def get_short_answer(search_query: str):
     return http_response.content
 
 
-def wolfram_normal(search_query: str, channel):
+def handle_wolfram_short(search_query: str, channel):
     """
     This uses wolfram's conversation api to return a short response that can be replied to in a thread.
     If the response cannot be replied to a general short answer response is displayed instead.

@@ -1,6 +1,7 @@
 from uqcsbot import bot, Command
 from urllib.parse import quote
 import re
+from uqcsbot.utils.command_utils import UsageSyntaxException
 
 
 def handle_latex_internal(channel, data):
@@ -27,7 +28,7 @@ def handle_latex_cmd(command: Command):
     `$$ CONTENT $$` also works.
     """
     if not command.has_arg():
-        bot.post_message(command.channel_id, "No data provided")
+        raise UsageSyntaxException()
     handle_latex_internal(command.channel_id, command.arg.strip())
 
 

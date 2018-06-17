@@ -1,6 +1,7 @@
 from uqcsbot import bot, Command
 import requests
 import json
+from uqcsbot.utils.command_utils import UsageSyntaxException
 
 
 @bot.on_command("wiki")
@@ -8,6 +9,9 @@ def handle_wiki(command: Command):
     '''
     `!wiki <TOPIC>` - Returns a snippet of text from a relevent wikipedia entry.
     '''
+    if not command.has_arg():
+        raise UsageSyntaxException()
+
     search_query = command.arg
     api_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&format=json&limit=2"
 

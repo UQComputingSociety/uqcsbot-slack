@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from typing import List, Tuple
 from functools import partial
 import asyncio
+from uqcsbot.utils.command_utils import UsageSyntaxException
 
 ACRONYM_LIMIT = 5
 BASE_URL = "http://acronyms.thefreedictionary.com"
@@ -23,7 +24,7 @@ def handle_acronym(command: Command):
     `!acro <TEXT>` - Finds an acronym for the given text.
     '''
     if not command.has_arg():
-        return
+        raise UsageSyntaxException()
 
     words = command.arg.split(" ")
 

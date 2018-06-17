@@ -2,13 +2,13 @@ from datetime import datetime
 from icalendar import Calendar, Event
 from uuid import uuid4 as uuid
 from uqcsbot import bot, Command
-from uqcsbot.util.status_reacts import loading_status, success_status
-from uqcsbot.util.uq_course_util import (get_course_assessment,
-                                         get_parsed_assessment_due_date,
-                                         HttpException,
-                                         CourseNotFoundException,
-                                         ProfileNotFoundException,
-                                         DateSyntaxException)
+from uqcsbot.utils.command_utils import loading_status, success_status
+from uqcsbot.utils.uq_course_utils import (get_course_assessment,
+                                           get_parsed_assessment_due_date,
+                                           HttpException,
+                                           CourseNotFoundException,
+                                           ProfileNotFoundException,
+                                           DateSyntaxException)
 
 # Maximum number of courses supported by !calendar to reduce call abuse.
 COURSE_LIMIT = 6
