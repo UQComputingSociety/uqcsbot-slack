@@ -10,7 +10,7 @@ import time
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.background import BackgroundScheduler
-from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_docs
+from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_doc
 
 
 CmdT = TypeVar('CmdT', bound='Command')
@@ -114,10 +114,8 @@ class UQCSBot(object):
                 try:
                     return command_fn(command)
                 except UsageSyntaxException as e:
-                    helper_doc = get_helper_docs(command.name)
-                    if len(helper_doc) == 0:
-                        return None
-                    self.post_message(command.channel_id, f'usage: {helper_doc[0]}')
+                    helper_doc = get_helper_doc(command.name)
+                    self.post_message(command.channel_id, f'usage: {helper_doc}')
             # Adds the wrapped function as a handler for the given command
             self._command_registry[command_name].append(wrapper)
             return wrapper

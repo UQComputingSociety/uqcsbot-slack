@@ -164,17 +164,90 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, 'members': sliced_members, 'cursor': cursor}
 
-    # def mocked_reactions_add(self, **kwargs):
-    #     pass
+    def get_channel_message(self, **kwargs) -> dict:
+        '''
+        Convenience function which returns the message at the given channel
+        and timestamp.
+        '''
+        channel_id_or_name = kwargs.get('channel')
+        timestamp = kwargs.get('timestamp')
 
-    # def mocked_reactions_remove(self, **kwargs):
-    #     pass
+        channel = self.channels.get(channel_id_or_name)
+        if channel is None or timestamp is None:
+            return None
+
+        channel_messages = self.test_messages.get(channel.id, [])
+        channel_message = [message for message in channel_messages
+                           if message['ts'] == timestamp]
+        return None if len(channel_message) != 1 else channel_message[0]
+
+    def mocked_reactions_add(self, **kwargs):
+        '''
+        Mocks reactions.add api call.
+        '''
+        name = kwargs.get('name')
+        message = self.get_channel_message(**kwargs)
+        if name is None or message is None:
+            return {'ok': False}
+        # Note: 'user' is not a part of Slack API for reactions.add, just a
+        # convenient way to set the calling user during testing. If not passed,
+        # message is assumed to be from bot.
+        user = kwargs.get('user', TEST_BOT_ID)
+
+        if 'reactions' not in message:
+            message['reactions'] = []
+
+        reaction_object = next((r for r in message['reactions'] if r['name'] == name), None)
+        message['reactions'] = [r for r in message['reactions'] if r['name'] != name]
+
+        if reaction_object is None:
+            reaction_object = {'name': name, 'count': 0, 'users': []}
+        if user not in reaction_object['users']:
+            reaction_object['count'] += 1
+            reaction_object['users'].append(user)
+
+        message['reactions'].append(reaction_object)
+        return {'ok': True}
+
+
+    def mocked_reactions_remove(self, **kwargs):
+        '''
+        Mocks reactions.remove api call.
+        '''
+        name = kwargs.get('name')
+        message = self.get_channel_message(**kwargs)
+        if name is None or message is None:
+            return {'ok': False}
+        # Note: 'user' is not a part of Slack API for reactions.add, just a
+        # convenient way to set the calling user during testing. If not passed,
+        # message is assumed to be from bot.
+        user = kwargs.get('user', TEST_BOT_ID)
+
+        if 'reactions' not in message:
+            return {'ok': False}
+
+        reaction_object = next((r for r in message['reactions'] if r['name'] == name), None)
+        message['reactions'] = [r for r in message['reactions'] if r['name'] != name]
+
+        if reaction_object is None:
+            return {'ok': False}
+        if user not in reaction_object['users']:
+            return {'ok': False}
+
+        reaction_object['count'] -= 1
+        reaction_object['users'].append(user)
+        message['reactions'].append(reaction_object)
+        return {'ok': True}
 
     def mocked_chat_postMessage(self, **kwargs):
         '''
         Mocks chat.postMessage api call.
         '''
         channel_id_or_name = kwargs.get('channel')
+        # Note: 'user' is not a part of Slack API for chat.postMessage, just a
+        # convenient way to set the calling user during testing. If not passed,
+        # message is assumed to be from bot.
+        user = kwargs.get('user', TEST_BOT_ID)
 
         channel = self.channels.get(channel_id_or_name)
         if channel is None:
@@ -185,13 +258,10 @@ class MockUQCSBot(UQCSBot):
         # here.
         stripped_kwargs = {k: v for k, v in kwargs.items()
                            if k in ('text', 'attachments', 'user')}
-        message = {'type': 'message', 'ts': str(time.time()), **stripped_kwargs}
+        message = {'type': 'message', 'ts': str(time.time()), 'user': user,
+                   **stripped_kwargs}
         # In case we were given a channel name, set channel strictly by the id.
         message['channel'] = channel.id
-        # Note: 'user' is not a part of Slack API for chat.postMessage, just a
-        # convenient way to set the calling user during testing. If not passed,
-        # message is assumed to be from bot.
-        message['user'] = kwargs.get('user', TEST_BOT_ID)
         self.test_messages[channel.id].append(message)
         self._run_handlers(message)
 

@@ -47,6 +47,12 @@ def get_helper_docs(command_name=None) -> List[str]:
                   if is_valid_helper_doc(fn.__doc__)
                   and (command_name is None or command_name == command))
 
+def get_helper_doc(command_name) -> str:
+    '''
+    Returns the helper docstring for the given command.
+    '''
+    helper_docs = get_helper_docs(command_name)
+    return helper_docs[0] if len(helper_docs) == 1 else None
 
 def success_status(command_fn):
     '''

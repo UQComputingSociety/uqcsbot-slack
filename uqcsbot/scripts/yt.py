@@ -8,7 +8,6 @@ YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 YOUTUBE_API_SERVICE_NAME = 'youtube'
 YOUTUBE_API_VERSION = 'v3'
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
-NO_QUERY_MESSAGE = "You can't look for nothing. !yt <QUERY>"
 
 
 def get_top_video_result(search_query: str):
