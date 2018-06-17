@@ -227,7 +227,7 @@ def handle_reply(evt: dict):
     # Finally, we have to check that this is a Wolfram replyable message
     # It is rare we would reach this point and not pass as who replies to a bot in a thread for
     # another reason?
-    parent_attachment = parent_message['attachments'][0] # Only one attachment to get
+    parent_attachment = parent_message['attachments'][0]  # Only one attachment to get
     parent_fallback = parent_attachment['fallback']
     if 'WolframCanReply' not in parent_fallback:
         return
