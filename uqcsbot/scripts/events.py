@@ -60,7 +60,7 @@ class EventFilter(object):
 
 
 class Event(object):
-    def __init__(self, start: datetime, end: datetime, location: vText, summary: vText):
+    def __init__(self, start: datetime, end: datetime, location: vText, summary: vText) -> None:
         self.start = start
         self.end = end
         self.location = location
@@ -103,7 +103,7 @@ def handle_events(command: Command):
     '''
     event_filter = EventFilter.from_command(command)
     if not event_filter.is_valid:
-        bot.post_message(command.channel, "Invalid events filter.")
+        bot.post_message(command.channel_id, "Invalid events filter.")
         return
 
     http_response = requests.get(CALENDAR_URL)
@@ -138,4 +138,4 @@ def handle_events(command: Command):
     else:
         message = f"{event_filter.get_header()}\r\n" + '\r\n'.join(str(e) for e in events)
 
-    bot.post_message(command.channel, message)
+    bot.post_message(command.channel_id, message)

@@ -9,6 +9,7 @@ from uqcsbot.util.uq_course_util import (get_course_assessment,
 # Maximum number of courses supported by !whatsdue to reduce call abuse.
 COURSE_LIMIT = 6
 
+
 def get_formatted_assessment_item(assessment_item):
     '''
     Returns the given assessment item in a pretty message format to display to
@@ -16,6 +17,7 @@ def get_formatted_assessment_item(assessment_item):
     '''
     course, task, due, weight = assessment_item
     return f'*{course}*: `{weight}` _{task}_ *({due})*'
+
 
 @bot.on_command('whatsdue')
 @loading_status
@@ -27,7 +29,7 @@ def handle_whatsdue(command: Command):
     channel that the command was called from. If -f/--full is provided, will
     return the full assessment list without filtering by cutoff dates.
     '''
-    channel = command.channel
+    channel = bot.channels.get(command.channel_id)
     command_args = command.arg.split() if command.has_arg() else []
 
     is_full_output = False
@@ -46,11 +48,10 @@ def handle_whatsdue(command: Command):
         bot.post_message(channel, f'Cannot process more than {COURSE_LIMIT} courses.')
         return
 
-    # If no full output specified, set the cutoff to today's date. Else, set the
-    # cutoff to UNIX epoch (i.e. filter nothing).
-    cutoff_datetime = datetime.fromtimestamp(0) if is_full_output else datetime.today()
+    # If full output is not specified, set the cutoff to today's date.
+    cutoff = None if is_full_output else datetime.today()
     try:
-        assessment = get_course_assessment(course_names, cutoff_datetime)
+        assessment = get_course_assessment(course_names, cutoff)
     except HttpException as e:
         bot.logger.error(e.message)
         bot.post_message(channel, f'An error occurred, please try again.')
@@ -60,7 +61,7 @@ def handle_whatsdue(command: Command):
         return
 
     message = '_*WARNING:* Assessment information may vary/change/be entirely' \
-               + ' different! Use at your own discretion_\n>>>'
+              + ' different! Use at your own discretion_\n>>>'
     message += '\n'.join(map(get_formatted_assessment_item, assessment))
     if not is_full_output:
         message += '\n_Note: This may not be the full assessment list. Use -f' \

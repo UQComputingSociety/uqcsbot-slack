@@ -13,8 +13,10 @@ def handle_pastexams(command: Command):
     If unspecified, will attempt to find the ECP for the channel the command was
     called from.
     '''
-    course_code = command.arg if command.has_arg() else command.channel.name
-    bot.post_message(command.channel, get_past_exams(course_code))
+    channel = bot.channels.get(command.channel_id)
+    course_code = command.arg if command.has_arg() else channel.name
+    bot.post_message(channel, get_past_exams(course_code))
+
 
 def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
     """
@@ -40,6 +42,7 @@ def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
     for (year, _, semester_id), link in zip(semesters, links):
         semester_str = semester_id.replace('.', ' ')
         yield f'{year} {semester_str}', link
+
 
 def get_past_exams(course_code: str) -> str:
     """

@@ -1,13 +1,9 @@
-"""
-Tests that the bot correctly finds no handlers for an invalid command and ignores it
-"""
+from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 import pytest
 
-from .conftest import MockUQCSBot, UnmatchedHandleException
-from .helpers import generate_message_object
-
-
-def test_invalid_script_doesnt_match(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!thiscommanddoesntexist")
-    with pytest.raises(UnmatchedHandleException):
-        uqcsbot.test_handle_event(message)
+def test_not_implemented_command(uqcsbot: MockUQCSBot):
+    '''
+    Tests that the bot correctly detects an invalid command.
+    '''
+    with pytest.raises(NotImplementedError):
+        uqcsbot.post_message(TEST_CHANNEL_ID, '!thiscommanddoesntexist')

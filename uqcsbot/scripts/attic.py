@@ -63,22 +63,29 @@ def handle_attic(command: Command) -> None:
     exam solution and study material repository. Defaults to searching for the name of the current channel unless
     explicitly provided a course code (e.g. CSSE1001).
     """
-    course_code = command.arg if command.has_arg() else command.channel.name
+    channel = bot.channels.get(command.channel_id)
+    course_code = command.arg if command.arg is not None else channel.name
     course_code = course_code.upper()
 
     # Make request for UQAttic root directory contents.
-    root_directory_request_url = f"{BASE_API_URL}files?q='{BASE_ATTIC_FOLDER}' in parents and mimeType = 'application/" \
-                                 f"vnd.google-apps.folder'&pageSize=1000&key={API_KEY}"
+    root_directory_request_url = (
+        f"{BASE_API_URL}files?q='{BASE_ATTIC_FOLDER}' in parents and mimeType = 'application/" +
+        f"vnd.google-apps.folder'&pageSize=1000&key={API_KEY}"
+    )
     root_directory = requests.get(root_directory_request_url)
     if not root_directory.status_code == 200:
-        bot.post_message(command.channel, 'There was an error getting the root UQAttic directory.')
+        bot.post_message(channel, 'There was an error getting the root UQAttic directory.')
         return
     root_directory_data = root_directory.json()
 
     # Check course folder exists by checking for the course code in the 'name' of each file/folder.
-    course = next((item for item in root_directory_data['files'] if item['name'] == course_code), None)
+    course = next((
+        item
+        for item in root_directory_data['files']
+        if item['name'] == course_code
+    ), None)
     if course is None:
-        bot.post_message(command.channel, f'No course folder found for {course_code}.')
+        bot.post_message(channel, f'No course folder found for {course_code}.')
         return
 
     # Get all files in directory and subdirectories.
@@ -86,16 +93,18 @@ def handle_attic(command: Command) -> None:
 
     # Determine whether to send to user or channel (based on number of responses).
     if len(files) > ROOM_FILE_LIMIT:
-        bot.post_message(command.channel, f'Too many files to list here, sent the list directly to '
-                                          f'<@{command.user_id}>.')
+        bot.post_message(channel, f'Too many files to list here, sent the list directly to '
+                                  f'<@{command.user_id}>.')
         response_channel = command.user_id
     else:
-        response_channel = command.channel
+        response_channel = channel
 
     # Send response message with formatted list of files.
     if len(files) > 0:
-        response_message = f'All of the UQAttic files found for the course <{BASE_FOLDER_URL}{course["id"]} | ' \
-                           f'{course["name"]}> are listed below:\n' + '\n'.join(format_files(files))
+        response_message = (
+            f'All of the UQAttic files found for the course <{BASE_FOLDER_URL}{course["id"]} | ' +
+            f'{course["name"]}> are listed below:\n' + '\n'.join(format_files(files))
+        )
     else:
         response_message = f'There were no files found in the {course_code} course folder.'
     bot.post_message(response_channel, response_message)
