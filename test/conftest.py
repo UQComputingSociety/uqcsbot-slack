@@ -4,6 +4,7 @@ Configuration for Pytest
 
 from unittest.mock import MagicMock
 from itertools import islice
+from functools import partial
 from collections import defaultdict
 import time
 import pytest
@@ -26,7 +27,7 @@ class MockUQCSBot(UQCSBot):
         super().__init__(*args, **kwargs)
         self.test_users = {
             TEST_BOT_ID: {'id': TEST_BOT_ID, 'name': TEST_BOT_ID, 'deleted': False,
-                           'profile': {'display_name': TEST_BOT_ID}, 'is_bot': True},
+                          'profile': {'display_name': TEST_BOT_ID}, 'is_bot': True},
             TEST_USER_ID: {'id': TEST_USER_ID, 'name': TEST_USER_ID, 'deleted': False,
                            'profile': {'display_name': TEST_USER_ID}}
         }
@@ -86,7 +87,7 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
 
         all_members = channel.get('members', [])
-        sliced_members = all_members[cursor : cursor + limit + 1]
+        sliced_members = all_members[cursor: cursor + limit + 1]
         cursor += len(sliced_members)
         if cursor == len(all_members):
             cursor = None
@@ -104,9 +105,8 @@ class MockUQCSBot(UQCSBot):
         if channel_id not in self.test_channels:
             return {'ok': False}
 
-        all_messages = self.test_messages.get(channel_id, [])
-        ordered_messages = all_messages[::-1] # Most recent first
-        sliced_messages = list(islice(ordered_messages, cursor, cursor + limit + 1))
+        all_messages = self.test_messages.get(channel_id, [])[::-1]  # Most recent first
+        sliced_messages = list(islice(all_messages, cursor, cursor + limit + 1))
         cursor += len(sliced_messages)
         if cursor == len(all_messages):
             cursor = None
@@ -132,17 +132,23 @@ class MockUQCSBot(UQCSBot):
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
 
+        def is_channel_type(channel, channel_type):
+            '''
+            Returns whether the given channel is of the given channel type.
+            '''
+            return channel.get(channel_type, False)
+
         if channel_type == 'channels':
-            filter_function = lambda x: x.get('is_public', False)
+            filter_function = partial(is_channel_type, channel_type='is_public')
         elif channel_type == 'groups':
-            filter_function = lambda x: x.get('is_group', False)
+            filter_function = partial(is_channel_type, channel_type='is_group')
         elif channel_type == 'ims':
-            filter_function = lambda x: x.get('is_im', False)
+            filter_function = partial(is_channel_type, channel_type='is_im')
         else:
             return {'ok': False}
 
         all_channels = list(filter(filter_function, self.test_channels.values()))
-        sliced_channels = all_channels[cursor : cursor + limit + 1]
+        sliced_channels = all_channels[cursor: cursor + limit + 1]
         cursor += len(sliced_channels)
         if cursor == len(all_channels):
             cursor = None
@@ -157,7 +163,7 @@ class MockUQCSBot(UQCSBot):
         limit = kwargs.get('limit', 100)
 
         all_members = list(self.test_users.values())
-        sliced_members = all_members[cursor : cursor + limit + 1]
+        sliced_members = all_members[cursor: cursor + limit + 1]
         cursor += len(sliced_members)
         if cursor == len(all_members):
             cursor = None
