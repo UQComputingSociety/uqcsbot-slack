@@ -1,21 +1,12 @@
 from uqcsbot import bot, Command
-from uqcsbot.utils.command_utils import success_status, sanitize_doc
-
-
-def is_valid_helper_doc(doc):
-    '''
-    Returns true if the given docstring is a valid helper docstring. Ignores
-    docstrings that have specified they are not a helper docstring by including
-    '@no_help' within them.
-    '''
-    return doc is not None and '@no_help' not in doc
+from uqcsbot.utils.command_utils import success_status, sanitize_doc, is_valid_helper_doc
 
 
 def get_helper_docs():
     '''
     Returns a sorted list of all the bot's command names and their associated
     helper docstrings. Will filter out any commands that do not have a valid
-    helper docstring (see 'is_valid_helper_doc' function above).
+    helper docstring (see 'is_valid_helper_doc' function).
     '''
     return sorted((command_name, fn.__doc__)
                   for command_name, functions in bot._command_registry.items()

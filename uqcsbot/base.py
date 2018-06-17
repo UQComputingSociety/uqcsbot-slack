@@ -1,6 +1,6 @@
 from slackclient import SlackClient
 from .api import APIWrapper, ChannelWrapper, Channel, UsersWrapper, User
-from functools import partial
+from functools import partial, wraps
 import collections
 import asyncio
 import concurrent.futures
@@ -10,7 +10,8 @@ import time
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.background import BackgroundScheduler
-from uqcsbot.utils.command_utils import usage_helper
+from uqcsbot.utils.command_utils import (UsageSyntaxException, sanitize_doc,
+                                         is_valid_helper_doc)
 
 
 CmdT = TypeVar('CmdT', bound='Command')
@@ -102,11 +103,25 @@ class UQCSBot(object):
             self.logger.debug(f"Goodbye event has unexpected extras: {evt}")
         self.logger.info(f"Server is about to disconnect")
 
-    @usage_helper
     def on_command(self, command_name: str):
-        def decorator(fn):
-            self._command_registry[command_name].append(fn)
-            return fn
+        def decorator(command_fn):
+            '''
+            Decorator function which returns a wrapper function that catches any
+            UsageSyntaxExceptions and sends the wrapped command's helper doc to
+            the calling channel.
+            '''
+            @wraps(command_fn)
+            def wrapper(command: Command):
+                try:
+                    return command_fn(command)
+                except UsageSyntaxException as e:
+                    helper_doc = sanitize_doc(command_fn.__doc__)
+                    if not is_valid_helper_doc(helper_doc):
+                        return None
+                    self.post_message(command.channel_id, f'usage: {helper_doc}')
+            # Adds the wrapped function as a handler for the given command
+            self._command_registry[command_name].append(wrapper)
+            return wrapper
         return decorator
 
     def on(self, message_type: Optional[str], fn: Optional[Callable] = None):

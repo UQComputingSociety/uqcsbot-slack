@@ -1,6 +1,6 @@
-import uqcsbot  # "import all" required to avoid circular imports
-from functools import wraps
 from random import choice
+from functools import wraps
+import uqcsbot  # Necessary to avoid circular imports.
 
 LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid']
 SUCCESS_REACTS = ['thumbsup', 'thumbsup_all', 'msn_thumbsup', 'ok-hand', 'nice',
@@ -24,26 +24,20 @@ def sanitize_doc(doc):
     return ' '.join([line.strip() for line in doc.split('\n')])
 
 
-def usage_helper(command_fn):
+def is_valid_helper_doc(doc):
     '''
-    Decorator function which detects whether the command was called correctly
-    and returns the correct usage helper doc if not.
+    Returns true if the given docstring is a valid helper docstring. Ignores
+    docstrings that have specified they are not a helper docstring by including
+    '@no_help' within them.
     '''
-    @wraps(command_fn)
-    def wrapper(command: uqcsbot.Command):
-        try:
-            command_fn(command)
-        except UsageSyntaxException as e:
-            helper_doc = sanitize_doc(command_fn.__doc__)
-            uqcsbot.bot.post_message(command.channel_id, f'usage: {helper_doc}')
-    return wrapper
+    return doc is not None and '@no_help' not in doc
 
 
 def success_status(command_fn):
     '''
-    Decorator function which adds a success react after the wrapped command
-    has run. This gives a visual cue to users in the calling channel that
-    the wrapped command was carried out successfully.
+    Decorator function which returns a wrapper function that adds a success
+    react after the wrapped command has run. This gives a visual cue to users in
+    the calling channel that the command was carried out successfully.
     '''
     @wraps(command_fn)
     def wrapper(command: uqcsbot.Command):
@@ -58,9 +52,10 @@ def success_status(command_fn):
 
 def loading_status(command_fn):
     '''
-    Decorator function which adds a loading react before the wrapped command
-    has run and removes it once it has successfully completed. This gives a
-    visual cue to users in the calling channel that the command is in progress.
+    Decorator function which returns a wrapper function that adds a loading
+    react before the wrapped command has run and removes it once it has
+    successfully completed. This gives a visual cue to users in the calling
+    channel that the command is in progress.
     '''
     @wraps(command_fn)
     def wrapper(command: uqcsbot.Command):
