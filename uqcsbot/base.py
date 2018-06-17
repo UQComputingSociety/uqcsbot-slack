@@ -1,10 +1,9 @@
 from slackclient import SlackClient
-from .api import APIWrapper, ChannelWrapper, Channel, UsersWrapper, User
+from uqcsbot.api import APIWrapper, ChannelWrapper, Channel, UsersWrapper
 from functools import partial, wraps
 import collections
 import asyncio
 import concurrent.futures
-import threading
 import logging
 import time
 from contextlib import contextmanager

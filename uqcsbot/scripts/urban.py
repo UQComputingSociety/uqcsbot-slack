@@ -21,7 +21,7 @@ def handle_urban(command: Command) -> None:
     # Attempt to get definitions from the Urban Dictionary API.
     http_response = requests.get(URBAN_API_ENDPOINT, params={'term': search_term})
     if http_response.status_code != 200:
-        bot.post_message(command.channel_id, 'There was an error accessing the Urban Dictionary API.')
+        bot.post_message(command.channel_id, 'There was an error accessing the Urban Dictionary.')
         return
     results = http_response.json()
 
@@ -31,10 +31,11 @@ def handle_urban(command: Command) -> None:
         return
 
     # Get best definition (by most 'thumbs up') and construct response.
-    sorted_defs = sorted(results['list'], key=lambda definition: definition['thumbs_up'], reverse=True)
+    sorted_defs = sorted(results['list'], key=lambda def_: def_['thumbs_up'], reverse=True)
     best_def = sorted_defs[0]
-    example = best_def.get('example', '').split('\r\n')  # Break example into individual lines.
-    formatted_example = '\n'.join(f'> {line}' for line in example)  # Put each line of the example in a block quote.
+    # Break example into individual lines and wrap each in it's own block quote.
+    example = best_def.get('example', '').split('\r\n')
+    formatted_example = '\n'.join(f'> {line}' for line in example)
 
     # Format message and send response to user in channel query was sent from.
     message = f'*{search_term.title()}*\n' \

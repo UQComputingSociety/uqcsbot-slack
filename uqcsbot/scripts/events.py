@@ -7,8 +7,7 @@ from pytz import timezone, utc
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException
 
-CALENDAR_URL = "https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com" \
-               "/public/basic.ics"
+CALENDAR_URL = "https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics"  # noqa
 FILTER_REGEX = re.compile('(full|all|[0-9]+( weeks?)?)')
 BRISBANE_TZ = timezone('Australia/Brisbane')
 MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]

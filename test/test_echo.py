@@ -1,5 +1,6 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 
+
 def test_echo(uqcsbot: MockUQCSBot):
     '''
     Test !echo
