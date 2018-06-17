@@ -34,6 +34,4 @@ def test_umart_normal(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    f = open("test/example.txt", 'w')
-    f.write(messages[1].get('text'))
     assert messages[1].get('text') == get_test_message()
