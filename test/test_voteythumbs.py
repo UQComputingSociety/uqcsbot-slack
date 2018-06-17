@@ -1,5 +1,4 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
-from uqcsbot.utils.command_utils import get_helper_doc
 
 
 def test_voteythumbs(uqcsbot: MockUQCSBot):
