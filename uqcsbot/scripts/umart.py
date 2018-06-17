@@ -19,26 +19,27 @@ def handle_umart(command: Command):
     """
     # Makes sure the query is not empty
     if not command.has_arg():
-        bot.post_message(command.channel, NO_QUERY_MESSAGE)
+        bot.post_message(command.channel_id, NO_QUERY_MESSAGE)
         return
     search_query = command.arg.strip()
     # Detects if user is being smart
     if "SOMETHING NOT AS SPECIFIC" in search_query:
-        bot.post_message(command.channel, "Not literally...")
+        bot.post_message(command.channel_id, "Not literally...")
         return
     search_results = get_umart_results(search_query)
     if not search_results:
-        bot.post_message(command.channel, ERROR_MESSAGE)
+        bot.post_message(command.channel_id, ERROR_MESSAGE)
         return
     if len(search_results) == 0:
-        bot.post_message(command.channel, NO_RESULTS_MESSAGE)
+        bot.post_message(command.channel_id, NO_RESULTS_MESSAGE)
         return
     message = "```"
     for result in search_results:
         message += f"Name: <{UMART_PRODUCT_URL}{result['link']}|{result['name']}>\n"
         message += f"Price: {result['price']}\n"
     message += "```"
-    bot.post_message(command.channel, message)
+    bot.logger.info(message)
+    bot.post_message(command.channel_id, message)
 
 
 def get_umart_results(search_query):
