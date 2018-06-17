@@ -3,7 +3,6 @@ Tests for yt.py
 """
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 from unittest.mock import patch
-import pytest
 import random
 import string
 
@@ -12,6 +11,7 @@ YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
 # 'on_command' to be called and add '!yt' as a handler which messes with
 # testing.
 NO_QUERY_MESSAGE = "You can't look for nothing. !yt <QUERY>"
+
 
 def mocked_search_execute(search_query: str, search_part: str, search_type: str, max_results: int):
     """
@@ -31,11 +31,13 @@ def mocked_search_execute(search_query: str, search_part: str, search_type: str,
         return {'items': items}
     return None
 
+
 def test_yt_no_query(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!yt")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[-1]['text'] == NO_QUERY_MESSAGE
+
 
 @patch("uqcsbot.scripts.yt.execute_search", new=mocked_search_execute)
 def test_yt_normal(uqcsbot: MockUQCSBot):
