@@ -196,7 +196,7 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
         # Note: 'user' is not a part of Slack API for reactions.add, just a
         # convenient way to set the calling user during testing. If not passed,
-        # message is assumed to be from bot.
+        # reaction is assumed to be from bot.
         user = kwargs.get('user', TEST_BOT_ID)
 
         if 'reactions' not in message:
@@ -226,7 +226,7 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
         # Note: 'user' is not a part of Slack API for reactions.add, just a
         # convenient way to set the calling user during testing. If not passed,
-        # message is assumed to be from bot.
+        # reaction is assumed to be from bot.
         user = kwargs.get('user', TEST_BOT_ID)
 
         if 'reactions' not in message:
