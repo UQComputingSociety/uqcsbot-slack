@@ -1,9 +1,8 @@
 """
 Tests for umart.py
 """
-from test.conftest import MockUQCSBot
-from test.helpers import generate_message_object
-from unittest import mock
+from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
+from unittest.mock import patch
 import requests
 import codecs
 
@@ -13,21 +12,28 @@ ERROR_MESSAGE = "I tried to get the things but alas I could not. Error with HTTP
 
 TEST_URL = "https://www.umart.com.au/umart1/pro/products_list_searchnew_min.phtml?search=HDD&bid=2"
 
+def get_test_message():
+    f = codecs.open("test/umart_test_message.txt", "r")
+    return f.read()
+
 # This method will be used to replace the requests response
 def mocked_html_get(*args, **kwargs):
-    f = codecs.open("umart_products_list_search.html", "r")
+    f = codecs.open("test/umart_products_list_search.html", "r")
     return f.read()
 
 
 def test_umart_no_query(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!umart")
-    uqcsbot.test_handle_event(message)
-    assert len(uqcsbot.test_posted_messages) == 1
-    assert uqcsbot.test_posted_messages[0].text == NO_QUERY_MESSAGE
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[1].get('text') == NO_QUERY_MESSAGE
 
 
-@mock.patch("uqcsbot.scripts.umart.get_search_page", side_effect=mocked_html_get)
+@patch("uqcsbot.scripts.umart.get_search_page", new=mocked_html_get)
 def test_umart_normal(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!umart HDD")
-    uqcsbot.test_handle_event(message)
-    assert len(uqcsbot.test_posted_messages) == 1
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    f = open("test/example.txt", 'w')
+    f.write(messages[1].get('text'))
+    assert messages[1].get('text') == get_test_message()
