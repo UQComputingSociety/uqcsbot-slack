@@ -15,7 +15,7 @@ UMART_PRODUCT_URL = "https://www.umart.com.au/umart1/pro/"
 @bot.on_command("umart")
 def handle_umart(command: Command):
     """
-    `!umart <QUERY>` - Returns up to 5 top results for products from umart matching the search query.
+    `!umart <QUERY>` - Returns 5 top results for products from umart matching the search query.
     """
     # Makes sure the query is not empty
     if not command.has_arg():
@@ -73,7 +73,7 @@ def get_search_page(search_query):
     Gets the search page HTML
     """
     try:
-        with closing(get(UMART_SEARCH_URL+"?search="+search_query+"&bid=2")) as resp:
+        with closing(get(UMART_SEARCH_URL + "?search=" + search_query + "&bid=2")) as resp:
             return resp.content
     except RequestException as e:
         bot.logger.error(
