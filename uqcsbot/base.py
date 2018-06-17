@@ -106,7 +106,8 @@ class UQCSBot(object):
             '''
             Decorator function which returns a wrapper function that catches any
             UsageSyntaxExceptions and sends the wrapped command's helper doc to
-            the calling channel.
+            the calling channel. Also adds the function as a handler for the
+            given command name.
             '''
             @wraps(command_fn)
             def wrapper(command: Command):
@@ -115,7 +116,6 @@ class UQCSBot(object):
                 except UsageSyntaxException as e:
                     helper_doc = get_helper_doc(command.name)
                     self.post_message(command.channel_id, f'usage: {helper_doc}')
-            # Adds the wrapped function as a handler for the given command
             self._command_registry[command_name].append(wrapper)
             return wrapper
         return decorator
