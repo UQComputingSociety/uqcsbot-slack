@@ -5,8 +5,7 @@ from uqcsbot import bot, Command
 @bot.on_command('voteythumbs')
 def handle_voteythumbs(command: Command):
     '''
-    `!voteythumbs <TOPIC>` - Starts a :thumbsup: :thumbsdown: vote on the given
-    topic. If unspecified, will not set a topic.
+    `!voteythumbs [TOPIC]` - Starts a :thumbsup: :thumbsdown: vote.
     '''
     add_vote_react = partial(
         bot.api.reactions.add,
