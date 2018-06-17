@@ -4,6 +4,7 @@ from uqcsbot import bot, Command
 # Maximum number of posts back a user can try to mock
 MAX_NUM_POSTS_BACK = 100
 
+
 def get_nth_most_recent_message(channel_id: str, message_index: int):
     '''
     Given a channel and a message index, will find the message at that index;
@@ -26,6 +27,7 @@ def get_nth_most_recent_message(channel_id: str, message_index: int):
     # signify a failure.
     return None if len(messages) != message_limit else messages[-1]['text']
 
+
 def mock_message(message: str):
     '''
     Given a message, will return the mocked version of it. This involves
@@ -38,6 +40,7 @@ def mock_message(message: str):
     See: http://knowyourmeme.com/memes/mocking-spongebob
     '''
     return ''.join(choice((c.upper, c.lower))() for c in message)
+
 
 @bot.on_command("mock")
 def handle_mock(command: Command):
@@ -53,9 +56,9 @@ def handle_mock(command: Command):
     elif num_posts_back < 0:
         response = 'Cannot mock into the future (yet)!'
     else:
-        message_to_mock = get_nth_most_recent_message(command.channel.id, num_posts_back)
+        message_to_mock = get_nth_most_recent_message(command.channel_id, num_posts_back)
         if message_to_mock is None:
             response = 'Something went wrong (likely insufficient conversation history).'
         else:
             response = mock_message(message_to_mock)
-    bot.post_message(command.channel, response)
+    bot.post_message(command.channel_id, response)

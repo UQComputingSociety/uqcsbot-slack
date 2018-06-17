@@ -8,6 +8,7 @@ SUCCESS_REACTS = ['thumbsup', 'thumbsup_all', 'msn_thumbsup', 'mint', 'nice',
 HYPE_REACTS = ['nice', 'noice', 'mint', 'exclamation', 'fiestaparrot',
                'github_square3', 'sweating']
 
+
 def success_status(command_fn):
     '''
     Decorator function which adds a success react after the wrapped command
@@ -18,12 +19,13 @@ def success_status(command_fn):
     def wrapper(command: Command):
         success_react = choice(SUCCESS_REACTS)
         reaction_kwargs = {'name': success_react,
-                           'channel': command.channel.id,
+                           'channel': command.channel_id,
                            'timestamp': command.message['ts']}
         res = command_fn(command)
         bot.api.reactions.add(**reaction_kwargs)
         return res
     return wrapper
+
 
 def loading_status(command_fn):
     '''
@@ -35,7 +37,7 @@ def loading_status(command_fn):
     def wrapper(command: Command):
         loading_react = choice(LOADING_REACTS)
         reaction_kwargs = {'name': loading_react,
-                           'channel': command.channel.id,
+                           'channel': command.channel_id,
                            'timestamp': command.message['ts']}
         bot.api.reactions.add(**reaction_kwargs)
         res = command_fn(command)

@@ -1,11 +1,12 @@
-"""
-Tests for uqcsbot.scripts.cat
-"""
-from .conftest import MockUQCSBot
-from .helpers import generate_message_object
+from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 
+# TODO(mitch): work out a way to get the cat from cat.py without triggering
+# 'on_command' to be called and add '!cat' as a handler which messes with
+# testing.
 
 def test_cat(uqcsbot: MockUQCSBot):
-    message = generate_message_object("!cat")
-    uqcsbot.test_handle_event(message)
-    assert len(uqcsbot.test_posted_messages) == 1
+    '''
+    test !cat
+    '''
+    uqcsbot.post_message(TEST_CHANNEL_ID, '!cat')
+    assert len(uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])) == 2

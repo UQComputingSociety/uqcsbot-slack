@@ -1,5 +1,5 @@
 from slackclient import SlackClient
-from .api import APIWrapper, ChannelWrapper, Channel
+from .api import APIWrapper, ChannelWrapper, Channel, UsersWrapper, User
 from functools import partial
 import collections
 import asyncio
@@ -8,7 +8,7 @@ import threading
 import logging
 import time
 from contextlib import contextmanager
-from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type
+from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
@@ -16,9 +16,8 @@ CmdT = TypeVar('CmdT', bound='Command')
 
 
 class Command(object):
-    def __init__(self, command_name: str, arg: Optional[str], channel: Channel, message: dict) -> None:
+    def __init__(self, command_name: str, arg: Optional[str], message: dict) -> None:
         self.command_name = command_name
-        self.channel = channel
         self.arg = arg
         self.message = message
 
@@ -33,20 +32,29 @@ class Command(object):
         command_name, *arg = text[1:].split(" ", 1)
         return cls(
             command_name=command_name,
-            channel=bot.channels.get(message["channel"]),
             arg=None if not arg else arg[0],
             message=message
         )
 
     @property
     def user_id(self):
+        '''
+        Returns the id of the user who called the command.
+        '''
         return self.message['user']
+
+    @property
+    def channel_id(self):
+        '''
+        Returns the id of the channel that the command was called in.
+        '''
+        return self.message['channel']
 
 
 CommandHandler = Callable[[Command], None]
 
 
-def protected_property(prop_name, attr_name):
+def protected_property(prop_name: str, attr_name: str):
     """
     Makes a read-only getter called `prop_name` that gets `attr_name`
     """
@@ -54,16 +62,17 @@ def protected_property(prop_name, attr_name):
         return getattr(self, attr_name)
     prop_fn.__name__ = prop_name
     return property(prop_fn)
-underscored_getter = lambda s: protected_property(s, '_' + s)
+
+
+def underscored_getter(s: str) -> Any:
+    return protected_property(s, '_' + s)
 
 
 class UQCSBot(object):
     api_token: Optional[str] = underscored_getter("api_token")
     client: Optional[SlackClient] = underscored_getter("client")
     verification_token: Optional[str] = underscored_getter("verification_token")
-    executor: Optional[concurrent.futures.ThreadPoolExecutor] = underscored_getter("executor")
-    scheduler: Optional[BackgroundScheduler] = underscored_getter("scheduler")
-    command_registry: Optional[DefaultDict[str, list]] = underscored_getter("command_registry")
+    executor: concurrent.futures.ThreadPoolExecutor = underscored_getter("executor")
 
     def __init__(self, logger=None):
         self._api_token = None
@@ -71,8 +80,8 @@ class UQCSBot(object):
         self._verification_token = None
         self._executor = concurrent.futures.ThreadPoolExecutor()
         self.logger = logger or logging.getLogger("uqcsbot")
-        self._handlers = collections.defaultdict(list)
-        self._command_registry = collections.defaultdict(list)
+        self._handlers: DefaultDict[str, list] = collections.defaultdict(list)
+        self._command_registry: DefaultDict[str, list] = collections.defaultdict(list)
         self._scheduler = BackgroundScheduler()
 
         self.register_handler('message', self._handle_command)
@@ -80,6 +89,7 @@ class UQCSBot(object):
         self.register_handler('goodbye', self._handle_goodbye)
 
         self.channels = ChannelWrapper(self)
+        self.users = UsersWrapper(self)
 
     def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
@@ -93,7 +103,7 @@ class UQCSBot(object):
 
     def on_command(self, command_name: str):
         def decorator(fn):
-            self.command_registry[command_name].append(fn)
+            self._command_registry[command_name].append(fn)
             return fn
         return decorator
 
@@ -148,7 +158,7 @@ class UQCSBot(object):
         self._scheduler.start()
         try:
             yield
-        except:
+        except Exception:
             self.logger.exception("An error occurred, exiting")
             self._scheduler.shutdown()
             self._executor.shutdown()
@@ -162,7 +172,7 @@ class UQCSBot(object):
         try:
             return handler(evt)
         except Exception:
-            self.logger.exception('Error in handler')
+            self.logger.exception(f'Error in handler while processing {evt}')
             return None
 
     def _handle_command(self, message: dict) -> None:
@@ -174,7 +184,7 @@ class UQCSBot(object):
         command = Command.from_message(message)
         if command is None:
             return
-        for handler in self.command_registry[command.command_name]:
+        for handler in self._command_registry[command.command_name]:
             self.executor.submit(
                 self._execute_catching_error,
                 handler,
@@ -210,39 +220,17 @@ class UQCSBot(object):
         self._client = SlackClient(api_token)
         self._verification_token = verification_token
         with self._execution_context():
-            # Initialise channels at start so we don't have to block
-            self.channels._initialise()
-
-            if not self.client.rtm_connect(with_team_state=False, auto_reconnect=True):
+            if not self.client.rtm_connect(with_team_state=True, auto_reconnect=True):
                 raise OSError("Error connecting to RTM API")
+            connect_state = self.client.server.login_data
+            self.channels.populate_from_team_state(connect_state)
+            self.users.populate_from_team_state(connect_state)
             while True:
                 for message in self.client.rtm_read():
                     self._run_handlers(message)
                     if message.get('type') == "goodbye":
                         break
                 time.sleep(0.5)
-
-    def run_cli(self):
-        """
-        Run in local (CLI) mode
-        """
-
-        def cli_api_call(method, **kwargs):
-            if method == "chat.postMessage":
-                print(kwargs['text'])
-            else:
-                print(kwargs)
-
-        self.api_call = cli_api_call
-        with self._execution_context():
-            while True:
-                response = input("> ")
-                self._run_handlers({
-                    "text": response,
-                    "channel": "general",
-                    "subtype": "user",
-                    "type": "message"
-                })
 
 
 bot = UQCSBot()

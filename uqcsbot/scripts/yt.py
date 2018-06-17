@@ -18,23 +18,24 @@ def handle_yt(command: Command):
     '''
     # Makes sure the query is not empty.
     if not command.has_arg():
-        bot.post_message(command.channel, NO_QUERY_MESSAGE)
+        bot.post_message(command.channel_id, NO_QUERY_MESSAGE)
         return
 
     search_query = command.arg.strip()
     try:
-        videoID = get_top_video_result(search_query, command.channel)
+        videoID = get_top_video_result(search_query, command.channel_id)
     except HttpError as e:
         # Googleapiclient should handle http errors
         bot.logger.error(f'An HTTP error {e.resp.status} occurred:\n{e.content}')
         # Force return to ensure no message is sent.
         return
-    
+
     if videoID:
-        bot.post_message(command.channel, f'{YOUTUBE_VIDEO_URL}{videoID}')
+        bot.post_message(command.channel_id, f'{YOUTUBE_VIDEO_URL}{videoID}')
     else:
-        bot.post_message(command.channel, "Your query returned no results.")
-        
+        bot.post_message(command.channel_id, "Your query returned no results.")
+
+
 def get_top_video_result(search_query: str, channel):
     '''
     The normal method for using !yt searches based on query
@@ -45,11 +46,11 @@ def get_top_video_result(search_query: str, channel):
 
     search_response = youtube.search().list(
         q=search_query,
-        part='id', # Only the video ID is needed to get video link
-        maxResults=1, # Since only one video is linked this is the only result we need
-        type='video' # Only want videos no pesky channels or playlists
+        part='id',  # Only the video ID is needed to get video link
+        maxResults=1,  # Since only one video is linked this is the only result we need
+        type='video'  # Only want videos no pesky channels or playlists
     ).execute()
-    
+
     search_result = search_response.get('items')
     if search_result is None:
         return None

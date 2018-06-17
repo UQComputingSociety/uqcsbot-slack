@@ -15,16 +15,20 @@ SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 # token tracking by GitHub etal.
 #
 # Order: uqcsbot-alpha, uqcsbot-beta, uqcsbot-gamma, uqcsbot-delta
-BOT_TOKENS = {'U9LA6BX8X': b64decode('eG94Yi0zMjYzNDY0MDUzMDMteGpIbFhlamVNUG1McVhRSnNnZFoyZVhT').decode('utf-8'),
-              'U9K81NL7N': b64decode('eG94Yi0zMjUyNzM3NjgyNjAtNFd0SGhRUWhLb3BSVUlJNFJuc0VRRXJL').decode('utf-8'),
-              'U9JJZ1ZJ4': b64decode('eG94Yi0zMjQ2NDUwNjc2MTYtaHNpR3B3S0ZhSnY3bzJrOW43UU9uRXFp').decode('utf-8'),
-              'U9K5W508K': b64decode('eG94Yi0zMjUyMDAxNzAyOTEtTlJvdVVLcWdyVEpVSE9SMjBoUzhBcnhW').decode('utf-8')}
+BOT_TOKENS = {'U9LA6BX8X': 'eG94Yi0zMjYzNDY0MDUzMDMteGpIbFhlamVNUG1McVhRSnNnZFoyZVhT',
+              'U9K81NL7N': 'eG94Yi0zMjUyNzM3NjgyNjAtNFd0SGhRUWhLb3BSVUlJNFJuc0VRRXJL',
+              'U9JJZ1ZJ4': 'eG94Yi0zMjQ2NDUwNjc2MTYtaHNpR3B3S0ZhSnY3bzJrOW43UU9uRXFp',
+              'U9K5W508K': 'eG94Yi0zMjUyMDAxNzAyOTEtTlJvdVVLcWdyVEpVSE9SMjBoUzhBcnhW'}
+for key in BOT_TOKENS:
+    BOT_TOKENS[key] = b64decode(BOT_TOKENS[key]).decode('utf-8')
+
 # Channel group which contains all the bots. Easy way to get all their ids.
 SECRET_BOT_MEETING_ROOM = 'G9JJXHF7S'
 # Mitch's UQCSTesting Slack API Token. No touchie >:(
 API_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01YjdmYjlhYzAyZWYzNDAyNTYyMTJmY2Q2YjQ1NmEyYg==').decode('utf-8')
 
 logger = logging.getLogger("uqcsbot")
+
 
 def get_user_info(user_id):
     '''
@@ -45,6 +49,7 @@ def get_user_info(user_id):
         sys.exit(1)
 
     return json_contents
+
 
 def is_active_bot(user_info):
     '''
@@ -112,10 +117,6 @@ def main():
 
     # Setup the CLI argument parser
     parser = argparse.ArgumentParser(description='Run UQCSBot')
-    parser.add_argument('--local',
-                        dest='local',
-                        action='store_true',
-                        help='Runs the bot in local (CLI) mode')
     parser.add_argument('--dev',
                         dest='dev',
                         action='store_true',
@@ -131,28 +132,25 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(level=args.log_level)
 
-    # Run the bot
-    if args.local:
-        bot.run_cli()
-    else:
-        # If in development mode, attempt to allocate an available bot token,
-        # else stick with the default. If no bot could be allocated, exit.
-        bot_token = SLACK_BOT_TOKEN
-        if args.dev:
-            test_bot = get_free_test_bot()
-            if test_bot is None:
-                logger.error('Something went wrong during bot allocation. '
-                      'Please ensure there are bots available and try again later. '
-                      'Exiting.')
-                sys.exit(1)
-            bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
-            logger.info("Bot name: " + test_bot['user']['name'])
-
-        if bot_token is None or bot_token is "":
-            logger.error("No bot token found!")
+    # If in development mode, attempt to allocate an available bot token,
+    # else stick with the default. If no bot could be allocated, exit.
+    bot_token = SLACK_BOT_TOKEN
+    if args.dev:
+        test_bot = get_free_test_bot()
+        if test_bot is None:
+            logger.error('Something went wrong during bot allocation. Please ' +
+                         'ensure there are bots available and try again ' +
+                         'later. Exiting.')
             sys.exit(1)
+        bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
+        logger.info("Bot name: " + test_bot['user']['name'])
 
-        bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
+    if bot_token is None or bot_token is "":
+        logger.error("No bot token found!")
+        sys.exit(1)
+
+    bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
+
 
 if __name__ == "__main__":
     main()

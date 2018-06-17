@@ -1,8 +1,8 @@
 from uqcsbot import bot, Command
 from requests import get
-from requests.utils import quote
+from urllib.parse import quote
 from bs4 import BeautifulSoup
-from typing import List
+from typing import List, Tuple
 from functools import partial
 import asyncio
 
@@ -10,7 +10,7 @@ ACRONYM_LIMIT = 5
 BASE_URL = "http://acronyms.thefreedictionary.com"
 
 
-async def get_acronyms(loop, word: str) -> (str, List[str]):
+async def get_acronyms(loop, word: str) -> Tuple[str, List[str]]:
     http_response = await loop.run_in_executor(None, partial(get, f"{BASE_URL}/{quote(word)}"))
     html = BeautifulSoup(http_response.content, 'html.parser')
     acronym_tds = html.find_all("td", class_="acr")
@@ -31,10 +31,10 @@ def handle_acronym(command: Command):
     if len(words) == 1:
         word = words[0]
         if word.lower() in [":horse:", "horse"]:
-            bot.post_message(command.channel, ">:taco:")
+            bot.post_message(command.channel_id, ">:taco:")
             return
         elif word.lower() in [":rachel:", "rachel"]:
-            bot.post_message(command.channel, ">:older_woman:")
+            bot.post_message(command.channel_id, ">:older_woman:")
             return
 
     loop = bot.get_event_loop()
@@ -50,4 +50,4 @@ def handle_acronym(command: Command):
     if len(words) > ACRONYM_LIMIT:
         response += f">I am limited to {ACRONYM_LIMIT} acronyms at once"
 
-    bot.post_message(command.channel, response)
+    bot.post_message(command.channel_id, response)
