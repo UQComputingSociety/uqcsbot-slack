@@ -3,9 +3,10 @@ from typing import Iterable, Tuple, Optional
 from base64 import b64decode
 import requests
 import json
+import os
 from uqcsbot.util.status_reacts import loading_status
 
-APP_ID = b64decode('RzU0S1VBLVVHWTdHR0hWUlg=').decode('utf-8')
+WOLFRAM_APP_ID = os.environ.get('WOLFRAM_APP_ID')
 
 
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
@@ -56,7 +57,7 @@ def wolfram_full(search_query: str, channel):
     !wolfram --full y = 2x + c
     """
     api_url = "http://api.wolframalpha.com/v2/query?&output=json"
-    http_response = requests.get(api_url, params={'input': search_query, 'appid': APP_ID})
+    http_response = requests.get(api_url, params={'input': search_query, 'appid': WOLFRAM_APP_ID})
 
     # Check if the response is ok
     if http_response.status_code != requests.codes.ok:
@@ -95,7 +96,7 @@ def get_short_answer(search_query: str):
     conversation starter but may be interesting.
     """
     api_url = "http://api.wolframalpha.com/v2/result?"
-    http_response = requests.get(api_url, params={'input': search_query, 'appid': APP_ID})
+    http_response = requests.get(api_url, params={'input': search_query, 'appid': WOLFRAM_APP_ID})
 
     # Check if the response is ok. A status code of 501 signifies that no result could be found.
     if http_response.status_code == 501:
@@ -171,13 +172,13 @@ def conversation_request(
     # Any of the following would suffice but may as well be thorough
     if host_name is None or conversation_id is None or s_output is None:
         api_url = "http://api.wolframalpha.com/v1/conversation.jsp?"
-        params = {'appid': APP_ID, 'i': search_query}
+        params = {'appid': WOLFRAM_APP_ID, 'i': search_query}
     else:
         # Slack annoyingly formats the reply_host link so we have to extract what we want:
         # The format is <http://www.domain.com|www.domain.com>
         host_name = host_name[1:-1].split('|')[0]
         api_url = f'{host_name}/api/v1/conversation.jsp?'
-        params = {'appid': APP_ID, 'i': search_query, 'conversationid': conversation_id, 's': s_output}
+        params = {'appid': WOLFRAM_APP_ID, 'i': search_query, 'conversationid': conversation_id, 's': s_output}
 
     http_response = requests.get(api_url, params=params)
 

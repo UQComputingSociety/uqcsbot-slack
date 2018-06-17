@@ -3,31 +3,21 @@ import sys
 import importlib
 import logging
 import argparse
-from base64 import b64decode
 import json
 import requests
-from uqcsbot.base import UQCSBot, bot, Command
+from uqcsbot.base import bot
 
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
-
-# UQCSTesting bot tokens. Everything is base64 encoded to somewhat circumvent
-# token tracking by GitHub etal.
-#
-# Order: uqcsbot-alpha, uqcsbot-beta, uqcsbot-gamma, uqcsbot-delta
-BOT_TOKENS = {'U9LA6BX8X': 'eG94Yi0zMjYzNDY0MDUzMDMteGpIbFhlamVNUG1McVhRSnNnZFoyZVhT',
-              'U9K81NL7N': 'eG94Yi0zMjUyNzM3NjgyNjAtNFd0SGhRUWhLb3BSVUlJNFJuc0VRRXJL',
-              'U9JJZ1ZJ4': 'eG94Yi0zMjQ2NDUwNjc2MTYtaHNpR3B3S0ZhSnY3bzJrOW43UU9uRXFp',
-              'U9K5W508K': 'eG94Yi0zMjUyMDAxNzAyOTEtTlJvdVVLcWdyVEpVSE9SMjBoUzhBcnhW'}
-for key in BOT_TOKENS:
-    BOT_TOKENS[key] = b64decode(BOT_TOKENS[key]).decode('utf-8')
-
+UQCSTESTING_USER_TOKEN = os.environ.get('UQCSTESTING_USER_TOKEN', '')
+BOT_TOKENS = {'U9LA6BX8X': os.environ.get('UQCSTESTING_BOT_TOKEN_ALPHA', ''),
+              'U9K81NL7N': os.environ.get('UQCSTESTING_BOT_TOKEN_BETA', ''),
+              'U9JJZ1ZJ4': os.environ.get('UQCSTESTING_BOT_TOKEN_GAMMA', ''),
+              'U9K5W508K': os.environ.get('UQCSTESTING_BOT_TOKEN_DELTA', '')}
 # Channel group which contains all the bots. Easy way to get all their ids.
 SECRET_BOT_MEETING_ROOM = 'G9JJXHF7S'
-# Mitch's UQCSTesting Slack API Token. No touchie >:(
-API_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01YjdmYjlhYzAyZWYzNDAyNTYyMTJmY2Q2YjQ1NmEyYg==').decode('utf-8')
 
-logger = logging.getLogger("uqcsbot")
+LOGGER = logging.getLogger("uqcsbot")
 
 
 def get_user_info(user_id):
@@ -37,15 +27,15 @@ def get_user_info(user_id):
     See https://api.slack.com/methods/users.info for the contents of info
     '''
     api_url = 'https://slack.com/api/users.info'
-    response = requests.get(api_url, params={'token': API_TOKEN, 'user': user_id})
+    response = requests.get(api_url, params={'token': UQCSTESTING_USER_TOKEN, 'user': user_id})
 
     if response.status_code != requests.codes['ok']:
-        logger.error(f'Received status code {response.status.code}')
+        LOGGER.error(f'Received status code {response.status.code}')
         sys.exit(1)
 
     json_contents = json.loads(response.content)
     if not json_contents['ok']:
-        logger.error(json_contents['error'])
+        LOGGER.error(json_contents['error'])
         sys.exit(1)
 
     return json_contents
@@ -55,17 +45,20 @@ def is_active_bot(user_info):
     '''
     Returns true if the provided user info describes an active bot (i.e. not deleted)
     '''
-    return user_info['ok'] and user_info['user'].get('is_bot', False) and not user_info['user']['deleted']
+    if not user_info['ok']:
+        return False
+    user = user_info['user']
+    return user.get('is_bot', False) and not user['deleted']
 
 
 def is_bot_avaliable(user_id):
     '''
-    Returns true if the given user_id is an active bot that is avaliable (i.e. is
+    Returns true if the given user_id is an active bot that is available (i.e. is
     not currently 'active' which would mean it is in use by another user).
     '''
 
     api_url = 'https://slack.com/api/users.getPresence'
-    response = requests.get(api_url, params={'token': API_TOKEN, 'user': user_id})
+    response = requests.get(api_url, params={'token': UQCSTESTING_USER_TOKEN, 'user': user_id})
     if response.status_code != requests.codes['ok']:
         return False
 
@@ -84,14 +77,15 @@ def get_free_test_bot():
     See https://api.slack.com/methods/users.info for the contents of info
     '''
     api_url = 'https://slack.com/api/conversations.members'
-    response = requests.get(api_url, params={'token': API_TOKEN, 'channel': SECRET_BOT_MEETING_ROOM})
+    response = requests.get(api_url, params={'token': UQCSTESTING_USER_TOKEN,
+                                             'channel': SECRET_BOT_MEETING_ROOM})
     if response.status_code != requests.codes['ok']:
-        logger.error(f'Received status code {response.status.code}')
+        LOGGER.error(f'Received status code {response.status.code}')
         sys.exit(1)
 
     json_contents = json.loads(response.content)
     if not json_contents['ok']:
-        logger.error(json_contents['error'])
+        LOGGER.error(json_contents['error'])
         sys.exit(1)
 
     for user_id in json_contents['members']:
@@ -138,15 +132,15 @@ def main():
     if args.dev:
         test_bot = get_free_test_bot()
         if test_bot is None:
-            logger.error('Something went wrong during bot allocation. Please ' +
+            LOGGER.error('Something went wrong during bot allocation. Please ' +
                          'ensure there are bots available and try again ' +
                          'later. Exiting.')
             sys.exit(1)
         bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
-        logger.info("Bot name: " + test_bot['user']['name'])
+        LOGGER.info("Bot name: " + test_bot['user']['name'])
 
-    if bot_token is None or bot_token is "":
-        logger.error("No bot token found!")
+    if bot_token is None or bot_token == "":
+        LOGGER.error("No bot token found!")
         sys.exit(1)
 
     bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
