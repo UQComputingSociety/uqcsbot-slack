@@ -1,6 +1,5 @@
 from uqcsbot import bot, Command
 from typing import Iterable, Tuple, Optional
-from base64 import b64decode
 import requests
 import json
 import os
@@ -11,9 +10,9 @@ WOLFRAM_APP_ID = os.environ.get('WOLFRAM_APP_ID')
 
 def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
     """
-    Yields subpods in the order they should be displayed. A subpod is essentially an element of a wolfram response.
-    For example one pod might be "Visual Representation" and the subpod is a graph of your input. Every pod has at least
-    one subpod (usually only one).
+    Yields subpods in the order they should be displayed. A subpod is essentially an element of a
+    wolfram response. For example one pod might be "Visual Representation" and the subpod is a graph
+    of your input. Every pod has at least one subpod (usually only one).
 
     Yield: (pod_or_subpod_title, subpod)
     """
@@ -36,7 +35,8 @@ def handle_wolfram(command: Command):
     # search query. See wolfram_full and wolfram_normal for the differences.
     if command.has_arg():
         cmd = command.arg.strip()
-        # Doing it specific to the start and end just in case someone has --full inside their query for whatever reason
+        # Doing it specific to the start and end just in case someone has --full inside their query
+        # for whatever reason.
         if cmd.startswith('--full'):
             cmd = cmd[len('--full'):]  # removes the --full
             wolfram_full(cmd, command.channel_id)
