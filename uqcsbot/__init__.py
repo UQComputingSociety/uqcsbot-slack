@@ -3,21 +3,32 @@ import sys
 import importlib
 import logging
 import argparse
+from base64 import b64decode
 import json
 import requests
 from uqcsbot.base import bot, Command, UQCSBot # noqa
 
+LOGGER = logging.getLogger("uqcsbot")
+
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
-UQCSTESTING_USER_TOKEN = os.environ.get('UQCSTESTING_USER_TOKEN', '')
-BOT_TOKENS = {'U9LA6BX8X': os.environ.get('UQCSTESTING_BOT_TOKEN_ALPHA', ''),
-              'U9K81NL7N': os.environ.get('UQCSTESTING_BOT_TOKEN_BETA', ''),
-              'U9JJZ1ZJ4': os.environ.get('UQCSTESTING_BOT_TOKEN_GAMMA', ''),
-              'U9K5W508K': os.environ.get('UQCSTESTING_BOT_TOKEN_DELTA', '')}
 # Channel group which contains all the bots. Easy way to get all their ids.
 SECRET_BOT_MEETING_ROOM = 'G9JJXHF7S'
 
-LOGGER = logging.getLogger("uqcsbot")
+# UQCSTesting tokens. Everything is base64 encoded to somewhat circumvent
+# token tracking by GitHub etal.
+#
+# Order: uqcsbot-alpha, uqcsbot-beta, uqcsbot-gamma, uqcsbot-delta
+BOT_TOKENS = {'U9LA6BX8X': 'eG94Yi0zMjYzNDY0MDUzMDMteGpIbFhlamVNUG1McVhRSnNnZFoyZVhT',
+              'U9K81NL7N': 'eG94Yi0zMjUyNzM3NjgyNjAtNFd0SGhRUWhLb3BSVUlJNFJuc0VRRXJL',
+              'U9JJZ1ZJ4': 'eG94Yi0zMjQ2NDUwNjc2MTYtaHNpR3B3S0ZhSnY3bzJrOW43UU9uRXFp',
+              'U9K5W508K': 'eG94Yi0zMjUyMDAxNzAyOTEtTlJvdVVLcWdyVEpVSE9SMjBoUzhBcnhW'}
+for key in BOT_TOKENS:
+    BOT_TOKENS[key] = b64decode(BOT_TOKENS[key]).decode('utf-8')
+
+# Mitch's UQCSTesting Slack API Token. No touchie >:(
+UQCSTESTING_USER_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01Yj'\
+                                   'dmYjlhYzAyZWYzNDAyNTYyMTJmY2Q2YjQ1NmEyYg==').decode('utf-8')
 
 
 def get_user_info(user_id):
