@@ -32,7 +32,7 @@ def test_welcome(uqcsbot: MockUQCSBot):
     direct_messages = uqcsbot.test_messages.get(TEST_DIRECT_ID, [])
     print(general_messages, direct_messages)
     assert len(direct_messages) > 0
-    assert general_messages[-1]['text'] == f'Welcome, {TEST_USER_ID}!'
+    assert general_messages[-1]['text'] == f'Welcome, <@{TEST_USER_ID}>!'
 
 
 def test_welcome_milestone(uqcsbot: MockUQCSBot):
