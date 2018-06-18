@@ -33,7 +33,8 @@ def handle_latex_cmd(command: Command):
 
 @bot.on('message')
 def handle_latex_evt(evt):
-    if evt.get('subtype') == "bot_message":
+    if 'subtype' in evt:
+        # Only handle evt on raw messages from users
         return
     match = re.search(r"\$\$(.+)\$\$", evt['text'])
     if match is None:
