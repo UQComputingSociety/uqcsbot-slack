@@ -33,10 +33,8 @@ def welcome(evt: dict):
     general = bot.channels.get("general")
     user = bot.users.get(evt.get("user"))
 
-    if user:
-        bot.post_message(general, f"Welcome, {user.display_name}!")
-
     if user and not user.is_bot:
+        bot.post_message(general, f"Welcome, <@{user.user_id}>!")
         for message in WELCOME_MESSAGES:
             time.sleep(MESSAGE_PAUSE)
             bot.post_message(evt.get("user"), message)
