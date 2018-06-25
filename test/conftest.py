@@ -7,9 +7,9 @@ from itertools import islice
 from functools import partial
 from collections import defaultdict
 import time
+from typing import Optional
 import pytest
 from slackclient import SlackClient
-
 import uqcsbot as uqcsbot_module
 from uqcsbot.api import APIWrapper
 from uqcsbot.base import UQCSBot, Command
@@ -170,7 +170,7 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, 'members': sliced_members, 'cursor': cursor}
 
-    def get_channel_message(self, **kwargs) -> dict:
+    def get_channel_message(self, **kwargs) -> Optional[dict]:
         '''
         Convenience function which returns the message at the given channel
         and timestamp.
@@ -290,6 +290,7 @@ class MockUQCSBot(UQCSBot):
             raise NotImplementedError('{command.command_name} is not a registered command.')
         for handler in self._command_registry[command.command_name]:
             handler(command)
+        return None
 
     def _run_handlers(self, event: dict):
         '''
