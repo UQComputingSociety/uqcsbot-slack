@@ -242,7 +242,7 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
 
         reaction_object['count'] -= 1
-        reaction_object['users'].pop(user)
+        reaction_object['users'].remove(user)
 
         # Removes the reaction from the message so that we can re-add the updated version.
         message['reactions'] = [r for r in message['reactions'] if r['name'] != name]
