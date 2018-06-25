@@ -265,12 +265,11 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
 
         # Strip the kwargs down to only ones which are valid for this api call.
-        # Note: if there is an additional argument you need supported, add it
-        # here.
+        # Note: If there is an additional argument you need supported, add it
+        # here as well as the intended functionality below.
         stripped_kwargs = {k: v for k, v in kwargs.items()
-                           if k in ('text', 'attachments', 'user')}
-        message = {'type': 'message', 'ts': str(time.time()), 'user': user,
-                   **stripped_kwargs}
+                           if k in ('text', 'attachments')}
+        message = {'type': 'message', 'ts': str(time.time()), 'user': user, **stripped_kwargs}
         # In case we were given a channel name, set channel strictly by the id.
         message['channel'] = channel.id
         self.test_messages[channel.id].append(message)
