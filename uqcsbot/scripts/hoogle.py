@@ -2,8 +2,6 @@ from uqcsbot import bot, Command
 import requests
 import json
 import html
-import argparse
-from uqcsbot.utils.command_utils import UsageSyntaxException
 
 
 def get_endpoint(type_sig: str) -> str:
@@ -31,24 +29,36 @@ def handle_hoogle(command: Command):
     '''
     command_args = command.arg.split() if command.has_arg() else []
 
-    arg_parser = argparse.ArgumentParser()
-    def usage_error(*args, **kwargs):
-        raise UsageSyntaxException()
-    arg_parser.error = usage_error  # type: ignore
-    arg_parser.add_argument('-v', '--verbose', action='store_true')
-    arg_parser.add_argument('type_signature')
+    verbose = False
 
-    parsed_args = arg_parser.parse_args(command_args)
-    endpoint_url = get_endpoint(parsed_args.type_signature)
+    if '--verbose' in command_args:
+        command_args.remove('--verbose')
+        verbose = True
+
+    if '-v' in command_args:
+        command_args.remove('-v')
+        verbose = True
+
+    if len(command_args) == 0:
+        bot.post_message(command.channel_id, "usage: " + handle_hoogle.__doc__)
+        return
+
+    type_sig = ' '.join(command_args)
+
+    endpoint_url = get_endpoint(type_sig)
+
     http_response = requests.get(endpoint_url)
+
     if http_response.status_code != requests.codes.ok:
         bot.post_message(command.channel_id, "Problem fetching data")
         return
 
     results = json.loads(http_response.content).get('results', [])
+
     if len(results) == 0:
         bot.post_message(command.channel_id, "No results found")
         return
 
-    message = "\n".join(pretty_hoogle_result(result, parsed_args.verbose) for result in results)
+    message = "\n".join(pretty_hoogle_result(result, verbose) for result in results)
+
     bot.post_message(command.channel_id, message)
