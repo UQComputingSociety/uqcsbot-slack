@@ -1,9 +1,8 @@
-import os
-import json
+from uqcsbot import bot, Command
 from typing import Iterable, Tuple, Optional
 import requests
-import argparse
-from uqcsbot import bot, Command
+import json
+import os
 from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 
 WOLFRAM_APP_ID = os.environ.get('WOLFRAM_APP_ID')
@@ -28,26 +27,29 @@ def get_subpods(pods: list) -> Iterable[Tuple[str, dict]]:
 @loading_status
 def handle_wolfram(command: Command):
     '''
-    `!wolfram [-f | --full] <QUERY>` - Returns the wolfram response for the given
-    query. If `-f`/`--full` is specified, will return the full response.
+    `!wolfram [--full] <QUERY>` - Returns the wolfram response for the given
+    query. If `--full` is specified, will return the full reponse.
     '''
-    command_args = command.arg.split() if command.has_arg() else []
-
-    arg_parser = argparse.ArgumentParser()
-    def usage_error(*args, **kwargs):
-        raise UsageSyntaxException()
-    arg_parser.error = usage_error  # type: ignore
-    arg_parser.add_argument('-f', '--full', action='store_true')
-    arg_parser.add_argument('query')
-
-    parsed_args = arg_parser.parse_args(command_args)
-    if parsed_args.full:
-        handle_wolfram_full(parsed_args.query, command.channel_id)
+    # Determines whether to use the full version or the short version. The full
+    # version is used if the --full. argument is supplied before or after the
+    # search query. See wolfram_full and wolfram_normal for the differences.
+    if command.has_arg():
+        cmd = command.arg.strip()
+        # Doing it specific to the start and end just in case someone has --full inside their query
+        # for whatever reason.
+        if cmd.startswith('--full'):
+            cmd = cmd[len('--full'):]  # removes the --full
+            wolfram_full(cmd, command.channel_id)
+        elif cmd.endswith('--full'):
+            cmd = cmd[:-len('--full')]  # removes the --full
+            wolfram_full(cmd, command.channel_id)
+        else:
+            wolfram_normal(cmd, command.channel_id)
     else:
-        handle_wolfram_short(parsed_args.query, command.channel_id)
+        raise UsageSyntaxException()
 
 
-def handle_wolfram_full(search_query: str, channel_id):
+def wolfram_full(search_query: str, channel):
     """
     This posts the full results from wolfram query. Images and all
 
@@ -59,13 +61,13 @@ def handle_wolfram_full(search_query: str, channel_id):
 
     # Check if the response is ok
     if http_response.status_code != requests.codes.ok:
-        bot.post_message(channel_id, "There was a problem getting the response")
+        bot.post_message(channel, "There was a problem getting the response")
         return
 
     # Get the result of the query and determine if wolfram succeeded in evaluating it
     result = json.loads(http_response.content)['queryresult']
     if not result['success'] or result["error"]:
-        bot.post_message(channel_id, "Please rephrase your query. Wolfram could not compute.")
+        bot.post_message(channel, "Please rephrase your query. Wolfram could not compute.")
         return
 
     # A pod is the name wolfram gives to the different "units" that make up its result.
@@ -85,7 +87,7 @@ def handle_wolfram_full(search_query: str, channel_id):
                 message += f'{image_title}:\n{image_url}\n'
             else:
                 message += f'{image_url}\n'
-    bot.post_message(channel_id, message)
+    bot.post_message(channel, message)
 
 
 def get_short_answer(search_query: str):
@@ -107,7 +109,7 @@ def get_short_answer(search_query: str):
     return http_response.content
 
 
-def handle_wolfram_short(search_query: str, channel_id):
+def wolfram_normal(search_query: str, channel):
     """
     This uses wolfram's conversation api to return a short response that can be replied to in a
     thread. If the response cannot be replied to a general short answer response is displayed
@@ -125,10 +127,10 @@ def handle_wolfram_short(search_query: str, channel_id):
         if result == "No result is available":
             # If no conversational result is available just return a normal short answer
             short_response = get_short_answer(search_query)
-            bot.post_message(channel_id, short_response)
+            bot.post_message(channel, short_response)
             return
         else:
-            bot.post_message(channel_id, result)
+            bot.post_message(channel, result)
             return
 
     # TODO(mubiquity): Is there a better option than storing the id in the fallback?
@@ -142,7 +144,7 @@ def handle_wolfram_short(search_query: str, channel_id):
         'text': result,
     }]
 
-    bot.post_message(channel_id, "", attachments=attachments)
+    bot.post_message(channel, "", attachments=attachments)
 
 
 def extract_reply(wolfram_response: dict) -> Tuple[str, str, str, str]:
