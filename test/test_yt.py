@@ -10,10 +10,10 @@ def test_yt_no_query(uqcsbot: MockUQCSBot):
     Test !yt with no query
     '''
     uqcsbot.post_message(TEST_CHANNEL_ID, "!yt")
-    voteythumbs_doc = get_helper_doc('yt')
+    youtube_doc = get_helper_doc('yt')
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    assert messages[-1]['text'] == f'usage: {voteythumbs_doc}'
+    assert messages[-1]['text'] == f'usage: {youtube_doc}'
 
 
 @pytest.mark.skip
