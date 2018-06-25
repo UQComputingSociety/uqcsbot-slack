@@ -2,7 +2,7 @@ import os
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from uqcsbot import bot, Command
-from uqcsbot.utils.command_utils import UsageSyntaxException, loading_status
+from uqcsbot.utils.command_utils import UsageSyntaxException
 
 YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
 YOUTUBE_API_SERVICE_NAME = 'youtube'
@@ -32,7 +32,6 @@ def get_top_video_result(search_query: str):
 
 
 @bot.on_command('yt')
-@loading_status
 def handle_yt(command: Command):
     '''
     `!yt <QUERY>` - Returns the top video search result based on the query string.
