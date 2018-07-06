@@ -25,7 +25,7 @@ def mocked_html_get(*args, **kwargs):
 
 def test_umart_no_query(uqcsbot: MockUQCSBot):
     """
-
+    This test aims to determine the stability of the script when it receives no query.
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, "!umart")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
@@ -35,6 +35,11 @@ def test_umart_no_query(uqcsbot: MockUQCSBot):
 
 @patch("uqcsbot.scripts.umart.get_search_page", new=mocked_html_get)
 def test_umart_normal(uqcsbot: MockUQCSBot):
+    """
+    This test aims to determine that a typical HTML response will result in a typical message.
+    By mocking the get_search_page function with mocked_html_get 
+    no online functionality is required.
+    """
     uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
