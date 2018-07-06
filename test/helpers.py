@@ -1,10 +1,6 @@
 """
 Handy helpers for testing the bot
 """
-import time
-
-from .conftest import TEST_CHANNEL_ID, TEST_USER_ID
-
 
 # Slack Message Types
 MESSAGE_TYPE_ACCOUNTS_CHANGED = "accounts_changed"

@@ -7,7 +7,7 @@ from typing import (
     TYPE_CHECKING, List, Iterable, Optional, Generator, Any, Union, TypeVar, Dict, Type
 )
 if TYPE_CHECKING:
-    from .base import UQCSBot
+    from uqcsbot.base import UQCSBot # noqa
 
 T = TypeVar('T')
 ChanT = TypeVar('ChanT', bound='Channel')
@@ -185,8 +185,6 @@ class Channel(object):
             is_private=chan_dict.get('is_private', False),
             is_archived=chan_dict.get('is_archived', False),
         )
-        if "members" in chan_dict:
-            chan._member_ids = chan_dict["members"]
         return chan
 
 
