@@ -10,11 +10,13 @@ YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
 # testing.
 NO_QUERY_MESSAGE = "You can't look for nothing. !yt <QUERY>"
 
+
 def test_yt_no_query(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!yt")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[-1]['text'] == NO_QUERY_MESSAGE
+
 
 @pytest.mark.skip
 def test_yt_normal(uqcsbot: MockUQCSBot):
