@@ -14,7 +14,6 @@ UMART_PRODUCT_URL = "https://www.umart.com.au/umart1/pro/"
 
 
 @bot.on_command("umart")
-@loading_status
 def handle_umart(command: Command):
     """
     `!umart <QUERY>` - Returns 5 top results for products from umart matching the search query.
@@ -51,8 +50,7 @@ def get_umart_results(search_query):
     search_page = get_search_page(search_query)
     if search_page is None:
         return None
-    search_results = get_results_from_page(search_page)
-    return search_results
+    return get_results_from_page(search_page)
 
 
 def get_results_from_page(search_page):
@@ -74,9 +72,8 @@ def get_search_page(search_query):
     Gets the search page HTML
     """
     try:
-        with closing(get(UMART_SEARCH_URL + "?search=" + search_query + "&bid=2")) as resp:
-            return resp.content
+        resp = get(UMART_SEARCH_URL + "?search=" + search_query + "&bid=2")
+        return resp.content
     except RequestException as e:
-        bot.logger.error(
-            f"A request error {e.resp.status} occurred:\n{e.content}")
+        bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
         return None
