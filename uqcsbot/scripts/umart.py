@@ -3,6 +3,7 @@ from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
+from uqcsbot.util.status_reacts import loading_status
 
 NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
 NO_RESULTS_MESSAGE = "I can't find anything. Try `!umart <SOMETHING NOT AS SPECIFIC>`"
@@ -13,6 +14,7 @@ UMART_PRODUCT_URL = "https://www.umart.com.au/umart1/pro/"
 
 
 @bot.on_command("umart")
+@loading_status
 def handle_umart(command: Command):
     """
     `!umart <QUERY>` - Returns 5 top results for products from umart matching the search query.
@@ -38,7 +40,6 @@ def handle_umart(command: Command):
         message += f"Name: <{UMART_PRODUCT_URL}{result['link']}|{result['name']}>\n"
         message += f"Price: {result['price']}\n"
     message += "```"
-    bot.logger.info(message)
     bot.post_message(command.channel_id, message)
 
 
