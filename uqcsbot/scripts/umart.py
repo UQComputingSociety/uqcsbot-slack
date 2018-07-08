@@ -13,6 +13,7 @@ UMART_SEARCH_URL = "https://www.umart.com.au/umart1/pro/products_list_searchnew_
 
 
 @bot.on_command("umart")
+@loading_status
 def handle_umart(command: Command):
     """
     `!umart <QUERY>` - Returns 5 top results for products from umart matching the search query.
