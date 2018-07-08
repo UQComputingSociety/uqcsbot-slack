@@ -8,10 +8,17 @@ NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
 NO_RESULTS_MESSAGE = "I can't find anything. Try `!umart <SOMETHING NOT AS SPECIFIC>`"
 ERROR_MESSAGE = "I tried to get the things but alas I could not. Error with HTTP Request."
 
-
-def get_test_message():
-    f = open("test/umart_test_message.txt", "r")
-    return f.read()
+GOOD_MESSAGE = """```Name: <https://www.umart.com.au/umart1|Product1>
+Price: $1999.00
+Name: <https://www.umart.com.au/umart2|Product2>
+Price: $1099.00
+Name: <https://www.umart.com.au/umart3|Product3>
+Price: $1399.00
+Name: <https://www.umart.com.au/umart4|Product4>
+Price: $1269.00
+Name: <https://www.umart.com.au/umart5|Product5>
+Price: $1239.00
+```"""
 
 
 def mocked_html_get(*args, **kwargs):
@@ -43,4 +50,4 @@ def test_umart_normal(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    assert messages[1].get('text') == get_test_message()
+    assert messages[1].get('text') == GOOD_MESSAGE

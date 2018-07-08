@@ -10,7 +10,6 @@ NO_RESULTS_MESSAGE = "I can't find anything. Try `!umart <SOMETHING NOT AS SPECI
 ERROR_MESSAGE = "I tried to get the things but alas I could not. Error with HTTP Request."
 
 UMART_SEARCH_URL = "https://www.umart.com.au/umart1/pro/products_list_searchnew_min.phtml"
-UMART_PRODUCT_URL = "https://www.umart.com.au/umart1/pro/"
 
 
 @bot.on_command("umart")
@@ -36,7 +35,7 @@ def handle_umart(command: Command):
         return
     message = "```"
     for result in search_results:
-        message += f"Name: <{UMART_PRODUCT_URL}{result['link']}|{result['name']}>\n"
+        message += f"Name: <{result['link']}|{result['name']}>\n"
         message += f"Price: {result['price']}\n"
     message += "```"
     bot.post_message(command.channel_id, message)
