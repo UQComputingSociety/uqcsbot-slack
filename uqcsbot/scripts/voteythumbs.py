@@ -1,54 +1,17 @@
-from uqcsbot import bot, Command
 from functools import partial
+from uqcsbot import bot, Command
 
 
-VOTEYTHUMBS_STRIP_PREFIXES = [
-    '@channel',
-    '@here',
-    '@everyone',
-    ':'  # intentionally last
-]
-
-
-def strip(message: str, prefixes=VOTEYTHUMBS_STRIP_PREFIXES):
-    while True:
-        # keep going until you didn't strip anything last pass
-        for prefix in prefixes:
-            if message.startswith(prefix):
-                message = message[len(prefix):].strip()
-                break
-        else:
-            break
-    return message
-
-
-@bot.on('message')
-def voteythumbs(evt: dict):
+@bot.on_command('voteythumbs')
+def handle_voteythumbs(command: Command):
     '''
-    `!voteythumbs <TOPIC>` - Starts a :thumbsup: :thumbsdown: vote on the given
-    topic. If unspecified, will not set a topic.
+    `!voteythumbs [TOPIC]` - Starts a :thumbsup: :thumbsdown: :eyes: vote.
     '''
-    if "!voteythumbs" not in evt.get("text", ""):
-        return
-    evt["text"] = strip(evt["text"])
-    cmd = Command.from_message(evt)
-    if cmd is None:
-        return
-    if not cmd.has_arg() and "!voteythumbs" in evt["text"]:
-        bot.post_message(cmd.channel_id, "Invalid voteythumbs command")
-    if not cmd.has_arg():
-        bot.logger.error("Invalid voteythumbs command")
-        return
-    cmd.arg = strip(cmd.arg)
-
-    result = bot.post_message(cmd.channel_id, f"Starting vote: {cmd.arg}")
-    add_reaction = partial(
+    add_vote_react = partial(
         bot.api.reactions.add,
-        channel=cmd.channel_id,
-        timestamp=result['ts'],
+        channel=command.channel_id,
+        timestamp=command.message['ts'],
     )
+
     for emoji in ["thumbsup", "thumbsdown", "eyes"]:
-        res = add_reaction(name=emoji)
-        if not res.get('ok'):
-            bot.logger.error(f"Voteythumbs error adding \"{emoji}\": {res}")
-            return
+        add_vote_react(name=emoji)
