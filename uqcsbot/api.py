@@ -185,8 +185,6 @@ class Channel(object):
             is_private=chan_dict.get('is_private', False),
             is_archived=chan_dict.get('is_archived', False),
         )
-        if "members" in chan_dict:
-            chan._member_ids = chan_dict["members"]
         return chan
 
 
