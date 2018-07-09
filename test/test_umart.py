@@ -44,7 +44,7 @@ def test_umart_no_query(uqcsbot: MockUQCSBot):
 def test_umart_normal(uqcsbot: MockUQCSBot):
     """
     This test aims to determine that a typical HTML response will result in a typical message.
-    By mocking the get_search_page function with mocked_html_get 
+    By mocking the get_search_page function with mocked_html_get
     no online functionality is required.
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
