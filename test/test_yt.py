@@ -2,7 +2,7 @@
 Tests for yt.py
 """
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
-from unittest import mock
+from unittest.mock import patch
 import pytest
 
 YOUTUBE_VIDEO_URL = 'https://www.youtube.com/watch?v='
@@ -18,28 +18,27 @@ def mocked_search_execute(search_query: str, search_part: str, search_type: str,
     Otherwise returns none.
     """
     if search_type == 'video' and search_part == 'id':
-        items = []
-        for _ in range(max_results):
-            # The following line generates an 11 character random string of ascii and digits
-            # This simulates a videoId returned by the google api client
-            videoId = ''.join(random.choices(
-                string.ascii_letters + string.digits, k=11))
-            # The response from the client contains a list of items
-            # Each item has id object containing a string called videoId
-            items.append({'id', {'videoId', videoId}})
+        items = [{'id': {'videoId': str(i).zfill(11)}} for i in range(max_results)]
         return {'items': items}
     return None
 
 
 def test_yt_no_query(uqcsbot: MockUQCSBot):
+    """
+    This test aims to test the stability of the script when no query is given.
+    """
     uqcsbot.post_message(TEST_CHANNEL_ID, "!yt")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[-1]['text'] == NO_QUERY_MESSAGE
 
 
-@mock.patch('uqcsbot.scripts.yt.execute_search', side_effect=mocked_search_execute)
+@patch('uqcsbot.scripts.yt.execute_search', new=mocked_search_execute)
 def test_yt_normal(uqcsbot: MockUQCSBot):
+    """
+    This test aims to test the basic functionality of the yt script.
+    The mocked function replaces the googleapiclient functionality.
+    """
     uqcsbot.post_message(TEST_CHANNEL_ID, "!yt dog")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
