@@ -6,8 +6,7 @@ from datetime import date, datetime, timedelta
 from pytz import timezone, utc
 import re
 
-CALENDAR_URL = "https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com" \
-               "/public/basic.ics"
+CALENDAR_URL = "https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics"  # noqa
 FILTER_REGEX = re.compile('(full|all|[0-9]+( weeks?)?)')
 BRISBANE_TZ = timezone('Australia/Brisbane')
 MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
@@ -60,7 +59,7 @@ class EventFilter(object):
 
 
 class Event(object):
-    def __init__(self, start: datetime, end: datetime, location: vText, summary: vText):
+    def __init__(self, start: datetime, end: datetime, location: vText, summary: vText) -> None:
         self.start = start
         self.end = end
         self.location = location

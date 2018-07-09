@@ -2,6 +2,7 @@ from uqcsbot import bot
 from random import choice
 from uqcsbot.util.status_reacts import LOADING_REACTS, HYPE_REACTS
 
+
 @bot.on_schedule('cron', hour=17, timezone='Australia/Brisbane')
 def wakie():
     '''
@@ -14,11 +15,13 @@ def wakie():
     victims = []
     while len(victims) < 2:
         new_victim = choice(channel.members)
-        if bot.users.get(new_victim).deleted:
+        user_from_store = bot.users.get(new_victim)
+        if user_from_store.deleted or user_from_store.is_bot:
             continue
         victims.append(new_victim)
+
     lines = [f'Hey <@{v}>! Tell us about something cool you are working on!' for v in victims]
     wakie_message = bot.post_message(channel, '\r\n'.join(lines))
     bot.api.reactions.add(name=choice(HYPE_REACTS + LOADING_REACTS),
-                                         channel=channel.id,
-                                         timestamp=wakie_message['ts'])
+                          channel=channel.id,
+                          timestamp=wakie_message['ts'])

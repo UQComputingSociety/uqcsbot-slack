@@ -6,8 +6,9 @@ from bs4 import BeautifulSoup
 from functools import partial
 
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
-BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds='
+BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds=' # noqa
 BASE_CALENDAR_URL = 'http://www.uq.edu.au/events/calendar_view.php?category_id=16&year='
+
 
 class DateSyntaxException(Exception):
     '''
@@ -18,6 +19,7 @@ class DateSyntaxException(Exception):
         self.date = date
         super().__init__(self.message, self.date)
 
+
 class CourseNotFoundException(Exception):
     '''
     Raised when a given course cannot be found for UQ.
@@ -27,6 +29,7 @@ class CourseNotFoundException(Exception):
         self.course_name = course_name
         super().__init__(self.message, self.course_name)
 
+
 class ProfileNotFoundException(Exception):
     '''
     Raised when a profile cannot be found for a given course.
@@ -35,6 +38,7 @@ class ProfileNotFoundException(Exception):
         self.message = f'Could not find profile for course \'{course_name}\'.'
         self.course_name = course_name
         super().__init__(self.message, self.course_name)
+
 
 class HttpException(Exception):
     '''
@@ -46,6 +50,7 @@ class HttpException(Exception):
         self.url = url
         self.status_code = status_code
         super().__init__(self.message, self.url, self.status_code)
+
 
 def get_course_profile_url(course_name):
     '''
@@ -63,6 +68,7 @@ def get_course_profile_url(course_name):
         raise ProfileNotFoundException(course_name)
     return profile.get('href')
 
+
 def get_course_profile_id(course_name):
     '''
     Returns the ID to the latest course profile for the given course.
@@ -70,6 +76,7 @@ def get_course_profile_id(course_name):
     profile_url = get_course_profile_url(course_name)
     profile_id_index = profile_url.index('profileId=') + len('profileId=')
     return profile_url[profile_id_index:]
+
 
 def get_current_exam_period():
     '''
@@ -96,6 +103,7 @@ def get_current_exam_period():
     start_datetime = end_datetime.replace(day=int(start_day))
     return start_datetime, end_datetime
 
+
 def get_parsed_assessment_due_date(assessment_item):
     '''
     Returns the parsed due date for the given assessment item as a datetime
@@ -115,8 +123,9 @@ def get_parsed_assessment_due_date(assessment_item):
             return start_datetime, end_datetime
         due_datetime = parser.parse(due_date, parser_info)
         return due_datetime, due_datetime
-    except:
+    except Exception:
         raise DateSyntaxException(due_date)
+
 
 def is_assessment_after_cutoff(assessment, cutoff):
     '''
@@ -131,6 +140,7 @@ def is_assessment_after_cutoff(assessment, cutoff):
         # parse them in future. Will require manual detection + parsing.
         return True
     return end_datetime >= cutoff if end_datetime else start_datetime >= cutoff
+
 
 def get_course_assessment(course_names, cutoff=None):
     '''
@@ -153,11 +163,13 @@ def get_course_assessment(course_names, cutoff=None):
     filtered_assessment = filter(assessment_filter, parsed_assessment)
     return list(filtered_assessment)
 
+
 def get_element_inner_html(dom_element):
     '''
     Returns the inner html for the given element.
     '''
     return dom_element.decode_contents(formatter='html')
+
 
 def get_parsed_assessment_item(assessment_item):
     '''

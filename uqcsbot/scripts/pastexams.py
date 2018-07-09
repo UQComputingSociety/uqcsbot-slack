@@ -17,6 +17,7 @@ def handle_pastexams(command: Command):
     course_code = command.arg if command.has_arg() else channel.name
     bot.post_message(channel, get_past_exams(course_code))
 
+
 def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
     """
     Takes the soup object of the page and generates each result in the format:
@@ -27,11 +28,13 @@ def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
     # Row 1: A bunch of informational text
     # Row 2: Semester information
     # Row 3: Links to Exams
-    # Rows two and three are what we care about. Of those the first column is just a row title so we ignore that as well
+    # Rows two and three are what we care about. Of those the first column is just a row title so
+    # we ignore that as well
 
     exam_table_rows = soup.find('table', class_='maintable').contents
     semesters = exam_table_rows[1].find_all('td')[1:]  # All columns in row 2 excluding the first
-    # Gets the content from each td. Text is separated by a <br/> thus result is in the format (year, <br/>, 'Sem.x'
+    # Gets the content from each td. Text is separated by a <br/> thus result is in the format
+    # (year, <br/>, 'Sem.x'
     semesters = [semester.contents for semester in semesters]
 
     # Same thing but for links
@@ -42,9 +45,11 @@ def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
         semester_str = semester_id.replace('.', ' ')
         yield f'{year} {semester_str}', link
 
+
 def get_past_exams(course_code: str) -> str:
     """
-    Gets the past exams for the course with the specified course code. Returns intuitive error messages if this fails.
+    Gets the past exams for the course with the specified course code. Returns intuitive error
+    messages if this fails.
     """
     url = 'https://www.library.uq.edu.au/exams/papers.php?'
     http_response = requests.get(url, params={'stub': course_code})

@@ -4,6 +4,7 @@ LONG_MESSAGE = 'I\'m going to say a really long sentence that has a really low'\
                + ' probability of outputting a random-case mocked message that'\
                + ' is equal to the original.'
 
+
 def test_mock_previous_message(uqcsbot: MockUQCSBot):
     '''
     Test !mock on the immediately previous message
@@ -14,6 +15,7 @@ def test_mock_previous_message(uqcsbot: MockUQCSBot):
     assert len(messages) == 3
     assert messages[-1]['text'].lower() == LONG_MESSAGE.lower()
     assert messages[-1]['text'] != LONG_MESSAGE
+
 
 def test_mock_past_message(uqcsbot: MockUQCSBot):
     '''

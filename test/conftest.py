@@ -4,6 +4,7 @@ Configuration for Pytest
 
 from unittest.mock import MagicMock
 from itertools import islice
+from functools import partial
 from collections import defaultdict
 import time
 import pytest
@@ -18,12 +19,15 @@ TEST_CHANNEL_ID = "C1234567890"
 TEST_GROUP_ID = "G1234567890"
 TEST_DIRECT_ID = "D1234567890"
 TEST_USER_ID = "U1234567890"
+TEST_BOT_ID = "B1234567890"
 
 
 class MockUQCSBot(UQCSBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_users = {
+            TEST_BOT_ID: {'id': TEST_BOT_ID, 'name': TEST_BOT_ID, 'deleted': False,
+                          'profile': {'display_name': TEST_BOT_ID}, 'is_bot': True},
             TEST_USER_ID: {'id': TEST_USER_ID, 'name': TEST_USER_ID, 'deleted': False,
                            'profile': {'display_name': TEST_USER_ID}}
         }
@@ -83,7 +87,7 @@ class MockUQCSBot(UQCSBot):
             return {'ok': False}
 
         all_members = channel.get('members', [])
-        sliced_members = all_members[cursor : cursor + limit + 1]
+        sliced_members = all_members[cursor: cursor + limit + 1]
         cursor += len(sliced_members)
         if cursor == len(all_members):
             cursor = None
@@ -101,9 +105,8 @@ class MockUQCSBot(UQCSBot):
         if channel_id not in self.test_channels:
             return {'ok': False}
 
-        all_messages = self.test_messages.get(channel_id, [])
-        ordered_messages = all_messages[::-1] # Most recent first
-        sliced_messages = list(islice(ordered_messages, cursor, cursor + limit + 1))
+        all_messages = self.test_messages.get(channel_id, [])[::-1]  # Most recent first
+        sliced_messages = list(islice(all_messages, cursor, cursor + limit + 1))
         cursor += len(sliced_messages)
         if cursor == len(all_messages):
             cursor = None
@@ -129,17 +132,23 @@ class MockUQCSBot(UQCSBot):
         cursor = kwargs.get('cursor', 0)
         limit = kwargs.get('limit', 100)
 
+        def is_channel_type(channel, channel_type):
+            '''
+            Returns whether the given channel is of the given channel type.
+            '''
+            return channel.get(channel_type, False)
+
         if channel_type == 'channels':
-            filter_function = lambda x: x.get('is_public', False)
+            filter_function = partial(is_channel_type, channel_type='is_public')
         elif channel_type == 'groups':
-            filter_function = lambda x: x.get('is_group', False)
+            filter_function = partial(is_channel_type, channel_type='is_group')
         elif channel_type == 'ims':
-            filter_function = lambda x: x.get('is_im', False)
+            filter_function = partial(is_channel_type, channel_type='is_im')
         else:
             return {'ok': False}
 
         all_channels = list(filter(filter_function, self.test_channels.values()))
-        sliced_channels = all_channels[cursor : cursor + limit + 1]
+        sliced_channels = all_channels[cursor: cursor + limit + 1]
         cursor += len(sliced_channels)
         if cursor == len(all_channels):
             cursor = None
@@ -154,7 +163,7 @@ class MockUQCSBot(UQCSBot):
         limit = kwargs.get('limit', 100)
 
         all_members = list(self.test_users.values())
-        sliced_members = all_members[cursor : cursor + limit + 1]
+        sliced_members = all_members[cursor: cursor + limit + 1]
         cursor += len(sliced_members)
         if cursor == len(all_members):
             cursor = None
@@ -166,16 +175,25 @@ class MockUQCSBot(UQCSBot):
         Mocks chat.postMessage api call.
         '''
         channel_id_or_name = kwargs.get('channel')
-        text = kwargs.get('text')
 
         channel = self.channels.get(channel_id_or_name)
         if channel is None:
             return {'ok': False}
 
-        message = {'text': text, 'ts': str(time.time())}
+        # Strip the kwargs down to only ones which are valid for this api call.
+        # Note: if there is an additional argument you need supported, add it
+        # here.
+        stripped_kwargs = {k: v for k, v in kwargs.items()
+                           if k in ('text', 'attachments', 'user')}
+        message = {'type': 'message', 'ts': str(time.time()), **stripped_kwargs}
+        # In case we were given a channel name, set channel strictly by the id.
+        message['channel'] = channel.id
+        # Note: 'user' is not a part of Slack API for chat.postMessage, just a
+        # convenient way to set the calling user during testing. If not passed,
+        # message is assumed to be from bot.
+        message['user'] = kwargs.get('user', TEST_BOT_ID)
         self.test_messages[channel.id].append(message)
-        message_event = {'type': 'message', 'channel': channel.id, **message}
-        self._run_handlers(message_event)
+        self._run_handlers(message)
 
         return {'ok': True, 'channel': channel.id, 'ts': message['ts'],
                 'message': message}
@@ -189,7 +207,7 @@ class MockUQCSBot(UQCSBot):
             return None
         if command.command_name not in self._command_registry:
             raise NotImplementedError('{command.command_name} is not a registered command.')
-        for handler in self.command_registry[command.command_name]:
+        for handler in self._command_registry[command.command_name]:
             handler(command)
 
     def _run_handlers(self, event: dict):

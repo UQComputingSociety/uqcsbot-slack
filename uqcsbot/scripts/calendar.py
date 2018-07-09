@@ -13,6 +13,7 @@ from uqcsbot.util.uq_course_util import (get_course_assessment,
 # Maximum number of courses supported by !calendar to reduce call abuse.
 COURSE_LIMIT = 6
 
+
 def get_calendar(assessment):
     '''
     Returns a compiled calendar containing the given assessment.
@@ -33,12 +34,13 @@ def get_calendar(assessment):
             # parse them in future. Will require manual detection + parsing.
             start_datetime = end_datetime = datetime.today()
             event['summary'] = 'WARNING: DATE PARSING FAILED\nPlease manually' \
-                                + 'set date for event!\nThe provided due date' \
-                                + 'from UQ was \'{due_date}\'.' + event['summary']
+                               + 'set date for event!\nThe provided due date' \
+                               + 'from UQ was \'{due_date}\'.' + event['summary']
         event.add('dtstart', start_datetime)
         event.add('dtend', end_datetime)
         calendar.add_component(event)
     return calendar.to_ical()
+
 
 @bot.on_command('calendar')
 @success_status
