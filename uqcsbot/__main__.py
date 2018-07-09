@@ -1,2 +1,2 @@
-from . import main
+from uqcsbot import main
 main()

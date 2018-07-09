@@ -29,14 +29,18 @@ def handle_yt(command: Command):
         bot.logger.error(f'An HTTP error {e.resp.status} occurred:\n{e.content}')
         # Force return to ensure no message is sent.
         return
-
+    
     if videoID:
         bot.post_message(command.channel_id, f'{YOUTUBE_VIDEO_URL}{videoID}')
     else:
         bot.post_message(command.channel_id, "Your query returned no results.")
 
+<<<<<<< HEAD
+def get_top_video_result(search_query: str):
+=======
 
 def get_top_video_result(search_query: str, channel):
+>>>>>>> d7adc3bb2c86eddd1607faeef82802575dc71672
     '''
     The normal method for using !yt searches based on query
     and returns the first video result. "I'm feeling lucky"
@@ -58,9 +62,21 @@ def execute_search(search_query: str, search_part: str, search_type: str, max_re
 
     search_response = youtube.search().list(
         q=search_query,
+<<<<<<< HEAD
         part=search_part, 
         maxResults=max_results, 
         type=search_type 
     ).execute()
 
     return search_response
+=======
+        part='id',  # Only the video ID is needed to get video link
+        maxResults=1,  # Since only one video is linked this is the only result we need
+        type='video'  # Only want videos no pesky channels or playlists
+    ).execute()
+
+    search_result = search_response.get('items')
+    if search_result is None:
+        return None
+    return search_result[0]['id']['videoId']
+>>>>>>> d7adc3bb2c86eddd1607faeef82802575dc71672

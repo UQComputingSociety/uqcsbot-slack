@@ -15,10 +15,11 @@ install_requires = [
     'icalendar',
     'pytz',
     'python-dateutil',
-    'google-api-python-client'
+    'google-api-python-client',
+    'pytest-runner',
 ]
 
-test_requires = [
+tests_require = [
     'pytest',
 ]
 
@@ -37,8 +38,8 @@ setup(
     keywords='slack async lightweight',
     packages=find_packages(),
     install_requires=install_requires,
-    test_requires=test_requires,
+    tests_require=tests_require,
     extras_require={
-        'test': test_requires,
+        'test': tests_require,
     }
 )
