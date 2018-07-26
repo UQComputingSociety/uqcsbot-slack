@@ -30,6 +30,19 @@ def mocked_html_get(*args, **kwargs):
     return f.read()
 
 
+def mocked_no_results(*args, **kwargs):
+    """
+    This method returns an empty list. The same as if no results could be scraped from HTML.
+    """
+    return []
+
+def mocked_no_page(*args, **kwargs):
+    """
+    This method returns None. The same as if an error ocurred in retrieving the search page.
+    """
+    return None
+
+
 def test_umart_no_query(uqcsbot: MockUQCSBot):
     """
     This test aims to determine the stability of the script when it receives no query.
@@ -51,3 +64,34 @@ def test_umart_normal(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[1].get('text') == GOOD_MESSAGE
+
+@patch("uqcsbot.scripts.umart.get_results_from_page", new=mocked_no_results)
+def test_umart_no_results(uqcsbot: MockUQCSBot):
+    """
+    This test covers the case where a search query does not yield results from Umart's search.
+    This is accomplished by mocking the get_results_from_page function in umart.py
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[1].get('text') == NO_RESULTS_MESSAGE
+
+@patch("uqcsbot.scripts.umart.get_search_page", new=mocked_no_page)
+def test_umart_html_error(uqcsbot: MockUQCSBot):
+    """
+    This test covers the case where a search query fails.
+    This is accomplished by mocking the get_search_page function in umart.py
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[1].get('text') == ERROR_MESSAGE
+
+def test_smart_user(uqcsbot: MockUQCSBot):
+    """
+    This test covers the case where there exists a smart user.
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart SOMETHING NOT AS SPECIFIC")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[1].get('text') == "Not literally..."
