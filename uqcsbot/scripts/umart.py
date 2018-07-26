@@ -29,7 +29,7 @@ def handle_umart(command: Command):
         bot.post_message(command.channel_id, "Not literally...")
         return
     search_results = get_umart_results(search_query)
-    if not search_results:
+    if search_results is None:
         bot.post_message(command.channel_id, ERROR_MESSAGE)
         return
     if len(search_results) == 0:
