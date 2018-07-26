@@ -36,6 +36,7 @@ def mocked_no_results(*args, **kwargs):
     """
     return []
 
+
 def mocked_no_page(*args, **kwargs):
     """
     This method returns None. The same as if an error ocurred in retrieving the search page.
@@ -65,6 +66,7 @@ def test_umart_normal(uqcsbot: MockUQCSBot):
     assert len(messages) == 2
     assert messages[1].get('text') == GOOD_MESSAGE
 
+
 @patch("uqcsbot.scripts.umart.get_results_from_page", new=mocked_no_results)
 def test_umart_no_results(uqcsbot: MockUQCSBot):
     """
@@ -76,6 +78,7 @@ def test_umart_no_results(uqcsbot: MockUQCSBot):
     assert len(messages) == 2
     assert messages[1].get('text') == NO_RESULTS_MESSAGE
 
+
 @patch("uqcsbot.scripts.umart.get_search_page", new=mocked_no_page)
 def test_umart_html_error(uqcsbot: MockUQCSBot):
     """
@@ -86,6 +89,7 @@ def test_umart_html_error(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[1].get('text') == ERROR_MESSAGE
+
 
 def test_smart_user(uqcsbot: MockUQCSBot):
     """
