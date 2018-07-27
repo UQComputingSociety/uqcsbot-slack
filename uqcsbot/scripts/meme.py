@@ -6,241 +6,123 @@ API_URL = "https://memegen.link/"
 # Many different characters need to be replaced in order to work in url format
 # See the API_URL for details
 REPLACEMENTS = {'_': '__', ' ': '_', r'\"': "''", '-': '--', '?': '~q', '%': '~p', '#': '~h', '/': '~s'}
-VALID_NAMES = [
-'names',
-'aag',
-'ackbar',
-'afraid',
-'ants',
-'away',
-'awesome',
-'awesome-awkward',
-'awkward',
-'awkward-awesome',
-'bad',
-'badchoice',
-'bd',
-'bender',
-'biw',
-'blb',
-'boat',
-'both',
-'bs',
-'buzz',
-'captain',
-'cb',
-'cbg',
-'center',
-'ch',
-'chosen',
-'crazypills',
-'cryingfloor',
-'disastergirl',
-'dodgson',
-'doge',
-'drake',
-'dsm',
-'dwight',
-'elf',
-'ermg',
-'fa',
-'facepalm',
-'fbf',
-'fetch',
-'fine',
-'firsttry',
-'fmr',
-'fry',
-'fwp',
-'gandalf',
-'ggg',
-'grumpycat',
-'hagrid',
-'happening',
-'hipster',
-'icanhas',
-'imsorry',
-'inigo',
-'interesting',
-'ive',
-'iw',
-'jetpack',
-'joker',
-'jw',
-'keanu',
-'kermit',
-'live',
-'ll',
-'mb',
-'mmm',
-'money',
-'mordor',
-'morpheus',
-'mw',
-'nice',
-'noidea',
-'oag',
-'officespace',
-'older',
-'oprah',
-'patrick',
-'philosoraptor',
-'puffin',
-'red',
-'regret',
-'remembers',
-'rollsafe',
-'sad-biden',
-'sad-boehner',
-'sad-bush',
-'sad-clinton',
-'sad-obama',
-'sadfrog',
-'saltbae',
-'sarcasticbear',
-'sb',
-'scc',
-'sf',
-'sk',
-'ski',
-'snek',
-'soa',
-'sohappy',
-'sohot',
-'sparta',
-'spongebob',
-'ss',
-'stew',
-'success',
-'tenguy',
-'toohigh',
-'tried',
-'ugandanknuck',
-'whatyear',
-'winter',
-'wonka',
-'xy',
-'yallgot',
-'yodawg',
-'yuno',
-
-]
-MEME_NAMES = """Ancient Aliens Guy: aag
-It's A Trap!: ackbar
-Afraid to Ask Andy: afraid
-Do You Want Ants?: ants
-Life... Finds a Way: away
-Socially Awesome Penguin: awesome
-Socially Awesome Awkward Penguin: awesome-awkward
-Socially Awkward Penguin: awkward
-Socially Awkward Awesome Penguin: awkward-awesome
-You Should Feel Bad: bad
-Milk Was a Bad Choice: badchoice
-Butthurt Dweller: bd
-I'm Going to Build My Own Theme Park: bender
-Baby Insanity Wolf: biw
-Bad Luck Brian: blb
-I Should Buy a Boat Cat: boat
-Why Not Both?: both
-This is Bull, Shark: bs
-X, X Everywhere: buzz
-I am the Captain Now: captain
-Confession Bear: cb
-Comic Book Guy: cbg
-What is this, a Center for Ants?!: center
-Captain Hindsight: ch
-You Were the Chosen One!: chosen
-I Feel Like I'm Taking Crazy Pills: crazypills
-Crying on Floor: cryingfloor
-Disaster Girl: disastergirl
-See? Nobody Cares: dodgson
-Doge: doge
-Drakeposting: drake
-Dating Site Murderer: dsm
-Schrute Facts: dwight
-You Sit on a Throne of Lies: elf
-Ermahgerd: ermg
-Forever Alone: fa
-Facepalm: facepalm
-Foul Bachelor Frog: fbf
-Stop Trying to Make Fetch Happen: fetch
-This is Fine: fine
-First Try!: firsttry
-Fuck Me, Right?: fmr
-Futurama Fry: fry
-First World Problems: fwp
-Confused Gandalf: gandalf
-Good Guy Greg: ggg
-Grumpy Cat: grumpycat
-I Should Not Have Said That: hagrid
-It's Happening: happening
-Hipster Barista: hipster
-I Can Has Cheezburger?: icanhas
-Oh, I'm Sorry, I Thought This Was America: imsorry
-Inigo Montoya: inigo
-The Most Interesting Man in the World: interesting
-Jony Ive Redesigns Things: ive
-Insanity Wolf: iw
-Nothing To Do Here: jetpack
-It's Simple, Kill the Batman: joker
-Probably Not a Good Idea: jw
-Conspiracy Keanu: keanu
-But That's None of My Business: kermit
-Do It Live!: live
-Laughing Lizard: ll
-Member Berries: mb
-Minor Mistake Marvin: mmm
-Shut Up and Take My Money!: money
-One Does Not Simply Walk into Mordor: mordor
-Matrix Morpheus: morpheus
-I Guarantee It: mw
-So I Got That Goin' For Me, Which is Nice: nice
-I Have No Idea What I'm Doing: noidea
-Overly Attached Girlfriend: oag
-That Would Be Great: officespace
-An Older Code Sir, But It Checks Out: older
-Oprah You Get a Car: oprah
-Push it somewhere else Patrick: patrick
-Philosoraptor: philosoraptor
-Unpopular opinion puffin: puffin
-Oh, Is That What We're Going to Do Today?: red
-I Immediately Regret This Decision!: regret
-Pepperidge Farm Remembers: remembers
-Roll Safe: rollsafe
-Sad Joe Biden: sad-biden
-Sad John Boehner: sad-boehner
-Sad George Bush: sad-bush
-Sad Bill Clinton: sad-clinton
-Sad Barack Obama: sad-obama
-Sad Frog / Feels Bad Man: sadfrog
-Salt Bae: saltbae
-Sarcastic Bear: sarcasticbear
-Scumbag Brain: sb
-Sudden Clarity Clarence: scc
-Sealed Fate: sf
-Skeptical Third World Kid: sk
-Super Cool Ski Instructor: ski
-Skeptical Snake: snek
-Seal of Approval: soa
-I Would Be So Happy: sohappy
-So Hot Right Now: sohot
-This is Sparta!: sparta
-Mocking Spongebob: spongebob
-Scumbag Steve: ss
-Baby, You've Got a Stew Going: stew
-Success Kid: success
-10 Guy: tenguy
-The Rent Is Too Damn High: toohigh
-At Least You Tried: tried
-Ugandan Knuckles: ugandanknuck
-What Year Is It?: whatyear
-Winter is coming: winter
-Condescending Wonka: wonka
-X all the Y: xy
-Y'all Got Any More of Them: yallgot
-Xzibit Yo Dawg: yodawg
-Y U NO Guy: yuno
-"""
+MEME_NAMES = {
+    "aag": "Ancient Aliens Guy",
+    "ackbar": "It's A Trap!",
+    "afraid": "Afraid to Ask Andy",
+    "ants": "Do You Want Ants?",
+    "away": "Life... Finds a Way",
+    "awesome": "Socially Awesome Penguin",
+    "awesome-awkward": "Socially Awesome Awkward Penguin",
+    "awkward": "Socially Awkward Penguin",
+    "awkward-awesome": "Socially Awkward Awesome Penguin",
+    "bad": "You Should Feel Bad",
+    "badchoice": "Milk Was a Bad Choice",
+    "bd": "Butthurt Dweller",
+    "bender": "I'm Going to Build My Own Theme Park",
+    "biw": "Baby Insanity Wolf",
+    "blb": "Bad Luck Brian",
+    "boat": "I Should Buy a Boat Cat",
+    "both": "Why Not Both?",
+    "bs": "This is Bull, Shark",
+    "buzz": "X, X Everywhere",
+    "captain": "I am the Captain Now",
+    "cb": "Confession Bear",
+    "cbg": "Comic Book Guy",
+    "center": "What is this, a Center for Ants?!",
+    "ch": "Captain Hindsight",
+    "chosen": "You Were the Chosen One!",
+    "crazypills": "I Feel Like I'm Taking Crazy Pills",
+    "cryingfloor": "Crying on Floor",
+    "disastergirl": "Disaster Girl",
+    "dodgson": "See? Nobody Cares",
+    "doge": "Doge",
+    "drake": "Drakeposting",
+    "dsm": "Dating Site Murderer",
+    "dwight": "Schrute Facts",
+    "elf": "You Sit on a Throne of Lies",
+    "ermg": "Ermahgerd",
+    "fa": "Forever Alone",
+    "facepalm": "Facepalm",
+    "fbf": "Foul Bachelor Frog",
+    "fetch": "Stop Trying to Make Fetch Happen",
+    "fine": "This is Fine",
+    "firsttry": "First Try!",
+    "fmr": "Fuck Me, Right?",
+    "fry": "Futurama Fry",
+    "fwp": "First World Problems",
+    "gandalf": "Confused Gandalf",
+    "ggg": "Good Guy Greg",
+    "grumpycat": "Grumpy Cat",
+    "hagrid": "I Should Not Have Said That",
+    "happening": "It's Happening",
+    "hipster": "Hipster Barista",
+    "icanhas": "I Can Has Cheezburger?",
+    "imsorry": "Oh, I'm Sorry, I Thought This Was America",
+    "inigo": "Inigo Montoya",
+    "interesting": "The Most Interesting Man in the World",
+    "ive": "Jony Ive Redesigns Things",
+    "iw": "Insanity Wolf",
+    "jetpack": "Nothing To Do Here",
+    "joker": "It's Simple, Kill the Batman",
+    "jw": "Probably Not a Good Idea",
+    "keanu": "Conspiracy Keanu",
+    "kermit": "But That's None of My Business",
+    "live": "Do It Live!",
+    "ll": "Laughing Lizard",
+    "mb": "Member Berries",
+    "mmm": "Minor Mistake Marvin",
+    "money": "Shut Up and Take My Money!",
+    "mordor": "One Does Not Simply Walk into Mordor",
+    "morpheus": "Matrix Morpheus",
+    "mw": "I Guarantee It",
+    "nice": "So I Got That Goin' For Me, Which is Nice",
+    "noidea": "I Have No Idea What I'm Doing",
+    "oag": "Overly Attached Girlfriend",
+    "officespace": "That Would Be Great",
+    "older": "An Older Code Sir, But It Checks Out",
+    "oprah": "Oprah You Get a Car",
+    "patrick": "Push it somewhere else Patrick",
+    "philosoraptor": "Philosoraptor",
+    "puffin": "Unpopular opinion puffin",
+    "red": "Oh, Is That What We're Going to Do Today?",
+    "regret": "I Immediately Regret This Decision!",
+    "remembers": "Pepperidge Farm Remembers",
+    "rollsafe": "Roll Safe",
+    "sad-biden": "Sad Joe Biden",
+    "sad-boehner": "Sad John Boehner",
+    "sad-bush": "Sad George Bush",
+    "sad-clinton": "Sad Bill Clinton",
+    "sad-obama": "Sad Barack Obama",
+    "sadfrog": "Sad Frog / Feels Bad Man",
+    "saltbae": "Salt Bae",
+    "sarcasticbear": "Sarcastic Bear",
+    "sb": "Scumbag Brain",
+    "scc": "Sudden Clarity Clarence",
+    "sf": "Sealed Fate",
+    "sk": "Skeptical Third World Kid",
+    "ski": "Super Cool Ski Instructor",
+    "snek": "Skeptical Snake",
+    "soa": "Seal of Approval",
+    "sohappy": "I Would Be So Happy",
+    "sohot": "So Hot Right Now",
+    "sparta": "This is Sparta!",
+    "spongebob": "Mocking Spongebob",
+    "ss": "Scumbag Steve",
+    "stew": "Baby, You've Got a Stew Going",
+    "success": "Success Kid",
+    "tenguy": "10 Guy",
+    "toohigh": "The Rent Is Too Damn High",
+    "tried": "At Least You Tried",
+    "ugandanknuck": "Ugandan Knuckles",
+    "whatyear": "What Year Is It?",
+    "winter": "Winter is coming",
+    "wonka": "Condescending Wonka",
+    "xy": "X all the Y",
+    "yallgot": "Y'all Got Any More of Them",
+    "yodawg": "Xzibit Yo Dawg",
+    "yuno": "Y U NO Guy",
+}
 
 # TODO: Would be really simple to add custom UQCS memes
 
@@ -260,7 +142,7 @@ def handle_meme(command: Command):
         return
 
     name = command.arg.split()[0].lower()
-    if name not in VALID_NAMES:
+    if name != "names" and name not in MEME_NAMES.keys():
         bot.post_message(channel, "The meme name is invalid. Try !meme names to get a list of all valid names")
         return
 
@@ -285,7 +167,8 @@ def handle_meme(command: Command):
 def send_meme_names(command: Command):
     """Sends the full list of meme names to the users channel to avoid channel spam"""
     user_channel = bot.channels.get(command.user_id)
-    attachments = [{'text': MEME_NAMES, 'title': "Meme Names:"}]
+    names_text = "\n".join((f"{full_name}: {name}" for (name, full_name) in MEME_NAMES.items()))
+    attachments = [{'text': names_text, 'title': "Meme Names:"}]
     bot.post_message(user_channel, "", attachments=attachments)
 
 
