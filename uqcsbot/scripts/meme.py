@@ -5,7 +5,7 @@ from uqcsbot.util.status_reacts import loading_status, success_status
 API_URL = "https://memegen.link/"
 # Many different characters need to be replaced in order to work in url format
 # See the API_URL for details
-REPLACEMENTS = {' ': '_', '_': '__', r'\"': "''", '-': '--', '?': '~q', '%': '~p', '#': '~h', '/': '~s'}
+REPLACEMENTS = {'_': '__', ' ': '_', r'\"': "''", '-': '--', '?': '~q', '%': '~p', '#': '~h', '/': '~s'}
 VALID_NAMES = [
 'names'
 'aag',
@@ -297,9 +297,11 @@ def get_meme_arguments(input_args: str):
     # Replaces all the required characters to be url friendly
     url_friendly_args = []
     for arg in args:
-        url_friendly = "".join((REPLACEMENTS.get(c, c) for c in arg))
-        if url_friendly == "":
-            url_friendly = "_"
-        url_friendly_args.append(url_friendly)
+        for old, new in REPLACEMENTS.items():
+            arg = arg.replace(old, new)
 
+        if arg == "":
+            arg = "_"
+        url_friendly_args.append(arg)
+    print(url_friendly_args)
     return url_friendly_args
