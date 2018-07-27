@@ -7,7 +7,7 @@ API_URL = "https://memegen.link/"
 # See the API_URL for details
 REPLACEMENTS = {'_': '__', ' ': '_', r'\"': "''", '-': '--', '?': '~q', '%': '~p', '#': '~h', '/': '~s'}
 VALID_NAMES = [
-'names'
+'names',
 'aag',
 'ackbar',
 'afraid',
@@ -255,19 +255,18 @@ def handle_meme(command: Command):
     """
     channel = command.channel_id
 
-    # Check if args where supplied and if not print the help
     if not command.has_arg():
         bot.post_message(channel, "Please run !help meme for usage")
         return
 
-    name = command.arg.split()[0]
+    name = command.arg.split()[0].lower()
     if name not in VALID_NAMES:
         bot.post_message(channel, "The meme name is invalid. Try !meme names to get a list of all valid names")
         return
 
     args = get_meme_arguments(command.arg)
 
-    if name.lower() == "names":
+    if name == "names":
         send_meme_names(command)
         return
     elif len(args) == 2:
@@ -286,7 +285,8 @@ def handle_meme(command: Command):
 def send_meme_names(command: Command):
     """Sends the full list of meme names to the users channel to avoid channel spam"""
     user_channel = bot.channels.get(command.user_id)
-    bot.post_message(user_channel, MEME_NAMES)
+    attachments = [{'text': MEME_NAMES, 'title': "Meme Names:"}]
+    bot.post_message(user_channel, "", attachments=attachments)
 
 
 def get_meme_arguments(input_args: str):
@@ -302,6 +302,7 @@ def get_meme_arguments(input_args: str):
 
         if arg == "":
             arg = "_"
+
         url_friendly_args.append(arg)
-    print(url_friendly_args)
+
     return url_friendly_args
