@@ -1,6 +1,7 @@
 from uqcsbot import bot, Command
 import re
 from uqcsbot.util.status_reacts import loading_status, success_status
+from urllib.parse import quote
 
 API_URL = "https://memegen.link/"
 # Many different characters need to be replaced in order to work in url format
@@ -158,7 +159,7 @@ def handle_meme(command: Command):
         return
 
     # Make an attachment linking to image
-    image_url = API_URL + f"{name}/{top}/{bottom}.jpg"
+    image_url = API_URL + f"{quote(name)}/{quote(top)}/{quote(bottom)}.jpg"
     attachments = [{"text": "", "image_url": image_url}]
     bot.post_message(channel, "", attachments=attachments)
 
