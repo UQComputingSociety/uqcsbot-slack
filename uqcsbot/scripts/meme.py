@@ -6,7 +6,7 @@ from urllib.parse import quote
 API_URL = "https://memegen.link/"
 # Many different characters need to be replaced in order to work in url format
 # See the API_URL for details
-REPLACEMENTS = {'_': '__', ' ': '_', r'\"': "''", '-': '--', '?': '~q', '%': '~p', '#': '~h', '/': '~s'}
+REPLACEMENTS = str.maketrans({'_': '__', ' ': '_', '-': '--', '?': '~q', '%': '~p', '#': '~h', '/': '~s'})
 MEME_NAMES = {
     "aag": "Ancient Aliens Guy",
     "ackbar": "It's A Trap!",
@@ -143,16 +143,16 @@ def handle_meme(command: Command):
         return
 
     name = command.arg.split()[0].lower()
-    if name != "names" and name not in MEME_NAMES.keys():
+    if name == "names":
+        send_meme_names(command)
+        return
+    elif name not in MEME_NAMES.keys():
         bot.post_message(channel, "The meme name is invalid. Try !meme names to get a list of all valid names")
         return
 
     args = get_meme_arguments(command.arg)
 
-    if name == "names":
-        send_meme_names(command)
-        return
-    elif len(args) == 2:
+    if len(args) == 2:
         top, bottom = args
     else:
         bot.post_message(channel, "You supplied the wrong number of args. Please run !help meme")
@@ -181,8 +181,9 @@ def get_meme_arguments(input_args: str):
     # Replaces all the required characters to be url friendly
     url_friendly_args = []
     for arg in args:
-        for old, new in REPLACEMENTS.items():
-            arg = arg.replace(old, new)
+        arg = arg.translate(REPLACEMENTS)
+        # the translate function won't properly handle the '\"' character so we do it explicitly
+        arg = arg.replace(r'\"', "''")
 
         if arg == "":
             arg = "_"
