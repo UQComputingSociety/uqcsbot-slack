@@ -73,7 +73,7 @@ def test_umart_no_results(uqcsbot: MockUQCSBot):
     This test covers the case where a search query does not yield results from Umart's search.
     This is accomplished by mocking the get_results_from_page function in umart.py
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart thereexistsnoproductwiththisnamesurely")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[1].get('text') == NO_RESULTS_MESSAGE
