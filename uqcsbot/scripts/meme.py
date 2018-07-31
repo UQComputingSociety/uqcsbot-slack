@@ -132,14 +132,13 @@ MEME_NAMES = {
 @loading_status
 def handle_meme(command: Command):
     """
-    !meme <meme name> "<top text>" "<bottom text>"
-
-    For a full list of names: !meme names
+    `!meme <names | (<MEME NAME> "<TOP TEXT>" "<BOTTOM TEXT>")>` - Generates a meme of the given format with the
+    provided top and bottom text. For a full list of formats, try `!meme names`.
     """
     channel = command.channel_id
 
     if not command.has_arg():
-        bot.post_message(channel, "Please run !help meme for usage")
+        bot.post_message(channel, "Please run `!help meme` for usage")
         return
 
     name = command.arg.split()[0].lower()
@@ -147,7 +146,7 @@ def handle_meme(command: Command):
         send_meme_names(command)
         return
     elif name not in MEME_NAMES.keys():
-        bot.post_message(channel, "The meme name is invalid. Try !meme names to get a list of all valid names")
+        bot.post_message(channel, "The meme name is invalid. Try `!meme names` to get a list of all valid names")
         return
 
     args = get_meme_arguments(command.arg)
@@ -155,7 +154,7 @@ def handle_meme(command: Command):
     if len(args) == 2:
         top, bottom = args
     else:
-        bot.post_message(channel, "You supplied the wrong number of args. Please run !help meme")
+        bot.post_message(channel, "You supplied the wrong number of args. Please run `!help meme`")
         return
 
     # Make an attachment linking to image
