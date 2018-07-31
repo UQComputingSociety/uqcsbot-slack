@@ -17,6 +17,7 @@ install_requires = [
     'python-dateutil',
     'google-api-python-client',
     'pytest-runner',
+    'unidecode',
 ]
 
 tests_require = [
