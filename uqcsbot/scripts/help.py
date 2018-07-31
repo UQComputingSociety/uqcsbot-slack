@@ -26,7 +26,7 @@ def get_helper_docs():
     helper docstring (see 'is_valid_helper_doc' function above).
     '''
     return sorted((command_name, fn.__doc__)
-                  for command_name, functions in bot.command_registry.items()
+                  for command_name, functions in bot._command_registry.items()
                   for fn in functions
                   if is_valid_helper_doc(fn.__doc__))
 
