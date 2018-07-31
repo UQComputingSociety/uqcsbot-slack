@@ -9,4 +9,5 @@ def test_meme(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
 
     assert len(messages) == 2
-    assert messages[-1]['attachments'][0]['image_url'] == 'https://memegen.link/bender/top/bottom.jpg'
+    image_url = messages[-1]['attachments'][0]['image_url']
+    assert image_url == 'https://memegen.link/bender/top/bottom.jpg'
