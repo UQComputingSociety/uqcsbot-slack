@@ -14,10 +14,11 @@ class DateSyntaxException(Exception):
     '''
     Raised when an unparsable date syntax is encountered.
     '''
-    def __init__(self, date):
-        self.message = f'Could not parse date \'{date}\'.'
+    def __init__(self, date, course_name):
+        self.message = f'Could not parse date \'{date}\' for course \'{course_name}\'.'
         self.date = date
-        super().__init__(self.message, self.date)
+        self.course_name = course_name
+        super().__init__(self.message, self.date, self.course_name)
 
 
 class CourseNotFoundException(Exception):
@@ -109,7 +110,7 @@ def get_parsed_assessment_due_date(assessment_item):
     Returns the parsed due date for the given assessment item as a datetime
     object. If the date cannot be parsed, a DateSyntaxException is raised.
     '''
-    _, _, due_date, _ = assessment_item
+    course_name, _, due_date, _ = assessment_item
     if due_date == 'Examination Period':
         return get_current_exam_period()
     parser_info = parser.parserinfo(dayfirst=True)
@@ -124,7 +125,7 @@ def get_parsed_assessment_due_date(assessment_item):
         due_datetime = parser.parse(due_date, parser_info)
         return due_datetime, due_datetime
     except Exception:
-        raise DateSyntaxException(due_date)
+        raise DateSyntaxException(due_date, course_name)
 
 
 def is_assessment_after_cutoff(assessment, cutoff):
@@ -181,10 +182,10 @@ def get_parsed_assessment_item(assessment_item):
     This is likely insufficient to handle every course's structure, and thus
     is subject to change.
     '''
-    course, task, due_date, weight = assessment_item.findAll('div')
+    course_name, task, due_date, weight = assessment_item.findAll('div')
     # Handles courses of the form 'CSSE1001 - Sem 1 2018 - St Lucia - Internal'.
     # Thus, this bit of code will extract the course.
-    course = course.text.strip().split(' - ')[0]
+    course_name = course_name.text.strip().split(' - ')[0]
     # Handles tasks of the form 'Computer Exercise<br/>Assignment 2'.
     task = get_element_inner_html(task).strip().replace('<br/>', ' - ')
     # Handles due dates of the form '26 Mar 18 - 27 Mar 18<br/>Held in Week 6
@@ -194,4 +195,4 @@ def get_parsed_assessment_item(assessment_item):
     # Handles weights of the form '30%<br/>Alternative to oral presentation'.
     # Thus, this bit of code will keep only the weight portion of the field.
     weight = get_element_inner_html(weight).strip().split('<br/>')[0]
-    return (course, task, due_date, weight)
+    return (course_name, task, due_date, weight)
