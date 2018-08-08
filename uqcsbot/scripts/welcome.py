@@ -46,5 +46,5 @@ def welcome(evt: dict):
         if not getattr(bot.users.get(member_id), "deleted", True)
     ])
     bot.logger.info(f"Currently at {valid_users} members")
-    if valid_users % MEMBER_MILESTONE == 0:
+    if valid_users > 0 and valid_users % MEMBER_MILESTONE == 0:
         bot.post_message(general, f":tada: {valid_users} members! :tada:")

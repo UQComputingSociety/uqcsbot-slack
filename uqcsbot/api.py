@@ -290,15 +290,23 @@ class ChannelWrapper(object):
 
     def _on_member_joined_channel(self, evt):
         chan = self.get(evt['channel'])
+        # Load members if we haven't already before locking to prevent deadlock.
+        chan.load_members()
         with chan._lock:
-            chan.members.append(evt['user'])
+            members = chan.members
+            user = evt['user']
+            if user not in members:
+                members.append(user)
 
     def _on_member_left_channel(self, evt):
         chan = self.get(evt['channel'])
+        # Load members if we haven't already before locking to prevent deadlock.
+        chan.load_members()
         with chan._lock:
+            members = chan.members
             user = evt['user']
-            if user in chan.members:
-                chan.members.remove(user)
+            if user in members:
+                members.remove(user)
 
     def _on_channel_rename(self, evt):
         with self._lock:
@@ -450,8 +458,8 @@ class User(object):
             "is_admin": data_dict.get('is_admin', False),
             "is_owner": data_dict.get('is_owner', False),
             "is_bot": data_dict.get('is_bot', False),
-            "display_name": data_dict['profile'].get('display_name'),
-            "real_name": data_dict['profile'].get('real_name'),
+            "display_name": data_dict.get('profile', {}).get('display_name'),
+            "real_name": data_dict.get('profile', {}).get('real_name'),
         }
 
     @classmethod
