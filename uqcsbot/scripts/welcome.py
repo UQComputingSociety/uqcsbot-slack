@@ -21,7 +21,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
 @bot.on("member_joined_channel")
 def welcome(evt: dict):
     """
-    Welcomes new users to UQCS Slack and checks for member milestones
+    Welcomes new users to UQCS Slack and checks for member milestones.
 
     @no_help
     """
@@ -33,18 +33,21 @@ def welcome(evt: dict):
     general = bot.channels.get("general")
     user = bot.users.get(evt.get("user"))
 
-    if user and not user.is_bot:
-        bot.post_message(general, f"Welcome, <@{user.user_id}>!")
-        for message in WELCOME_MESSAGES:
-            time.sleep(MESSAGE_PAUSE)
-            bot.post_message(evt.get("user"), message)
-
     valid_users = len([
         member_id
         for member_id in announcements.members
         # getattr used so `None` members count as "deleted"
         if not getattr(bot.users.get(member_id), "deleted", True)
+        and not bot.users.get(member_id).is_bot
     ])
-    bot.logger.info(f"Currently at {valid_users} members")
+
+    # Alert general of a member milestone.
     if valid_users % MEMBER_MILESTONE == 0:
         bot.post_message(general, f":tada: {valid_users} members! :tada:")
+
+    # Send new user their welcome messages.
+    if user and not user.is_bot:
+        bot.post_message(general, f"Welcome, <@{user.user_id}>!")
+        for message in WELCOME_MESSAGES:
+            time.sleep(MESSAGE_PAUSE)
+            bot.post_message(evt.get("user"), message)
