@@ -23,7 +23,8 @@ def test_yt_no_query(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!yt")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    assert messages[-1]['text'] == f'usage: {get_helper_doc('yt')}'
+    youtube_doc = get_helper_doc('yt')
+    assert messages[-1]['text'] == f'usage: {youtube_doc}'
 
 
 @patch('uqcsbot.scripts.yt.execute_search', new=mocked_search_execute)
