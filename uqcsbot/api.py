@@ -290,15 +290,15 @@ class ChannelWrapper(object):
 
     def _on_member_joined_channel(self, evt):
         chan = self.get(evt['channel'])
-        members = chan.members
         with chan._lock:
-            members.append(evt['user'])
+            chan.members.append(evt['user'])
 
     def _on_member_left_channel(self, evt):
         chan = self.get(evt['channel'])
-        members = chan.members
         with chan._lock:
-            members.remove(evt['user'])
+            user = evt['user']
+            if user in chan.members:
+                chan.members.remove(user)
 
     def _on_channel_rename(self, evt):
         with self._lock:
