@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.background import BackgroundScheduler
 from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_doc
+from unidecode import unidecode
 
 
 CmdT = TypeVar('CmdT', bound='Command')
@@ -26,7 +27,7 @@ class Command(object):
 
     @classmethod
     def from_message(cls: Type[CmdT], message: dict) -> Optional[CmdT]:
-        text = message.get("text", '')
+        text = unidecode(message.get("text", ''))
         if message.get("subtype") == "bot_message" or not text.startswith("!"):
             return None
         name, *arg = text[1:].split(" ", 1)

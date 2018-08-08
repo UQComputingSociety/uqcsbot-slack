@@ -15,9 +15,11 @@ def wakie():
     victims = []
     while len(victims) < 2:
         new_victim = choice(channel.members)
-        if bot.users.get(new_victim).deleted:
+        user_from_store = bot.users.get(new_victim)
+        if user_from_store.deleted or user_from_store.is_bot:
             continue
         victims.append(new_victim)
+
     lines = [f'Hey <@{v}>! Tell us about something cool you are working on!' for v in victims]
     wakie_message = bot.post_message(channel, '\r\n'.join(lines))
     bot.api.reactions.add(name=choice(HYPE_REACTS + LOADING_REACTS),
