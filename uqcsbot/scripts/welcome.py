@@ -33,7 +33,14 @@ def welcome(evt: dict):
     general = bot.channels.get("general")
     user = bot.users.get(evt.get("user"))
 
-    valid_users = len([
+    if user is None or user.is_bot:
+        return
+
+    # Welcome user in general.
+    bot.post_message(general, f"Welcome, <@{user.user_id}>!")
+
+    # Calculate number of members, ignoring deleted users and bots.
+    num_members = len([
         member_id
         for member_id in announcements.members
         # getattr used so `None` members count as "deleted"
@@ -41,13 +48,11 @@ def welcome(evt: dict):
         and not bot.users.get(member_id).is_bot
     ])
 
-    # Alert general of a member milestone.
-    if valid_users % MEMBER_MILESTONE == 0:
-        bot.post_message(general, f":tada: {valid_users} members! :tada:")
+    # Alert general of any member milestone.
+    if num_members % MEMBER_MILESTONE == 0:
+        bot.post_message(general, f":tada: {num_members} members! :tada:")
 
     # Send new user their welcome messages.
-    if user and not user.is_bot:
-        bot.post_message(general, f"Welcome, <@{user.user_id}>!")
-        for message in WELCOME_MESSAGES:
-            time.sleep(MESSAGE_PAUSE)
-            bot.post_message(evt.get("user"), message)
+    for message in WELCOME_MESSAGES:
+        time.sleep(MESSAGE_PAUSE)
+        bot.post_message(user.user_id, message)
