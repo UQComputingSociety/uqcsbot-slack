@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from uqcsbot.util.status_reacts import loading_status
 
 NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
-NO_RESULTS_MESSAGE = "I can't find anything. Try `!umart <SOMETHING NOT AS SPECIFIC>`"
+NO_RESULTS_MESSAGE = "I can't find nothing baus! Try `!umart <SOMETHING NOT AS SPECIFIC>`"
 ERROR_MESSAGE = "I tried to get the things but alas I could not. Error with HTTP Request."
 
 UMART_SEARCH_URL = "https://www.umart.com.au/umart1/pro/products_list_searchnew_min.phtml"
