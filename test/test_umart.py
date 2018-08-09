@@ -5,7 +5,7 @@ from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 from unittest.mock import patch
 
 NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
-NO_RESULTS_MESSAGE = "I can't find anything. Try `!umart <SOMETHING NOT AS SPECIFIC>`"
+NO_RESULTS_MESSAGE = "I can't find nothing baus! Try `!umart <SOMETHING NOT AS SPECIFIC>`"
 ERROR_MESSAGE = "I tried to get the things but alas I could not. Error with HTTP Request."
 
 GOOD_MESSAGE = """```Name: <https://www.umart.com.au/umart1/pro/Product1|Product1>
@@ -67,7 +67,7 @@ def test_umart_normal(uqcsbot: MockUQCSBot):
     assert messages[1].get('text') == GOOD_MESSAGE
 
 
-@patch("uqcsbot.scripts.umart.get_results_from_page", new=mocked_no_results)
+@patch("uqcsbot.scripts.umart.get_umart_results", new=mocked_no_results)
 def test_umart_no_results(uqcsbot: MockUQCSBot):
     """
     This test covers the case where a search query does not yield results from Umart's search.
