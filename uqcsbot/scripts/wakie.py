@@ -1,6 +1,6 @@
 from uqcsbot import bot
 from random import choice
-from uqcsbot.util.status_reacts import LOADING_REACTS, HYPE_REACTS
+from uqcsbot.utils.command_utils import LOADING_REACTS, HYPE_REACTS
 
 
 @bot.on_schedule('cron', hour=17, timezone='Australia/Brisbane')

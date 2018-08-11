@@ -3,7 +3,7 @@ from typing import Iterable, Tuple, Optional
 import requests
 import json
 import os
-from uqcsbot.util.status_reacts import loading_status
+from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 
 WOLFRAM_APP_ID = os.environ.get('WOLFRAM_APP_ID')
 
@@ -30,23 +30,23 @@ def handle_wolfram(command: Command):
     `!wolfram [--full] <QUERY>` - Returns the wolfram response for the given
     query. If `--full` is specified, will return the full reponse.
     '''
+    if not command.has_arg():
+        raise UsageSyntaxException()
+
     # Determines whether to use the full version or the short version. The full
     # version is used if the --full. argument is supplied before or after the
     # search query. See wolfram_full and wolfram_normal for the differences.
-    if command.has_arg():
-        cmd = command.arg.strip()
-        # Doing it specific to the start and end just in case someone has --full inside their query
-        # for whatever reason.
-        if cmd.startswith('--full'):
-            cmd = cmd[len('--full'):]  # removes the --full
-            wolfram_full(cmd, command.channel_id)
-        elif cmd.endswith('--full'):
-            cmd = cmd[:-len('--full')]  # removes the --full
-            wolfram_full(cmd, command.channel_id)
-        else:
-            wolfram_normal(cmd, command.channel_id)
+    cmd = command.arg.strip()
+    # Doing it specific to the start and end just in case someone has --full inside their query
+    # for whatever reason.
+    if cmd.startswith('--full'):
+        cmd = cmd[len('--full'):]  # removes the --full
+        wolfram_full(cmd, command.channel_id)
+    elif cmd.endswith('--full'):
+        cmd = cmd[:-len('--full')]  # removes the --full
+        wolfram_full(cmd, command.channel_id)
     else:
-        bot.post_message(command.channel_id, "You need to ask something")
+        wolfram_normal(cmd, command.channel_id)
 
 
 def wolfram_full(search_query: str, channel):

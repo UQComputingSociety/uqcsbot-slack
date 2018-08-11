@@ -1,6 +1,6 @@
 from uqcsbot import bot, Command
 import re
-from uqcsbot.util.status_reacts import loading_status, success_status
+from uqcsbot.utils.command_utils import loading_status, success_status, UsageSyntaxException
 from urllib.parse import quote
 
 API_URL = "https://memegen.link/"
@@ -138,8 +138,7 @@ def handle_meme(command: Command):
     channel = command.channel_id
 
     if not command.has_arg():
-        bot.post_message(channel, "Please run `!help meme` for usage")
-        return
+        raise UsageSyntaxException()
 
     name = command.arg.split()[0].lower()
     if name == "names":
@@ -150,14 +149,11 @@ def handle_meme(command: Command):
         return
 
     args = get_meme_arguments(command.arg)
-
-    if len(args) == 2:
-        top, bottom = args
-    else:
-        bot.post_message(channel, "You supplied the wrong number of args. Please run `!help meme`")
-        return
+    if len(args) != 2:
+        raise UsageSyntaxException()
 
     # Make an attachment linking to image
+    top, bottom = args
     image_url = API_URL + f"{quote(name)}/{quote(top)}/{quote(bottom)}.jpg"
     attachments = [{"text": "", "image_url": image_url}]
     bot.post_message(channel, "", attachments=attachments)

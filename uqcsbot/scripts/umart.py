@@ -3,7 +3,7 @@ from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
-from uqcsbot.util.status_reacts import loading_status
+from uqcsbot.utils.command_utils import loading_status
 
 NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
 NO_RESULTS_MESSAGE = "I can't find nothing baus! Try `!umart <SOMETHING NOT AS SPECIFIC>`"

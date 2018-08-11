@@ -1,6 +1,6 @@
 from slackclient import SlackClient
 from uqcsbot.api import APIWrapper, ChannelWrapper, Channel, UsersWrapper
-from functools import partial
+from functools import partial, wraps
 import collections
 import asyncio
 import concurrent.futures
@@ -9,6 +9,7 @@ import time
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.background import BackgroundScheduler
+from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_doc
 from unidecode import unidecode
 
 
@@ -16,8 +17,8 @@ CmdT = TypeVar('CmdT', bound='Command')
 
 
 class Command(object):
-    def __init__(self, command_name: str, arg: Optional[str], message: dict) -> None:
-        self.command_name = command_name
+    def __init__(self, name: str, arg: Optional[str], message: dict) -> None:
+        self.name = name
         self.arg = arg
         self.message = message
 
@@ -29,9 +30,9 @@ class Command(object):
         text = unidecode(message.get("text", ''))
         if message.get("subtype") == "bot_message" or not text.startswith("!"):
             return None
-        command_name, *arg = text[1:].split(" ", 1)
+        name, *arg = text[1:].split(" ", 1)
         return cls(
-            command_name=command_name,
+            name=name,
             arg=None if not arg else arg[0],
             message=message
         )
@@ -102,9 +103,22 @@ class UQCSBot(object):
         self.logger.info(f"Server is about to disconnect")
 
     def on_command(self, command_name: str):
-        def decorator(fn):
-            self._command_registry[command_name].append(fn)
-            return fn
+        def decorator(command_fn):
+            '''
+            Decorator function which returns a wrapper function that catches any
+            UsageSyntaxExceptions and sends the wrapped command's helper doc to
+            the calling channel. Also adds the function as a handler for the
+            given command name.
+            '''
+            @wraps(command_fn)
+            def wrapper(command: Command):
+                try:
+                    return command_fn(command)
+                except UsageSyntaxException as e:
+                    helper_doc = get_helper_doc(command.name)
+                    self.post_message(command.channel_id, f'usage: {helper_doc}')
+            self._command_registry[command_name].append(wrapper)
+            return wrapper
         return decorator
 
     def on(self, message_type: Optional[str], fn: Optional[Callable] = None):
@@ -184,7 +198,7 @@ class UQCSBot(object):
         command = Command.from_message(message)
         if command is None:
             return
-        for handler in self._command_registry[command.command_name]:
+        for handler in self._command_registry[command.name]:
             self.executor.submit(
                 self._execute_catching_error,
                 handler,

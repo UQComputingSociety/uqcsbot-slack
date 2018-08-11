@@ -1,6 +1,6 @@
 import os
 from uqcsbot import bot, Command
-
+from uqcsbot.utils.command_utils import UsageSyntaxException
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
@@ -18,8 +18,7 @@ def handle_yt(command: Command):
     '''
     # Makes sure the query is not empty.
     if not command.has_arg():
-        bot.post_message(command.channel_id, NO_QUERY_MESSAGE)
-        return
+        raise UsageSyntaxException()
 
     search_query = command.arg.strip()
     try:

@@ -1,6 +1,6 @@
-from uqcsbot import bot, Command
-from uqcsbot.util.status_reacts import loading_status
 import requests
+from uqcsbot import bot, Command
+from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 
 URBAN_API_ENDPOINT = 'http://api.urbandictionary.com/v0/define'
 URBAN_USER_ENDPOINT = 'https://www.urbandictionary.com/define.php'
@@ -14,8 +14,8 @@ def handle_urban(command: Command) -> None:
     """
     # Check for search phase
     if not command.has_arg():
-        bot.post_message(command.channel_id, '> Usage: `!urban <SEARCH_PHRASE>`')
-        return
+        raise UsageSyntaxException()
+
     search_term = command.arg
 
     # Attempt to get definitions from the Urban Dictionary API.

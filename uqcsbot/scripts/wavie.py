@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 def wave(evt):
     """
     :wave: reacts to "person joined/left this channel"
-
+    
     @no_help
     """
     if evt.get('subtype') not in ['channel_join', 'channel_leave']:

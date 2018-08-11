@@ -1,5 +1,5 @@
 from uqcsbot import bot, Command
-from uqcsbot.util.status_reacts import loading_status
+from uqcsbot.utils.command_utils import loading_status
 from typing import List
 import os
 import requests

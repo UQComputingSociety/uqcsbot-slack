@@ -1,5 +1,5 @@
 from uqcsbot import bot, Command
-from uqcsbot.util.status_reacts import success_status
+from uqcsbot.utils.command_utils import success_status
 
 
 @bot.on_command("whoami")

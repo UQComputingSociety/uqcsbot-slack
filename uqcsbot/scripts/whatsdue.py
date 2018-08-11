@@ -1,10 +1,10 @@
 from datetime import datetime
 from uqcsbot import bot, Command
-from uqcsbot.util.status_reacts import loading_status
-from uqcsbot.util.uq_course_util import (get_course_assessment,
-                                         HttpException,
-                                         CourseNotFoundException,
-                                         ProfileNotFoundException)
+from uqcsbot.utils.command_utils import loading_status
+from uqcsbot.utils.uq_course_utils import (get_course_assessment,
+                                           HttpException,
+                                           CourseNotFoundException,
+                                           ProfileNotFoundException)
 
 # Maximum number of courses supported by !whatsdue to reduce call abuse.
 COURSE_LIMIT = 6
