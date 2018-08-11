@@ -13,6 +13,7 @@ from slackclient import SlackClient
 import uqcsbot as uqcsbot_module
 from uqcsbot.api import APIWrapper
 from uqcsbot.base import UQCSBot, Command
+from copy import deepcopy
 
 # Convenient (but arbitrary) channels and users for use in testing
 TEST_CHANNEL_ID = "C1234567890"
@@ -46,8 +47,8 @@ class MockUQCSBot(UQCSBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.test_messages = defaultdict(list)
-        self.test_users = TEST_USERS.copy()
-        self.test_channels = TEST_CHANNELS.copy()
+        self.test_users = deepcopy(TEST_USERS)
+        self.test_channels = deepcopy(TEST_CHANNELS)
 
         def mocked_api_call(method, **kwargs):
             '''
@@ -326,5 +327,5 @@ def uqcsbot(_uqcsbot: MockUQCSBot):
     # Anything after yield will be run after test
     # Clear messages, users and channels
     _uqcsbot.test_messages.clear()
-    _uqcsbot.test_users = TEST_USERS.copy()
-    _uqcsbot.test_channels = TEST_CHANNELS.copy()
+    _uqcsbot.test_users = deepcopy(TEST_USERS)
+    _uqcsbot.test_channels = deepcopy(TEST_CHANNELS)
