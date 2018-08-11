@@ -40,13 +40,12 @@ def welcome(evt: dict):
     bot.post_message(general, f"Welcome, <@{user.user_id}>!")
 
     # Calculate number of members, ignoring deleted users and bots.
-    num_members = len([
-        member_id
-        for member_id in announcements.members
-        # getattr used so `None` members count as "deleted"
-        if not getattr(bot.users.get(member_id), "deleted", True)
-        and not bot.users.get(member_id).is_bot
-    ])
+    num_members = 0
+    for member_id in announcements.members:
+        member = bot.users.get(member_id)
+        if member is None or member.deleted or member.is_bot:
+            continue
+        num_members += 1
 
     # Alert general of any member milestone.
     if num_members % MEMBER_MILESTONE == 0:
