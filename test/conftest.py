@@ -13,38 +13,42 @@ from slackclient import SlackClient
 import uqcsbot as uqcsbot_module
 from uqcsbot.api import APIWrapper
 from uqcsbot.base import UQCSBot, Command
+from copy import deepcopy
 
-# Arbitrary channel and user ids for use in testing
+# Convenient (but arbitrary) channels and users for use in testing
 TEST_CHANNEL_ID = "C1234567890"
 TEST_GROUP_ID = "G1234567890"
 TEST_DIRECT_ID = "D1234567890"
 TEST_USER_ID = "U1234567890"
 TEST_BOT_ID = "B1234567890"
+TEST_USERS = {
+    # Bot user
+    TEST_BOT_ID: {'id': TEST_BOT_ID, 'name': TEST_BOT_ID, 'deleted': False,
+                  'is_bot': True, 'profile': {'display_name': TEST_BOT_ID}},
+    # Regular user
+    TEST_USER_ID: {'id': TEST_USER_ID, 'name': TEST_USER_ID, 'deleted': False,
+                   'profile': {'display_name': TEST_USER_ID}}
+}
+TEST_CHANNELS = {
+    # Public channel
+    TEST_CHANNEL_ID: {'id': TEST_CHANNEL_ID, 'name': TEST_CHANNEL_ID,
+                      'is_public': True, 'members': [TEST_USER_ID]},
+    # Group channel
+    TEST_GROUP_ID: {'id': TEST_GROUP_ID, 'name': TEST_GROUP_ID, 'is_group': True,
+                    'is_private': True, 'members': [TEST_USER_ID]},
+    # Direct channel
+    TEST_DIRECT_ID: {'id': TEST_DIRECT_ID, 'name': TEST_DIRECT_ID, 'is_im': True,
+                     'is_private': True, 'is_user_deleted': False,
+                     'user': TEST_USER_ID}
+}
 
 
 class MockUQCSBot(UQCSBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.test_users = {
-            TEST_BOT_ID: {'id': TEST_BOT_ID, 'name': TEST_BOT_ID, 'deleted': False,
-                          'profile': {'display_name': TEST_BOT_ID}, 'is_bot': True},
-            TEST_USER_ID: {'id': TEST_USER_ID, 'name': TEST_USER_ID, 'deleted': False,
-                           'profile': {'display_name': TEST_USER_ID}}
-        }
         self.test_messages = defaultdict(list)
-        self.test_channels = {
-            # Public channel
-            TEST_CHANNEL_ID: {'id': TEST_CHANNEL_ID, 'name': TEST_CHANNEL_ID,
-                              'is_public': True, 'members': [TEST_USER_ID]},
-            # Group channel
-            TEST_GROUP_ID: {'id': TEST_GROUP_ID, 'name': TEST_GROUP_ID,
-                            'is_group': True, 'is_private': True,
-                            'members': [TEST_USER_ID]},
-            # Direct channel
-            TEST_DIRECT_ID: {'id': TEST_DIRECT_ID, 'name': TEST_DIRECT_ID,
-                             'is_im': True, 'is_private': True,
-                             'is_user_deleted': False, 'user': TEST_USER_ID}
-        }
+        self.test_users = deepcopy(TEST_USERS)
+        self.test_channels = deepcopy(TEST_CHANNELS)
 
         def mocked_api_call(method, **kwargs):
             '''
@@ -321,5 +325,7 @@ def uqcsbot(_uqcsbot: MockUQCSBot):
     _uqcsbot.users._initialise()
     yield _uqcsbot
     # Anything after yield will be run after test
-    # Clear channel messages
+    # Clear messages, users and channels
     _uqcsbot.test_messages.clear()
+    _uqcsbot.test_users = deepcopy(TEST_USERS)
+    _uqcsbot.test_channels = deepcopy(TEST_CHANNELS)

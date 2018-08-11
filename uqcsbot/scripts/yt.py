@@ -53,7 +53,7 @@ def execute_search(search_query: str, search_part: str, search_type: str, max_re
     Executes the search via the google api client based on the parameters given.
     '''
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-                    developerKey=YOUTUBE_API_KEY)
+                    developerKey=YOUTUBE_API_KEY, cache_discovery=False)
 
     search_response = youtube.search().list(
         q=search_query,
