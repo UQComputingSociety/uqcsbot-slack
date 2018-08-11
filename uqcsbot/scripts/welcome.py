@@ -21,7 +21,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
 @bot.on("member_joined_channel")
 def welcome(evt: dict):
     """
-    Welcomes new users to UQCS Slack and checks for member milestones
+    Welcomes new users to UQCS Slack and checks for member milestones.
 
     @no_help
     """
@@ -33,18 +33,25 @@ def welcome(evt: dict):
     general = bot.channels.get("general")
     user = bot.users.get(evt.get("user"))
 
-    if user and not user.is_bot:
-        bot.post_message(general, f"Welcome, <@{user.user_id}>!")
-        for message in WELCOME_MESSAGES:
-            time.sleep(MESSAGE_PAUSE)
-            bot.post_message(evt.get("user"), message)
+    if user is None or user.is_bot:
+        return
 
-    valid_users = len([
-        member_id
-        for member_id in announcements.members
-        # getattr used so `None` members count as "deleted"
-        if not getattr(bot.users.get(member_id), "deleted", True)
-    ])
-    bot.logger.info(f"Currently at {valid_users} members")
-    if valid_users % MEMBER_MILESTONE == 0:
-        bot.post_message(general, f":tada: {valid_users} members! :tada:")
+    # Welcome user in general.
+    bot.post_message(general, f"Welcome, <@{user.user_id}>!")
+
+    # Calculate number of members, ignoring deleted users and bots.
+    num_members = 0
+    for member_id in announcements.members:
+        member = bot.users.get(member_id)
+        if member is None or member.deleted or member.is_bot:
+            continue
+        num_members += 1
+
+    # Alert general of any member milestone.
+    if num_members % MEMBER_MILESTONE == 0:
+        bot.post_message(general, f":tada: {num_members} members! :tada:")
+
+    # Send new user their welcome messages.
+    for message in WELCOME_MESSAGES:
+        time.sleep(MESSAGE_PAUSE)
+        bot.post_message(user.user_id, message)
