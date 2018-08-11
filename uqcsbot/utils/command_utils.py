@@ -100,7 +100,7 @@ def success_status(command_fn):
         res = None
         try:
             res = command_fn(command)
-        except FailureException as e:
+        except Exception as e:
             reaction_kwargs['name'] = choice(FAILURE_REACTS)
         uqcsbot.bot.api.reactions.add(**reaction_kwargs)
         return res
