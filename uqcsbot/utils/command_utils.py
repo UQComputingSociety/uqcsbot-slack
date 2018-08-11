@@ -8,6 +8,16 @@ SUCCESS_REACTS = ['thumbsup', 'thumbsup_all', 'msn_thumbsup', 'ok-hand', 'nice',
                   'noice', 'feels_good']
 HYPE_REACTS = ['nice', 'noice', 'ok-hand', 'exclamation', 'fiestaparrot',
                'github_square3', 'sweating']
+FAILURE_REACTS = ['thumbsdown', 'msn_n', 'no_good', 'no_entry_sign',
+                  'bitconnectfacepalm']
+
+
+class FailureException(Exception):
+    '''
+    Raised when a command experiences an unexpected failure that prevents it
+    from completing successfully.
+    '''
+    pass
 
 
 class UsageSyntaxException(Exception):
@@ -54,18 +64,44 @@ def get_helper_doc(command_name) -> str:
     helper_docs = get_helper_docs(command_name)
     return helper_docs[0] if len(helper_docs) == 1 else None
 
+
+def admin_only(command_fn):
+    '''
+    Decorator function which wraps a command and ensures only admins can run it.
+    '''
+    @wraps(command_fn)
+    def wrapper(command: uqcsbot.Command):
+        user = uqcsbot.bot.users.get(command.user_id)
+        if user is None:
+            return None
+        if not user.is_admin:
+            uqcsbot.bot.post_message(command.channel_id,
+                                     'Must be an admin to use this command.')
+            return None
+        return command_fn(command)
+    return wrapper
+
+
 def success_status(command_fn):
     '''
     Decorator function which returns a wrapper function that adds a success
-    react after the wrapped command has run. This gives a visual cue to users in
-    the calling channel that the command was carried out successfully.
+    react after the wrapped command has run successfully. If the command fails
+    for some reason and raises a FailureException, will instead add a failure
+    react. This gives a visual cue to users in the calling channel of the outcome
+    of the wrapped command.
     '''
     @wraps(command_fn)
     def wrapper(command: uqcsbot.Command):
         reaction_kwargs = {'name': choice(SUCCESS_REACTS),
                            'channel': command.channel_id,
                            'timestamp': command.message['ts']}
-        res = command_fn(command)
+        # If the command returns without a failure exception, it is deemed
+        # successful and receives the success react.
+        res = None
+        try:
+            res = command_fn(command)
+        except FailureException as e:
+            reaction_kwargs['name'] = choice(FAILURE_REACTS)
         uqcsbot.bot.api.reactions.add(**reaction_kwargs)
         return res
     return wrapper
