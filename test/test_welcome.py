@@ -1,6 +1,6 @@
 from test.conftest import MockUQCSBot, TEST_USER_ID, TEST_DIRECT_ID
 from test.helpers import (generate_event_object, MESSAGE_TYPE_CHANNEL_CREATED,
-                          MESSAGE_TYPE_MEMBER_JOINED_CHANNEL)
+                          MESSAGE_TYPE_MEMBER_JOINED_CHANNEL, MESSAGE_TYPE_TEAM_JOIN)
 from unittest.mock import patch
 
 # TODO(mitch): replace this with the milestone number once you've worked out how
@@ -47,11 +47,17 @@ def test_welcome_milestone(uqcsbot: MockUQCSBot):
                               channel={'id': 'announcements', 'name': 'announcements',
                                        'is_public': True}),
     ]
-    for _ in range(MEMBER_MILESTONE):
-        events.append(
+    for i in range(MEMBER_MILESTONE):
+        user_id = 'U' + str(i).rjust(10, '0')
+        uqcsbot.test_users[user_id] = {'id': user_id}
+        uqcsbot.test_channels[user_id] = {'id': user_id, 'name': user_id}
+        events.extend((
+            generate_event_object(MESSAGE_TYPE_CHANNEL_CREATED,
+                                  channel={'id': user_id, 'name': user_id}),
+            generate_event_object(MESSAGE_TYPE_TEAM_JOIN, user={'id': user_id}),
             generate_event_object(MESSAGE_TYPE_MEMBER_JOINED_CHANNEL,
-                                  channel='announcements', user=TEST_USER_ID)
-        )
+                                  channel='announcements', user=user_id)
+        ))
     with patch('time.sleep') as mock_sleep:
         mock_sleep.return_value = None
         for event in events:
