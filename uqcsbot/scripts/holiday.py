@@ -2,6 +2,7 @@ from uqcsbot import bot
 from uqcsbot.utils.command_utils import HYPE_REACTS
 from bs4 import BeautifulSoup
 from random import choice
+from requests.exceptions import RequestException
 import datetime
 import requests
 
@@ -70,5 +71,5 @@ def get_holiday_page() -> bytes:
         response = requests.get(HOLIDAY_URL)
         return response.content
     except RequestException as e:
-        bot.logger.error(e.content)
+        bot.logger.error(e.response.content)
     return None
