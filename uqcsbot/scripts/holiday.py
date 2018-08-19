@@ -2,6 +2,7 @@ from uqcsbot import bot
 from uqcsbot.utils.command_utils import HYPE_REACTS
 from bs4 import BeautifulSoup
 from random import choice
+from requests.exceptions import RequestException
 import datetime
 import requests
 
