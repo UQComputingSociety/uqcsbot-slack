@@ -37,7 +37,7 @@ def get_holiday(day:str) -> dict:
 
     holidays = get_holidays_from_page(holiday_page)
 
-    holidays_today = [holiday for holiday in holidays if holiday['day'] == day]
+    holidays_today = [holiday for holiday in holidays if day in holiday['day']]
 
     return choice(holidays_today) if holidays_today else None
 
@@ -47,7 +47,9 @@ def get_holidays_from_page(holiday_page) -> list:
     Strips results from html page
     '''
     soup = BeautifulSoup(holiday_page, 'html.parser')
-    soup_holidays = soup.find_all(class_="c0") + soup.find_all(class_="c1")
+    soup_holidays = soup.find_all(class_="c0") + \
+                    soup.find_all(class_="c1") + \
+                    soup.find_all(class_="hl")
 
     holidays = []
 
