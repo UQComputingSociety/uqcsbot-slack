@@ -1,5 +1,5 @@
-from uqcsbot import bot, Command
-from uqcsbot.utils.command_utils import loading_status, HYPE_REACTS
+from uqcsbot import bot
+from uqcsbot.utils.command_utils import HYPE_REACTS
 from bs4 import BeautifulSoup
 from random import choice
 import datetime
@@ -21,22 +21,10 @@ def holiday():
         return
 
     description = holiday['desc']
-    bot.post_message(channel, f'Today is {description}!')
-
-@bot.on_command('holiday')
-@loading_status
-def handle_holiday(command: Command) -> None:
-    channel = bot.channels.get(command.channel_id)
-    now = datetime.datetime.now().strftime("%d %b").lstrip('0')
-    if command.has_arg():
-        now = command.arg
-
-    holiday = get_holiday(now)
-    if holiday is None:
-        return
-
-    description = holiday['desc']
-    bot.post_message(channel, f'Today is {description}!')
+    message = bot.post_message(channel, f'Today is {description}!')
+    bot.api.reactions.add(name=choice(HYPE_REACTS),
+                          channel=channel.id,
+                          timestamp=message['ts'])
 
 def get_holiday(day:str) -> dict:
     '''
