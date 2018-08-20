@@ -19,10 +19,9 @@ class Holiday:
         Returns true if the holiday is celebrated today
         '''
         now = datetime.now()
-        return self.date.month == now.month and \
-                self.date.day == now.day
+        return self.date.month == now.month and self.date.day == now.day
 
-@bot.on_schedule('cron', hour=14, minute=45, timezone='Australia/Brisbane')
+@bot.on_schedule('cron', hour=9, timezone='Australia/Brisbane')
 def holiday() -> None:
     '''
     Posts a random celebratory day on #general from
@@ -30,8 +29,7 @@ def holiday() -> None:
     '''
     channel = bot.channels.get("general")
 
-    now = datetime.now().strftime("%d %b").lstrip('0')
-    holiday = get_holiday(now)
+    holiday = get_holiday()
     if holiday is None:
         return
 
@@ -40,7 +38,7 @@ def holiday() -> None:
                           channel=channel.id,
                           timestamp=message['ts'])
 
-def get_holiday(day:str) -> Holiday:
+def get_holiday() -> Holiday:
     '''
     Gets the holiday for a given day. If there are multiple
     holidays, choose a random one.
