@@ -1,33 +1,46 @@
 from uqcsbot import bot
 from uqcsbot.utils.command_utils import HYPE_REACTS
 from bs4 import BeautifulSoup
+from datetime import datetime
 from random import choice
 from requests.exceptions import RequestException
-import datetime
 import requests
 
 HOLIDAY_URL = 'https://www.timeanddate.com/holidays/fun/'
 
-@bot.on_schedule('cron', hour=9, timezone='Australia/Brisbane')
-def holiday():
+class Holiday:
+    def __init__(self, date: datetime, description: str, url: str) -> None:
+        self.date = date
+        self.description = description
+        self.url = url
+
+    def is_today(self) -> bool:
+        '''
+        Returns true if the holiday is celebrated today
+        '''
+        now = datetime.now()
+        return self.date.month == now.month and \
+                self.date.day == now.day
+
+@bot.on_schedule('cron', hour=14, minute=45, timezone='Australia/Brisbane')
+def holiday() -> None:
     '''
     Posts a random celebratory day on #general from
     https://www.timeanddate.com/holidays/fun/
     '''
     channel = bot.channels.get("general")
 
-    now = datetime.datetime.now().strftime("%d %b").lstrip('0')
+    now = datetime.now().strftime("%d %b").lstrip('0')
     holiday = get_holiday(now)
     if holiday is None:
         return
 
-    description = holiday['desc']
-    message = bot.post_message(channel, f'Today is {description}!')
+    message = bot.post_message(channel, f'Today is {holiday.description}!')
     bot.api.reactions.add(name=choice(HYPE_REACTS),
                           channel=channel.id,
                           timestamp=message['ts'])
 
-def get_holiday(day:str) -> dict:
+def get_holiday(day:str) -> Holiday:
     '''
     Gets the holiday for a given day. If there are multiple
     holidays, choose a random one.
@@ -38,7 +51,7 @@ def get_holiday(day:str) -> dict:
 
     holidays = get_holidays_from_page(holiday_page)
 
-    holidays_today = [holiday for holiday in holidays if day in holiday['day']]
+    holidays_today = [holiday for holiday in holidays if holiday.is_today()]
 
     return choice(holidays_today) if holidays_today else None
 
@@ -55,10 +68,11 @@ def get_holidays_from_page(holiday_page) -> list:
     holidays = []
 
     for soup_holiday in soup_holidays:
-        holiday = {}
-        holiday['day'] = soup_holiday.find('th').get_text(strip=True)
-        holiday['desc'] = soup_holiday.find('a').get_text(strip=True)
-        holiday['url'] = soup_holiday.find('a')['href']
+        date_string = soup_holiday.find('th').get_text(strip=True)
+        description = soup_holiday.find('a').get_text(strip=True)
+        url = soup_holiday.find('a')['href']
+        date = datetime.strptime(date_string, '%d %b')
+        holiday = Holiday(date, description, url)
         holidays.append(holiday)
 
     return holidays
