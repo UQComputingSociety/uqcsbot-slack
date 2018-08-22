@@ -2,9 +2,10 @@ from uqcsbot import bot, Command
 from bs4 import BeautifulSoup
 from datetime import datetime
 from requests.exceptions import RequestException
-from uqcsbot.utils.command_utils import loading_status
+from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 import requests
 
+MAX_COUPONS = 10 # Prevents abuse
 COUPONESE_DOMINOS_URL = 'https://www.couponese.com/store/dominos.com.au/'
 
 class Coupon:
@@ -26,17 +27,25 @@ class Coupon:
 @loading_status
 def handle_dominos(command: Command):
     '''
-    `!dominos <n>` - Returns n domino's coupons
+    `!dominos [N]` - Returns a list of dominos coupons (default: 5 | max: 10)
     '''
     command_args = command.arg.strip() if command.has_arg() else 5
+    try:
+        coupons_amount = max(int(command_args), MAX_COUPONS)
+    except:
+        raise UsageSyntaxException()
 
-    coupons = get_coupons(int(command_args))
+    coupons = get_coupons(int(coupons_amount))
     message = ""
     for coupon in coupons:
         message += f"Code: *{coupon.code}* - {coupon.description}\n"
     bot.post_message(command.channel_id, message)
 
 def get_coupons(n:int) -> list:
+    '''
+    Returns a list of n Coupons
+    '''
+
     coupon_page = get_coupon_page()
     if coupon_page is None:
         return None
