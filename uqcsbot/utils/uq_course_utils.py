@@ -8,7 +8,6 @@ from functools import partial
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds=' # noqa
 BASE_CALENDAR_URL = 'http://www.uq.edu.au/events/calendar_view.php?category_id=16&year='
-SEMESTER_CODE = '&offer=53544c554332494e' # appended to BASE_COURSE_URL to highlight the current semester
 
 
 class DateSyntaxException(Exception):
@@ -58,18 +57,17 @@ def get_course_profile_url(course_name):
     '''
     Returns the URL to the latest course profile for the given course.
     '''
-    course_url = BASE_COURSE_URL + course_name + SEMESTER_CODE
+    course_url = BASE_COURSE_URL + course_name
     http_response = requests.get(course_url)
     if http_response.status_code != requests.codes.ok:
         raise HttpException(course_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
     if html.find(id='course-notfound'):
         raise CourseNotFoundException(course_name)
-    profile = html.find('tr', class_='current')
-    url = profile.find('a', class_='profile-available')
-    if url is None:
+    profile = html.find('a', class_='profile-available')
+    if profile is None:
         raise ProfileNotFoundException(course_name)
-    return url.get('href')
+    return profile.get('href')
 
 
 def get_course_profile_id(course_name):
