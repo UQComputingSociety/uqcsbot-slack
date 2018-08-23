@@ -37,7 +37,9 @@ def welcome(evt: dict):
         return
 
     # Welcome user in general.
-    bot.post_message(general, f"Welcome, <@{user.user_id}>!")
+    user_id = user.user_id
+    welcome = "WELCOME" if user_id.upper() == user_id else "Welcome"
+    bot.post_message(general, f"{welcome}, <@{user.user_id}>!")
 
     # Calculate number of members, ignoring deleted users and bots.
     num_members = 0
