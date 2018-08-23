@@ -11,7 +11,7 @@ ERROR_MESSAGE = "Trouble with HTTP Request, can't ASCIIfy :("
 ASCII_URL = "http://artii.herokuapp.com/make?text="
 FONT_URL = "http://artii.herokuapp.com/fonts_list"
 
-
+#TODO: FIX RETURNING ONLY FONTSLIST - SHOULD NOT PASS NOTHING INTO ASCIIFY
 @bot.on_command("asciify")
 @loading_status
 def handle_asciify(command: Command):
@@ -54,8 +54,9 @@ def handle_asciify(command: Command):
         return
     if not command_args:
         bot.post_message(command.channel_id, NO_QUERY_MESSAGE)
-        
-    text = ' '.join(command_args)
+        text = None
+    else: 
+        text = ' '.join(command_args)
     #asciification
     if random_font:
         ascii_text = asciify(text, randomfont())
