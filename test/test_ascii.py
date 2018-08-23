@@ -2,100 +2,56 @@
 Tests for ascii.py
 """
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
-from unittest.mock import patch
+
+TEST_TEXT = "ThIS iS a TeST MesSAgE"
+FONTSLIST_URL = "http://artii.herokuapp.com/fonts_list"
 
 NO_QUERY_MESSAGE = "Can't ASCIIfy nothing... try `!asciify <TEXT>`"
 BOTH_OPTIONS_MESSAGE = "Font can only be random OR specified"
 ERROR_MESSAGE = "Trouble with HTTP Request, can't ASCIIfy :("
 
-GOOD_MESSAGE = """```Name: <https://www.umart.com.au/umart1/pro/Product1|Product1>
-Price: $1999.00
-Name: <https://www.umart.com.au/umart1/pro/Product2|Product2>
-Price: $1099.00
-Name: <https://www.umart.com.au/umart1/pro/Product3|Product3>
-Price: $1399.00
-Name: <https://www.umart.com.au/umart1/pro/Product4|Product4>
-Price: $1269.00
-Name: <https://www.umart.com.au/umart1/pro/Product5|Product5>
-Price: $1239.00
-```"""
+DEFAULT_FONT_RESULT= '''  _______ _     _____  _____   _  _____           _______    _____ _______   __  __           _____              ______ 
+ |__   __| |   |_   _|/ ____| (_)/ ____|         |__   __|  / ____|__   __| |  \/  |         / ____|  /\        |  ____|
+    | |  | |__   | | | (___    _| (___     __ _     | | ___| (___    | |    | \  / | ___ ___| (___   /  \   __ _| |__   
+    | |  | '_ \  | |  \___ \  | |\___ \   / _` |    | |/ _ \\___ \   | |    | |\/| |/ _ \ __|\___ \ / /\ \ / _` |  __|  
+    | |  | | | |_| |_ ____) | | |____) | | (_| |    | |  __/____) |  | |    | |  | |  __\__ \____) / ____ \ (_| | |____ 
+    |_|  |_| |_|_____|_____/  |_|_____/   \__,_|    |_|\___|_____/   |_|    |_|  |_|\___|___/_____/_/    \_\__, |______|
 
+                                                                                                          __/ |       
+                                                                                                           |___/        '''
+CUSTOM_FONT_RESULT= ''' ######           ####  #####          #####            ######          ##### ######   #     #                  #####   ##           ######   
+ # ## #  #   #     ##  ### ##     ##  ### ##     ##     # ## #  # #### ### ## # ## #   ##   ##  # ####  ###### ### ##  ####    # #### ##  ##  
+   ##    #   #     ##  ###       ###  ###       # #       ##    #   ## ###      ##     ### ###  #   ## ##   ## ###    ##  ##  ##   ## ##      
+   ##    #   #     ##   ####      ##   ####    ## #       ##    #       ####    ##     #######  #      ##       ####  ##  ##  ##      ####    
+   ##   #######    ##     ###    ###     ###   #  ##      ##   ## ##      ###   ##     ## # ## ## ##    #####     ### ######  #       ##      
+   ##   ##   ##    ##  ## ###    ###  ## ###  ## ####     ##   ##      ## ###   ##     ##   ## ##           ## ## ### ##  ##  #   ### ##  ##  
+  ####  ##   ##   #### #####      ##  #####   ##   ##    ####  ##  ### #####   ####    ##   ## ##  ### ##   ## ##### ##    ## ###  # ######   
+         #   ##                   ##          ##   ##          ## ###                          ## ###  ### ##                  #####          '''
 
-def mocked_html_get(*args, **kwargs):
-    """
-    This method will be used to replace the requests response
-    Returns locally stored HTML that represents a typically scraped response.
-    """
-    f = open("test/umart_products_list_search.html", "r")
-    return f.read()
-
-
-def mocked_no_results(*args, **kwargs):
-    """
-    This method returns an empty list. The same as if no results could be scraped from HTML.
-    """
-    return []
-
-
-def mocked_no_page(*args, **kwargs):
-    """
-    This method returns None. The same as if an error ocurred in retrieving the search page.
-    """
-    return None
-
-
-def test_umart_no_query(uqcsbot: MockUQCSBot):
-    """
-    This test aims to determine the stability of the script when it receives no query.
-    """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart")
+def test_default_font(uqcsbot: MockUQCSBot):
+    uqcsbot.post_message(TEST_CHANNEL_ID, f"!asciify {TEST_TEXT}")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    assert messages[1].get('text') == NO_QUERY_MESSAGE
+    assert messages[1].get('text') == DEFAULT_FONT_RESULT
 
-
-@patch("uqcsbot.scripts.umart.get_search_page", new=mocked_html_get)
-def test_umart_normal(uqcsbot: MockUQCSBot):
-    """
-    This test aims to determine that a typical HTML response will result in a typical message.
-    By mocking the get_search_page function with mocked_html_get
-    no online functionality is required.
-    """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
+def test_custom_font(uqcsbot: MockUQCSBot):
+    uqcsbot.post_message(TEST_CHANNEL_ID, f"!asciify --demo_2__ {TEST_TEXT}")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    assert messages[1].get('text') == GOOD_MESSAGE
+    assert print(messages[1].get('text')) == CUSTOM_FONT_RESULT
 
 
-@patch("uqcsbot.scripts.umart.get_umart_results", new=mocked_no_results)
-def test_umart_no_results(uqcsbot: MockUQCSBot):
-    """
-    This test covers the case where a search query does not yield results from Umart's search.
-    This is accomplished by mocking the get_results_from_page function in umart.py
-    """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart thereexistsnoproductwiththisnamesurely")
+def test_get_fontslist(uqcsbot: MockUQCSBot):
+    uqcsbot.post_message(TEST_CHANNEL_ID, f"!asciify --fontslist")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    assert messages[1].get('text') == NO_RESULTS_MESSAGE
+    assert messages[1].get('text') == FONTSLIST_URL
 
-
-@patch("uqcsbot.scripts.umart.get_search_page", new=mocked_no_page)
-def test_umart_html_error(uqcsbot: MockUQCSBot):
-    """
-    This test covers the case where a search query fails.
-    This is accomplished by mocking the get_search_page function in umart.py
-    """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart HDD")
+def test_invalid_options(uqcsbot: MockUQCSBot):
+    uqcsbot.post_message(TEST_CHANNEL_ID, f"!asciify --randomfont --demo_2__")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    assert messages[1].get('text') == ERROR_MESSAGE
+    assert messages[1].get('text') == BOTH_OPTIONS_MESSAGE
 
 
-def test_smart_user(uqcsbot: MockUQCSBot):
-    """
-    This test covers the case where there exists a smart user.
-    """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "!umart SOMETHING NOT AS SPECIFIC")
-    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
-    assert len(messages) == 2
-    assert messages[1].get('text') == "Not literally..."
+
