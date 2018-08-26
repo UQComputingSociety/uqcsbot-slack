@@ -42,16 +42,35 @@ def mock_message(message: str):
     return ''.join(choice((c.upper, c.lower))() for c in message)
 
 
+def is_number(message):
+    '''
+    Tries to coerce the message to an integer. If successful, return True-- else
+    returns False.
+    '''
+    try:
+        int(message)
+    except:
+        return False
+    return True
+
+
 @bot.on_command("mock")
 def handle_mock(command: Command):
     '''
-    `!mock [NUM POSTS]` - Mocks the message from the specified number of
+    `!mock ([TEXT] | [NUM POSTS])` - Mocks the message from the specified number of
     messages back. If no number is specified, mocks the most recent message.
     '''
+    num_posts_back = None
     # Add 1 here to account for the calling user's message, which we don't want
     # to mock by default.
-    num_posts_back = int(command.arg) + 1 if command.has_arg() else 1
-    if num_posts_back > MAX_NUM_POSTS_BACK:
+    if not command.has_arg():
+        num_posts_back = 1
+    elif is_number(command.arg):
+        num_posts_back = int(command.arg) + 1
+
+    if num_posts_back is None:
+        response = mock_message(command.arg)
+    elif num_posts_back > MAX_NUM_POSTS_BACK:
         response = f'Cannot recall messages that far back, try under {MAX_NUM_POSTS_BACK}.'
     elif num_posts_back < 0:
         response = 'Cannot mock into the future (yet)!'
@@ -61,4 +80,5 @@ def handle_mock(command: Command):
             response = 'Something went wrong (likely insufficient conversation history).'
         else:
             response = mock_message(message_to_mock)
+
     bot.post_message(command.channel_id, response)
