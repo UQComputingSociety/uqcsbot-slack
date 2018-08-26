@@ -290,7 +290,7 @@ class MockUQCSBot(UQCSBot):
         if command is None:
             return None
         if command.name not in self._command_registry:
-            raise NotImplementedError('{command.name} is not a registered command.')
+            raise NotImplementedError(f'{command.name} is not a registered command.')
         for handler in self._command_registry[command.name]:
             handler(command)
         return None
