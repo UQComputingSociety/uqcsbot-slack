@@ -31,3 +31,14 @@ def test_mock_past_message(uqcsbot: MockUQCSBot):
     assert len(messages) == 7
     assert messages[-1]['text'].lower() == LONG_MESSAGE.lower()
     assert messages[-1]['text'] != LONG_MESSAGE
+
+
+def test_mock_given_message(uqcsbot: MockUQCSBot):
+    '''
+    Test !mock works for given text.
+    '''
+    uqcsbot.post_message(TEST_CHANNEL_ID, f'!mock {LONG_MESSAGE}')
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[-1]['text'].lower() == LONG_MESSAGE.lower()
+    assert messages[-1]['text'] != LONG_MESSAGE
