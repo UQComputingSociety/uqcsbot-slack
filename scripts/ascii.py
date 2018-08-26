@@ -11,7 +11,6 @@ ERROR_MESSAGE = "Trouble with HTTP Request, can't ASCIIfy :("
 ASCII_URL = "http://artii.herokuapp.com/make?text="
 FONT_URL = "http://artii.herokuapp.com/fonts_list"
 
-#TODO: FIX RETURNING ONLY FONTSLIST - SHOULD NOT PASS NOTHING INTO ASCIIFY
 @bot.on_command("asciify")
 @loading_status
 def handle_asciify(command: Command):
@@ -40,10 +39,10 @@ def handle_asciify(command: Command):
         bot.post_message(command.channel_id, ERROR_MESSAGE)
         return
     for i in fontslist:
-        if ('--' + i) in command_args:
+        if (f"--{i}") in command_args:
             custom_font = True
             selected_font = i
-            command_args.remove('--' + selected_font)
+            command_args.remove(f"--{i}")
     #check for random font option
     if '--randomfont' in command_args:
         random_font = True
@@ -62,15 +61,17 @@ def handle_asciify(command: Command):
         ascii_text = asciify(text, randomfont())
     elif custom_font:
         ascii_text = asciify(text, selected_font)
-    else:
+    elif text:
         ascii_text = asciify(text, None)
+    else:
+        ascii_text = None
     #message posts
+    if return_fonts:
+        bot.post_message(command.channel_id, FONT_URL)
     if ascii_text:
         bot.post_message(command.channel_id, ascii_text)
     else:
-        bot.post_message(command.channel_id, ERROR_MESSAGE)
-    if return_fonts:
-        bot.post_message(command.channel_id, FONT_URL)
+        return
     return
 
 
@@ -84,6 +85,7 @@ def asciify(text: str, font: str) -> str:
             return ascii_text
     except RequestException as e:
         bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
+        bot.post_message(command.channel_id, ERROR_MESSAGE)
         return None
     
 
@@ -94,6 +96,7 @@ def randomfont() -> str:
         return fontslist[font_number]
     else:
         return None
+
 
 def get_fontslist() -> list:
     try:
