@@ -77,7 +77,7 @@ def handle_asciify(command: Command):
 
 def asciify(text: str, font: str) -> str:
     try:
-        if font:
+        if font is not None:
             ascii_text = "```\n" + get(ASCII_URL + text + '&font=' + font).text + "\n```"
             return ascii_text
         else:
