@@ -52,19 +52,23 @@ def handle_asciify(command: Command):
         bot.post_message(command.channel_id, BOTH_OPTIONS_MESSAGE)
         return
     if not command_args:
-        bot.post_message(command.channel_id, NO_QUERY_MESSAGE)
         text = None
     else: 
         text = ' '.join(command_args)
     #asciification
-    if random_font:
-        ascii_text = asciify(text, randomfont())
-    elif custom_font:
-        ascii_text = asciify(text, selected_font)
-    elif text:
-        ascii_text = asciify(text, None)
-    else:
+    if text is None:
+        bot.post_message(command.channel_id, NO_QUERY_MESSAGE)
         ascii_text = None
+    else:
+        if random_font:
+            ascii_text = asciify(text, randomfont())
+        elif custom_font:
+            ascii_text = asciify(text, selected_font)
+        else:
+            ascii_text = asciify(text, None)
+        if ascii_text is None:
+            bot.post_message(command.channel_id, ERROR_MESSAGE)
+            return
     #message posts
     if return_fonts:
         bot.post_message(command.channel_id, FONT_URL)
@@ -78,14 +82,14 @@ def handle_asciify(command: Command):
 def asciify(text: str, font: str) -> str:
     try:
         if font is not None:
-            ascii_text = "```\n" + get(ASCII_URL + text + '&font=' + font).text + "\n```"
+            resp = get(ASCII_URL + text + '&font=' + font)
+            ascii_text = f"```\n{resp.text}\n```"
             return ascii_text
         else:
-            ascii_text = "```\n" + get(ASCII_URL + text).text + "\n```"
+            resp = get(ASCII_URL + text)
+            ascii_text = f"```\n{resp.text}\n```"
             return ascii_text
     except RequestException as e:
-        bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
-        bot.post_message(command.channel_id, ERROR_MESSAGE)
         return None
     
 
@@ -100,10 +104,10 @@ def randomfont() -> str:
 
 def get_fontslist() -> list:
     try:
-        fontslist = get('http://artii.herokuapp.com/fonts_list').text.split()
+        resp = get('http://artii.herokuapp.com/fonts_list')
+        fontslist = resp.text.split()
         return fontslist
     except RequestException as e:
-        bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
         return None
     
     
