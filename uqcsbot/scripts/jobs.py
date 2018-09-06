@@ -1,8 +1,10 @@
 """
 Monitors #jobs-bulletin and reminds employers and users of their rights and responsibilities.
 """
-from uqcsbot import bot
 import time
+from uqcsbot import bot
+from typing import List
+
 
 MESSAGE_PAUSE = 2   # Number of seconds between sending bot messages
 FAIR_WORK_INTERNSHIPS_INFO = "https://www.fairwork.gov.au/pay/unpaid-work/work-experience-and-internships"
@@ -30,59 +32,77 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
 ]
 
 
+def replace_channel_links(messages: List[str]) -> List[str]:
+    """
+    Replace static channel names for #uqcs-meta, #jobs-discussion, #jobs-bulletin with links.
+    :param messages: the list of welcome messages to replace links in.
+    :param jobs_bulletin: the link for the #jobs-bulletin channel.
+    :param jobs_discussion: the link for the #jobs-discussion channel.
+    :param uqcs_meta: the link for the #uqcs-meta channel.
+    :return: the same list of strings, but with static channel names replaced with links.
+    """
+    linked_messages = []
+    for message in messages:
+        message = message.replace("#jobs-bulletin", f"<#{bot.channels.get('jobs-bulletin').id}>")
+        message = message.replace("#jobs-discussion", f"<#{bot.channels.get('jobs-discussion').id}>")
+        message = message.replace("#uqcs-meta", f"<#{bot.channels.get('uqcs-meta').id}>")
+        linked_messages.append(message)
+    return linked_messages
+
+
 @bot.on("member_joined_channel")
-def welcome_jobs(evt: dict):
+def welcome_jobs(event: dict):
     """
     Welcomes job seekers and employers to the #jobs-bulletin channel, setting expectations for both.
 
     @no_help
     """
-    chan = bot.channels.get(evt.get("channel"))
+    chan = bot.channels.get(event.get("channel"))
     if chan is None or chan.name != "jobs-bulletin":
         return
 
     jobs_bulletin = chan
-    user = bot.users.get(evt.get("user"))
+    user = bot.users.get(event.get("user"))
 
     if user is None or user.is_bot:
         return
 
     # Send instructions to user
     bot.post_message(user.user_id, f"Hey {user.display_name}, welcome to <#{jobs_bulletin.id}>!")
-    for message in WELCOME_MESSAGES:
+    for message in replace_channel_links(WELCOME_MESSAGES):
         time.sleep(MESSAGE_PAUSE)
         bot.post_message(user.user_id, message)
 
 
 @bot.on("message")
-def job_response(evt: dict):
+def job_response(event: dict):
     """
     Messages users that have posted in #jobs-bulletin to remind them of the rules.
 
     @no_help
     """
-    chan = bot.channels.get(evt.get("channel"))
+    chan = bot.channels.get(event.get("channel"))
 
     if chan.name != "jobs-bulletin":
         return
 
-    if evt.get("subtype") in ["channel_join", "channel_leave"]:
+    if event.get("subtype") in ["channel_join", "channel_leave"]:
         return
 
     jobs_bulletin = chan
     jobs_discussion = bot.channels.get("jobs-discussion")
-    user = bot.users.get(evt.get("user"))
+    user = bot.users.get(event.get("user"))
 
     if user is None or user.is_bot:
         return
 
-    bot.post_message(jobs_bulletin, f"{user.display_name} has posted a new job in <#{jobs_bulletin.id}>! "
+    bot.post_message(jobs_bulletin, f"{user.display_name} has posted a new job! "
                                     f":tada: \nPlease ask any questions in <#{jobs_discussion.id}> or in a private "
                                     f"message to <@{user.user_id}|{user.display_name}>")
 
     bot.post_message(user.user_id, f"Hey {user.display_name}, you've just posted in <#{jobs_bulletin.id}>! "
                                    f"Just a quick reminder of the conditions surrounding the use of this channel:")
-    for message in WELCOME_MESSAGES:
+    for message in replace_channel_links(WELCOME_MESSAGES):
         time.sleep(MESSAGE_PAUSE)
         bot.post_message(user.user_id, message)
     bot.post_message(user.user_id, f"*Broken one of these rules?*\n It's not too late! Please go back ASAP and delete"
