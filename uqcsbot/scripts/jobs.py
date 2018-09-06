@@ -9,7 +9,7 @@ FAIR_WORK_INTERNSHIPS_INFO = "https://www.fairwork.gov.au/pay/unpaid-work/work-e
 CODE_OF_CONDUCT = "https://github.com/UQComputingSociety/code-of-conduct"
 UQCS_EMAIL = "mailto:contact@uqcs.org.au"
 WELCOME_MESSAGES = [    # Welcome messages sent to new members
-    "This channel is a little different to your average UQCS :slack: channel and has a few extra rules:",
+    "#jobs-bulletin is a little different to your average UQCS :slack: channel and has a few extra rules:",
     "*Rules for Everyone* \n1. Only employers advertising jobs are allowed to post in this channel.\n"
     "2. All discussion about the posted jobs must take place in the #jobs-discussion channel or by direct message "
     "with the person posting the advertisement. Please be respectful when interacting with companies and sponsors.",
@@ -78,8 +78,8 @@ def job_response(evt: dict):
                                     f"message to <@{user.user_id}|{user.display_name}>")
 
     # Send new user their welcome messages.
-    bot.post_message(user.user_id, f"Hey {user.display_name}, you've just posted in <#{jobs_bulletin.id}>!\n"
-                                   f"Just a quick reminder of our rules:")
+    bot.post_message(user.user_id, f"Hey {user.display_name}, you've just posted in <#{jobs_bulletin.id}>! "
+                                   f"Just a quick reminder of the conditions surrounding the use of the channel:")
     for message in WELCOME_MESSAGES:
         time.sleep(MESSAGE_PAUSE)
         bot.post_message(user.user_id, message)
