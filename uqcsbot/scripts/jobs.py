@@ -23,8 +23,8 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "under the _Fair Work Act (2009)_ :fairwork:. \n_tldr: if an intern (whether called that or not) adds value to "
     "(or 'does productive work' for) your business, they must be remunerated with either a fair wage or equity_. If you"
     " ignore these warnings, please expect to face criticism from the community (we will protect our members from being"
-    f" exploited). Additionally, all <{EAIT_UNPAID_JOBS}|unpaid placements> for students in the "
-    f"<{EAIT_FACULTY}|EAIT Faculty> must be approved by the faculty.",
+    f" exploited, it isn't meant as a personal attack). Additionally, all <{EAIT_UNPAID_JOBS}|unpaid placements> for "
+    f"students in the <{EAIT_FACULTY}|EAIT Faculty> must be approved by the faculty.",
     f"4. Job postings _must_ conform to our <{CODE_OF_CONDUCT}|Code of Conduct> and must not discriminate against "
     f"applicants based on race, religion, sexual orientation, gender identity or age.",
     f"If you have any questions, please get in touch with the committee in #uqcs-meta or by email at "
