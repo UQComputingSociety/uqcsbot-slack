@@ -38,7 +38,7 @@ def welcome_jobs(evt: dict):
     @no_help
     """
     chan = bot.channels.get(evt.get("channel"))
-    if chan is None or chan.name != "jobs_bulletin":
+    if chan is None or chan.name != "jobs-bulletin":
         return
 
     jobs_bulletin = chan
@@ -48,7 +48,7 @@ def welcome_jobs(evt: dict):
         return
 
     # Send instructions to user
-    bot.post_message(user.user_id, f"Hey {user.display_name}, welcome to <{jobs_bulletin.id}>!")
+    bot.post_message(user.user_id, f"Hey {user.display_name}, welcome to <#{jobs_bulletin.id}>!")
     for message in WELCOME_MESSAGES:
         time.sleep(MESSAGE_PAUSE)
         bot.post_message(user.user_id, message)
@@ -61,16 +61,16 @@ def job_response(evt: dict):
 
     @no_help
     """
-    chan = bot.channels.get(evt.get('channel'))
+    chan = bot.channels.get(evt.get("channel"))
 
     if chan.name != "jobs-bulletin":
         return
 
-    if evt.get('subtype') in ['channel_join', 'channel_leave']:
+    if evt.get("subtype") in ["channel_join", "channel_leave"]:
         return
 
     jobs_bulletin = chan
-    jobs_discussion = bot.channels.get('jobs-discussion')
+    jobs_discussion = bot.channels.get("jobs-discussion")
     user = bot.users.get(evt.get("user"))
 
     if user is None or user.is_bot:
