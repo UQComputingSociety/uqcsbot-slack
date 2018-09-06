@@ -6,11 +6,13 @@ import time
 
 MESSAGE_PAUSE = 2   # Number of seconds between sending bot messages
 FAIR_WORK_INTERNSHIPS_INFO = "https://www.fairwork.gov.au/pay/unpaid-work/work-experience-and-internships"
+EAIT_UNPAID_JOBS = "https://www.eait.uq.edu.au/engineering-professional-practice-unpaid-placements"
+EAIT_FACULTY = "https://www.eait.uq.edu.au/"
 CODE_OF_CONDUCT = "https://github.com/UQComputingSociety/code-of-conduct"
 UQCS_EMAIL = "mailto:contact@uqcs.org.au"
 WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "#jobs-bulletin is a little different to your average UQCS :slack: channel and has a few extra rules:",
-    "*Rules for Everyone* \n1. Only employers advertising jobs are allowed to post in this channel.\n"
+    "*Rules for Everyone* \n1. The _only_ posts allowed in this channel are job advertisements.\n"
     "2. All discussion about the posted jobs must take place in the #jobs-discussion channel or by direct message "
     "with the person posting the advertisement. Please be respectful when interacting with companies and sponsors.",
     "*Additional Rules for Employers Posting Jobs/Internship Opportunities:*\n"
@@ -19,7 +21,8 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "under the _Fair Work Act (2009)_ :fairwork:. \n_tldr: if an intern (whether called that or not) adds value to "
     "(or 'does productive work' for) your business, they must be remunerated with either a fair wage or equity_. If you"
     " ignore these warnings, please expect to face criticism from the community (we will protect our members from being"
-    " exploited).",
+    f" exploited). Additionally, all <{EAIT_UNPAID_JOBS}|unpaid placements> for students in the "
+    f"<{EAIT_FACULTY}|EAIT Faculty> must be approved by the faculty.",
     f"4. Job postings _must_ conform to our <{CODE_OF_CONDUCT}|Code of Conduct> and must not discriminate against "
     f"applicants based on race, religion, sexual orientation, gender identity or age.",
     f"If you have any questions, please get in touch with the committee in #uqcs-meta or by email at "
@@ -77,11 +80,10 @@ def job_response(evt: dict):
                                     f":tada: \nPlease ask any questions in <#{jobs_discussion.id}> or in a private "
                                     f"message to <@{user.user_id}|{user.display_name}>")
 
-    # Send new user their welcome messages.
     bot.post_message(user.user_id, f"Hey {user.display_name}, you've just posted in <#{jobs_bulletin.id}>! "
-                                   f"Just a quick reminder of the conditions surrounding the use of the channel:")
+                                   f"Just a quick reminder of the conditions surrounding the use of this channel:")
     for message in WELCOME_MESSAGES:
         time.sleep(MESSAGE_PAUSE)
         bot.post_message(user.user_id, message)
     bot.post_message(user.user_id, f"*Broken one of these rules?*\n It's not too late! Please go back ASAP and delete"
-                                   f" or modify your message in #jobs-bulletin so it complies. Thanks!")
+                                   f" or modify your message in <#{jobs_bulletin.id}> so it complies. Thanks!")
