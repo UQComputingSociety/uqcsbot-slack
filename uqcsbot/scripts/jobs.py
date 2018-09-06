@@ -59,7 +59,11 @@ def job_response(evt: dict):
     @no_help
     """
     chan = bot.channels.get(evt.get('channel'))
+
     if chan.name != "jobs-bulletin":
+        return
+
+    if evt.get('subtype') in ['channel_join', 'channel_leave']:
         return
 
     jobs_bulletin = chan
@@ -79,5 +83,5 @@ def job_response(evt: dict):
     for message in WELCOME_MESSAGES:
         time.sleep(MESSAGE_PAUSE)
         bot.post_message(user.user_id, message)
-    bot.post_message(user.user_id, f"*Broken one of these rules?*\n It's not too late! Please go back ASAP and delete "
-                                   f" modify your message in #jobs-bulletin so it complies. Thanks!")
+    bot.post_message(user.user_id, f"*Broken one of these rules?*\n It's not too late! Please go back ASAP and delete"
+                                   f" or modify your message in #jobs-bulletin so it complies. Thanks!")
