@@ -3,14 +3,9 @@ Tests for ascii.py
 """
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 from unittest.mock import patch
+from uqcsbot.scripts.ascii import BOTH_OPTIONS_MESSAGE, NO_FONT_MESSAGE,FONT_URL
 
 TEST_TEXT = "ThIS iS a TeST MesSAgE"
-FONTSLIST_URL = "http://artii.herokuapp.com/fonts_list"
-
-NO_QUERY_MESSAGE = "Can't ASCIIfy nothing... try `!asciify <TEXT>`"
-BOTH_OPTIONS_MESSAGE = "Font can only be random OR specified"
-ERROR_MESSAGE = "Trouble with HTTP Request, can't ASCIIfy :("
-
 
 def mocked_get_fontslist(*args, **kwargs):
     '''
@@ -59,7 +54,7 @@ def test_return_fontslist(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, f"!asciify --fontslist")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 3
-    assert messages[2].get('text') == FONTSLIST_URL
+    assert messages[2].get('text') == FONT_URL
 
 
 @patch("uqcsbot.scripts.ascii.asciify", new=mocked_asciify)
@@ -80,3 +75,14 @@ def test_random_font(uqcsbot: MockUQCSBot):
     assert len(messages) == 2
     assert messages[1].get('text').split()[0] == "CUSTOM_FONT"
     assert messages[1].get('text').split()[1] in fontslist
+
+
+@patch("uqcsbot.scripts.ascii.asciify", new=mocked_asciify)
+@patch("uqcsbot.scripts.ascii.get_fontslist", new=mocked_get_fontslist)
+def test_invalid_font(uqcsbot: MockUQCSBot):
+    uqcsbot.post_message(TEST_CHANNEL_ID, f"!asciify --invalidfont {TEST_TEXT}")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[1].get('text') == "NO_FONT_MESSAGE"
+
+
