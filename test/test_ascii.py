@@ -3,9 +3,15 @@ Tests for ascii.py
 """
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 from unittest.mock import patch
-from uqcsbot.scripts.ascii import BOTH_OPTIONS_MESSAGE, NO_FONT_MESSAGE,FONT_URL
+
 
 TEST_TEXT = "ThIS iS a TeST MesSAgE"
+FONT_URL = "http://artii.herokuapp.com/fonts_list"
+NO_QUERY_MESSAGE = "Can't ASCIIfy nothing... try `!asciify <TEXT>`"
+BOTH_OPTIONS_MESSAGE = "Font can only be random OR specified"
+ERROR_MESSAGE = "Trouble with HTTP Request, can't ASCIIfy :("
+NO_FONT_MESSAGE = "Cannot find the specified font in the fontslist."
+
 
 def mocked_get_fontslist(*args, **kwargs):
     '''
@@ -83,6 +89,4 @@ def test_invalid_font(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, f"!asciify --invalidfont {TEST_TEXT}")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    assert messages[1].get('text') == "NO_FONT_MESSAGE"
-
-
+    assert messages[1].get('text') == NO_FONT_MESSAGE
