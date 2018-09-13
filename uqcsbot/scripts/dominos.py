@@ -36,9 +36,10 @@ def handle_dominos(command: Command):
     command_args = command.arg.split() if command.has_arg() else []
 
     parser = argparse.ArgumentParser()
+
     def usage_error(*args, **kwargs):
         raise UsageSyntaxException()
-    parser.error = usage_error
+    parser.error = usage_error # type: ignore
     parser.add_argument('-n', '--num', default=5, type=int)
     parser.add_argument('-e', '--expiry', action='store_true')
     parser.add_argument('keywords', nargs='*')
