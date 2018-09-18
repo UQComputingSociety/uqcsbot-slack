@@ -4,10 +4,12 @@ from datetime import datetime
 from dateutil import parser
 from bs4 import BeautifulSoup
 from functools import partial
+from binascii import hexlify
 
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds=' # noqa
 BASE_CALENDAR_URL = 'http://www.uq.edu.au/events/calendar_view.php?category_id=16&year='
+OFFERING_QUERY = '&offer='
 
 
 class DateSyntaxException(Exception):
@@ -52,12 +54,27 @@ class HttpException(Exception):
         self.status_code = status_code
         super().__init__(self.message, self.url, self.status_code)
 
+def get_offering_code(semester=None, campus='STLUC', is_internal=True):
+    """
+    Returns the hex encoded offering string for the given semester and campus.
+
+    Keyword Arguments:
+        semester {str} -- Semester code (3 is summer) (default: current semester)
+        campus {str} -- Campus code string (one of STLUC, etc.)
+        is_internal {bool} -- True for internal, false for external.
+    """
+    # TODO: Codes for other campuses.
+    if semester is None:
+        semester = 1 if datetime.today().month <= 6 else 2
+    location = 'IN' if is_internal else 'EX'
+    return hexlify(b'{campus}{semester}{location}').decode('utf-8')
+
 
 def get_course_profile_url(course_name):
     '''
     Returns the URL to the latest course profile for the given course.
     '''
-    course_url = BASE_COURSE_URL + course_name
+    course_url = BASE_COURSE_URL + course_name + OFFERING_QUERY + get_offering_code()
     http_response = requests.get(course_url)
     if http_response.status_code != requests.codes.ok:
         raise HttpException(course_url, http_response.status_code)
