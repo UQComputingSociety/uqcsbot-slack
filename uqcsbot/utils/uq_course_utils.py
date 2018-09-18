@@ -67,7 +67,7 @@ def get_offering_code(semester=None, campus='STLUC', is_internal=True):
     if semester is None:
         semester = 1 if datetime.today().month <= 6 else 2
     location = 'IN' if is_internal else 'EX'
-    return hexlify(b'{campus}{semester}{location}').decode('utf-8')
+    return hexlify(f'{campus}{semester}{location}'.encode('utf-8')).decode('utf-8')
 
 
 def get_course_profile_url(course_name):
