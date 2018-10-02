@@ -3,6 +3,7 @@ from uqcsbot import bot, Command
 from bs4 import BeautifulSoup
 from datetime import datetime
 from requests.exceptions import RequestException
+from typing import List
 from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 import requests
 
@@ -53,14 +54,14 @@ def handle_dominos(command: Command):
         message += f"Code: *{coupon.code}* - {coupon.description}\n"
     bot.post_message(command.channel_id, message)
 
-def filter_coupons(coupons: list, keywords: list) -> list:
+def filter_coupons(coupons: List[Coupon], keywords: List[str]) -> List[Coupon]:
     '''
     Filters coupons iff a keyword is found in the description.
     '''
     return [coupon for coupon in coupons if \
             any(coupon.keyword_matches(keyword) for keyword in keywords)]
         
-def get_coupons(n: int, ignore_expiry: bool, keywords: list) -> list:
+def get_coupons(n: int, ignore_expiry: bool, keywords: List[str]) -> List[Coupon]:
     '''
     Returns a list of n Coupons
     '''
@@ -78,7 +79,7 @@ def get_coupons(n: int, ignore_expiry: bool, keywords: list) -> list:
         coupons = filter_coupons(coupons, keywords)
     return coupons[:n]
 
-def get_coupons_from_page(coupon_page: bytes) -> list:
+def get_coupons_from_page(coupon_page: bytes) -> List[Coupon]:
     '''
     Strips results from html page and returns a list of Coupon(s)
     '''
