@@ -4,10 +4,12 @@ from datetime import datetime
 from dateutil import parser
 from bs4 import BeautifulSoup
 from functools import partial
+from binascii import hexlify
 
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds=' # noqa
 BASE_CALENDAR_URL = 'http://www.uq.edu.au/events/calendar_view.php?category_id=16&year='
+OFFERING_PARAMETER = 'offer'
 
 
 class DateSyntaxException(Exception):
@@ -52,13 +54,30 @@ class HttpException(Exception):
         self.status_code = status_code
         super().__init__(self.message, self.url, self.status_code)
 
+def get_offering_code(semester=None, campus='STLUC', is_internal=True):
+    """
+    Returns the hex encoded offering string for the given semester and campus.
+
+    Keyword Arguments:
+        semester {str} -- Semester code (3 is summer) (default: current semester)
+        campus {str} -- Campus code string (one of STLUC, etc.)
+        is_internal {bool} -- True for internal, false for external.
+    """
+    # TODO: Codes for other campuses.
+    if semester is None:
+        semester = 1 if datetime.today().month <= 6 else 2
+    location = 'IN' if is_internal else 'EX'
+    return hexlify(f'{campus}{semester}{location}'.encode('utf-8')).decode('utf-8')
+
 
 def get_course_profile_url(course_name):
     '''
     Returns the URL to the latest course profile for the given course.
     '''
     course_url = BASE_COURSE_URL + course_name
-    http_response = requests.get(course_url)
+    http_response = requests.get(
+        course_url, params={OFFERING_PARAMETER: get_offering_code()}
+    )
     if http_response.status_code != requests.codes.ok:
         raise HttpException(course_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
@@ -159,7 +178,7 @@ def get_course_assessment(course_names, cutoff=None):
     assessment = assessment_table.findAll('tr')[1:]
     parsed_assessment = map(get_parsed_assessment_item, assessment)
     # If no cutoff is specified, set cutoff to UNIX epoch (i.e. filter nothing).
-    cutoff = cutoff or datetime.fromtimestamp(0)
+    cutoff = cutoff or datetime.min
     assessment_filter = partial(is_assessment_after_cutoff, cutoff=cutoff)
     filtered_assessment = filter(assessment_filter, parsed_assessment)
     return list(filtered_assessment)
