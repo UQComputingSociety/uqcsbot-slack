@@ -176,7 +176,7 @@ def get_course_assessment(course_names, cutoff=None):
     assessment = assessment_table.findAll('tr')[1:]
     parsed_assessment = map(get_parsed_assessment_item, assessment)
     # If no cutoff is specified, set cutoff to UNIX epoch (i.e. filter nothing).
-    cutoff = cutoff or datetime.fromtimestamp(0)
+    cutoff = cutoff or datetime.min
     assessment_filter = partial(is_assessment_after_cutoff, cutoff=cutoff)
     filtered_assessment = filter(assessment_filter, parsed_assessment)
     return list(filtered_assessment)
