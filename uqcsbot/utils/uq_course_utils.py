@@ -9,7 +9,7 @@ from binascii import hexlify
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds=' # noqa
 BASE_CALENDAR_URL = 'http://www.uq.edu.au/events/calendar_view.php?category_id=16&year='
-OFFERING_QUERY = '&offer='
+OFFERING_PARAMETER = 'offer'
 
 
 class DateSyntaxException(Exception):
@@ -74,8 +74,10 @@ def get_course_profile_url(course_name):
     '''
     Returns the URL to the latest course profile for the given course.
     '''
-    course_url = BASE_COURSE_URL + course_name + OFFERING_QUERY + get_offering_code()
-    http_response = requests.get(course_url)
+    course_url = BASE_COURSE_URL + course_name
+    http_response = requests.get(
+        course_url, params={OFFERING_PARAMETER: get_offering_code()}
+    )
     if http_response.status_code != requests.codes.ok:
         raise HttpException(course_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
