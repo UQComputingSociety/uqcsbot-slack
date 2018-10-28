@@ -21,7 +21,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     f"3. We take the rights of our members and associates seriously. If you are posting an unpaid position, please be"
     f" up front about the lack of remuneration and *mindful of* <{FAIR_WORK_INTERNSHIPS_INFO}|*your obligations*> "
     "under the _Fair Work Act (2009)_ :fairwork:. \n_tldr: if an intern (whether called that or not) adds value to "
-    "(or 'does productive work' for) your business, they must be remunerated with either a fair wage or equity_. If you"
+    "(or 'does productive work' for) your business, they must be remunerated with either a fair wage_. If you"
     " ignore these warnings, please expect to face criticism from the community (we will protect our members from being"
     f" exploited, it isn't meant as a personal attack). Additionally, all <{EAIT_UNPAID_JOBS}|unpaid placements> for "
     f"students in the <{EAIT_FACULTY}|EAIT Faculty> must be approved by the faculty.",
