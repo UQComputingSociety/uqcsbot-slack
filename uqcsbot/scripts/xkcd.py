@@ -17,7 +17,7 @@ def get_by_id(comic_number: int) -> str:
     :param comic_number: the ID number of the xkcd comic to retrieve.
     :return: a response containing either a comic URL or an error message.
     """
-    if comic_number < 0:
+    if comic_number <= 0:
         return "Invalid xkcd ID, it must be a positive integer."
     url = f"{XKCD_BASE_URL}{str(comic_number)}"
     response = requests.get(url)
