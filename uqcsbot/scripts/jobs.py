@@ -19,10 +19,10 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     f"3. We take the rights of our members and associates seriously. If you are posting an unpaid position, please be"
     f" up front about the lack of remuneration and *mindful of* <{FAIR_WORK_INTERNSHIPS_INFO}|*your obligations*> "
     "under the _Fair Work Act (2009)_ :fairwork:. \n_tldr: if an intern (whether called that or not) adds value to "
-    "(or 'does productive work' for) your business, they must be remunerated with a fair wage. If you ignore these "
-    "warnings, please expect to face criticism from the community (we will protect our members from being exploited). "
-    "Additionally, all <{EAIT_UNPAID_JOBS}|unpaid placements> for students in the <{EAIT_FACULTY}|EAIT Faculty> must "
-    "be approved by the faculty.",
+    "(or 'does productive work' for) your business, they must be remunerated with a fair wage_. If you"
+    " ignore these warnings, please expect to face criticism from the community (we will protect our members from being"
+    f" exploited). Additionally, all <{EAIT_UNPAID_JOBS}|unpaid placements> for students in the "
+    f"<{EAIT_FACULTY}|EAIT Faculty> must be approved by the faculty.",
     f"4. Job postings _must_ conform to our <{CODE_OF_CONDUCT}|Code of Conduct> and must not discriminate against "
     f"applicants based on race, religion, sexual orientation, gender identity or age.",
     f"If you have any questions, please get in touch with the committee in #uqcs-meta or by email at "
