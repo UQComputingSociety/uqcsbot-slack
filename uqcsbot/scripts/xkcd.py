@@ -93,7 +93,7 @@ def handle_xkcd(command: Command) -> None:
 
 
 @bot.on_schedule('cron', hour=14, minute=1, day_of_week='mon,wed,fri', timezone='Australia/Brisbane')
-def new_xkcd():
+def new_xkcd() -> None:
     """
     Posts new xkcd comic when they are released every Monday, Wednesday
     & Friday at 4AM UTC or 2PM Brisbane time.
