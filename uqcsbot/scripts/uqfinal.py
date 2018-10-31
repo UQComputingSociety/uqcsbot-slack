@@ -5,6 +5,7 @@ from uqcsbot.utils.command_utils import loading_status
 
 uqfinal = "https://api.uqfinal.com"
 
+
 @bot.on_command("uqfinal")
 @loading_status
 def handle_uqfinal(command: Command):
@@ -15,10 +16,10 @@ def handle_uqfinal(command: Command):
     if not command.has_arg():
         bot.post_message(command.channel_id, "Please choose a course")
         return
-    
+
     args = command.arg.split()
-    
-    course = args[0] # Always exists
+
+    course = args[0]  # Always exists
     string_scores = args[1:]
     scores = []
 
@@ -28,13 +29,12 @@ def handle_uqfinal(command: Command):
         except:
             bot.post_message(command.channel_id, score + " could not be converted to a score")
 
-
     # Assume current semester
     semesterResponse = get(uqfinal + "/semesters")
-    semester = semesterResponse.json()["semesters"].pop()
+    semester = semesterResponse.json()["data"]["semesters"].pop()
 
-    courseResponse = get("/".join([uqfinal, course, semester["uqId"]]))
-    courseInfo = courseResponse.json()
+    courseResponse = get("/".join([uqfinal, "course", str(semester["uqId"]), course]))
+    courseInfo = courseResponse.json()["data"]
 
     num_assessment = len(courseInfo["assessment"])
 
@@ -44,10 +44,10 @@ def handle_uqfinal(command: Command):
 
     total = 0
     for i, score in enumerate(scores):
-        total += score * courseInfo["assessment"][i].weight
+        total += score * int(courseInfo["assessment"][i]["weight"]) / 100
 
     needed = 50 - total
-    result = math.ceil(needed / course.assessment[num_assessment - 1].weight * 100)
+    result = math.ceil(needed / int(courseInfo["assessment"][num_assessment - 1]["weight"]) * 100)
     bot.post_message(command.channel_id, "You need to achieve at least " +
                      str(result) +
                      "% on the final exam.\n_Disclaimer: this does not take hurdles into account_\n_Powered by "
