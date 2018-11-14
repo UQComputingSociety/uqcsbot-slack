@@ -103,6 +103,6 @@ def new_xkcd() -> None:
     link = get_latest()
     general = bot.channels.get("general")
     bot.post_message(general.id,
-                     link,
+                     "xkcd has released a new comic: " + link,
                      unfurl_links=True,
                      unfurl_media=True)
