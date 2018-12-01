@@ -1,4 +1,5 @@
 from uqcsbot import bot, Command
+from uqcsbot.utils.command_utils import loading_status
 from requests.exceptions import RequestException
 from typing import Dict, List
 import os
@@ -19,6 +20,7 @@ class Member:
 
 #@bot.on_schedule('cron', hour=15, timezone='Australia/Brisbane')
 @bot.on_command("advent")
+@loading_status
 def advent(command: Command) -> None:
     '''
     !advent - Prints the Advent of Code leaderboard
