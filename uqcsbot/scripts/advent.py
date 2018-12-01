@@ -1,12 +1,12 @@
 from uqcsbot import bot, Command
 from requests.exceptions import RequestException
 from typing import Dict, List
+import os
 import requests
 
-LEADERBOARD_URL = 'https://adventofcode.com/2018/leaderboard/private/view/'
-LEADERBOARD_CODE = '246889'
-# Session ID goes here
-SESSION_ID = '' 
+LEADERBOARD_URL = 'https://adventofcode.com/2018/leaderboard/private/view/246889.json'
+SESSION_ID = os.environ['AOC_SESSION_ID'] 
+
 
 class Member:
     def __init__(self, name: str, score: int, stars: int) -> None:
@@ -21,16 +21,17 @@ class Member:
 @bot.on_command("advent")
 def advent(command: Command) -> None:
     '''
-    Post the Advent of Code Leaderboard on #contests
+    !advent - Prints the Advent of Code leaderboard
     '''
     channel = bot.channels.get("contests")
+
     leaderboard = get_leaderboard()
     members = get_members(leaderboard['members'])
 
     message = "```\n"
     message += "Score Stars Name\n"
     for member in members:
-        message += "{:5} {:5} {}\n".format(member.score, member.stars, member.name)
+        message += f'{member.score:5} {member.stars:5} {member.name}\n'
     message += "```"
 
     bot.post_message(command.channel_id, message)
@@ -53,9 +54,12 @@ def get_leaderboard() -> Dict:
     Returns a json dump of the leaderboard
     '''
     try:
-        url = "{}{}.json".format(LEADERBOARD_URL, LEADERBOARD_CODE)
-        response = requests.get(url, cookies={"session": SESSION_ID})
+        response = requests.get(LEADERBOARD_URL, cookies={"session": SESSION_ID})
         return response.json()
+    except ValueError as e: #  json.JSONDecodeError
+        # TODO: Handle the case when the response is ok but the contents
+        # are invalid (cannot be parsed as json)
+        raise e
     except RequestException as e:
         bot.logger.error(e.response.content)
     return None
