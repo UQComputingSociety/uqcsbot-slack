@@ -4,7 +4,7 @@ from uqcsbot.scripts.advent import LEADERBOARD_URL, SESSION_ID, Member
 
 def test_advent_normal():
     """
-    Tests that the private leaderboard can be accessed and the
+    Tests that the private leaderboard can be accessed and that the
     JSON structure can be parsed
     """
     response = requests.get(LEADERBOARD_URL, cookies={"session": SESSION_ID})
