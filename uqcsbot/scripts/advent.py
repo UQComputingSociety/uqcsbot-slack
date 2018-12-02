@@ -58,10 +58,10 @@ def get_leaderboard() -> Dict:
     try:
         response = requests.get(LEADERBOARD_URL, cookies={"session": SESSION_ID})
         return response.json()
-    except ValueError as e: #  json.JSONDecodeError
+    except ValueError as exception: #  json.JSONDecodeError
         # TODO: Handle the case when the response is ok but the contents
         # are invalid (cannot be parsed as json)
-        raise e
-    except RequestException as e:
-        bot.logger.error(e.response.content)
+        raise exception
+    except RequestException as exception:
+        bot.logger.error(exception.response.content)
     return None
