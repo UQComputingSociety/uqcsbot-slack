@@ -23,7 +23,7 @@ class Member:
 @loading_status
 def advent(command: Command) -> None:
     '''
-    !advent - Prints the Advent of Code leaderboard
+    !advent - Prints the Advent of Code private leaderboard for UQCS
     '''
     channel = bot.channels.get("contests")
 
