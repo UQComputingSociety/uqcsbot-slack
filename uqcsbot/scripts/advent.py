@@ -16,7 +16,7 @@ class Member:
         self.stars = stars
 
     def __lt__(self, other):
-        return self.score > other.score or self.stars > other.stars
+        return self.score > other.score or (self.score == other.score and self.stars > other.stars)
 
 #@bot.on_schedule('cron', hour=15, timezone='Australia/Brisbane')
 @bot.on_command("advent")
