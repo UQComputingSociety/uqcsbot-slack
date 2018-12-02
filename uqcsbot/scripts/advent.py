@@ -18,6 +18,7 @@ class Member:
     def __lt__(self, other):
         return self.score > other.score or (self.score == other.score and self.stars > other.stars)
 
+
 @bot.on_schedule("cron", hour=15, timezone="Australia/Brisbane")
 @bot.on_command("advent")
 @loading_status
@@ -38,10 +39,11 @@ def advent(command: Command) -> None:
 
     bot.post_message(command.channel_id, message)
 
+
 def get_members(members_json: Dict) -> List[Member]:
-    '''
+    """
     Returns a sorted list of Members in the leaderboard
-    '''
+    """
     members = []
 
     for member in members_json.values():
@@ -50,6 +52,7 @@ def get_members(members_json: Dict) -> List[Member]:
 
     members.sort()
     return members
+
 
 def get_leaderboard() -> Dict:
     """
