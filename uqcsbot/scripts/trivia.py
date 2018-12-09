@@ -3,6 +3,7 @@ import requests
 import json
 import base64
 import random
+from datetime import datetime, timezone, timedelta
 from typing import List
 from uqcsbot import bot, Command
 from uqcsbot.api import Channel
@@ -11,10 +12,11 @@ from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 API_URL = "https://opentdb.com/api.php"
 CATEGORIES_URL = "https://opentdb.com/api_category.php"
 
+MIN_SECONDS = 5
 MAX_SECONDS = 300
 
 # Customisation options
-BOOLEAN_REACTS = ['this', 'not-this']
+BOOLEAN_REACTS = ['this', 'not-this'] # Format of [ <True>, <False> ]
 MULTIPLE_CHOICE_REACTS = ['green_heart', 'yellow_heart', 'heart', 'blue_heart']
 CHOICE_COLORS = ['#6C9935', '#F3C200', '#B6281E', '#3176EF']
 
@@ -39,9 +41,6 @@ def handle_trivia(command: Command):
         return
 
     handle_question(command, args)
-
-    schedule_answer(command, args.seconds)
-
 
 def parse_arguments(command: Command) -> argparse.Namespace:
     """
@@ -74,7 +73,7 @@ def parse_arguments(command: Command) -> argparse.Namespace:
         bot.post_message(command.channel_id, parser.format_help())
 
     # Constrain the number of seconds to a reasonable frame
-    args.seconds = max(0, args.seconds)
+    args.seconds = max(MIN_SECONDS, args.seconds)
     args.seconds = min(args.seconds, MAX_SECONDS)
 
     return args
@@ -145,17 +144,21 @@ def handle_question(command: Command, args: argparse.Namespace):
 
 
     # Print the questions (if multiple choice) and add the answer reactions
-    reactions = []
     if is_boolean:
         reactions = BOOLEAN_REACTS
+        answer_text = f':{BOOLEAN_REACTS[0]}:' if correct_answer == 'True' else f':{BOOLEAN_REACTS[1]}:'
     else:
         reactions = MULTIPLE_CHOICE_REACTS
+        answer_text = correct_answer
 
         answers.append(correct_answer)
         message_ts = post_possible_answers(command.channel_id, answers)
 
     for reaction in reactions:
         bot.api.reactions.add(name=reaction, channel=command.channel_id, timestamp=message_ts)
+
+    answer_message = f'*The answer was: {answer_text}*'
+    schedule_answer(command, answer_message, args.seconds)
 
 def post_possible_answers(channel: Channel, answers: List[str]) -> float:
     """
@@ -171,5 +174,11 @@ def post_possible_answers(channel: Channel, answers: List[str]) -> float:
 
     return bot.post_message(channel, '', attachments=attachments)['ts']
 
-def schedule_answer(command: Command, secs: int):
-    pass
+def schedule_answer(command: Command, answer: str, secs: int):
+    """
+    Schedules the given answer to be posted to the channel after the given number of seconds
+    """
+    post_answer = lambda: bot.post_message(command.channel_id, answer)
+    end_date = datetime.now(timezone(timedelta(hours=10))) + timedelta(seconds=secs + 1)
+
+    bot._scheduler.add_job(post_answer, 'interval', seconds=secs, end_date=end_date)
