@@ -142,7 +142,7 @@ def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Di
     Returns the dictionary object for the question on success and None on failure (after posting an error message).
     """
     # Base64 to help with encoding the message for slack
-    params: Dict[str, Union[int, str, List[str]]] = {'amount': 1, 'encode': 'base64'}
+    params: Dict[str, Union[int, str]] = {'amount': 1, 'encode': 'base64'}
 
     # Add in any explicitly specified arguments
     if args.category != -1:
