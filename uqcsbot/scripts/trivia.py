@@ -4,7 +4,7 @@ import json
 import random
 import requests
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional, Dict, Union, NamedTuple
+from typing import List, Dict, Union, NamedTuple
 
 from uqcsbot import bot, Command
 from uqcsbot.api import Channel
@@ -13,6 +13,7 @@ from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 API_URL = "https://opentdb.com/api.php"
 CATEGORIES_URL = "https://opentdb.com/api_category.php"
 
+# NamedTuple for use with the data returned from the api
 QuestionData = NamedTuple('QuestionData',
                           [('type', str), ('question', str), ('correct_answer', str), ('incorrect_answers', List[str])])
 
