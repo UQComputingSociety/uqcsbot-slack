@@ -1,5 +1,6 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 
+
 def test_trivia_multiple(uqcsbot: MockUQCSBot):
     """
     Tests !trivia with the multiple choice option
@@ -10,6 +11,7 @@ def test_trivia_multiple(uqcsbot: MockUQCSBot):
 
     assert len(messages) == 6
 
+
 def test_trivia_boolean(uqcsbot: MockUQCSBot):
     """
         Tests !trivia with the true/false option
@@ -19,6 +21,7 @@ def test_trivia_boolean(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
 
     assert len(messages) == 4
+
 
 def test_bad_input(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!trivia -d easp")
