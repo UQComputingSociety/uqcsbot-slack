@@ -4,7 +4,7 @@ import json
 import random
 import requests
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict, Union, NamedTuple
 
 from uqcsbot import bot, Command
 from uqcsbot.api import Channel
@@ -12,6 +12,9 @@ from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 
 API_URL = "https://opentdb.com/api.php"
 CATEGORIES_URL = "https://opentdb.com/api_category.php"
+
+QuestionData = NamedTuple('QuestionData',
+                          [('type', str), ('question', str), ('correct_answer', str), ('incorrect_answers', List[str])])
 
 # Customisation options
 MIN_SECONDS = 5
@@ -107,9 +110,9 @@ def handle_question(command: Command, args: argparse.Namespace):
         return
 
     # The base 64 decoding ensures that the formatting works properly with slack
-    question = decode_b64(question_data["question"])
-    correct_answer = decode_b64(question_data["correct_answer"])
-    answers = [decode_b64(ans) for ans in question_data["incorrect_answers"]]
+    question = decode_b64(question_data.question)
+    correct_answer = decode_b64(question_data.correct_answer)
+    answers = [decode_b64(ans) for ans in question_data.incorrect_answers]
 
     # Whether or not the question was a true/false question
     is_boolean = len(answers) == 1
@@ -136,7 +139,7 @@ def handle_question(command: Command, args: argparse.Namespace):
     schedule_answer(command, answer_message, args.seconds)
 
 
-def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Dict[str, Union[int, str, List[str]]]]:
+def get_question_data(channel: Channel, args: argparse.Namespace) -> QuestionData:
     """
     Attempts to get a question from teh api using the specified arguments.
     Returns the dictionary object for the question on success and None on failure (after posting an error message).
@@ -169,7 +172,13 @@ def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Di
         bot.post_message(channel, "No results were returned")
         return None
 
-    return response_content['results'][0]
+    question_data = response_content['results'][0]
+
+    # Delete the ones we don't need
+    del question_data['category']
+    del question_data['difficulty']
+
+    return QuestionData(**question_data)
 
 
 def decode_b64(encoded: str) -> str:
