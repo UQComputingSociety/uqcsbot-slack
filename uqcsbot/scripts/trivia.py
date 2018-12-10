@@ -4,7 +4,7 @@ import json
 import random
 import requests
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict, Union
 
 from uqcsbot import bot, Command
 from uqcsbot.api import Channel
@@ -136,7 +136,7 @@ def handle_question(command: Command, args: argparse.Namespace):
     schedule_answer(command, answer_message, args.seconds)
 
 
-def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[dict]:
+def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Dict[str, Union[int, str, List[str]]]]:
     """
     Attempts to get a question from teh api using the specified arguments.
     Returns the dictionary object for the question on success and None on failure (after posting an error message).
