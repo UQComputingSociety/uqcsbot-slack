@@ -108,8 +108,10 @@ def new_xkcd() -> None:
         message = "Its Monday, 4 days till Friday; heres the "
     elif (day == 2): #Wednesday
         message = "Half way through the week, time for the "
-    else: #Friday
+    elif (day == 4): #Friday
         message = ":musical_note: It's Friday, Friday\nGotta get down on Friday\nEverybody's lookin' forward to the "
+    else:
+        message = "@pah It is day " + str(day) + ", please fix me... Here is the "
     message = message + "latest XKCD comic "
 
     general = bot.channels.get("general")
