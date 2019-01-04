@@ -21,6 +21,11 @@ QuestionData = NamedTuple('QuestionData',
 MIN_SECONDS = 5
 MAX_SECONDS = 300
 
+# The channels where multiple trivia questions can be asked (prevent spam)
+# TODO: Let me know if you want this restriction or not
+VALID_SEQUETIAL_CHANNELS = ['trivia', 'bot-testing', 'timtams']
+MAX_SEQUENTIAL_QUESTIONS = 30
+
 BOOLEAN_REACTS = ['this', 'not-this']  # Format of [ <True>, <False> ]
 MULTIPLE_CHOICE_REACTS = ['green_heart', 'yellow_heart', 'heart', 'blue_heart']
 CHOICE_COLORS = ['#6C9935', '#F3C200', '#B6281E', '#3176EF']
@@ -42,6 +47,12 @@ def handle_trivia(command: Command):
     # Send the possible categories
     if args.cats:
         bot.post_message(command.channel_id, get_categories())
+        return
+
+    # Check if the channel is valid for sequential questions
+    if args.count > 1 and bot.channels.get(command.channel_id).name not in VALID_SEQUETIAL_CHANNELS:
+        bot.post_message(command.channel_id,
+                         'You cannot use the sequential questions feature in this channel try #trivia')
         return
 
     handle_question(command, args)
@@ -68,6 +79,7 @@ def parse_arguments(command: Command) -> argparse.Namespace:
                         help='The type of question. (default: %(default)s)')
     parser.add_argument('-s', '--seconds', default=30, type=int,
                         help='Number of seconds before posting answer (default: %(default)s)')
+    parser.add_argument('-n', '--count', default=1, type=int, help="Do 'n' trivia questions in quick succession")
     parser.add_argument('--cats', action='store_true', help='Sends a list of valid categories to the user')
     parser.add_argument('-h', '--help', action='store_true')
 
@@ -78,8 +90,12 @@ def parse_arguments(command: Command) -> argparse.Namespace:
         bot.post_message(command.channel_id, parser.format_help())
 
     # Constrain the number of seconds to a reasonable frame
-    args.seconds = max(MIN_SECONDS, args.seconds)
+    args.seconds = max(args.seconds, MIN_SECONDS)
     args.seconds = min(args.seconds, MAX_SECONDS)
+
+    # Constrain the number of sequential questions
+    args.count = max(args.number, 1)
+    args.count = min(args.number, MAX_SEQUENTIAL_QUESTIONS)
 
     return args
 
