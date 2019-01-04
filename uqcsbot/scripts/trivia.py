@@ -28,7 +28,7 @@ MIN_SECONDS = 5
 MAX_SECONDS = 300
 
 # The channels where multiple trivia questions can be asked (prevent spam)
-# TODO: Let me know if you want this restriction or not
+
 VALID_SEQUETIAL_CHANNELS = ['trivia', 'bot-testing']
 MAX_SEQUENTIAL_QUESTIONS = 30
 
