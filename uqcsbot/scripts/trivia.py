@@ -28,7 +28,6 @@ MIN_SECONDS = 5
 MAX_SECONDS = 300
 
 # The channels where multiple trivia questions can be asked (prevent spam)
-
 VALID_SEQUETIAL_CHANNELS = ['trivia', 'bot-testing']
 MAX_SEQUENTIAL_QUESTIONS = 30
 
@@ -221,7 +220,7 @@ def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Qu
     question_data['correct_answer'] = decode_b64(question_data['correct_answer'])
     answers = [decode_b64(ans) for ans in answers]
 
-    question_data = QuestionData(**question_data, is_boolean=is_boolean, answers=answers)
+    question_data = QuestionData(is_boolean=is_boolean, answers=answers, **question_data)
 
     # Shuffle the answers
     random.shuffle(question_data.answers)
