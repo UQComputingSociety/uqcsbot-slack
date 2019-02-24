@@ -91,7 +91,7 @@ class Event(object):
         else:
             end_str = f"{d2.hour}:{d2.minute:02}"
 
-        return f"*{start_str} - {end_str}* - _{self.location}_: `{self.summary}`"
+        return f"*{start_str} - {end_str}* - `{self.summary}` - _{self.location}_"
 
 
 @bot.on_command('events')
