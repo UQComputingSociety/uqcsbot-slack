@@ -321,14 +321,14 @@ def handle_search_crates_route(channel: Channel, args: CrateSearch):
 
     # If the user parameter is already a number use it as an id otherwise try to get the id
     if args.user.isdigit():
-        params['user_id'] = int(args.user)
+        params['user_id'] = args.user
     elif args.user:
         user_id = get_user_id(args.user)
         if user_id == -1:
             bot.post_message(channel, f'The username {args.user} could not be resolved')
             return
 
-        params['user_id'] = user_id
+        params['user_id'] = str(user_id)
 
     search_result = get_crates_search_results(channel, args.search, params)
     if search_result is None:
@@ -385,7 +385,7 @@ def get_category_page(channel: Channel, sort: str, page: int) -> Tuple[Optional[
     """
     # Get the categories
     url = BASE_URL + '/categories'
-    response = requests.get(url, {'sort': sort, 'page': page})
+    response = requests.get(url, {'sort': sort, 'page': page})  # type: ignore
 
     if response.status_code != requests.codes.ok:
         bot.post_message(channel, 'There was a problem getting the list of categories')
