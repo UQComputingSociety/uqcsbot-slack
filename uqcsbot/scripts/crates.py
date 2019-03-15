@@ -35,13 +35,16 @@ CrateResult = NamedTuple('CrateResult', [('name', str), ('downloads', int), ('ho
 # Named tuple for a category that was found in a search
 CategoryResult = NamedTuple('CategoryResult', [('name', str), ('description', str), ('crates', int)])
 
+# Named tuple for a user that was found in a search
+UserResult = NamedTuple('UserResult', [('id', int), ('username', str), ('name', str), ('avatar', str), ('url', str)])
 
 
 class SubCommand(Enum):
     """Distinguishes the type of sub command that was invoked"""
     EXACT = 1,
     SEARCH = 2,
-    CATEGORIES = 3
+    CATEGORIES = 3,
+    USERS = 4
 
 
 @bot.on_command('crates')
@@ -68,12 +71,14 @@ def parse_arguments(arg_str: str) -> Union[HelpCommand, CrateSearch, CategorySea
     def usage_error(*args, **kwargs):
         raise UsageSyntaxException()
 
-    # parser.error = usage_error  # type: ignore
+    parser.error = usage_error  # type: ignore
 
     # Converts "Date and time" into "date-and-time" which is the format used for category ids
-    def category_formatter(cat: str): return cat.lower().strip().replace(' ', '-')
+    def category_formatter(cat: str):
+        return cat.lower().strip().replace(' ', '-')
 
-    def search_limit(val: str): return max(1, min(int(val), MAX_LIMIT))  # limits the val such that 0 < val <= MaxLimit
+    def search_limit(val: str):
+        return max(1, min(int(val), MAX_LIMIT))  # limits the val such that 0 < val <= MaxLimit
 
     # For "!crates {args}"
     main_parser = subparsers.add_parser('main', add_help=False)
@@ -108,11 +113,16 @@ def parse_arguments(arg_str: str) -> Union[HelpCommand, CrateSearch, CategorySea
     category_parser.set_defaults(execute_action=handle_categories_route, route=SubCommand.CATEGORIES)
 
     # TODO: For "!crates users {args}"
+    users_parser = subparsers.add_parser('user', add_help=False,
+                                         help='Sub-command to get information about a username')
+    users_parser.add_argument('username', help='The users username')
+    users_parser.add_argument('-h', '--help', action='store_true', help='Prints this help message')
+    users_parser.set_defaults(execute_action=handle_users_route, route=SubCommand.USERS)
 
     # We need to check if the first argument is "categories" or "search" otherwise we add "main" to get around an
     # issue were argparse will complain that the name isn't one of the subparser names
     split_args = arg_str.split()
-    if not split_args or (split_args[0] != "categories" and split_args[0] != "search"):
+    if not split_args or (split_args[0] != "categories" and split_args[0] != "search" and split_args[0] != 'user'):
         split_args.insert(0, "main")
 
     args = parser.parse_args(split_args)
@@ -123,12 +133,13 @@ def parse_arguments(arg_str: str) -> Union[HelpCommand, CrateSearch, CategorySea
         if args.route == SubCommand.EXACT:
             # Because we had to break parser up into main this help message needs to be manually typed to be useful
             args.help_string = """
-*Usage: !crates [[name] | {search,categories}]*
+*Usage: !crates [[name] | {search,categories,users}]*
 
 *Sub-Commands*:
- {search,categories}
+ {search,categories,users}
    search              Search for a crate with conditions
    categories          Get information about categories instead of crates
+   users               Get information about a user from their username  
    
 *Default Usage*:
     usage: !crates [-h] [name]
@@ -141,8 +152,10 @@ def parse_arguments(arg_str: str) -> Union[HelpCommand, CrateSearch, CategorySea
             """
         elif args.route == SubCommand.SEARCH:
             args.help_string = search_parser.format_help()
-        else:
+        elif args.route == SubCommand.CATEGORIES:
             args.help_string = category_parser.format_help()
+        else:
+            args.help_string = users_parser.format_help()
 
     return args
 
@@ -389,7 +402,6 @@ def get_category_page(channel: Channel, sort: str, page: int) -> Tuple[Optional[
     return categories, total
 
 
-
 def display_all_categories(channel: Channel, args: CategorySearch):
     """Displays just the names of all the categories in one big list"""
     cats, tot = get_category_page(channel, args.sort, 1)
@@ -426,6 +438,7 @@ def display_all_categories(channel: Channel, args: CategorySearch):
     ]
 
     bot.post_message(channel, '', blocks=blocks)
+
 
 def display_specific_category(channel: Channel, args: CategorySearch):
     # Get the categories
@@ -479,6 +492,7 @@ def display_specific_category(channel: Channel, args: CategorySearch):
 
     bot.post_message(channel, '', blocks=blocks)
 
+
 def handle_categories_route(channel: Channel, args: CategorySearch):
     """Handles the categories sub-command by determining whether or not to display all categories or just one"""
     if args.name:
@@ -487,5 +501,60 @@ def handle_categories_route(channel: Channel, args: CategorySearch):
         display_all_categories(channel, args)
 
 
+# UserResult = NamedTuple('UserResult', [('id', int), ('username', str), ('name', str), ('avatar', str), ('url', str)])
+
+def get_user(channel: Channel, username: str) -> Optional[UserResult]:
+    """Gets a UserResult by querying the api for the given username. None on error."""
+    url = f'{BASE_URL}/users/{username}'
+    response = requests.get(url)
+
+    if response.status_code != requests.codes.ok:
+        bot.post_message(channel, 'There was a problem getting the user')
+        return None
+
+    raw_user = json.loads(response.content).get('user')
+
+    if raw_user is None or 'errors' in raw_user:
+        bot.post_message(channel, f'User "{username}" not found')
+        return None
+
+    user_id = raw_user.get('id', -1)
+    login = raw_user.get('login', username)
+    name = raw_user.get('name', username)
+    avatar = raw_user.get('avatar', 'https://imgur.com/gwtcGmr')  # Blank avatar as a default
+    url = raw_user.get('url', '')
+
+    return UserResult(user_id, login, name, avatar, url)
+
+
 def handle_users_route(channel: Channel, args: UserSearch):
-    print("users")
+    user = get_user(channel, args.username)
+
+    # Error occurred
+    if user is None:
+        return
+
+    # Begin formatting the message
+    text = f'*{user.username}:*\n\tID: {user.id}\n\tName: {user.id}\n\t'
+    if user.url:
+        text += f'Homepage: {user.url}'
+
+    blocks = [
+        {
+            'type': 'section',
+            'text': {
+                'type': 'mrkdwn',
+                'text': text
+            },
+            'accessory': {
+                'type': 'image',
+                'image_url': user.avatar,
+                'alt_text': 'User Avatar'
+            }
+        },
+        {
+            'type': 'divider'
+        }
+    ]
+
+    bot.post_message(channel, '', blocks=blocks)
