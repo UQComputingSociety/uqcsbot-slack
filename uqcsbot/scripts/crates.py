@@ -24,13 +24,17 @@ CrateSearch = NamedTuple('CrateSearch',
                           ('search', str)])
 
 # NamedTuple for the default categories sub-command that deals with searching for categories
-CategorySearch = NamedTuple('CategorySearch', [('name', str), ('limit', int), ('sort', str)])
+CategorySearch = NamedTuple('CategorySearch', [('name', str), ('sort', str)])
 
 # NamedTuple for the user sub-command that deals with searching for specific users
 UserSearch = NamedTuple('UserSearch', [('username', str)])
 
 # Named tuple for a crate that was found in a search
 CrateResult = NamedTuple('CrateResult', [('name', str), ('downloads', int), ('homepage', str), ('description', str)])
+
+# Named tuple for a category that was found in a search
+CategoryResult = NamedTuple('CategoryResult', [('name', str), ('description', str), ('crates', int)])
+
 
 
 class SubCommand(Enum):
@@ -97,11 +101,8 @@ def parse_arguments(arg_str: str) -> Union[HelpCommand, CrateSearch, CategorySea
     category_parser = subparsers.add_parser('categories', add_help=False,
                                             help='Sub-command to get information about categories instead of crates')
     category_parser.add_argument('-h', '--help', action='store_true', help='Prints this help message')
-    category_parser.add_argument('-n', '--name', default='', type=category_formatter,
-                                 help='Specify a specific category to get more information about it')
-    category_parser.add_argument('-l', '--limit', default=5, type=search_limit,
-                                 help=f'When not searching for a specific category how many results should be shown? '
-                                      '(max:  ' + str(MAX_LIMIT) + ', default: %(default)s)')
+    category_parser.add_argument('name', nargs='?', default='', type=category_formatter,
+                                 help='Optional. Specify a specific category to get more information about it')
     category_parser.add_argument('-s', '--sort', choices=['alpha', 'crates'], default='alpha', type=str.lower,
                                  help='Sort the result by alphabetical order or by number of crates in the category')
     category_parser.set_defaults(execute_action=handle_categories_route, route=SubCommand.CATEGORIES)
@@ -360,8 +361,130 @@ def handle_search_crates_route(channel: Channel, args: CrateSearch):
     bot.post_message(channel, '', blocks=blocks)
 
 
+def get_category_page(channel: Channel, sort: str, page: int) -> Tuple[Optional[List[str]], int]:
+    """
+    Returns all the names of all categories from a page of the response
+    :param channel: The channel to post any errors to
+    :param sort: The order to sort by. One of "crates" or "alpha"
+    :param page: The page number to get the categories from
+    :return: A tuple containing a list of category names (or None on error) and the total number of categories
+    """
+    # Get the categories
+    url = BASE_URL + '/categories'
+    response = requests.get(url, {'sort': sort, 'page': page})
+
+    if response.status_code != requests.codes.ok:
+        bot.post_message(channel, 'There was a problem getting the list of categories')
+        return None, 0
+
+    # Convert the json response
+    response_data = json.loads(response.content)
+
+    raw_categories = response_data.get('categories')
+    total = response_data.get('meta', {}).get('total', 0)
+
+    # Get the category names
+    categories = [cat.get('name') if 'name' in cat else cat.get('id', '') for cat in raw_categories]
+
+    return categories, total
+
+
+
+def display_all_categories(channel: Channel, args: CategorySearch):
+    """Displays just the names of all the categories in one big list"""
+    cats, tot = get_category_page(channel, args.sort, 1)
+    if cats is None:
+        return  # Error occurred
+
+    # Get all of the categories by incrementing page number
+    page = 2
+    while len(cats) < tot:
+        next_cats, _ = get_category_page(channel, args.sort, page)
+        if next_cats is None or not next_cats:
+            break
+
+        cats.extend(next_cats)
+        page += 1
+
+    # Begin formatting the message
+    category_string = '\n'.join(cats)
+    blocks = [
+        {
+            'type': 'section',
+            'text': {
+                'type': 'mrkdwn',
+                'text': f'*Displaying {tot} categories:*'
+            }
+        },
+        {
+            'type': 'section',
+            'text': {
+                'type': 'mrkdwn',
+                'text': f'```{category_string}```'
+            }
+        },
+    ]
+
+    bot.post_message(channel, '', blocks=blocks)
+
+def display_specific_category(channel: Channel, args: CategorySearch):
+    # Get the categories
+    url = BASE_URL + f'/categories/{args.name}'
+    response = requests.get(url)
+
+    if response.status_code != requests.codes.ok:
+        bot.post_message(channel, f'There was a problem getting the category "{args.name}"')
+        return
+
+    # Convert the json response
+    response_data = json.loads(response.content)
+    if 'errors' in response_data:
+        bot.post_message(channel, f'The category "{args.name}" does not exist')
+        return
+
+    raw_category = response_data.get('category')
+
+    name = raw_category.get('name')
+    name = raw_category.get('id') if name is None else name
+    desc = raw_category.get('description', 'No description provided')
+
+    category = CategoryResult(name, desc, raw_category['crates_cnt'])
+
+    # Format the message
+    blocks = [
+        {
+            'type': 'section',
+            'text': {
+                'type': 'mrkdwn',
+                'text': f'*{category.name}:*'
+            },
+        },
+        {
+            'type': 'section',
+            'text': {
+                'type': 'mrkdwn',
+                'text': f'{category.description}'
+            },
+        },
+        {
+            'type': 'context',
+            'elements': [
+                {
+                    'type': 'plain_text',
+                    'text': f'Crate Count: {category.crates}'
+                }
+            ]
+        },
+    ]
+
+    bot.post_message(channel, '', blocks=blocks)
+
 def handle_categories_route(channel: Channel, args: CategorySearch):
-    print("categories")
+    """Handles the categories sub-command by determining whether or not to display all categories or just one"""
+    if args.name:
+        display_specific_category(channel, args)
+    else:
+        display_all_categories(channel, args)
 
 
 def handle_users_route(channel: Channel, args: UserSearch):
