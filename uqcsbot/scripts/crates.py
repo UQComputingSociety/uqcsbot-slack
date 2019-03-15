@@ -51,11 +51,12 @@ class SubCommand(Enum):
 @loading_status
 def handle_crates(command: Command):
     """
-    `!crates `
+    `!crates [-h] [[name] | {search,categories,users}]`
             - Get information about crates from crates.io
     """
     args = parse_arguments(command.arg if command.has_arg() else '')
 
+    # Executes the function that was stored by the arg parser depending on which sub-command was used
     args.execute_action(command.channel_id, args)  # type: ignore
 
 
@@ -112,7 +113,7 @@ def parse_arguments(arg_str: str) -> Union[HelpCommand, CrateSearch, CategorySea
                                  help='Sort the result by alphabetical order or by number of crates in the category')
     category_parser.set_defaults(execute_action=handle_categories_route, route=SubCommand.CATEGORIES)
 
-    # TODO: For "!crates users {args}"
+    # For "!crates users {args}"
     users_parser = subparsers.add_parser('user', add_help=False,
                                          help='Sub-command to get information about a username')
     users_parser.add_argument('username', help='The users username')
@@ -441,6 +442,7 @@ def display_all_categories(channel: Channel, args: CategorySearch):
 
 
 def display_specific_category(channel: Channel, args: CategorySearch):
+    """Displays a single category in more detail"""
     # Get the categories
     url = BASE_URL + f'/categories/{args.name}'
     response = requests.get(url)
@@ -500,9 +502,6 @@ def handle_categories_route(channel: Channel, args: CategorySearch):
     else:
         display_all_categories(channel, args)
 
-
-# UserResult = NamedTuple('UserResult', [('id', int), ('username', str), ('name', str), ('avatar', str), ('url', str)])
-
 def get_user(channel: Channel, username: str) -> Optional[UserResult]:
     """Gets a UserResult by querying the api for the given username. None on error."""
     url = f'{BASE_URL}/users/{username}'
@@ -528,6 +527,7 @@ def get_user(channel: Channel, username: str) -> Optional[UserResult]:
 
 
 def handle_users_route(channel: Channel, args: UserSearch):
+    """Displays information about a user from their username"""
     user = get_user(channel, args.username)
 
     # Error occurred
@@ -535,9 +535,9 @@ def handle_users_route(channel: Channel, args: UserSearch):
         return
 
     # Begin formatting the message
-    text = f'*{user.username}:*\n\tID: {user.id}\n\tName: {user.id}\n\t'
+    text = f'*{user.username}:*\n\t*ID*: {user.id}\n\t*Name:* {user.name}\n\t'
     if user.url:
-        text += f'Homepage: {user.url}'
+        text += f'*Homepage:* {user.url}'
 
     blocks = [
         {
