@@ -60,7 +60,7 @@ def handle_crates(command: Command):
     args.execute_action(command.channel_id, args)  # type: ignore
 
 
-def parse_arguments(arg_str: str) -> Union[HelpCommand, CrateSearch, CategorySearch]:
+def parse_arguments(arg_str: str) -> argparse.Namespace:
     """
     Parses the arguments passed to the command
     :param arg_str: The argument string (not including "!crates")
@@ -195,7 +195,7 @@ def convert_crate_result(crate: Dict[str, Union[str, int]]) -> Optional[CrateRes
         homepage = crate['documentation'] if homepage is None else homepage
         homepage = "https://crates.io" if homepage is None else homepage
 
-        return CrateResult(crate['name'], crate['downloads'], homepage, crate['description'])
+        return CrateResult(crate['name'], crate['downloads'], homepage, crate['description'])  # type: ignore
     except KeyError:
         return None
 
@@ -321,7 +321,7 @@ def handle_search_crates_route(channel: Channel, args: CrateSearch):
 
     # If the user parameter is already a number use it as an id otherwise try to get the id
     if args.user.isdigit():
-        params['user_id'] = args.user
+        params['user_id'] = int(args.user)
     elif args.user:
         user_id = get_user_id(args.user)
         if user_id == -1:
@@ -501,6 +501,7 @@ def handle_categories_route(channel: Channel, args: CategorySearch):
         display_specific_category(channel, args)
     else:
         display_all_categories(channel, args)
+
 
 def get_user(channel: Channel, username: str) -> Optional[UserResult]:
     """Gets a UserResult by querying the api for the given username. None on error."""
