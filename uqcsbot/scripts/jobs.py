@@ -78,7 +78,7 @@ def job_response(evt: dict):
 
     bot.post_message(jobs_bulletin, f"{user.display_name} has posted a new job in <#{jobs_bulletin.id}>! "
                                     f":tada: \nPlease ask any questions in <#{jobs_discussion.id}> or in a private "
-                                    f"message to <@{user.user_id}|{user.display_name}>")
+                                    f"message to <@{user.user_id}>")
 
     bot.post_message(user.user_id, f"Hey {user.display_name}, you've just posted in <#{jobs_bulletin.id}>! "
                                    f"Just a quick reminder of the conditions surrounding the use of this channel:")
