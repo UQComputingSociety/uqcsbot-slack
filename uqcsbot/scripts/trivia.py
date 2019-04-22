@@ -24,6 +24,7 @@ QuestionData = NamedTuple('QuestionData',
 ReactionUsers = NamedTuple('ReactionUsers', [('name', str), ('users', Set[str])])
 
 # Customisation options
+REACT_INTERVAL = 1 # The interval between reactions being made for the possible answers (prevents order changing)
 MIN_SECONDS = 5
 MAX_SECONDS = 300
 
@@ -240,13 +241,41 @@ def post_question(channel: Channel, question_data: QuestionData, prefix: str = '
     # Print the questions (if multiple choice) and add the answer reactions
     reactions = BOOLEAN_REACTS if question_data.is_boolean else MULTIPLE_CHOICE_REACTS
 
+
     if not question_data.is_boolean:
         message_ts = post_possible_answers(channel, question_data.answers)
 
-    for reaction in reactions:
-        bot.api.reactions.add(name=reaction, channel=channel, timestamp=message_ts)
+    add_reactions_interval(reactions, channel, message_ts, REACT_INTERVAL)
 
     return message_ts
+
+
+def add_reactions_interval(reactions: List[str], channel: Channel, msg_timestamp: str, interval: float=1):
+    """
+    Adds the given reactions with "interval" seconds between in order to prevent them from changing order in slack (as
+    slack uses the timestamp of when the reaction was added to determine the order).
+    :param reactions: The reactions to add
+    :param channel: The channel containing the desired message to react to
+    :param msg_timestamp: The timestamp of the required message
+    :param interval: The interval between posting each reaction (defaults to 1 second)
+    """
+    # If the react interval is 0 don't do any of the scheduling stuff
+    if REACT_INTERVAL == 0:
+        for reaction in reactions:
+            bot.api.reactions.add(name=reaction, channel=channel, timestamp=msg_timestamp)
+
+        return
+
+    # Do the first one immediately
+    bot.api.reactions.add(name=reactions[0], channel=channel, timestamp=msg_timestamp)
+
+    # I am not 100% sure why this is needed. Doing it with a normal partial or lambda will try to post the same reacts
+    def add_reaction(reaction: str):
+        bot.api.reactions.add(name=reaction, channel=channel, timestamp=msg_timestamp)
+
+    for index, reaction in enumerate(reactions[1:]):
+        delay = (index + 1) * interval
+        schedule_action(partial(add_reaction, reaction), delay)
 
 
 def decode_b64(encoded: str) -> str:
@@ -277,7 +306,7 @@ def post_possible_answers(channel: Channel, answers: List[str]) -> float:
     return bot.post_message(channel, '', attachments=attachments)['ts']
 
 
-def schedule_action(action: Callable, secs: int):
+def schedule_action(action: Callable, secs: Union[int, float]):
     """Schedules the supplied action to be called once in the given number of seconds."""
     run_date = datetime.now(timezone(timedelta(hours=10))) + timedelta(seconds=secs)
     bot._scheduler.add_job(action, 'date', run_date=run_date)
