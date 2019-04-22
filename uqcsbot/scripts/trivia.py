@@ -24,7 +24,7 @@ QuestionData = NamedTuple('QuestionData',
 ReactionUsers = NamedTuple('ReactionUsers', [('name', str), ('users', Set[str])])
 
 # Customisation options
-REACT_INTERVAL = 1 # The interval between reactions being made for the possible answers (prevents order changing)
+REACT_INTERVAL = 1  # The interval between reactions being made for the possible answers (prevents order changing)
 MIN_SECONDS = 5
 MAX_SECONDS = 300
 
@@ -241,7 +241,6 @@ def post_question(channel: Channel, question_data: QuestionData, prefix: str = '
     # Print the questions (if multiple choice) and add the answer reactions
     reactions = BOOLEAN_REACTS if question_data.is_boolean else MULTIPLE_CHOICE_REACTS
 
-
     if not question_data.is_boolean:
         message_ts = post_possible_answers(channel, question_data.answers)
 
@@ -250,7 +249,7 @@ def post_question(channel: Channel, question_data: QuestionData, prefix: str = '
     return message_ts
 
 
-def add_reactions_interval(reactions: List[str], channel: Channel, msg_timestamp: str, interval: float=1):
+def add_reactions_interval(reactions: List[str], channel: Channel, msg_timestamp: str, interval: float = 1):
     """
     Adds the given reactions with "interval" seconds between in order to prevent them from changing order in slack (as
     slack uses the timestamp of when the reaction was added to determine the order).
@@ -325,8 +324,8 @@ def daily_trivia():
     handle_question(channel, args)
 
     # Format a nice message to tell when the answer will be
-    hours = CRON_SECONDS//3600
-    minutes = (CRON_SECONDS - (hours * 3600))//60
+    hours = CRON_SECONDS // 3600
+    minutes = (CRON_SECONDS - (hours * 3600)) // 60
     if minutes > 55:
         hours += 1
         minutes = 0
