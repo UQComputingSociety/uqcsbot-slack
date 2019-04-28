@@ -58,7 +58,7 @@ class ImageBlock(SlackBlock):
     def get_formatted_block(self):
         return {
             'type': 'image',
-            'url': self.url,
+            'image_url': self.url,
             'alt_text': self.alt_text
         }
 
@@ -271,28 +271,47 @@ def get_crate_name_result(channel: Channel, name: str) -> Optional[CrateResult]:
     return crate
 
 
+def create_slack_section_block(text: TextBlock, accessory: Optional[SlackBlock]=None) -> dict:
+    """
+    Creates a "section block" as described in the slack documentation here:
+    https://api.slack.com/reference/messaging/blocks#section
+    """
+    section_block = {
+        'type': 'section',
+        'text': text.get_formatted_block()
+    }
+
+    if accessory is not None:
+        section_block['accessory'] = accessory.get_formatted_block()
+
+    return section_block
+
+
+def create_slack_context_block(elements: List[SlackBlock]) -> dict:
+    """
+    Creates a "context block" as described in the slack documentation here:
+    https://api.slack.com/reference/messaging/blocks#context
+    """
+    return {
+        'type': 'context',
+        'elements': [element.get_formatted_block() for element in elements],
+    }
+
+def create_slack_divider_block() -> Dict[str, str]:
+    """
+    Returns a "divider block" as described in the slack documentation here:
+    https://api.slack.com/reference/messaging/blocks#divider
+    """
+    return {
+        'type': 'divider'
+    }
+
 def get_crate_blocks(crate: CrateResult) -> List[Dict[str, Union[str, Dict[str, str], List[Dict[str, str]]]]]:
     """Converts a crate into its block based message format for posting to slack"""
     return [
-        {
-            'type': 'section',
-            'text': {
-                'type': 'mrkdwn',
-                'text': f'*<{crate.homepage}|{crate.name}>*\n{crate.description}'
-            },
-        },
-        {
-            'type': 'context',
-            'elements': [
-                {
-                    'type': 'plain_text',
-                    'text': f'Downloads: {crate.downloads}'
-                }
-            ]
-        },
-        {
-            'type': 'divider'
-        }
+        create_slack_section_block(TextBlock(f'*<{crate.homepage}|{crate.name}>*\n{crate.description}')),
+        create_slack_context_block([TextBlock(f'Downloads: {crate.downloads}', markdown=False)]),
+        create_slack_divider_block()
     ]
 
 
@@ -379,16 +398,8 @@ def handle_search_crates_route(channel: Channel, args: CrateSearch):
 
     # The beginning of the formatted response
     blocks = [
-        {
-            'type': 'section',
-            'text': {
-                'type': 'mrkdwn',
-                'text': f'*Showing {min(args.limit, total)} of {total} results*'
-            },
-        },
-        {
-            'type': 'divider'
-        }
+        create_slack_section_block(TextBlock(f'*Showing {min(args.limit, total)} of {total} results*')),
+        create_slack_divider_block()
     ]
 
     # Iterate over all of the crates or until limit is reached. Whichever comes first.
@@ -458,47 +469,11 @@ def display_all_categories(channel: Channel, args: CategorySearch):
     # Begin formatting the message
     category_string = '\n'.join(categories)
     blocks = [
-        {
-            'type': 'section',
-            'text': {
-                'type': 'mrkdwn',
-                'text': f'*Displaying {total} categories:*'
-            }
-        },
-        {
-            'type': 'section',
-            'text': {
-                'type': 'mrkdwn',
-                'text': f'```{category_string}```'
-            }
-        },
+        create_slack_section_block(TextBlock(f'*Displaying {total} categories:*')),
+        create_slack_section_block(TextBlock(f'```{category_string}```')),
     ]
 
     bot.post_message(channel, '', blocks=blocks)
-
-
-def create_slack_section_block(text: TextBlock):
-    """
-    Creates a "section block" as described in the slack documentation here:
-    https://api.slack.com/reference/messaging/blocks#section
-    """
-    return {
-        {
-            'type': 'section',
-            'text': text.get_formatted_block()
-        }
-    }
-
-
-def create_slack_context_block(elements: List[SlackBlock]):
-    """
-    Creates a "context block" as described in the slack documentation here:
-    https://api.slack.com/reference/messaging/blocks#context
-    """
-    return {
-        'type': 'context',
-        'elements': [element.get_formatted_block() for element in elements],
-    }
 
 
 def display_specific_category(channel: Channel, args: CategorySearch):
@@ -589,21 +564,8 @@ def handle_users_route(channel: Channel, args: UserSearch):
         text += f'*Homepage:* {user.url}'
 
     blocks = [
-        {
-            'type': 'section',
-            'text': {
-                'type': 'mrkdwn',
-                'text': text
-            },
-            'accessory': {
-                'type': 'image',
-                'image_url': user.avatar,
-                'alt_text': 'User Avatar'
-            }
-        },
-        {
-            'type': 'divider'
-        }
+        create_slack_section_block(TextBlock(text), accessory=ImageBlock(user.avatar, 'User Avatar')),
+        create_slack_divider_block()
     ]
 
     bot.post_message(channel, '', blocks=blocks)
