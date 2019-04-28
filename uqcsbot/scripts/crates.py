@@ -549,7 +549,10 @@ def handle_categories_route(channel: Channel, args: CategorySearch):
 
 
 def get_user(channel: Channel, username: str) -> Optional[UserResult]:
-    """Gets a UserResult by querying the api for the given username. None on error."""
+    """
+    Gets a UserResult by querying the crates.io api for the given username.
+    None on error.
+    """
     url = f'{BASE_URL}/users/{username}'
     response = requests.get(url)
 
