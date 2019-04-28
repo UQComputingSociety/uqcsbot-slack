@@ -39,18 +39,22 @@ CategoryResult = NamedTuple('CategoryResult', [('name', str), ('description', st
 # Named tuple for a user that was found in a search
 UserResult = NamedTuple('UserResult', [('id', int), ('username', str), ('name', str), ('avatar', str), ('url', str)])
 
+
 class SlackBlock(ABC):
     """
     Abstract class for a formatted slack block
     (follows the conventions from https://api.slack.com/reference/messaging/blocks)
     """
+
     @abstractmethod
     def get_formatted_block(self) -> Dict[str, str]:
         """Gets the dictionary which maps the required properties for the given block"""
         pass
 
+
 class ImageBlock(SlackBlock):
     """SlackBlock that represents an image block (contains an image url and alternate text for that image)"""
+
     def __init__(self, url: str, alt_text: str):
         self.url = url
         self.alt_text = alt_text
@@ -62,10 +66,11 @@ class ImageBlock(SlackBlock):
             'alt_text': self.alt_text
         }
 
+
 class TextBlock(SlackBlock):
     """SlackBlock that represents a text block (contains an image url and alternate text for that image)"""
 
-    def __init__(self, text: str, markdown: bool=True):
+    def __init__(self, text: str, markdown: bool = True):
         self.text = text
         self.markdown = markdown
 
@@ -74,6 +79,7 @@ class TextBlock(SlackBlock):
             'type': 'mrkdwn' if self.markdown else 'plain_text',
             'text': self.text
         }
+
 
 class SubCommand(Enum):
     """Distinguishes the type of sub command that was invoked"""
@@ -271,7 +277,7 @@ def get_crate_name_result(channel: Channel, name: str) -> Optional[CrateResult]:
     return crate
 
 
-def create_slack_section_block(text: TextBlock, accessory: Optional[SlackBlock]=None) -> dict:
+def create_slack_section_block(text: TextBlock, accessory: Optional[SlackBlock] = None) -> dict:
     """
     Creates a "section block" as described in the slack documentation here:
     https://api.slack.com/reference/messaging/blocks#section
@@ -297,6 +303,7 @@ def create_slack_context_block(elements: List[SlackBlock]) -> dict:
         'elements': [element.get_formatted_block() for element in elements],
     }
 
+
 def create_slack_divider_block() -> Dict[str, str]:
     """
     Returns a "divider block" as described in the slack documentation here:
@@ -305,6 +312,7 @@ def create_slack_divider_block() -> Dict[str, str]:
     return {
         'type': 'divider'
     }
+
 
 def get_crate_blocks(crate: CrateResult) -> List[Dict[str, Union[str, Dict[str, str], List[Dict[str, str]]]]]:
     """Converts a crate into its block based message format for posting to slack"""
