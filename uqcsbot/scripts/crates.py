@@ -314,7 +314,7 @@ def create_slack_divider_block() -> Dict[str, str]:
     }
 
 
-def get_crate_blocks(crate: CrateResult) -> List[Union[dict, List[Dict[str, str]]]]:
+def get_crate_blocks(crate: CrateResult) -> List[dict]:
     """Converts a crate into its block based message format for posting to slack"""
     return [
         create_slack_section_block(TextBlock(f'*<{crate.homepage}|{crate.name}>*\n{crate.description}')),
