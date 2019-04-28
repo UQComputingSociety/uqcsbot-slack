@@ -1,5 +1,6 @@
 import argparse
 import json
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import NamedTuple, Union, Optional, List, Dict, Tuple
 
@@ -38,6 +39,41 @@ CategoryResult = NamedTuple('CategoryResult', [('name', str), ('description', st
 # Named tuple for a user that was found in a search
 UserResult = NamedTuple('UserResult', [('id', int), ('username', str), ('name', str), ('avatar', str), ('url', str)])
 
+class SlackBlock(ABC):
+    """
+    Abstract class for a formatted slack block
+    (follows the conventions from https://api.slack.com/reference/messaging/blocks)
+    """
+    @abstractmethod
+    def get_formatted_block(self) -> Dict[str, str]:
+        """Gets the dictionary which maps the required properties for the given block"""
+        pass
+
+class ImageBlock(SlackBlock):
+    """SlackBlock that represents an image block (contains an image url and alternate text for that image)"""
+    def __init__(self, url: str, alt_text: str):
+        self.url = url
+        self.alt_text = alt_text
+
+    def get_formatted_block(self):
+        return {
+            'type': 'image',
+            'url': self.url,
+            'alt_text': self.alt_text
+        }
+
+class TextBlock(SlackBlock):
+    """SlackBlock that represents a text block (contains an image url and alternate text for that image)"""
+
+    def __init__(self, text: str, markdown: bool=True):
+        self.text = text
+        self.markdown = markdown
+
+    def get_formatted_block(self):
+        return {
+            'type': 'mrkdwn' if self.markdown else 'plain_text',
+            'text': self.text
+        }
 
 class SubCommand(Enum):
     """Distinguishes the type of sub command that was invoked"""
@@ -405,28 +441,28 @@ def get_category_page(channel: Channel, sort: str, page: int) -> Tuple[Optional[
 
 def display_all_categories(channel: Channel, args: CategorySearch):
     """Displays just the names of all the categories in one big list"""
-    cats, tot = get_category_page(channel, args.sort, 1)
-    if cats is None:
+    categories, total = get_category_page(channel, args.sort, 1)
+    if categories is None:
         return  # Error occurred
 
     # Get all of the categories by incrementing page number
     page = 2
-    while len(cats) < tot:
+    while len(categories) < total:
         next_cats, _ = get_category_page(channel, args.sort, page)
         if next_cats is None or not next_cats:
             break
 
-        cats.extend(next_cats)
+        categories.extend(next_cats)
         page += 1
 
     # Begin formatting the message
-    category_string = '\n'.join(cats)
+    category_string = '\n'.join(categories)
     blocks = [
         {
             'type': 'section',
             'text': {
                 'type': 'mrkdwn',
-                'text': f'*Displaying {tot} categories:*'
+                'text': f'*Displaying {total} categories:*'
             }
         },
         {
@@ -441,8 +477,37 @@ def display_all_categories(channel: Channel, args: CategorySearch):
     bot.post_message(channel, '', blocks=blocks)
 
 
+def create_slack_section_block(text: TextBlock):
+    """
+    Creates a "section block" as described in the slack documentation here:
+    https://api.slack.com/reference/messaging/blocks#section
+    """
+    return {
+        {
+            'type': 'section',
+            'text': text.get_formatted_block()
+        }
+    }
+
+
+def create_slack_context_block(elements: List[SlackBlock]):
+    """
+    Creates a "context block" as described in the slack documentation here:
+    https://api.slack.com/reference/messaging/blocks#context
+    """
+    return {
+        'type': 'context',
+        'elements': [element.get_formatted_block() for element in elements],
+    }
+
+
 def display_specific_category(channel: Channel, args: CategorySearch):
-    """Displays a single category in more detail"""
+    """
+    Displays a single category in more detail
+    For example !crates categories algorithms would return a description of the algorithms category and the number of
+    crates that falls into the algorithms category. A search for a crate with "!crates search" can be filtered based on
+    these categories using the -c flag.
+    """
     # Get the categories
     url = BASE_URL + f'/categories/{args.name}'
     response = requests.get(url)
@@ -467,29 +532,9 @@ def display_specific_category(channel: Channel, args: CategorySearch):
 
     # Format the message
     blocks = [
-        {
-            'type': 'section',
-            'text': {
-                'type': 'mrkdwn',
-                'text': f'*{category.name}:*'
-            },
-        },
-        {
-            'type': 'section',
-            'text': {
-                'type': 'mrkdwn',
-                'text': f'{category.description}'
-            },
-        },
-        {
-            'type': 'context',
-            'elements': [
-                {
-                    'type': 'plain_text',
-                    'text': f'Crate Count: {category.crates}'
-                }
-            ]
-        },
+        create_slack_section_block(TextBlock(f'*{category.name}:*')),
+        create_slack_section_block(TextBlock(category.description)),
+        create_slack_context_block([TextBlock(f'Crate Count: {category.crates}', markdown=False)])
     ]
 
     bot.post_message(channel, '', blocks=blocks)
