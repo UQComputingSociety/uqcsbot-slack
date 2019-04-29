@@ -7,7 +7,7 @@ def handle_dice(command: Command):
     `!dice [number]` - Rolls 1 or more six sided dice (d6).
     """
     if command.has_arg() and command.arg.isnumeric():
-        rolls = max(int(command.arg), 1)
+        rolls = min(max(int(command.arg), 1), 360)
     else:
         rolls = 1
 
