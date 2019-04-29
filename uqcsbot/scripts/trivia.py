@@ -24,7 +24,7 @@ QuestionData = NamedTuple('QuestionData',
 ReactionUsers = NamedTuple('ReactionUsers', [('name', str), ('users', Set[str])])
 
 # Customisation options
-REACT_INTERVAL = 1  # The interval between reactions being made for the possible answers (prevents order changing)
+REACT_INTERVAL = 2  # The interval between reactions being made for the possible answers (prevents order changing)
 MIN_SECONDS = 5
 MAX_SECONDS = 300
 
@@ -249,14 +249,14 @@ def post_question(channel: Channel, question_data: QuestionData, prefix: str = '
     return message_ts
 
 
-def add_reactions_interval(reactions: List[str], channel: Channel, msg_timestamp: str, interval: float = 1):
+def add_reactions_interval(reactions: List[str], channel: Channel, msg_timestamp: str, interval: float = 2):
     """
     Adds the given reactions with "interval" seconds between in order to prevent them from changing order in slack (as
     slack uses the timestamp of when the reaction was added to determine the order).
     :param reactions: The reactions to add
     :param channel: The channel containing the desired message to react to
     :param msg_timestamp: The timestamp of the required message
-    :param interval: The interval between posting each reaction (defaults to 1 second)
+    :param interval: The interval between posting each reaction (defaults to 2 seconds)
     """
     # If the react interval is 0 don't do any of the scheduling stuff
     if REACT_INTERVAL == 0:
