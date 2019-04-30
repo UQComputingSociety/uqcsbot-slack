@@ -1,7 +1,7 @@
 from uqcsbot import bot, Command
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
-import datetime
+from datetime import datetime as DT
 
 def get_xml(state: str):
     source = {"NSW": "IDN11060", "ACT": "IDN11060", "NT": "IDD10207", "QLD": "IDQ11295", "SA": "IDS10044", "TAS": "IDT16710", "VIC": "IDV10753", "WA": "IDW14199"}
@@ -59,8 +59,8 @@ def handle_weather(command: Command):
         return
 
     # write day name, "today" or "tomorrow"
-    forcast_date = datetime.datetime.strptime(node.get('start-time-local'), "%Y-%m-%dT%H:%M:%S%z").date()
-    today_date = datetime.datetime.now().date()
+    forcast_date = DT.strptime("".join(node.get('start-time-local').rsplit(":",1)), "%Y-%m-%dT%H:%M:%S%z").date()
+    today_date = DT.now().date()
     date_delta = (forcast_date - today_date).days
     date_name = "Today" if date_delta == 0 else "Tomorrow" if date_delta == 1 else forcast_date.strftime("%A")
     response = "*{}'s Weather Forcast For {}*".format(date_name, location)
