@@ -21,11 +21,10 @@ def handle_cards(command: Command):
         deck = list(range(0, 0+10)) + list(range(13, 13+11)) + list(range(26, 26+10)) + list(range(39, 39+11)) + [-1]
         shuffle(deck)
         hands = [deck[ 0:10], deck[10:20], deck[20:30], deck[30:40], deck[40:]]
-        for h in hands: h.sort()
-        hands = [[emojify(c) for c in h] for h in hands]
-        for h in range(5):
-            hands[h] = [":regional-indicator-n: ",":regional-indicator-e: ",":regional-indicator-s: ",":regional-indicator-w: ",":cat: "][h] + "".join(hands[h])
-            bot.post_message(command.channel_id, hands[h])
+        for i in range(5):
+            h = [emojify(j) for j in sorted(hands[i])]
+            response = [":regional-indicator-n: ",":regional-indicator-e: ",":regional-indicator-s: ",":regional-indicator-w: ",":cat: "][i] + "".join(h)
+            bot.post_message(command.channel_id, response)
         return
     
     deck = list(range(52))
