@@ -43,6 +43,8 @@ def handle_cards(command: Command):
     deck = deck[:cards]
     deck.sort()
 
-    response = [emojify(i) for i in deck]
+    response = ""
+    for i in deck:
+        response += emojify(i)
 
-    bot.post_message(command.channel_id, "".join(response))
+    bot.post_message(command.channel_id, response)
