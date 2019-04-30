@@ -8,11 +8,12 @@ def mocked_xml_get(*args, **kwargs):
     This method will be used to replace the requests response
     Returns locally stored XML Queensland forecasts from 2019.
     """
-    source = {"NSW": "IDN11060", "ACT": "IDN11060", "NT": "IDD10207", "QLD": "IDQ11295", "SA": "IDS10044", "TAS": "IDT16710", "VIC": "IDV10753", "WA": "IDW14199"}
+    source = {"NSW": "IDN11060", "ACT": "IDN11060", "NT": "IDD10207", "QLD": "IDQ11295",
+              "SA": "IDS10044", "TAS": "IDT16710", "VIC": "IDV10753", "WA": "IDW14199"}
     try:
         data = open("test/bom_{}.xml".format(source[args[0]]))
         root = ET.fromstring(data.read())
-    except:
+    except Exception:
         return None
     return root
 
@@ -73,3 +74,7 @@ def test_error(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, '!weather -1')
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert messages[-1]['text'] == "No Forecast Available For That Day"
+
+    uqcsbot.post_message(TEST_CHANNEL_ID, '!weather TAS Hobart')
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert messages[-1]['text'] == "Could Not Retrieve BOM Data"
