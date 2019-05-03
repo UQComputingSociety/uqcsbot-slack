@@ -2,26 +2,27 @@ from uqcsbot import bot, Command
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 from datetime import datetime as DT
+from typing import Union, Tuple
 
 
-def get_xml(state: str):
+def get_xml(state: str) -> Union[None, ET.Element]:
     """
-    get BOM data as an XML for a given state
+    Get BOM data as an XML for a given state
     """
     source = {"NSW": "IDN11060", "ACT": "IDN11060", "NT": "IDD10207", "QLD": "IDQ11295",
               "SA": "IDS10044", "TAS": "IDT16710", "VIC": "IDV10753", "WA": "IDW14199"}
     try:
-        data = urlopen("ftp://ftp.bom.gov.au/anon/gen/fwo/{}.xml".format(source[state]))
+        data = urlopen(f"ftp://ftp.bom.gov.au/anon/gen/fwo/{source[state]}.xml")
         root = ET.fromstring(data.read())
     except Exception:
         return None
     return root
 
 
-def process_arguments(arguments: str):
+def process_arguments(arguments: str) -> Tuple[str, str, str]:
     """
-    process the arguments given to !weather, dividing them into state, location and future
-    uses default of QLD, Brisbane and 0 if not given
+    Process the arguments given to !weather, dividing them into state, location and future
+    Uses default of QLD, Brisbane and 0 if not given
     """
     args = arguments.split(" ") if arguments else []
     if args and args[-1].lstrip('-+').isnumeric():
@@ -43,24 +44,25 @@ def process_arguments(arguments: str):
     return state, location, future
 
 
-def find_location(root: ET.Element, location: str, future: int):
+def find_location(root: ET.Element, location: str, future: int) \
+                  -> Tuple[Union[None, ET.Element], Union[None, str]]:
     """
-    , returns the XML for a given the location and how far into the future
+    Rreturns the XML for a given the location and how far into the future
     """
-    node = root.find(".//area[@description='{}']".format(location))
+    node = root.find(f".//area[@description='{location}']")
     if node is None:
         return None, "Location Not Found"
     if node.get("type") != "location":
         return None, "Location Given Is Region"
-    node = node.find(".//forecast-period[@index='{}']".format(future))
+    node = node.find(f".//forecast-period[@index='{future}']")
     if node is None:
         return None, "No Forecast Available For That Day"
     return node, None
 
 
-def response_header(node: ET.Element, location: str):
+def response_header(node: ET.Element, location: str) -> str:
     """
-    returns the response header, in the form "{Location}'s Weather Forcast For {Day}"
+    Returns the response header, in the form "{Location}'s Weather Forcast For {Day}"
     """
     forcast_date = DT.strptime("".join(node.get('start-time-local')
                                        .rsplit(":", 1)), "%Y-%m-%dT%H:%M:%S%z").date()
@@ -75,56 +77,56 @@ def response_header(node: ET.Element, location: str):
         date_name = "Yesterday"
     else:
         date_name = forcast_date.strftime("%A")
-    return "*{}'s Weather Forcast For {}*".format(date_name, location)
+    return f"*{date_name}'s Weather Forcast For {location}*"
 
 
-def response_overall(node: ET.Element):
+def response_overall(node: ET.Element) -> str:
     """
-    returns the overall forcast"
+    Returns the overall forcast
     """
     icon_code = node.find(".//element[@type='forecast_icon_code']")
     if icon_code is not None:
         icon = ["", "sunny", "clear", "partly-cloudy", "cloudy", "", "haze", "", "light-rain",
                 "wind", "fog", "showers", "rain", "dust", "frost", "snow", "storm",
                 "light-showers", "heavy-showers", "tropicalcyclone"][int(icon_code.text)]
-        icon = ":bom_{}:".format(icon) if icon else ""
+        icon = f":bom_{icon}:" if icon else ""
     descrip = node.find(".//text[@type='precis']")
     if descrip is not None:
-        return "{} {} {}".format(icon, descrip.text, icon)
+        return f"{icon} {descrip.text} {icon}"
     return ""
 
 
-def response_temperature(node: ET.Element):
+def response_temperature(node: ET.Element) -> str:
     """
-    returns the temperature forecast"
+    Returns the temperature forecast
     """
     temp_min = node.find(".//element[@type='air_temperature_minimum']")
     temp_max = node.find(".//element[@type='air_temperature_maximum']")
     if temp_min is not None and temp_max is not None:
-        return "Temperature: {}ºC - {}ºC".format(temp_min.text, temp_max.text)
+        return f"Temperature: {temp_min.text}ºC - {temp_max.text}ºC"
     elif temp_min is not None:
-        return "Minimum Temperature: {}ºC".format(temp_min.text)
+        return f"Minimum Temperature: {temp_min.text}ºC"
     elif temp_max is not None:
-        return "Maximum Temperature: {}ºC".format(temp_max.text)
+        return f"Maximum Temperature: {temp_max.text}ºC"
     return ""
 
 
-def response_precipitation(node: ET.Element):
+def response_precipitation(node: ET.Element) -> str:
     """
-    returns the precipitaion forecast"
+    Returns the precipitaion forecast
     """
     rain_range = node.find(".//element[@type='precipitation_range']")
     precip_prob = node.find(".//text[@type='probability_of_precipitation']")
     if rain_range is not None and precip_prob is not None:
-        return "{} Chance of Precipitation; {}".format(precip_prob.text, rain_range.text)
+        return f"{precip_prob.text} Chance of Precipitation; {rain_range.text}"
     elif precip_prob is not None:
-        return "{} Chance of Precipitation".format(precip_prob.text)
+        return f"{precip_prob.text} Chance of Precipitation"
     return ""
 
 
-def response_brisbane_detailed():
+def response_brisbane_detailed() -> Union[str, str, str]:
     """
-    returns a detailed forecast for Brisbane"
+    Returns a detailed forecast for Brisbane
     """
     try:
         data = urlopen("ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ10605.xml")
@@ -145,7 +147,7 @@ def response_brisbane_detailed():
     if fire_danger is None or fire_danger.text == "Low-Moderate":
         fire_danger = ""
     else:
-        fire_danger = "There Is A {} Fire Danger Today".format(fire_danger.text)
+        fire_danger = f"There Is A {fire_danger.text} Fire Danger Today"
 
     uv_alert = node.find(".//text[@type='uv_alert']")
     uv_alert = "" if uv_alert is None else uv_alert.text
@@ -154,7 +156,7 @@ def response_brisbane_detailed():
 
 
 @bot.on_command('weather')
-def handle_weather(command: Command):
+def handle_weather(command: Command) -> None:
     """
     `!weather [[state] location] [day]` - Returns the weather forcaset for a location
     `day` is how many days into the future the forecast is for (0 is today and default)
@@ -180,11 +182,11 @@ def handle_weather(command: Command):
     response.append(response_temperature(node))
     response.append(response_precipitation(node))
     # post
-    bot.post_message(command.channel_id, "\r\n".join([r for r in response if r]))
+    bot.post_message(command.channel_id, "\n".join([r for r in response if r]))
 
 
 @bot.on_schedule('cron', hour=6, minute=0, timezone='Australia/Brisbane')
-def daily_weather():
+def daily_weather() -> None:
     """
     Posts today's Brisbane weather at 6:00am every day
     """
@@ -206,9 +208,8 @@ def daily_weather():
     response.append(response_overall(node))
     response.append(brisbane_detailed)
     response.append(response_temperature(node))
-    #response.append(response_precipitation(node))
     response.append(brisbane_fire)
     response.append(brisbane_uv)
     # post
     general = bot.channels.get("general")
-    bot.post_message(general.id, "\r\n".join([r for r in response if r]))
+    bot.post_message(general.id, "\n".join([r for r in response if r]))

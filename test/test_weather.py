@@ -65,7 +65,7 @@ def test_brisbane(uqcsbot: MockUQCSBot):
     for m in messages[1:]:
         assert m['text'] == messages[0]['text']
 
-    assert messages[0]['text'].split("\r\n")[0] == "*Today's Weather Forcast For Brisbane*"
+    assert messages[0]['text'].split("\n")[0] == "*Today's Weather Forcast For Brisbane*"
 
 
 @patch("uqcsbot.scripts.weather.get_xml", new=mocked_xml_get)
@@ -76,7 +76,7 @@ def test_tomorrow(uqcsbot: MockUQCSBot):
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, '!weather Esk 1')
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
-    assert messages[-1]['text'].split("\r\n")[0] == "*Tomorrow's Weather Forcast For Esk*"
+    assert messages[-1]['text'].split("\n")[0] == "*Tomorrow's Weather Forcast For Esk*"
 
 
 @patch("uqcsbot.scripts.weather.get_xml", new=mocked_xml_get)
@@ -87,7 +87,7 @@ def test_location(uqcsbot: MockUQCSBot):
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, '!weather NSW Coffs Harbour')
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
-    assert messages[-1]['text'].split("\r\n")[0] == "*Today's Weather Forcast For Coffs Harbour*"
+    assert messages[-1]['text'].split("\n")[0] == "*Today's Weather Forcast For Coffs Harbour*"
 
 
 @patch("uqcsbot.scripts.weather.get_xml", new=mocked_xml_get)
