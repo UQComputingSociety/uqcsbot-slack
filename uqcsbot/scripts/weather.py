@@ -124,7 +124,7 @@ def response_precipitation(node: ET.Element) -> str:
     return ""
 
 
-def response_brisbane_detailed() -> Union[str, str, str]:
+def response_brisbane_detailed() -> Tuple[str, str, str]:
     """
     Returns a detailed forecast for Brisbane
     """
@@ -147,7 +147,7 @@ def response_brisbane_detailed() -> Union[str, str, str]:
     if fire_danger_node is None or fire_danger_node.text == "Low-Moderate":
         fire_danger = ""
     else:
-        fire_danger = f"There Is A {fire_danger.text} Fire Danger Today"
+        fire_danger = f"There Is A {fire_danger_node.text} Fire Danger Today"
 
     uv_alert_node = node.find(".//text[@type='uv_alert']")
     uv_alert = "" if uv_alert_node is None else uv_alert_node.text
