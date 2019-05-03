@@ -19,7 +19,7 @@ def get_xml(state: str) -> Union[None, ET.Element]:
     return root
 
 
-def process_arguments(arguments: str) -> Tuple[str, str, str]:
+def process_arguments(arguments: str) -> Tuple[str, str, int]:
     """
     Process the arguments given to !weather, dividing them into state, location and future
     Uses default of QLD, Brisbane and 0 if not given
@@ -140,17 +140,17 @@ def response_brisbane_detailed() -> Union[str, str, str]:
     if node is None:
         return ""
 
-    forecast = node.find(".//text[@type='forecast']")
-    forecast = "" if forecast is None else forecast.text
+    forecast_node = node.find(".//text[@type='forecast']")
+    forecast = "" if forecast_node is None else forecast_node.text
 
-    fire_danger = node.find(".//text[@type='fire_danger']")
-    if fire_danger is None or fire_danger.text == "Low-Moderate":
+    fire_danger_node = node.find(".//text[@type='fire_danger']")
+    if fire_danger_node is None or fire_danger_node.text == "Low-Moderate":
         fire_danger = ""
     else:
         fire_danger = f"There Is A {fire_danger.text} Fire Danger Today"
 
-    uv_alert = node.find(".//text[@type='uv_alert']")
-    uv_alert = "" if uv_alert is None else uv_alert.text
+    uv_alert_node = node.find(".//text[@type='uv_alert']")
+    uv_alert = "" if uv_alert_node is None else uv_alert_node.text
 
     return (forecast, fire_danger, uv_alert)
 
@@ -170,9 +170,9 @@ def handle_weather(command: Command) -> None:
         bot.post_message(command.channel_id, "Could Not Retrieve BOM Data")
         return
 
-    node, response = find_location(root, location, future)
+    node, find_response = find_location(root, location, future)
     if node is None:
-        bot.post_message(command.channel_id, response)
+        bot.post_message(command.channel_id, find_response)
         return
 
     # get responses
@@ -197,7 +197,7 @@ def daily_weather() -> None:
     if root is None:
         return
 
-    node, response = find_location(root, location, future)
+    node, find_response = find_location(root, location, future)
     if node is None:
         return
 
