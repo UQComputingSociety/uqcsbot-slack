@@ -132,13 +132,13 @@ def response_brisbane_detailed() -> Tuple[str, str, str]:
         data = urlopen("ftp://ftp.bom.gov.au/anon/gen/fwo/IDQ10605.xml")
         root = ET.fromstring(data.read())
     except Exception:
-        return ""
+        return "", "", ""
     node = root.find(".//area[@description='Brisbane']")
     if node is None:
-        return ""
+        return "", "", ""
     node = node.find(".//forecast-period[@index='0']")
     if node is None:
-        return ""
+        return "", "", ""
 
     forecast_node = node.find(".//text[@type='forecast']")
     forecast = "" if forecast_node is None else forecast_node.text
