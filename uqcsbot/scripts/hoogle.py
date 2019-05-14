@@ -1,4 +1,5 @@
 from uqcsbot import bot, Command
+from uqcsbot.utils.command_utils import loading_status
 import requests
 import json
 import html
@@ -22,6 +23,7 @@ def pretty_hoogle_result(result: dict, is_verbose: bool) -> str:
 
 
 @bot.on_command("hoogle")
+@loading_status
 def handle_hoogle(command: Command):
     '''
     `!hoogle [-v] [--verbose] <TYPE_SIGNATURE>` - Queries the Hoogle Haskell API search engine,
