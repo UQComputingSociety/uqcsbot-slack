@@ -18,3 +18,12 @@ def test_mentalhealth_keyword(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert "campus security" in messages[-1]['text'].lower()
+
+def test_emergency_keyword(uqcsbot: MockUQCSBot):
+    '''
+    Ensure !emergency also does the needful
+    '''
+    uqcsbot.post_message(TEST_CHANNEL_ID, '!emergency')
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert "campus security" in messages[-1]['text'].lower()
