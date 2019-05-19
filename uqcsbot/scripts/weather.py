@@ -1,4 +1,5 @@
 from uqcsbot import bot, Command
+from uqcsbot.utils.command_utils import loading_status
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 from datetime import datetime as DT
@@ -156,6 +157,7 @@ def response_brisbane_detailed() -> Tuple[str, str, str]:
 
 
 @bot.on_command('weather')
+@loading_status
 def handle_weather(command: Command) -> None:
     """
     `!weather [[state] location] [day]` - Returns the weather forcaset for a location
