@@ -1,0 +1,229 @@
+"""
+Tests for the events module.
+"""
+from datetime import datetime
+from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
+from pytz import timezone
+from unittest.mock import patch
+from uqcsbot.utils.itee_seminar_utils import (HttpException, get_seminars)
+
+NO_EVENTS_MESSAGE = "_There don't appear to be any events in the next *2* weeks_\r\n" \
+    "For a full list of events, visit: https://uqcs.org.au/calendar.html " \
+    "and https://www.itee.uq.edu.au/seminar-list"
+
+
+def mocked_html_summary_get_typical():
+    """
+    Returns locally stored HTML that represents a typical seminar listing.
+    """
+    f = open("test/ITEE_Upcoming_Seminars.html", "r")
+    return f.read()
+
+
+def mocked_html_summary_get_no_results():
+    """
+    Returns locally stored HTML that represents an empty seminar listing.
+    """
+    f = open("test/ITEE_Upcoming_Seminars_empty.html", "r")
+    return f.read()
+
+
+def mocked_html_summary_get_error():
+    """
+    Throws an exception to indicate the seminar listing could not be loaded.
+    """
+    raise HttpException("SEMINAR-URL", 500)
+
+
+def mocked_html_details_full(url):
+    """
+    Provides successful access to seminar details using locally stored content.
+    """
+    if url == "https://www.itee.uq.edu.au/introduction-functional-programming":
+        return open("test/ITEE_Seminar1.html").read()
+    if url == "https://www.itee.uq.edu.au/performance-enhancement-software-def" \
+              "ined-cellular-5g-and-internet-things-networks":
+        return open("test/ITEE_Seminar2.html").read()
+    assert False
+
+
+def mocked_html_details_partial(url):
+    """
+    Provides partial access to seminar details using locally stored content.
+    One endpoint works correctly, another reports a 500 server error.
+    """
+    if url == "https://www.itee.uq.edu.au/introduction-functional-programming":
+        raise HttpException("SEMINAR-URL", 500)
+    if url == "https://www.itee.uq.edu.au/performance-enhancement-software-def" \
+              "ined-cellular-5g-and-internet-things-networks":
+        return open("test/ITEE_Seminar2.html").read()
+    assert False
+
+
+def mocked_events_ics():
+    """
+    Returns a locally stored .ics file that imitates the UQCS Calendar on
+    Google Calendar.
+    """
+    return open("test/test_events_events.ics").read()
+
+
+# Unit tests of the Seminars component only
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_typical)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_details_page",
+       new=mocked_html_details_full)
+def test_events_seminars_typical():
+    """
+    This test checks Seminar Utilities correctly provides seminar information when
+    all ITEE website pages are available and correctly formatted.
+    """
+    summaries = get_seminars()
+    brisbaneTime = timezone('Australia/Brisbane')
+    expectedDate1 = datetime(2019, 5, 28, 12, 0, 0, tzinfo=brisbaneTime)
+    expectedDate2 = datetime(2019, 5, 29, 13, 0, 0, tzinfo=brisbaneTime)
+
+    assert len(summaries) == 2
+    assert summaries[0] == ('Introduction to functional programming - Tony Morris, Software '
+                            'Engineer at Data61',
+                            'https://www.itee.uq.edu.au/introduction-functional-programming',
+                            expectedDate1,
+                            '78-420')
+    assert summaries[1] == ('Performance Enhancement of Software Defined Cellular 5G and '
+                            'Internet-of-Things Networks - Furqan Khan',
+                            'https://www.itee.uq.edu.au/performance-enhancement-software-'
+                            'defined-cellular-5g-and-internet-things-networks',
+                            expectedDate2,
+                            '78-430')
+
+
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_typical)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_details_page",
+       new=mocked_html_details_partial)
+def test_events_seminars_partial_results():
+    """
+    This test checks Seminar Utilities correctly provides partial seminar information
+    when the seminar listings page is available on the ITEE website, but not all of the
+    details pages.
+    """
+    summaries = get_seminars()
+    brisbaneTime = timezone('Australia/Brisbane')
+    expectedDate1 = datetime(2019, 5, 28, 12, 0, 0, tzinfo=brisbaneTime)
+    expectedDate2 = datetime(2019, 5, 29, 13, 0, 0, tzinfo=brisbaneTime)
+
+    assert len(summaries) == 2
+    assert summaries[0] == ('Introduction to functional programming',
+                            'https://www.itee.uq.edu.au/introduction-functional-programming',
+                            expectedDate1,
+                            '78-420')
+    assert summaries[1] == ('Performance Enhancement of Software Defined Cellular 5G and '
+                            'Internet-of-Things Networks - Furqan Khan',
+                            'https://www.itee.uq.edu.au/performance-enhancement-software-'
+                            'defined-cellular-5g-and-internet-things-networks',
+                            expectedDate2,
+                            '78-430')
+
+
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_no_results)
+def test_events_seminars_no_results():
+    """
+    This test checks Seminar Utilities correctly handles no seminars being listed on the
+    ITEE website.
+    """
+    summaries = get_seminars()
+    assert len(summaries) == 0
+
+
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_error)
+def test_events_seminars_error():
+    """
+    This test checks Seminar Utilities correctly handles the ITEE website being unavailable.
+    The correct behaviour is to throw an exception.
+    """
+    try:
+        get_seminars()
+        assert False
+    except HttpException as e:
+        assert e.url == "SEMINAR-URL"
+        assert e.status_code == 500
+
+
+@patch("uqcsbot.scripts.events.get_calendar_file", new=mocked_events_ics)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_error)
+def test_events_no_events(uqcsbot: MockUQCSBot):
+    """
+    This test simulates the user invoking !events when there are no events available.
+    The test cases includes the ITEE website being unavailable.
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[1].get('text') == NO_EVENTS_MESSAGE
+
+
+@patch("uqcsbot.scripts.events.get_calendar_file", new=mocked_events_ics)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_typical)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_details_page",
+       new=mocked_html_details_full)
+def test_events_typical(uqcsbot: MockUQCSBot):
+    """
+    This test simulates the user invoking !events when there are seminars available.
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    expected = "Events in the *next _2_ weeks*\r\n" \
+               "*MAY 28 12:00 - 13:00* - `<https://www.itee.uq.edu.au/introductio" \
+               "n-functional-programming|Introduction to functional programming -" \
+               " Tony Morris, Software Engineer at Data61>` - _78-420_\r\n" \
+               "*MAY 29 13:00 - 14:00* - `<https://www.itee.uq.edu.au/performance" \
+               "-enhancement-software-defined-cellular-5g-and-internet-things-net" \
+               "works|Performance Enhancement of Software Defined Cellular 5G and" \
+               " Internet-of-Things Networks - Furqan Khan>` - _78-430_"
+    assert messages[1].get('text') == expected
+
+
+@patch("uqcsbot.scripts.events.get_calendar_file", new=mocked_events_ics)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_typical)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_details_page",
+       new=mocked_html_details_full)
+def test_events_normal(uqcsbot: MockUQCSBot):
+    """
+    This test simulates the user invoking '!events full', with Google Calendar and
+    ITEE seminar information available.
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!events full")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    expected = "List of *all* upcoming events\r\n" \
+               "*MAY 28 12:00 - 13:00* - `<https://www.itee.uq.edu.au/introductio" \
+               "n-functional-programming|Introduction to functional programming -" \
+               " Tony Morris, Software Engineer at Data61>` - _78-420_\r\n" \
+               "*MAY 29 13:00 - 14:00* - `<https://www.itee.uq.edu.au/performance" \
+               "-enhancement-software-defined-cellular-5g-and-internet-things-net" \
+               "works|Performance Enhancement of Software Defined Cellular 5G and" \
+               " Internet-of-Things Networks - Furqan Khan>` - _78-430_\r\n" \
+               "*MAY 28 18:00 - 20:00* - `Introduction to asyncIO - Tom Manderson" \
+               "` - _TBA_\r\n" \
+               "*MAY 31 18:00 - 20:00* - `UQCS Special General Meeting + EOS Drin" \
+               "ks` - _TBA_"
+    assert messages[1].get('text') == expected
+
+
+def test_events_live(uqcsbot: MockUQCSBot):
+    """
+    This test simulates a user invoking '!events' against the live UQCS calendar
+    and ITEE website. No particular assertion is made about the content of the bot's
+    response, other than that there is one and it is not an error.
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert (messages[1].get('text') == NO_EVENTS_MESSAGE) \
+        or (messages[1].get('text').startswith("Events in the *next _2_ weeks*\r\n"))

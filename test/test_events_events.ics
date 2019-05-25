@@ -1,0 +1,139 @@
+BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Brisbane Tech Calendar
+X-WR-TIMEZONE:Australia/Brisbane
+X-WR-CALDESC:A calendar for all tech events\, hackathons and startup weeken
+ ds!
+BEGIN:VTIMEZONE
+TZID:Australia/Brisbane
+X-LIC-LOCATION:Australia/Brisbane
+BEGIN:STANDARD
+TZOFFSETFROM:+1000
+TZOFFSETTO:+1000
+TZNAME:AEST
+DTSTART:19700101T000000
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART:20500531T080000Z
+DTEND:20500531T100000Z
+DTSTAMP:20500525T064927Z
+UID:13sst9hmmjs3jmfo9vok7kaut4@google.com
+CREATED:20500516T052612Z
+DESCRIPTION:
+LAST-MODIFIED:20500521T132018Z
+LOCATION:TBA
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:UQCS Special General Meeting + EOS Drinks
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20500528T080000Z
+DTEND:20500528T100000Z
+DTSTAMP:20500525T064927Z
+UID:4bs6svqoio0v74c3ltg3mrdutd@google.com
+CREATED:20500516T052517Z
+DESCRIPTION:
+LAST-MODIFIED:20500516T063034Z
+LOCATION:TBA
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Introduction to asyncIO - Tom Manderson
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20190523T080000Z
+DTEND:20190523T100000Z
+DTSTAMP:20190525T064927Z
+UID:6kokihq89ta04dp0de5c9j35ee@google.com
+CREATED:20190420T121608Z
+DESCRIPTION:
+LAST-MODIFIED:20190523T071517Z
+LOCATION:Hawken Engineering Building - Room C207
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:Tales From the Dark Web - Warren Simondson
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20190521T080000Z
+DTEND:20190521T100000Z
+DTSTAMP:20190525T064927Z
+UID:78jfvukpgln04a16dt0decphdh@google.com
+CREATED:20190406T143215Z
+DESCRIPTION:Words: everyone uses them. But how do computers use them and ho
+ w is it different from how people use them and also how do we make computer
+ s speak? Trick question: they use speakers. But also it is more complicated
+ \, sometimes. Join David Ferris in making weird mouth sounds and go on a ma
+ rvelous journey through the vocal tract\, zoom through a crash course on li
+ nguistics for engineers\, and maybe learn the true meaning of friendship. O
+ r how speech synthesis works. The latter is more likely.
+LAST-MODIFIED:20190516T063104Z
+LOCATION:Social Sciences Building - 24-S402
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Speech Synthesis - David Ferris
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20190516T080000Z
+DTEND:20190516T100000Z
+DTSTAMP:20190525T064927Z
+UID:05n1j6p47cs5gftak6nj2v8t1r@google.com
+CREATED:20190420T121625Z
+DESCRIPTION:UQCS is proud to host Jessica Beard\, Jordan West and Declan Vo
+ ng at UQ to talk about the Design and Development processes at Canva and th
+ eir vision as one of the largest startups in Australia. \n\nCanva was voted
+  the "Best place to work" for under 1000 employees in Australia in 2018 and
+  have open internship and graduate opportunities at the moment based in Syd
+ ney. They'll will be offering some people the chance to be flown down to th
+ eir offices in the coming months!\n\nCome along for a interesting night fil
+ led with Canva merch\, free pizza and conversations with some Canva enginee
+ rs!
+LAST-MODIFIED:20190508T052640Z
+LOCATION:50-T103 Hawken Engineering Building\, St Lucia QLD 4072\, Australi
+ a
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Design & Development at Canva
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20190502T080000Z
+DTEND:20190502T100000Z
+DTSTAMP:20190525T064927Z
+UID:384bqhajqhm3pf3d28t4qe0lae@google.com
+CREATED:20190322T154237Z
+DESCRIPTION:
+LAST-MODIFIED:20190501T000143Z
+LOCATION:50-T103
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:Blockchain: What & Why - Paul Haley
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20190430T080000Z
+DTEND:20190430T100000Z
+DTSTAMP:20190525T064927Z
+UID:5eodlna0or0c41m2s0no68jcof@google.com
+CREATED:20190406T110632Z
+DESCRIPTION:Since graduating from UQ in 2006 with a Bachelor of Information
+  Technology\, Mark has worked as a software engineer in seven companies acr
+ oss four countries. He currently works at Google’s headquarters in Silicon
+ Valley as a Senior Software Engineer in Tools and Infrastructure\, building
+  debugging and visualization tools used throughout Google. In this talk he
+ will share his journey so far\, advice on how to succeed as a software engi
+ neer\, and\, of course\, tips on passing the notorious Google interviews.
+LAST-MODIFIED:20190428T050028Z
+LOCATION:Hawken Engineering Building - Room T103
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:UQ to Google: Lessons from 12 Years as a Software Engineer
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR

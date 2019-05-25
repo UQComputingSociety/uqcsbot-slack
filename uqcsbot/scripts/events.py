@@ -1,11 +1,12 @@
 from typing import List
 import re
 from datetime import date, datetime, timedelta
-from icalendar import Calendar, vText
+from icalendar import Calendar
 import requests
 from pytz import timezone, utc
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException
+from uqcsbot.utils.itee_seminar_utils import (get_seminars, HttpException, InvalidFormatException)
 
 CALENDAR_URL = "https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics"  # noqa
 FILTER_REGEX = re.compile('(full|all|[0-9]+( weeks?)?)')
@@ -54,13 +55,13 @@ class EventFilter(object):
 
     def get_no_result_msg(self):
         if self._weeks is not None:
-            return f"There doesn't appear to be any events in the next *{self._weeks}* weeks"
+            return f"There don't appear to be any events in the next *{self._weeks}* weeks"
         else:
-            return "There doesn't appear to be any upcoming events..."
+            return "There don't appear to be any upcoming events..."
 
 
 class Event(object):
-    def __init__(self, start: datetime, end: datetime, location: vText, summary: vText) -> None:
+    def __init__(self, start: datetime, end: datetime, location: str, summary: str) -> None:
         self.start = start
         self.end = end
         self.location = location
@@ -81,6 +82,13 @@ class Event(object):
         summary = cal_event.get('summary')
         return cls(start, end, location, summary)
 
+    @classmethod
+    def from_seminar(cls, seminar_event):
+        title, link, start, location = seminar_event
+        # ITEE doesn't specify the length of seminars, but they are normally one hour
+        end = start + timedelta(hours=1)
+        return cls(start, end, location, f'<{link}|{title}>')
+
     def __str__(self):
         d1 = self.start.astimezone(BRISBANE_TZ)
         d2 = self.end.astimezone(BRISBANE_TZ)
@@ -97,7 +105,7 @@ class Event(object):
 @bot.on_command('events')
 def handle_events(command: Command):
     '''
-    `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - Lists all the UQCS
+    `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - Lists all the UQCS and ITEE
     events that are scheduled to occur within the given filter. If unspecified,
     will return the next 2 weeks of events.
     '''
@@ -105,8 +113,7 @@ def handle_events(command: Command):
     if not event_filter.is_valid:
         raise UsageSyntaxException()
 
-    http_response = requests.get(CALENDAR_URL)
-    cal = Calendar.from_ical(http_response.content)
+    cal = Calendar.from_ical(get_calendar_file())
 
     current_time = datetime.now(tz=BRISBANE_TZ).astimezone(utc)
 
@@ -125,6 +132,16 @@ def handle_events(command: Command):
         if event.start > current_time:
             events.append(event)
 
+    try:
+        # Try to include events from the ITEE seminars page
+        seminars = get_seminars()
+        for seminar in seminars:
+            # The ITEE website only lists current events.
+            event = Event.from_seminar(seminar)
+            events.append(event)
+    except (HttpException, InvalidFormatException) as e:
+        bot.logger.error(e.message)
+
     # then we apply our event filter as generated earlier
     events = event_filter.filter_events(events, current_time)
     # then, we sort the events by date
@@ -133,8 +150,19 @@ def handle_events(command: Command):
     # then print to the user the result
     if not events:
         message = f"_{event_filter.get_no_result_msg()}_\r\n" \
-                  f"For a full list of events, visit: https://uqcs.org.au/calendar.html"
+                  f"For a full list of events, visit: https://uqcs.org.au/calendar.html" \
+                  f" and https://www.itee.uq.edu.au/seminar-list"
     else:
         message = f"{event_filter.get_header()}\r\n" + '\r\n'.join(str(e) for e in events)
 
     bot.post_message(command.channel_id, message)
+
+
+def get_calendar_file():
+    """
+    Loads the UQCS Events calender .ics file from Google Calendar. This method is
+    mocked by unit tests.
+    :return: The returned ics calendar file, as a stream
+    """
+    http_response = requests.get(CALENDAR_URL)
+    return http_response.content
