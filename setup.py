@@ -29,7 +29,7 @@ tests_require = [
 
 setup(
     name='uqcsbot',
-    version='0.0.1',
+    version='0.0.2',
     description='UQCSbot is a chat bot built in python for use on our UQCS Slack Team',
     long_description=long_description,
     url='https://github.com/UQComputingSociety/uqcsbot',
