@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 from icalendar import Calendar
 import requests
 from pytz import timezone, utc
+from typing import Tuple, Optional
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException
 from uqcsbot.utils.itee_seminar_utils import (get_seminars, HttpException, InvalidFormatException)
@@ -61,11 +62,27 @@ class EventFilter(object):
 
 
 class Event(object):
-    def __init__(self, start: datetime, end: datetime, location: str, summary: str) -> None:
+    def __init__(self, start: datetime, end: datetime, location: str, summary: str, link: Optional[str]):
         self.start = start
         self.end = end
         self.location = location
         self.summary = summary
+        self.link = link
+
+    @classmethod
+    def encode_text(cls, text: str) -> str:
+        """
+        Encodes user-specified text so that it is not interpreted as command characters
+        by Slack. Implementation as required by: https://api.slack.com/docs/message-formatting
+        Note that this encoding process does not stop injection of text effects (bolding,
+        underlining, etc.), or a malicious user breaking the text formatting in the events
+        command. It should, however, prevent <, & and > being misinterpreted and including
+        links where they should not.
+        --
+        :param text: The text to encode
+        :return: The encoded text
+        """
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     @classmethod
     def from_cal_event(cls, cal_event):
@@ -80,14 +97,15 @@ class Event(object):
             end = datetime.combine(end, datetime.max.time()).astimezone(utc)
         location = cal_event.get('location', 'TBA')
         summary = cal_event.get('summary')
-        return cls(start, end, location, summary)
+        return cls(start, end, location, summary, None)
 
     @classmethod
-    def from_seminar(cls, seminar_event):
+    def from_seminar(cls, seminar_event: Tuple[str, str, datetime, str]):
         title, link, start, location = seminar_event
         # ITEE doesn't specify the length of seminars, but they are normally one hour
         end = start + timedelta(hours=1)
-        return cls(start, end, location, f'<{link}|{title}>')
+        # Note: this
+        return cls(start, end, location, title, link)
 
     def __str__(self):
         d1 = self.start.astimezone(BRISBANE_TZ)
@@ -99,7 +117,15 @@ class Event(object):
         else:
             end_str = f"{d2.hour}:{d2.minute:02}"
 
-        return f"*{start_str} - {end_str}* - `{self.summary}` - _{self.location}_"
+        # Encode user-provided text to prevent certain characters being interpreted
+        # as slack commands.
+        summary_str = Event.encode_text(self.summary)
+        location_str = Event.encode_text(self.location)
+
+        if self.link is None:
+            return f"*{start_str} - {end_str}* - `{summary_str}` - _{location_str}_"
+        else:
+            return f"*{start_str} - {end_str}* - `<{self.link}|{summary_str}>` - _{location_str}_"
 
 
 @bot.on_command('events')
@@ -158,7 +184,7 @@ def handle_events(command: Command):
     bot.post_message(command.channel_id, message)
 
 
-def get_calendar_file():
+def get_calendar_file() -> bytes:
     """
     Loads the UQCS Events calender .ics file from Google Calendar. This method is
     mocked by unit tests.

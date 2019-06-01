@@ -12,42 +12,44 @@ NO_EVENTS_MESSAGE = "_There don't appear to be any events in the next *2* weeks_
     "and https://www.itee.uq.edu.au/seminar-list"
 
 
-def mocked_html_summary_get_typical():
+def mocked_html_summary_get_typical() -> bytes:
     """
     Returns locally stored HTML that represents a typical seminar listing.
     """
-    f = open("test/ITEE_Upcoming_Seminars.html", "r")
-    return f.read()
+    with open("test/ITEE_Upcoming_Seminars.html", "rb") as html_file:
+        return html_file.read()
 
 
-def mocked_html_summary_get_no_results():
+def mocked_html_summary_get_no_results() -> bytes:
     """
     Returns locally stored HTML that represents an empty seminar listing.
     """
-    f = open("test/ITEE_Upcoming_Seminars_empty.html", "r")
-    return f.read()
+    with open("test/ITEE_Upcoming_Seminars_empty.html", "rb") as html_file:
+        return html_file.read()
 
 
-def mocked_html_summary_get_error():
+def mocked_html_summary_get_error() -> bytes:
     """
     Throws an exception to indicate the seminar listing could not be loaded.
     """
     raise HttpException("SEMINAR-URL", 500)
 
 
-def mocked_html_details_full(url):
+def mocked_html_details_full(url: str) -> bytes:
     """
     Provides successful access to seminar details using locally stored content.
     """
     if url == "https://www.itee.uq.edu.au/introduction-functional-programming":
-        return open("test/ITEE_Seminar1.html").read()
+        with open("test/ITEE_Seminar1.html", "rb") as html_file:
+            return html_file.read()
     if url == "https://www.itee.uq.edu.au/performance-enhancement-software-def" \
               "ined-cellular-5g-and-internet-things-networks":
-        return open("test/ITEE_Seminar2.html").read()
+        with open("test/ITEE_Seminar2.html", "rb") as html_file:
+            return html_file.read()
     assert False
 
 
-def mocked_html_details_partial(url):
+def mocked_html_details_partial(url: str) -> bytes:
     """
     Provides partial access to seminar details using locally stored content.
     One endpoint works correctly, another reports a 500 server error.
@@ -56,16 +58,18 @@ def mocked_html_details_partial(url):
         raise HttpException("SEMINAR-URL", 500)
     if url == "https://www.itee.uq.edu.au/performance-enhancement-software-def" \
               "ined-cellular-5g-and-internet-things-networks":
-        return open("test/ITEE_Seminar2.html").read()
+        with open("test/ITEE_Seminar2.html", "rb") as html_file:
+            return html_file.read()
     assert False
 
 
-def mocked_events_ics():
+def mocked_events_ics() -> bytes:
     """
     Returns a locally stored .ics file that imitates the UQCS Calendar on
     Google Calendar.
     """
-    return open("test/test_events_events.ics").read()
+    with open("test/test_events_events.ics", "rb") as events_file:
+        return events_file.read()
 
 
 # Unit tests of the Seminars component only
@@ -89,7 +93,7 @@ def test_events_seminars_typical():
                             'https://www.itee.uq.edu.au/introduction-functional-programming',
                             expectedDate1,
                             '78-420')
-    assert summaries[1] == ('Performance Enhancement of Software Defined Cellular 5G and '
+    assert summaries[1] == ('Performance Enhancement of Software Defined Cellular 5G & '
                             'Internet-of-Things Networks - Furqan Khan',
                             'https://www.itee.uq.edu.au/performance-enhancement-software-'
                             'defined-cellular-5g-and-internet-things-networks',
@@ -117,7 +121,7 @@ def test_events_seminars_partial_results():
                             'https://www.itee.uq.edu.au/introduction-functional-programming',
                             expectedDate1,
                             '78-420')
-    assert summaries[1] == ('Performance Enhancement of Software Defined Cellular 5G and '
+    assert summaries[1] == ('Performance Enhancement of Software Defined Cellular 5G & '
                             'Internet-of-Things Networks - Furqan Khan',
                             'https://www.itee.uq.edu.au/performance-enhancement-software-'
                             'defined-cellular-5g-and-internet-things-networks',
@@ -183,8 +187,8 @@ def test_events_typical(uqcsbot: MockUQCSBot):
                " Tony Morris, Software Engineer at Data61>` - _78-420_\r\n" \
                "*MAY 29 13:00 - 14:00* - `<https://www.itee.uq.edu.au/performance" \
                "-enhancement-software-defined-cellular-5g-and-internet-things-net" \
-               "works|Performance Enhancement of Software Defined Cellular 5G and" \
-               " Internet-of-Things Networks - Furqan Khan>` - _78-430_"
+               "works|Performance Enhancement of Software Defined Cellular 5G &am" \
+               "p; Internet-of-Things Networks - Furqan Khan>` - _78-430_"
     assert messages[1].get('text') == expected
 
 
@@ -207,12 +211,12 @@ def test_events_normal(uqcsbot: MockUQCSBot):
                " Tony Morris, Software Engineer at Data61>` - _78-420_\r\n" \
                "*MAY 29 13:00 - 14:00* - `<https://www.itee.uq.edu.au/performance" \
                "-enhancement-software-defined-cellular-5g-and-internet-things-net" \
-               "works|Performance Enhancement of Software Defined Cellular 5G and" \
-               " Internet-of-Things Networks - Furqan Khan>` - _78-430_\r\n" \
+               "works|Performance Enhancement of Software Defined Cellular 5G &am" \
+               "p; Internet-of-Things Networks - Furqan Khan>` - _78-430_\r\n" \
                "*MAY 28 18:00 - 20:00* - `Introduction to asyncIO - Tom Manderson" \
                "` - _TBA_\r\n" \
-               "*MAY 31 18:00 - 20:00* - `UQCS Special General Meeting + EOS Drin" \
-               "ks` - _TBA_"
+               "*MAY 31 18:00 - 20:00* - `UQCS Special General Meeting &amp; EOS " \
+               "Drinks` - _TBA_"
     assert messages[1].get('text') == expected
 
 
