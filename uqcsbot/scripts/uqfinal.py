@@ -1,6 +1,6 @@
 import math
 from uqcsbot import bot, Command
-from requests import get
+from requests import get, RequestException, Response
 from uqcsbot.utils.command_utils import loading_status
 
 uqfinal = "https://api.uqfinal.com"
@@ -28,16 +28,18 @@ def handle_uqfinal(command: Command):
             scores.append(float(score))
         except:
             bot.post_message(command.channel_id, f"{score} could not be converted to a number")
+            return
 
     semester = get_uqfinal_semesters()
     if semester == None:
-        bot.post_message("Failed to retrieve semester data from UQfinal")
+        bot.post_message(command.channel_id, "Failed to retrieve semester data from UQfinal")
         return
 
-    courseInfo = get_uqfinal_course(semester, course)
-    if courseInfo == None:
-        bot.post_message(f"Failed to retrieve course information for {course}")
-    num_assessment = len(courseInfo["assessment"])
+    course_info = get_uqfinal_course(semester, course)
+    if course_info == None:
+        bot.post_message(command.channel_id, f"Failed to retrieve course information for {course}")
+        return
+    num_assessment = len(course_info["assessment"])
 
     if (len(scores) != num_assessment - 1):
         bot.post_message(command.channel_id, "Please provide grades for all assessment except the last")
@@ -45,10 +47,10 @@ def handle_uqfinal(command: Command):
 
     total = 0
     for i, score in enumerate(scores):
-        total += score * float(courseInfo["assessment"][i]["weight"]) / 100
+        total += score * float(course_info["assessment"][i]["weight"]) / 100
 
     needed = 50 - total
-    result = math.ceil(needed / float(courseInfo["assessment"][num_assessment - 1]["weight"]) * 100)
+    result = math.ceil(needed / float(course_info["assessment"][num_assessment - 1]["weight"]) * 100)
     bot.post_message(command.channel_id, "You need to achieve at least " +
                      str(result) +
                      "% on the final exam.\n_Disclaimer: this does not take hurdles into account_\n_Powered by "
@@ -62,8 +64,11 @@ def get_uqfinal_semesters():
     """
     try:
         # Assume current semester
-        semesterResponse = get(uqfinal + "/semesters")
-        return semesterResponse.json()["data"]["semesters"].pop()
+        semester_response: Response = get(uqfinal + "/semesters")
+        if semester_response.status_code != 200:
+            bot.logger.error(f"UQFinal returned {semester_response.status_code} when getting the current semester")
+            return None
+        return semester_response.json()["data"]["semesters"].pop()
     except RequestException as e:
         bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
         return None
@@ -75,8 +80,11 @@ def get_uqfinal_course(semester, course: str):
     Return None on failure
     """
     try:
-        courseResponse = get("/".join([uqfinal, "course", str(semester["uqId"]), course]))
-        return courseResponse.json()["data"]
+        course_response = get("/".join([uqfinal, "course", str(semester["uqId"]), course]))
+        if course_response.status_code != 200:
+            bot.logger.error(f"UQFinal returned {course_response.status_code} when getting the course {course}")
+            return None
+        return course_response.json()["data"]
     except RequestException as e:
         bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
         return None
