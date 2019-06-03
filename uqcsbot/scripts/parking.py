@@ -1,4 +1,5 @@
 from uqcsbot import bot, Command
+from uqcsbot.utils.command_utils import loading_status
 from urllib.request import urlopen
 from re import findall
 from typing import Union
@@ -16,6 +17,7 @@ def get_pf_parking_data() -> Union[str, None]:
 
 
 @bot.on_command("parking")
+@loading_status
 def handle_parking(command: Command) -> None:
     """
     `!parking [all]` - Displays how many car parks are available at UQ St. Lucia
