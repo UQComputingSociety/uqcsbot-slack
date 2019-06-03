@@ -25,17 +25,18 @@ def handle_uqfinal(command: Command):
 
     for score in string_scores:
         try:
-            scores.append(int(score))
+            scores.append(float(score))
         except:
-            bot.post_message(command.channel_id, score + " could not be converted to a score")
+            bot.post_message(command.channel_id, f"{score} could not be converted to a number")
 
-    # Assume current semester
-    semesterResponse = get(uqfinal + "/semesters")
-    semester = semesterResponse.json()["data"]["semesters"].pop()
+    semester = get_uqfinal_semesters()
+    if semester == None:
+        bot.post_message("Failed to retrieve semester data from UQfinal")
+        return
 
-    courseResponse = get("/".join([uqfinal, "course", str(semester["uqId"]), course]))
-    courseInfo = courseResponse.json()["data"]
-
+    courseInfo = get_uqfinal_course(semester, course)
+    if courseInfo == None:
+        bot.post_message(f"Failed to retrieve course information for {course}")
     num_assessment = len(courseInfo["assessment"])
 
     if (len(scores) != num_assessment - 1):
@@ -44,11 +45,38 @@ def handle_uqfinal(command: Command):
 
     total = 0
     for i, score in enumerate(scores):
-        total += score * int(courseInfo["assessment"][i]["weight"]) / 100
+        total += score * float(courseInfo["assessment"][i]["weight"]) / 100
 
     needed = 50 - total
-    result = math.ceil(needed / int(courseInfo["assessment"][num_assessment - 1]["weight"]) * 100)
+    result = math.ceil(needed / float(courseInfo["assessment"][num_assessment - 1]["weight"]) * 100)
     bot.post_message(command.channel_id, "You need to achieve at least " +
                      str(result) +
                      "% on the final exam.\n_Disclaimer: this does not take hurdles into account_\n_Powered by "
                      "http://uqfinal.com_")
+
+
+def get_uqfinal_semesters():
+    """
+    Get the current semester data from uqfinal
+    Return None on failure
+    """
+    try:
+        # Assume current semester
+        semesterResponse = get(uqfinal + "/semesters")
+        return semesterResponse.json()["data"]["semesters"].pop()
+    except RequestException as e:
+        bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
+        return None
+
+
+def get_uqfinal_course(semester, course: str):
+    """
+    Get the current course data from uqfinal
+    Return None on failure
+    """
+    try:
+        courseResponse = get("/".join([uqfinal, "course", str(semester["uqId"]), course]))
+        return courseResponse.json()["data"]
+    except RequestException as e:
+        bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
+        return None
