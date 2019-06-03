@@ -446,6 +446,7 @@ class User(object):
         self.is_bot = is_bot
         self.display_name = display_name
         self.real_name = real_name
+        self.name = display_name or real_name
         if lock is None:
             lock = threading.RLock()
         self._lock = lock
