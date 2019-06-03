@@ -26,10 +26,16 @@ def handle_uqfinal(command: Command):
 
     for str_score in string_scores:
         try:
-            # mypy was being a shit
-            scores.append(float(str_score))
-        except:
-            bot.post_message(command.channel_id, f"{str_score} could not be converted to a number")
+            temp = float(str_score)
+            if temp <= 1:
+                bot.post_message(command.channel_id, f"Note: Treating {str_score} as {temp * 100}%")
+                temp *= 100
+            if temp < 0 or temp > 100:
+                bot.post_message(command.channel_id, f"Assessment scores should be between 0 and 100")
+                return
+            scores.append(temp)
+        except ValueError:
+            bot.post_message(command.channel_id, f"\"{str_score}\" could not be converted to a number")
             return
 
     semester = get_uqfinal_semesters()
@@ -44,7 +50,7 @@ def handle_uqfinal(command: Command):
     num_assessment = len(course_info["assessment"])
 
     if (len(scores) != num_assessment - 1):
-        bot.post_message(command.channel_id, "Please provide grades for all assessment except the last")
+        bot.post_message(command.channel_id, f"Please provide grades for all assessment except the last\nThis course has {num_assessment} assessments")
         return
 
     total = 0.0
