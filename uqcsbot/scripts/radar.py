@@ -9,4 +9,8 @@ def handle_radar(command: Command):
     '''
     time_in_s = int(time())
     radar_url = f'https://bom.lambda.tools/?location=brisbane&timestamp={time_in_s}'
-    bot.post_message(command.channel_id, radar_url)
+    attachment = {"image_url": radar_url, "text": None,
+                  "fallback": "Screenshot from the Bureau of Meterology's"
+                  " Brisbane radar."}
+    bot.post_message(command.channel_id, radar_url,
+            attachments=[attachment])

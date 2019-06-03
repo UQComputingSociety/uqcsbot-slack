@@ -8,7 +8,9 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 install_requires = [
-    'slackclient',
+    'slackclient==1.3.1',
+    # TODO: delete this
+    'websocket-client==0.54.0',
     'requests',
     'BeautifulSoup4',
     'apscheduler',
@@ -27,7 +29,7 @@ tests_require = [
 
 setup(
     name='uqcsbot',
-    version='0.0.1',
+    version='0.0.2',
     description='UQCSbot is a chat bot built in python for use on our UQCS Slack Team',
     long_description=long_description,
     url='https://github.com/UQComputingSociety/uqcsbot',

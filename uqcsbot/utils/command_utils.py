@@ -3,11 +3,16 @@ from functools import wraps
 from typing import List
 import uqcsbot  # Necessary to avoid circular imports.
 
-LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid']
+LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid', 'twiddle_thumbs',
+					'boredparrot', 'trex', 'hourglass_flowing_sand',
+					'slowparrot', 'late']
 SUCCESS_REACTS = ['thumbsup', 'thumbsup_all', 'msn_thumbsup', 'ok-hand', 'nice',
-                  'noice', 'feels_good']
+					'noice', 'feels_good', 'woohoo', 'tada', 'pepelewis',
+					'justright', 'doublethumbsup', 'toot', 'smashing']
 HYPE_REACTS = ['nice', 'noice', 'ok-hand', 'exclamation', 'fiestaparrot',
-               'github_square3', 'sweating']
+					'github_square3', 'sweating', 'pogchamp', 'alert', 'asdf',
+					'caramelldansen_hyper', 'yeet', 'feelsgoodman', 'keen',
+					'spooky']
 
 
 class UsageSyntaxException(Exception):

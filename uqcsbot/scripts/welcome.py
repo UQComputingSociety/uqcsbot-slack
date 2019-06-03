@@ -21,6 +21,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "Ishraque Zahin (@Ishraque), Ryan Kurz (@lighthou) and Raghav Mishra (@rm)",
     "For a list of upcoming events check out the #events channel, or type \"!events\"",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
+    "Be sure to download the Slack desktop and phone apps as well, so you'll be able to catch any important announcements",
     "and again, welcome :)"
 ]
 
