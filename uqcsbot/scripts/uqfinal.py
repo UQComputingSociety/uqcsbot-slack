@@ -1,6 +1,7 @@
 import math
 from uqcsbot import bot, Command
 from requests import get, RequestException, Response
+from typing import List
 from uqcsbot.utils.command_utils import loading_status
 
 uqfinal = "https://api.uqfinal.com"
@@ -21,13 +22,14 @@ def handle_uqfinal(command: Command):
 
     course = args[0]  # Always exists
     string_scores = args[1:]
-    scores = []
+    scores: List[float] = []
 
-    for score in string_scores:
+    for str_score in string_scores:
         try:
-            scores.append(float(score))
+            # mypy was being a shit
+            scores.append(float(str_score))
         except:
-            bot.post_message(command.channel_id, f"{score} could not be converted to a number")
+            bot.post_message(command.channel_id, f"{str_score} could not be converted to a number")
             return
 
     semester = get_uqfinal_semesters()
@@ -45,7 +47,7 @@ def handle_uqfinal(command: Command):
         bot.post_message(command.channel_id, "Please provide grades for all assessment except the last")
         return
 
-    total = 0
+    total = 0.0
     for i, score in enumerate(scores):
         total += score * float(course_info["assessment"][i]["weight"]) / 100
 
@@ -70,7 +72,7 @@ def get_uqfinal_semesters():
             return None
         return semester_response.json()["data"]["semesters"].pop()
     except RequestException as e:
-        bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
+        bot.logger.error(f"A request error {e.response.status} occurred:\n{e.response.content}")
         return None
 
 
@@ -86,5 +88,5 @@ def get_uqfinal_course(semester, course: str):
             return None
         return course_response.json()["data"]
     except RequestException as e:
-        bot.logger.error(f"A request error {e.resp.status} occurred:\n{e.content}")
+        bot.logger.error(f"A request error {e.response.status} occurred:\n{e.response.content}")
         return None
