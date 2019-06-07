@@ -1,19 +1,17 @@
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
-from urllib.request import urlopen
+from typing import Tuple
+
 from re import findall
-from typing import Union
+import requests
 
 
-def get_pf_parking_data() -> Union[str, None]:
+def get_pf_parking_data() -> Tuple[int, str]:
     """
     Returns a parking HTML document from the UQ P&F website
     """
-    try:
-        data = urlopen("https://pg.pf.uq.edu.au/").read().decode("utf-8")
-    except Exception:
-        return None
-    return data
+    page = requests.get("https://pg.pf.uq.edu.au/")
+    return (page.status_code, page.text)
 
 
 @bot.on_command("parking")
@@ -30,8 +28,8 @@ def handle_parking(command: Command) -> None:
         permit = False
 
     # read parking data
-    data = get_pf_parking_data()
-    if data is None:
+    code, data = get_pf_parking_data()
+    if code != 200:
         bot.post_message(command.channel_id, "Could Not Retrieve Parking Data")
         return
 
@@ -46,14 +44,14 @@ def handle_parking(command: Command) -> None:
              "P11 L1": "P11 - Conifer Knoll Lower (Staff)",
              "P11 L2": "P11 - Conifer Knoll Upper (Staff)",
              "P11 L3": "P11 - Conifer Knoll Roof (14P Daily Restricted)"}
-    catagory = lambda x: "No" if x == "FULL" else "Few" if x == "NEARLY FULL" else x
+    category = lambda x: "No" if x == "FULL" else "Few" if x == "NEARLY FULL" else x
 
     # find parks
     areas = findall(r"<tr>\W*<td class='zone'>(.*)<\/td>\W*<td class='.*\n?'>(.*)\n?<\/td>" +
                     r"\W*<td class='.*\n?'>(.*)\n?<\/td>\W*<\/tr>", str(data))
-    for a in areas:
-        if a[2]:
-            response.append(f"{catagory(a[2])} Carparks Availible in {names[a[0]]}")
-        elif permit and a[1]:
-            response.append(f"{catagory(a[1])} Carparks Availible in {names[a[0]]}")
+    for area in areas:
+        if area[2]:
+            response.append(f"{category(area[2])} Carparks Availible in {names[area[0]]}")
+        elif permit and area[1]:
+            response.append(f"{category(area[1])} Carparks Availible in {names[area[0]]}")
     bot.post_message(command.channel_id, "\n".join(response))

@@ -10,8 +10,8 @@ def mocked_get_pf_parking_data():
         data = open("test/parking.html").read()
     except Exception as e:
         raise e
-        return None
-    return data
+        return (0, "")
+    return (200, data)
 
 
 @patch("uqcsbot.scripts.parking.get_pf_parking_data", new=mocked_get_pf_parking_data)
