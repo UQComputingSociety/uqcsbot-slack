@@ -14,6 +14,7 @@ def handle_emojify(command: Command):
     '''
     master: Dict[str, List[str]] = defaultdict(lambda: ["grey_question"])
 
+    # letters
     master['A'] = ["adobe", "airbnb", "amazon", "anarchism", "arch", "atlassian", "office_access",
                    choice(["card-ace-clubs", "card-ace-diamonds",
                            "card-ace-hearts", "card-ace-spades"])]
@@ -52,6 +53,7 @@ def handle_emojify(command: Command):
     master['Y'] = ["hackernews"]
     master['Z'] = ["tetris_z"]
 
+    # numbers
     master['0'] = ["chrome", "suncorp", "disney_zero", "firefox", "mars", choice(["dvd", "cd"])]
     master['1'] = ["techone", "testtube", "thonk_ping", "first_place_medal"]
     master['2'] = [choice(["card-2-clubs", "card-2-diamonds", "card-2-hearts", "card-2-spades"]),
@@ -67,35 +69,56 @@ def handle_emojify(command: Command):
                    "8ball"]
     master['9'] = [choice(["card-9-clubs", "card-9-diamonds", "card-9-hearts", "card-9-spades"])]
 
+    # space
     master[' '] = ["whitespace"]
 
-    master['@'] = ["whip"]
+    # other ascii characters (sorted by ascii value)
+    master['!'] = ["excalamation"]
+    master['"'] = [choice(["ldquo", "rdquo"]), "pig_nose"]
     master['#'] = ["slack_old", "csharp"]
     master['$'] = ["thonk_money", "moneybag"]
-    master['^'] = ["this", "typographical_carrot", "arrow_up"]
+    # '&' converts to '&AMP;'
     master['&'] = ["ampersand", "dnd"]
     master['*'] = ["day", "nab", "youtried", "msn_star", "rune_prayer"]
-    master['-'] = ["no_entry"]
     master['+'] = ["tf2_medic", "flag-ch", "flag-england"]
-
-    master['"'] = [choice(["ldquo", "rdquo"]), "pig_nose"]
-    master['>'] = ["accenture", "implying", "plex", "powershell"]
+    master['-'] = ["no_entry"]
+    master['.'] = ["black_small_square"]
     master['/'] = ["slash"]
+    # '>' converts to '&GT;'
+    master['>'] = ["accenture", "implying", "plex", "powershell"]
+    master['?'] = ["question"]
+    master['@'] = ["whip"]
+    master['^'] = ["this", "typographical_carrot", "arrow_up"]
+    master['~'] = ["wavy_dash"]
 
-    # master['Α'] = ["alpha"]
-    # master['Β'] = ["beta"]
-    # master['Λ'] = ["halflife", "haskell", "lambda", "racket"]
-    # master['Σ'] = ["polymathian"]
+    # slack/uqcsbot convert the following to other symbols
 
-    # master['…'] = ["lastpass"]
-    # master['€'] = ["martian_euro"]
-    # master['√'] = ["sqrt"]
-    # master['∞'] = ["arduino", "visualstudio"]
-    # master['∴'] = ["julia"]
+    # greek letters
+    # 'Α' converts to 'A'
+    master['Α'] = ["alpha"]
+    # 'Β' converts to 'B'
+    master['Β'] = ["beta"]
+    # 'Λ' converts to 'L'
+    master['Λ'] = ["halflife", "haskell", "lambda", "racket"]
+    # 'Σ' converts to 'S'
+    master['Σ'] = ["polymathian"]
+
+    # other symbols (sorted by unicode value)
+    # '…' converts to '...'
+    master['…'] = ["lastpass"]
+    # '€' converts to 'EUR'
+    master['€'] = ["martian_euro"]
+    # '√' converts to '[?]'
+    master['√'] = ["sqrt"]
+    # '∞' converts to '[?]'
+    master['∞'] = ["arduino", "visualstudio"]
+    # '∴' converts to '[?]'
+    master['∴'] = ["julia"]
 
     text = ""
     if command.has_arg():
         text = command.arg.upper()
+    # revert HTML conversions
     text = text.replace("&AMP;", "&")
     text = text.replace("&GT;", ">")
 
@@ -108,6 +131,6 @@ def handle_emojify(command: Command):
 
     response = ""
     for c in text:
-        response += ":"+emoji[c].pop()+":"
+        response += f":{emoji[c].pop()}:"
 
     bot.post_message(command.channel_id, response)
