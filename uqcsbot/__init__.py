@@ -15,8 +15,8 @@ SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 # Channel group which contains all the bots. Easy way to get all their ids.
 SECRET_BOT_MEETING_ROOM = 'G9JJXHF7S'
 
-# UQCSTesting tokens. Everything is base64 encoded to somewhat circumvent
-# token tracking by GitHub etal.
+# UQCSTesting tokens. Everything is base64 encoded to
+# somewhat circumvent token tracking by GitHub etal.
 #
 # Order: uqcsbot-alpha, uqcsbot-beta, uqcsbot-gamma, uqcsbot-delta
 BOT_TOKENS = {'U9LA6BX8X': 'eG94Yi0zMjYzNDY0MDUzMDMteGpIbFhlamVNUG1McVhRSnNnZFoyZVhT',
@@ -27,16 +27,16 @@ for key in BOT_TOKENS:
     BOT_TOKENS[key] = b64decode(BOT_TOKENS[key]).decode('utf-8')
 
 # Mitch's UQCSTesting Slack API Token. No touchie >:(
-UQCSTESTING_USER_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01Yj'\
+UQCSTESTING_USER_TOKEN = b64decode('eG94cC0yNjA3ODI2NzQ2MTAtMjYwMzQ1MTQ0NTI5LTMyNTEyMzU5ODExNS01Yj'
                                    'dmYjlhYzAyZWYzNDAyNTYyMTJmY2Q2YjQ1NmEyYg==').decode('utf-8')
 
 
 def get_user_info(user_id):
-    '''
+    """
     Returns info about a user
 
     See https://api.slack.com/methods/users.info for the contents of info
-    '''
+    """
     api_url = 'https://slack.com/api/users.info'
     response = requests.get(api_url, params={'token': UQCSTESTING_USER_TOKEN, 'user': user_id})
 
@@ -53,9 +53,9 @@ def get_user_info(user_id):
 
 
 def is_active_bot(user_info):
-    '''
+    """
     Returns true if the provided user info describes an active bot (i.e. not deleted)
-    '''
+    """
     if not user_info['ok']:
         return False
     user = user_info['user']
@@ -63,10 +63,10 @@ def is_active_bot(user_info):
 
 
 def is_bot_avaliable(user_id):
-    '''
+    """
     Returns true if the given user_id is an active bot that is available (i.e. is
     not currently 'active' which would mean it is in use by another user).
-    '''
+    """
 
     api_url = 'https://slack.com/api/users.getPresence'
     response = requests.get(api_url, params={'token': UQCSTESTING_USER_TOKEN, 'user': user_id})
@@ -78,7 +78,7 @@ def is_bot_avaliable(user_id):
 
 
 def get_free_test_bot():
-    '''
+    """
     Pings a channel on the UQCSTesting Slack that contains all the available
     bots, and Mitch. We can poll this channel to find  bots which are 'away'
     (that is, not currently being used by anyone else)
@@ -86,7 +86,7 @@ def get_free_test_bot():
     Returns info about the bot
 
     See https://api.slack.com/methods/users.info for the contents of info
-    '''
+    """
     api_url = 'https://slack.com/api/conversations.members'
     response = requests.get(api_url, params={'token': UQCSTESTING_USER_TOKEN,
                                              'channel': SECRET_BOT_MEETING_ROOM})
@@ -122,13 +122,11 @@ def main():
 
     # Setup the CLI argument parser
     parser = argparse.ArgumentParser(description='Run UQCSBot')
-    parser.add_argument('--dev',
-                        dest='dev',
+    parser.add_argument('--dev', dest='dev',
                         action='store_true',
                         help='Runs the bot in development mode (auto assigns a '
                              'bot on the uqcstesting Slack team)')
-    parser.add_argument('--log_level',
-                        dest='log_level',
+    parser.add_argument('--log_level', dest='log_level',
                         default='INFO',
                         help='Specifies the output logging level to be used '
                              '(i.e. DEBUG, INFO, WARNING, ERROR, CRITICAL)')
@@ -143,9 +141,8 @@ def main():
     if args.dev:
         test_bot = get_free_test_bot()
         if test_bot is None:
-            LOGGER.error('Something went wrong during bot allocation. Please ' +
-                         'ensure there are bots available and try again ' +
-                         'later. Exiting.')
+            LOGGER.error('Something went wrong during bot allocation. Please ensure there'
+                         ' are bots available and try again later. Exiting.')
             sys.exit(1)
         bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
         LOGGER.info("Bot name: " + test_bot['user']['name'])
