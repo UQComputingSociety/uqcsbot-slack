@@ -17,14 +17,15 @@ CATEGORIES_URL = "https://opentdb.com/api_category.php"
 
 # NamedTuple for use with the data returned from the api
 QuestionData = NamedTuple('QuestionData',
-                          [('type', str), ('question', str), ('correct_answer', str), ('answers', List[str]),
-                           ('is_boolean', bool)])
+                          [('type', str), ('question', str), ('correct_answer', str),
+                           ('answers', List[str]), ('is_boolean', bool)])
 
 # Contains information about a reaction and the list of users who used said reaction
 ReactionUsers = NamedTuple('ReactionUsers', [('name', str), ('users', Set[str])])
 
 # Customisation options
-REACT_INTERVAL = 1  # The interval between reactions being made for the possible answers (prevents order changing)
+# The interval between reactions being made for the possible answers (prevents order changing)
+REACT_INTERVAL = 1
 MIN_SECONDS = 5
 MAX_SECONDS = 300
 
@@ -33,12 +34,14 @@ VALID_SEQUETIAL_CHANNELS = ['trivia', 'bot-testing']
 MAX_SEQUENTIAL_QUESTIONS = 30
 
 BOOLEAN_REACTS = ['this', 'not-this']  # Format of [ <True>, <False> ]
-MULTIPLE_CHOICE_REACTS = ['green_heart', 'yellow_heart', 'heart', 'blue_heart']  # Colours should match CHOICE_COLORS
+# Colours should match CHOICE_COLORS
+MULTIPLE_CHOICE_REACTS = ['green_heart', 'yellow_heart', 'heart', 'blue_heart']
 CHOICE_COLORS = ['#6C9935', '#F3C200', '#B6281E', '#3176EF']
 
 # What arguments to use for the cron job version
 CRON_CHANNEL = 'trivia'
-CRON_SECONDS = 86385  # (One day - 15 seconds) Overrides any -s argument below and ignores MAX_SECONDS rule
+# (One day - 15 seconds) Overrides any -s argument below and ignores MAX_SECONDS rule
+CRON_SECONDS = 86385
 CRON_ARGUMENTS = ''
 
 
@@ -46,8 +49,9 @@ CRON_ARGUMENTS = ''
 @loading_status
 def handle_trivia(command: Command):
     """
-        `!trivia [-d <easy|medium|hard>] [-c <CATEGORY>] [-t <multiple|tf>] [-s <N>] [-n <N>] [--cats]`
-            - Asks a new trivia question
+    `!trivia [-d <easy|medium|hard>] [-c <CATEGORY>]
+             [-t <multiple|tf>] [-s <N>] [-n <N>] [--cats]`
+        - Asks a new trivia question
     """
     args = parse_arguments(command.channel_id, command.arg if command.has_arg() else '')
 
@@ -62,16 +66,20 @@ def handle_trivia(command: Command):
 
     # Check if the channel is valid for sequential questions
     current_channel = bot.channels.get(command.channel_id)
-    if args.count > 1 and not current_channel.is_im and current_channel.name not in VALID_SEQUETIAL_CHANNELS:
+    if args.count > 1 and not current_channel.is_im and \
+       current_channel.name not in VALID_SEQUETIAL_CHANNELS:
         # If no valid channels are specified
         if len(VALID_SEQUETIAL_CHANNELS) == 0:
-            bot.post_message(command.channel_id, 'This command can only be used in private messages with the bot')
+            bot.post_message(command.channel_id,
+                             'This command can only be used in private messages with the bot')
             return
 
         first_valid = bot.channels.get(VALID_SEQUETIAL_CHANNELS[0])
-        channel_message = f'Try <#{first_valid.id}|{VALID_SEQUETIAL_CHANNELS[0]}>.' if first_valid else ''
-        bot.post_message(command.channel_id,
-                         f'You cannot use the sequential questions feature in this channel. {channel_message}')
+        channel_message = ''
+        if first_valid:
+            f'Try <#{first_valid.id}|{VALID_SEQUETIAL_CHANNELS[0]}>.'
+        bot.post_message(command.channel_id, f'You cannot use the sequential questions '
+                         f'feature in this channel. {channel_message}')
         return
 
     handle_question(command.channel_id, args)
@@ -89,21 +97,26 @@ def parse_arguments(channel: Channel, arg_string: str) -> argparse.Namespace:
         raise UsageSyntaxException()
 
     parser.error = usage_error  # type: ignore
-    parser.add_argument('-d', '--difficulty', choices=['easy', 'medium', 'hard'], default='random', type=str.lower,
+    parser.add_argument('-d', '--difficulty', choices=['easy', 'medium', 'hard'],
+                        default='random', type=str.lower,
                         help='The difficulty of the question. (default: %(default)s)')
-    parser.add_argument('-c', '--category', default=-1, type=int, help='Specifies a category (default: any)')
-    parser.add_argument('-t', '--type', choices=['boolean', 'multiple'], default="random", type=str.lower,
+    parser.add_argument('-c', '--category', default=-1, type=int,
+                        help='Specifies a category (default: any)')
+    parser.add_argument('-t', '--type', choices=['boolean', 'multiple'],
+                        default="random", type=str.lower,
                         help='The type of question. (default: %(default)s)')
     parser.add_argument('-s', '--seconds', default=30, type=int,
                         help='Number of seconds before posting answer (default: %(default)s)')
-    parser.add_argument('-n', '--count', default=1, type=int,
-                        help=f"Do 'n' trivia questions in quick succession (max : {MAX_SEQUENTIAL_QUESTIONS})")
-    parser.add_argument('--cats', action='store_true', help='Sends a list of valid categories to the user')
+    parser.add_argument('-n', '--count', default=1, type=int, help=f"Do 'n' trivia questions in "
+                        f"quick succession (max : {MAX_SEQUENTIAL_QUESTIONS})")
+    parser.add_argument('--cats', action='store_true',
+                        help='Sends a list of valid categories to the user')
     parser.add_argument('-h', '--help', action='store_true', help='Prints this help message')
 
     args = parser.parse_args(arg_string.split())
 
-    # If the help option was used print the help message to the channel (needs access to the parser to do this)
+    # If the help option was used print the help message to
+    # the channel (needs access to the parser to do this)
     if args.help:
         bot.post_message(channel, parser.format_help())
 
@@ -122,7 +135,9 @@ def parse_arguments(channel: Channel, arg_string: str) -> argparse.Namespace:
 
 
 def get_categories() -> str:
-    """Gets the message to send if the user wants a list of the available categories."""
+    """
+    Gets the message to send if the user wants a list of the available categories.
+    """
     http_response = requests.get(CATEGORIES_URL)
     if http_response.status_code != requests.codes.ok:
         return "There was a problem getting the response"
@@ -156,7 +171,10 @@ def handle_question(channel: Channel, args: argparse.Namespace):
 
     # Get the answer message
     if question_data.is_boolean:
-        answer_text = f':{BOOLEAN_REACTS[0]}:' if question_data.correct_answer == 'True' else f':{BOOLEAN_REACTS[1]}:'
+        if question_data.correct_answer == 'True':
+            answer_text = f':{BOOLEAN_REACTS[0]}:'
+        else:
+            answer_text = f':{BOOLEAN_REACTS[1]}:'
     else:
         answer_text = question_data.correct_answer
 
@@ -175,7 +193,8 @@ def handle_question(channel: Channel, args: argparse.Namespace):
 def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[QuestionData]:
     """
     Attempts to get a question from the api using the specified arguments.
-    Returns the dictionary object for the question on success and None on failure (after posting an error message).
+    Returns the dictionary object for the question on success
+    and None on failure (after posting an error message).
     """
     # Base64 to help with encoding the message for slack
     params: Dict[str, Union[int, str]] = {'amount': 1, 'encode': 'base64'}
@@ -199,7 +218,8 @@ def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Qu
     # Check the response codes and post a useful message in the case of an error
     response_content = json.loads(http_response.content)
     if response_content['response_code'] == 2:
-        bot.post_message(channel, "Invalid category id. Try !trivia --cats for a list of valid categories.")
+        bot.post_message(channel, "Invalid category id. "
+                         "Try !trivia --cats for a list of valid categories.")
         return None
     elif response_content['response_code'] != 0:
         bot.post_message(channel, "No results were returned")
@@ -216,7 +236,8 @@ def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Qu
     del question_data['difficulty']
     del question_data['incorrect_answers']
 
-    # Decode the ones we want. The base 64 decoding ensures that the formatting works properly with slack.
+    # Decode the ones we want. The base 64 decoding ensures
+    # that the formatting works properly with slack.
     question_data['question'] = decode_b64(question_data['question'])
     question_data['correct_answer'] = decode_b64(question_data['correct_answer'])
     answers = [decode_b64(ans) for ans in answers]
@@ -231,7 +252,8 @@ def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Qu
 
 def post_question(channel: Channel, question_data: QuestionData, prefix: str = '') -> float:
     """
-    Posts the question from the given QuestionData along with the possible answers list if applicable.
+    Posts the question from the given QuestionData along with
+    the possible answers list if applicable.
     Also creates the answer reacts.
     Returns the timestamp of the posted message.
     """
@@ -249,10 +271,12 @@ def post_question(channel: Channel, question_data: QuestionData, prefix: str = '
     return message_ts
 
 
-def add_reactions_interval(reactions: List[str], channel: Channel, msg_timestamp: str, interval: float = 1):
+def add_reactions_interval(reactions: List[str], channel: Channel,
+                           msg_timestamp: str, interval: float = 1):
     """
-    Adds the given reactions with "interval" seconds between in order to prevent them from changing order in slack (as
-    slack uses the timestamp of when the reaction was added to determine the order).
+    Adds the given reactions with "interval" seconds between in order
+    to prevent them from changing order in slack (as slack uses the
+    timestamp of when the reaction was added to determine the order).
     :param reactions: The reactions to add
     :param channel: The channel containing the desired message to react to
     :param msg_timestamp: The timestamp of the required message
@@ -268,7 +292,8 @@ def add_reactions_interval(reactions: List[str], channel: Channel, msg_timestamp
     # Do the first one immediately
     bot.api.reactions.add(name=reactions[0], channel=channel, timestamp=msg_timestamp)
 
-    # I am not 100% sure why this is needed. Doing it with a normal partial or lambda will try to post the same reacts
+    # I am not 100% sure why this is needed. Doing it with a normal partial or
+    # lambda will try to post the same reacts
     def add_reaction(reaction: str):
         bot.api.reactions.add(name=reaction, channel=channel, timestamp=msg_timestamp)
 
@@ -278,16 +303,24 @@ def add_reactions_interval(reactions: List[str], channel: Channel, msg_timestamp
 
 
 def decode_b64(encoded: str) -> str:
-    """Takes a base64 encoded string. Returns the decoded version to utf-8."""
+    """
+    Takes a base64 encoded string. Returns the decoded version to utf-8.
+    """
     return base64.b64decode(encoded).decode('utf-8')
 
 
 def get_correct_reaction(question_data: QuestionData):
-    """Returns the reaction that matches with the correct answer"""
+    """
+    Returns the reaction that matches with the correct answer
+    """
     if question_data.is_boolean:
-        correct_reaction = BOOLEAN_REACTS[0] if question_data.correct_answer == 'True' else BOOLEAN_REACTS[1]
+        if question_data.correct_answer == 'True':
+            correct_reaction = BOOLEAN_REACTS[0]
+        else:
+            BOOLEAN_REACTS[1]
     else:
-        correct_reaction = MULTIPLE_CHOICE_REACTS[question_data.answers.index(question_data.correct_answer)]
+        correct_reaction = MULTIPLE_CHOICE_REACTS[
+            question_data.answers.index(question_data.correct_answer)]
 
     return correct_reaction
 
@@ -306,14 +339,18 @@ def post_possible_answers(channel: Channel, answers: List[str]) -> float:
 
 
 def schedule_action(action: Callable, secs: Union[int, float]):
-    """Schedules the supplied action to be called once in the given number of seconds."""
+    """
+    Schedules the supplied action to be called once in the given number of seconds.
+    """
     run_date = datetime.now(timezone(timedelta(hours=10))) + timedelta(seconds=secs)
     bot._scheduler.add_job(action, 'date', run_date=run_date)
 
 
 @bot.on_schedule('cron', hour=12, timezone='Australia/Brisbane')
 def daily_trivia():
-    """Adds a job that displays a random question to the specified channel at lunch time"""
+    """
+    Adds a job that displays a random question to the specified channel at lunch time
+    """
     channel = bot.channels.get(CRON_CHANNEL).id
 
     # Get arguments and update the seconds

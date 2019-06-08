@@ -6,10 +6,10 @@ MAX_NUM_POSTS_BACK = 100
 
 
 def get_nth_most_recent_message(channel_id: str, message_index: int):
-    '''
+    """
     Given a channel and a message index, will find the message at that index;
     where messages are ordered from most recent to least recent.
-    '''
+    """
     # Add 1 to message_index as the 'limit' field is 1-indexed. For example, the
     # 0th message (i.e the first message) can be retrieved by limiting the
     # number of messages to 1.
@@ -29,40 +29,39 @@ def get_nth_most_recent_message(channel_id: str, message_index: int):
 
 
 def mock_message(message: str):
-    '''
-    Given a message, will return the mocked version of it. This involves
-    randomly varying the case of each letter in the message.
+    """
+    Given a message, will return the mocked version of it.
+    This involves randomly varying the case of each letter in the message.
 
     Example:
       Input: "Mitch, you're acting very immature and should probably stop"
       Output: "MitCh, YoU’RE aCTing vERy ImMatUrE aNd sHOuld pRObAbLy stOp"
 
     See: http://knowyourmeme.com/memes/mocking-spongebob
-    '''
+    """
     return ''.join(choice((c.upper, c.lower))() for c in message)
 
 
 def is_number(message):
-    '''
-    Tries to coerce the message to an integer. If successful, return True-- else
-    returns False.
-    '''
+    """
+    Tries to coerce the message to an integer. If successful, return True else returns False.
+    """
     try:
         int(message)
-    except:
+    except Exception:
         return False
     return True
 
 
 @bot.on_command("mock")
 def handle_mock(command: Command):
-    '''
+    """
     `!mock ([TEXT] | [NUM POSTS])` - Mocks the message from the specified number of
     messages back. If no number is specified, mocks the most recent message.
-    '''
+    """
     num_posts_back = None
-    # Add 1 here to account for the calling user's message, which we don't want
-    # to mock by default.
+    # Add 1 here to account for the calling user's message,
+    # which we don't want to mock by default.
     if not command.has_arg():
         num_posts_back = 1
     elif is_number(command.arg):

@@ -1,7 +1,6 @@
 from uqcsbot import bot, Command
 from requests import get
 from requests.exceptions import RequestException
-from contextlib import closing
 from bs4 import BeautifulSoup
 from uqcsbot.utils.command_utils import loading_status
 

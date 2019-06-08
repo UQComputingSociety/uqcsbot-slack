@@ -8,6 +8,7 @@ import requests
 
 HOLIDAY_URL = 'https://www.timeanddate.com/holidays/fun/'
 
+
 class Holiday:
     def __init__(self, date: datetime, description: str, url: str) -> None:
         self.date = date
@@ -15,18 +16,19 @@ class Holiday:
         self.url = url
 
     def is_today(self) -> bool:
-        '''
+        """
         Returns true if the holiday is celebrated today
-        '''
+        """
         now = datetime.now()
         return self.date.month == now.month and self.date.day == now.day
 
+
 @bot.on_schedule('cron', hour=9, timezone='Australia/Brisbane')
 def holiday() -> None:
-    '''
+    """
     Posts a random celebratory day on #general from
     https://www.timeanddate.com/holidays/fun/
-    '''
+    """
     channel = bot.channels.get("general")
 
     holiday = get_holiday()
@@ -34,15 +36,14 @@ def holiday() -> None:
         return
 
     message = bot.post_message(channel, f'Today is {holiday.description}!')
-    bot.api.reactions.add(name=choice(HYPE_REACTS),
-                          channel=channel.id,
-                          timestamp=message['ts'])
+    bot.api.reactions.add(name=choice(HYPE_REACTS), channel=channel.id, timestamp=message['ts'])
+
 
 def get_holiday() -> Holiday:
-    '''
+    """
     Gets the holiday for a given day. If there are multiple
     holidays, choose a random one.
-    '''
+    """
     holiday_page = get_holiday_page()
     if holiday_page is None:
         return None
@@ -53,15 +54,14 @@ def get_holiday() -> Holiday:
 
     return choice(holidays_today) if holidays_today else None
 
-    
+
 def get_holidays_from_page(holiday_page) -> list:
-    '''
+    """
     Strips results from html page
-    '''
+    """
     soup = BeautifulSoup(holiday_page, 'html.parser')
-    soup_holidays = soup.find_all(class_="c0") + \
-                    soup.find_all(class_="c1") + \
-                    soup.find_all(class_="hl")
+    soup_holidays = (soup.find_all(class_="c0") + soup.find_all(class_="c1")
+                     + soup.find_all(class_="hl"))
 
     holidays = []
 
@@ -75,10 +75,11 @@ def get_holidays_from_page(holiday_page) -> list:
 
     return holidays
 
+
 def get_holiday_page() -> bytes:
-    '''
+    """
     Gets the holiday page HTML
-    '''
+    """
     try:
         response = requests.get(HOLIDAY_URL)
         return response.content

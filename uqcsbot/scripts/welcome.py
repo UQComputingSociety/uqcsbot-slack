@@ -10,18 +10,19 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "Hey there! Welcome to the UQCS Slack!",
     "This is the first time I've seen you, so you're probably new here",
     "I'm UQCSbot, your friendly (open source) robot helper",
-    "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many " \
+    "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many "
     "subject-specific ones (e.g #csse1001, #math1051, #csse2310)",
     "To find and join a channel, tap on the channels header in the sidebar",
-    "The UQCS Slack is a friendly community with a code of conduct in place to ensure our " \
+    "The UQCS Slack is a friendly community with a code of conduct in place to ensure our "
     "members well-being and safety. You can view a copy of this code of conduct at",
     "https://github.com/UQComputingSociety/code-of-conduct",
-    "Your friendly committee and admins are Nicholas Lambourne (@ndl), Jack Caperon (@jam), " \
-    "Bradley Stone (@Σ), Joshua Sutton (@jsutton), Ella de Lore (@Ella), Matthew Lake (@mgtlake), " \
+    "Your friendly committee and admins are Nicholas Lambourne (@ndl), Jack Caperon (@jam), "
+    "Bradley Stone (@Σ), Joshua Sutton (@jsutton), Ella de Lore (@Ella), Matthew Lake (@mgtlake), "
     "Ishraque Zahin (@Ishraque), Ryan Kurz (@lighthou) and Raghav Mishra (@rm)",
     "For a list of upcoming events check out the #events channel, or type \"!events\"",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
-    "Be sure to download the Slack desktop and phone apps as well, so you'll be able to catch any important announcements",
+    "Be sure to download the Slack desktop and phone apps as well, "
+    "so you'll be able to catch any important announcements",
     "and again, welcome :)"
 ]
 

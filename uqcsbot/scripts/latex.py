@@ -9,13 +9,8 @@ def handle_latex_internal(channel, data):
     bot.post_message(
         channel,
         text=f"LaTeX render for \"{data}\"",
-        attachments=[
-            {
-                "fallback": f"Codecogs LaTeX image for {data}",
-                "image_url": url,
-                "footer": "From latex.codecogs.com"
-            }
-        ],
+        attachments=[{"fallback": f"Codecogs LaTeX image for {data}",
+                      "image_url": url, "footer": "From latex.codecogs.com"}],
         unfurl_links=False,
         unfurl_media=False,
     )

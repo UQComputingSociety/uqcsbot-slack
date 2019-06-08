@@ -13,9 +13,9 @@ NO_QUERY_MESSAGE = "You can't look for nothing. !yt <QUERY>"
 
 @bot.on_command('yt')
 def handle_yt(command: Command):
-    '''
+    """
     `!yt <QUERY>` - Returns the top video search result based on the query string.
-    '''
+    """
     # Makes sure the query is not empty.
     if not command.has_arg():
         raise UsageSyntaxException()
@@ -37,10 +37,10 @@ def handle_yt(command: Command):
 
 
 def get_top_video_result(search_query: str, channel):
-    '''
+    """
     The normal method for using !yt searches based on query
     and returns the first video result. "I'm feeling lucky"
-    '''
+    """
     search_response = execute_search(search_query, 'id', 'video', 1)
     search_result = search_response.get('items')
     if search_result is None:
@@ -49,17 +49,13 @@ def get_top_video_result(search_query: str, channel):
 
 
 def execute_search(search_query: str, search_part: str, search_type: str, max_results: int):
-    '''
+    """
     Executes the search via the google api client based on the parameters given.
-    '''
+    """
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
                     developerKey=YOUTUBE_API_KEY, cache_discovery=False)
 
-    search_response = youtube.search().list(
-        q=search_query,
-        part=search_part,
-        maxResults=max_results,
-        type=search_type
-    ).execute()
+    search_response = youtube.search().list(q=search_query, part=search_part,
+                                            maxResults=max_results, type=search_type).execute()
 
     return search_response

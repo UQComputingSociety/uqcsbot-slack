@@ -6,9 +6,9 @@ from uqcsbot.utils.command_utils import UsageSyntaxException
 
 @bot.on_command("wiki")
 def handle_wiki(command: Command):
-    '''
+    """
     `!wiki <TOPIC>` - Returns a snippet of text from a relevent wikipedia entry.
-    '''
+    """
     if not command.has_arg():
         raise UsageSyntaxException()
 

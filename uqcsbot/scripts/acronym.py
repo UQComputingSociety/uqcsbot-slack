@@ -20,9 +20,9 @@ async def get_acronyms(loop, word: str) -> Tuple[str, List[str]]:
 
 @bot.on_command("acro")
 def handle_acronym(command: Command):
-    '''
+    """
     `!acro <TEXT>` - Finds an acronym for the given text.
-    '''
+    """
     if not command.has_arg():
         raise UsageSyntaxException()
 

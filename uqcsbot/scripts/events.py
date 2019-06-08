@@ -9,7 +9,8 @@ from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException
 from uqcsbot.utils.itee_seminar_utils import (get_seminars, HttpException, InvalidFormatException)
 
-CALENDAR_URL = "https://calendar.google.com/calendar/ical/q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics"  # noqa
+CALENDAR_URL = ("https://calendar.google.com/calendar/ical/"
+                "q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics")
 FILTER_REGEX = re.compile('(full|all|[0-9]+( weeks?)?)')
 BRISBANE_TZ = timezone('Australia/Brisbane')
 MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
@@ -62,7 +63,8 @@ class EventFilter(object):
 
 
 class Event(object):
-    def __init__(self, start: datetime, end: datetime, location: str, summary: str, link: Optional[str]):
+    def __init__(self, start: datetime, end: datetime, location: str,
+                 summary: str, link: Optional[str]):
         self.start = start
         self.end = end
         self.location = location
@@ -88,9 +90,8 @@ class Event(object):
     def from_cal_event(cls, cal_event):
         start = cal_event.get('dtstart').dt
         end = cal_event.get('dtend').dt
-        # ical 'dt' properties are parsed as a 'DDD' (datetime, date, duration)
-        # type. The below code converts a date to a datetime, where time is set
-        # to midnight.
+        # ical 'dt' properties are parsed as a 'DDD' (datetime, date, duration) type.
+        # The below code converts a date to a datetime, where time is set to midnight.
         if isinstance(start, date) and not isinstance(start, datetime):
             start = datetime.combine(start, datetime.min.time()).astimezone(utc)
         if isinstance(end, date) and not isinstance(end, datetime):
@@ -117,8 +118,8 @@ class Event(object):
         else:
             end_str = f"{d2.hour}:{d2.minute:02}"
 
-        # Encode user-provided text to prevent certain characters being interpreted
-        # as slack commands.
+        # Encode user-provided text to prevent certain characters
+        # being interpreted as slack commands.
         summary_str = Event.encode_text(self.summary)
         location_str = Event.encode_text(self.location)
 
@@ -130,11 +131,11 @@ class Event(object):
 
 @bot.on_command('events')
 def handle_events(command: Command):
-    '''
-    `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - Lists all the UQCS and ITEE
-    events that are scheduled to occur within the given filter. If unspecified,
-    will return the next 2 weeks of events.
-    '''
+    """
+    `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - Lists all the UQCS and
+    ITEE events that are scheduled to occur within the given filter.
+    If unspecified, will return the next 2 weeks of events.
+    """
     event_filter = EventFilter.from_command(command)
     if not event_filter.is_valid:
         raise UsageSyntaxException()
@@ -147,8 +148,8 @@ def handle_events(command: Command):
     # subcomponents are how icalendar returns the list of things in the calendar
     for c in cal.subcomponents:
         # TODO: support recurring events
-        # we are only interested in ones with the name VEVENT as they are events
-        # we also currently filter out recurring events
+        # we are only interested in ones with the name VEVENT as they
+        # are events we also currently filter out recurring events
         if c.name != 'VEVENT' or c.get('RRULE') is not None:
             continue
 
@@ -175,9 +176,9 @@ def handle_events(command: Command):
 
     # then print to the user the result
     if not events:
-        message = f"_{event_filter.get_no_result_msg()}_\r\n" \
-                  f"For a full list of events, visit: https://uqcs.org.au/calendar.html" \
-                  f" and https://www.itee.uq.edu.au/seminar-list"
+        message = (f"_{event_filter.get_no_result_msg()}_\r\n"
+                   "For a full list of events, visit: https://uqcs.org.au/calendar.html"
+                   " and https://www.itee.uq.edu.au/seminar-list")
     else:
         message = f"{event_filter.get_header()}\r\n" + '\r\n'.join(str(e) for e in events)
 
@@ -186,8 +187,8 @@ def handle_events(command: Command):
 
 def get_calendar_file() -> bytes:
     """
-    Loads the UQCS Events calender .ics file from Google Calendar. This method is
-    mocked by unit tests.
+    Loads the UQCS Events calender .ics file from Google Calendar.
+    This method is mocked by unit tests.
     :return: The returned ics calendar file, as a stream
     """
     http_response = requests.get(CALENDAR_URL)

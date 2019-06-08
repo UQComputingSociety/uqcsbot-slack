@@ -44,7 +44,13 @@ def handle_parking(command: Command) -> None:
              "P11 L1": "P11 - Conifer Knoll Lower (Staff)",
              "P11 L2": "P11 - Conifer Knoll Upper (Staff)",
              "P11 L3": "P11 - Conifer Knoll Roof (14P Daily Restricted)"}
-    category = lambda x: "No" if x == "FULL" else "Few" if x == "NEARLY FULL" else x
+
+    def category(fill):
+        if fill == "FULL":
+            return "No"
+        if fill == "NEARLY FULL":
+            return "Few"
+        return fill
 
     # find parks
     areas = findall(r"<tr>\W*<td class='zone'>(.*)<\/td>\W*<td class='.*\n?'>(.*)\n?<\/td>" +
