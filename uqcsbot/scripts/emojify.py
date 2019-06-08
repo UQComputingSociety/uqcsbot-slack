@@ -21,7 +21,7 @@ def handle_emojify(command: Command):
     master['B'] = ["bhinking", "bitcoin", "blutes"]
     master['C'] = ["c", "clang", "cplusplus", "copyright"]
     master['D'] = ["d", "disney"]
-    master['E'] = ["e", "ecorp", "emacs", "erlang", "ie10", "office_excel", "thonk_slow"]
+    master['E'] = ["e", "ecorp", "emacs", "erlang", "ie10", "thonk_slow"]
     master['F'] = ["f", "facebook"]
     master['G'] = ["g+", "google", "nintendo_gamecube"]
     master['H'] = ["hackerrank", "homejoy"]
@@ -49,7 +49,8 @@ def handle_emojify(command: Command):
     master['V'] = ["vim", "vue", "vuetify", "v"]
     master['W'] = ["office_word", "washio", "wesfarmers", "westpac",
                    "weyland_consortium", "wikipedia_w", "woolworths"]
-    master['X'] = ["atlassian_old", "aginicx", "sonarr", "x-files", "xbox", "x", "flag-scotland"]
+    master['X'] = ["atlassian_old", "aginicx", "sonarr", "x-files", "xbox",
+                   "x", "flag-scotland", "office_excel"]
     master['Y'] = ["hackernews"]
     master['Z'] = ["tetris_z"]
 
