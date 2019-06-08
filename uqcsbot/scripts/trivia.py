@@ -77,7 +77,7 @@ def handle_trivia(command: Command):
         first_valid = bot.channels.get(VALID_SEQUETIAL_CHANNELS[0])
         channel_message = ''
         if first_valid:
-            f'Try <#{first_valid.id}|{VALID_SEQUETIAL_CHANNELS[0]}>.'
+            channel_message = f'Try <#{first_valid.id}|{VALID_SEQUETIAL_CHANNELS[0]}>.'
         bot.post_message(command.channel_id, f'You cannot use the sequential questions '
                          f'feature in this channel. {channel_message}')
         return
@@ -317,7 +317,7 @@ def get_correct_reaction(question_data: QuestionData):
         if question_data.correct_answer == 'True':
             correct_reaction = BOOLEAN_REACTS[0]
         else:
-            BOOLEAN_REACTS[1]
+            correct_reaction = BOOLEAN_REACTS[1]
     else:
         correct_reaction = MULTIPLE_CHOICE_REACTS[
             question_data.answers.index(question_data.correct_answer)]

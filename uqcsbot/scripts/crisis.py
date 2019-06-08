@@ -14,7 +14,7 @@ UQ resources: https://about.uq.edu.au/campaigns-and-initiatives/mental-health"""
 @bot.on_command("emergency")
 def handle_crisis(command: Command):
     """
-    `!crisis`, `!mentalhealth` or `emergency` - Get a list of emergency resources.
+    `!crisis`, `!mentalhealth` or `!emergency` - Get a list of emergency resources.
     """
 
     bot.post_message(command.channel_id, RESPONSE)

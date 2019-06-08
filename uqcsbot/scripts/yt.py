@@ -55,7 +55,9 @@ def execute_search(search_query: str, search_part: str, search_type: str, max_re
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
                     developerKey=YOUTUBE_API_KEY, cache_discovery=False)
 
-    search_response = youtube.search().list(q=search_query, part=search_part,
-                                            maxResults=max_results, type=search_type).execute()
+    search_response = youtube.search().list(q=search_query,
+                                            part=search_part,
+                                            maxResults=max_results,
+                                            type=search_type).execute()
 
     return search_response

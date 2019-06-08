@@ -81,7 +81,8 @@ class TextBlock(SlackBlock):
         self.markdown = markdown
 
     def get_formatted_block(self):
-        return {'type': 'mrkdwn' if self.markdown else 'plain_text', 'text': self.text}
+        return {'type': 'mrkdwn' if self.markdown else 'plain_text',
+                'text': self.text}
 
 
 class SubCommand(Enum):
@@ -349,8 +350,8 @@ def get_crate_blocks(crate: CrateResult) -> List[dict]:
     Converts a crate into its block based message format for posting to slack
     """
     return [
-        create_slack_section_block(TextBlock(f'*<{crate.homepage}|{crate.name}>*'
-                                             f'\n{crate.description}')),
+        create_slack_section_block(TextBlock(f'*<{crate.homepage}|{crate.name}>*\n'
+                                             f'{crate.description}')),
         create_slack_context_block([TextBlock(f'Downloads: {crate.downloads}', markdown=False)]),
         create_slack_divider_block()
     ]

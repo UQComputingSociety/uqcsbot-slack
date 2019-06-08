@@ -139,7 +139,8 @@ def wolfram_normal(search_query: str, channel):
     # string. Attachments is a slack thing that allows the formatting or more complex messages.
     # In this case we add a footer and use the fallback to cheekily store information for later.
     attachments = [{'fallback': f'WolframCanReply {reply_host} {s_output} {conversation_id}',
-                    'footer': 'Further questions may be asked', 'text': result}]
+                    'footer': 'Further questions may be asked',
+                    'text': result}]
 
     bot.post_message(channel, "", attachments=attachments)
 

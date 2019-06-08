@@ -48,7 +48,7 @@ def is_number(message):
     """
     try:
         int(message)
-    except Exception:
+    except ValueError:
         return False
     return True
 
