@@ -123,15 +123,19 @@ def handle_emojify(command: Command):
     text = text.replace("&AMP;", "&")
     text = text.replace("&GT;", ">")
 
-    emoji = {}
-    for c in set(text):
-        full, part = divmod(text.count(c), len(master[c]))
-        shuffle(master[c])
-        emoji[c] = full * master[c] + master[c][:part]
-        shuffle(emoji[c])
+    lexicon = {}
+    for character in set(text):
+        full, part = divmod(text.count(character), len(master[character]))
+        shuffle(master[character])
+        lexicon[character] = full * master[character] + master[character][:part]
+        shuffle(lexicon[character])
 
     response = ""
-    for c in text:
-        response += f":{emoji[c].pop()}:"
+    for character in text:
+        emoji = f":{lexicon[character].pop()}:"
+        if len(response + emoji) > 4000:
+            bot.post_message(command.channel_id, response)
+            response = ""
+        response += emoji
 
     bot.post_message(command.channel_id, response)
