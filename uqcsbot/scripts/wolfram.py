@@ -172,7 +172,7 @@ def conversation_request(
     """
     # The format of the api urls is slightly different if a conversation is being continued
     # (has a conversation_id). Any of the following would suffice but may as well be thorough
-    if host_name is None or conversation_id is None or s_output is None:
+    if any([host_name is None, conversation_id is None, s_output is None]):
         api_url = "http://api.wolframalpha.com/v1/conversation.jsp?"
         params = {'appid': WOLFRAM_APP_ID, 'i': search_query}
     else:

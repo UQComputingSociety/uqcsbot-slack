@@ -21,8 +21,8 @@ class Coupon:
         try:
             expiry_date = datetime.strptime(self.expiry_date, '%Y-%m-%d')
             now = datetime.now()
-            return (expiry_date.year >= now.year and expiry_date.month >= now.month and
-                    expiry_date.day >= now.day)
+            return all([expiry_date.year >= now.year, expiry_date.month >= now.month,
+                        expiry_date.day >= now.day])
         except Exception:
             return True
 

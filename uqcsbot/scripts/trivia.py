@@ -66,8 +66,8 @@ def handle_trivia(command: Command):
 
     # Check if the channel is valid for sequential questions
     current_channel = bot.channels.get(command.channel_id)
-    if args.count > 1 and not current_channel.is_im and \
-       current_channel.name not in VALID_SEQUETIAL_CHANNELS:
+    if all([args.count > 1, not current_channel.is_im,
+            current_channel.name not in VALID_SEQUETIAL_CHANNELS]):
         # If no valid channels are specified
         if len(VALID_SEQUETIAL_CHANNELS) == 0:
             bot.post_message(command.channel_id,

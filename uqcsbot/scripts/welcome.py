@@ -52,7 +52,7 @@ def welcome(evt: dict):
     num_members = 0
     for member_id in announcements.members:
         member = bot.users.get(member_id)
-        if member is None or member.deleted or member.is_bot:
+        if any([member is None, member.deleted, member.is_bot]):
             continue
         num_members += 1
 
