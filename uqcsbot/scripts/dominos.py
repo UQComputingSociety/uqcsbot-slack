@@ -23,7 +23,7 @@ class Coupon:
             now = datetime.now()
             return all([expiry_date.year >= now.year, expiry_date.month >= now.month,
                         expiry_date.day >= now.day])
-        except Exception:
+        except ValueError:
             return True
 
     def keyword_matches(self, keyword: str) -> bool:
