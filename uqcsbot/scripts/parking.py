@@ -2,8 +2,8 @@ from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
 from typing import Tuple
 
-from re import findall
 import requests
+from bs4 import BeautifulSoup
 
 
 def get_pf_parking_data() -> Tuple[int, str]:
@@ -44,11 +44,20 @@ def handle_parking(command: Command) -> None:
              "P11 L1": "P11 - Conifer Knoll Lower (Staff)",
              "P11 L2": "P11 - Conifer Knoll Upper (Staff)",
              "P11 L3": "P11 - Conifer Knoll Roof (14P Daily Restricted)"}
-    category = lambda x: "No" if x == "FULL" else "Few" if x == "NEARLY FULL" else x
+
+    def category(fill):
+        if fill.upper() == "FULL":
+            return "No"
+        if fill.upper() == "NEARLY FULL":
+            return "Few"
+        return fill
 
     # find parks
-    areas = findall(r"<tr>\W*<td class='zone'>(.*)<\/td>\W*<td class='.*\n?'>(.*)\n?<\/td>" +
-                    r"\W*<td class='.*\n?'>(.*)\n?<\/td>\W*<\/tr>", str(data))
+    table = BeautifulSoup(data, 'html.parser').find("table", attrs={"id": "parkingAvailability"})
+    rows = table.find_all("tr")[1:]
+    # split and join for single space whitespace
+    areas = [[" ".join(i.get_text().strip().split()) for i in j.find_all("td")] for j in rows]
+
     for area in areas:
         if area[2]:
             response.append(f"{category(area[2])} Carparks Availible in {names[area[0]]}")
