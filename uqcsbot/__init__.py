@@ -6,7 +6,7 @@ import argparse
 from base64 import b64decode
 import json
 import requests
-from uqcsbot.base import bot, Command, UQCSBot # noqa
+from uqcsbot.base import bot, Command, UQCSBot  # noqa
 
 LOGGER = logging.getLogger("uqcsbot")
 

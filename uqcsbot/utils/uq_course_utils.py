@@ -7,7 +7,8 @@ from functools import partial
 from binascii import hexlify
 
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
-BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds=' # noqa
+BASE_ASSESSMENT_URL = ('https://www.courses.uq.edu.au/'
+                       'student_section_report.php?report=assessment&profileIds=')
 BASE_CALENDAR_URL = 'http://www.uq.edu.au/events/calendar_view.php?category_id=16&year='
 OFFERING_PARAMETER = 'offer'
 

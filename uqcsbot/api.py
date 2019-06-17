@@ -6,7 +6,7 @@ import logging
 from typing import (TYPE_CHECKING, List, Iterable, Optional, Generator,
                     Any, Union, TypeVar, Dict, Type)
 if TYPE_CHECKING:
-    from uqcsbot.base import UQCSBot # noqa
+    from uqcsbot.base import UQCSBot  # noqa
 
 T = TypeVar('T')
 ChanT = TypeVar('ChanT', bound='Channel')
