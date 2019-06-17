@@ -60,7 +60,7 @@ def handle_parking(command: Command) -> None:
 
     for area in areas:
         if area[2]:
-            response.append(f"{category(area[2])} Carparks Availible in {names[area[0]]}")
+            response.append(f"{category(area[2])} Carparks Available in {names[area[0]]}")
         elif permit and area[1]:
-            response.append(f"{category(area[1])} Carparks Availible in {names[area[0]]}")
+            response.append(f"{category(area[1])} Carparks Available in {names[area[0]]}")
     bot.post_message(command.channel_id, "\n".join(response))
