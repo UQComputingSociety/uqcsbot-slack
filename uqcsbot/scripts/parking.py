@@ -3,7 +3,7 @@ from uqcsbot.utils.command_utils import loading_status
 from typing import Tuple
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as Soup
 
 
 def get_pf_parking_data() -> Tuple[int, str]:
@@ -53,10 +53,10 @@ def handle_parking(command: Command) -> None:
         return fill
 
     # find parks
-    table = BeautifulSoup(data, 'html.parser').find("table", attrs={"id": "parkingAvailability"})
+    table = Soup(data, "html.parser").find("table", attrs={"id": "parkingAvailability"})
     rows = table.find_all("tr")[1:]
     # split and join for single space whitespace
-    areas = [[" ".join(i.get_text().strip().split()) for i in j.find_all("td")] for j in rows]
+    areas = [[" ".join(i.get_text().split()) for i in j.find_all("td")] for j in rows]
 
     for area in areas:
         if area[2]:
