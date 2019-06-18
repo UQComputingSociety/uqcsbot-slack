@@ -4,14 +4,15 @@ from requests import get, RequestException, Response
 from typing import List
 from uqcsbot.utils.command_utils import loading_status
 
-uqfinal = "https://api.uqfinal.com"
+UQFINAL_API = "https://api.uqfinal.com"
 
 
 @bot.on_command("uqfinal")
 @loading_status
 def handle_uqfinal(command: Command):
     """
-    `!uqfinal <CODE> <GRADES>` - Check UQFinal for course CODE with the first assessment pieces as <GRADES> as percentages
+    `!uqfinal <CODE> <GRADES>` - Check UQFinal for course CODE 
+    with the first assessment pieces as <GRADES> as percentages
     """
     # Makes sure the query is not empty
     if not command.has_arg():
@@ -27,30 +28,32 @@ def handle_uqfinal(command: Command):
     for str_score in string_scores:
         try:
             temp = float(str_score)
-            if temp <= 1:
-                bot.post_message(command.channel_id, f"Note: Treating {str_score} as {temp * 100}%")
-                temp *= 100
-            if temp < 0 or temp > 100:
-                bot.post_message(command.channel_id, f"Assessment scores should be between 0 and 100")
-                return
-            scores.append(temp)
         except ValueError:
             bot.post_message(command.channel_id, f"\"{str_score}\" could not be converted to a number")
             return
+        if temp <= 1:
+            temp *= 100
+            bot.post_message(command.channel_id, f"Note: Treating {str_score} as {temp}%")
+        if temp < 0 or temp > 100:
+            bot.post_message(command.channel_id, f"Assessment scores should be between 0 and 100")
+            return
+        scores.append(temp)
 
     semester = get_uqfinal_semesters()
-    if semester == None:
+    if semester is None:
         bot.post_message(command.channel_id, "Failed to retrieve semester data from UQfinal")
         return
 
     course_info = get_uqfinal_course(semester, course)
-    if course_info == None:
+    if course_info is None:
         bot.post_message(command.channel_id, f"Failed to retrieve course information for {course}")
         return
     num_assessment = len(course_info["assessment"])
 
     if (len(scores) != num_assessment - 1):
-        bot.post_message(command.channel_id, f"Please provide grades for all assessment except the last\nThis course has {num_assessment} assessments")
+        bot.post_message(command.channel_id,
+                         f"Please provide grades for all assessment except the last\n"
+                         f"This course has {num_assessment} assessments")
         return
 
     total = 0.0
@@ -72,7 +75,7 @@ def get_uqfinal_semesters():
     """
     try:
         # Assume current semester
-        semester_response: Response = get(uqfinal + "/semesters")
+        semester_response: Response = get(UQFINAL_API + "/semesters")
         if semester_response.status_code != 200:
             bot.logger.error(f"UQFinal returned {semester_response.status_code} when getting the current semester")
             return None
@@ -88,7 +91,7 @@ def get_uqfinal_course(semester, course: str):
     Return None on failure
     """
     try:
-        course_response = get("/".join([uqfinal, "course", str(semester["uqId"]), course]))
+        course_response = get("/".join([UQFINAL_API, "course", str(semester["uqId"]), course]))
         if course_response.status_code != 200:
             bot.logger.error(f"UQFinal returned {course_response.status_code} when getting the course {course}")
             return None
