@@ -51,7 +51,7 @@ def handle_uqfinal(command: Command):
         return
     num_assessment = len(course_info["assessment"])
 
-    if (len(scores) != num_assessment - 1):
+    if len(scores) != num_assessment - 1:
         bot.post_message(command.channel_id,
                          f"Please provide grades for all assessment except the last\n"
                          f"This course has {num_assessment} assessments")
@@ -62,10 +62,9 @@ def handle_uqfinal(command: Command):
         total += score * float(course_info["assessment"][i]["weight"]) / 100
 
     needed = 50 - total
-    result = needed / float(course_info["assessment"][num_assessment - 1]["weight"])
-    result = math.ceil(result * 100)
+    result = math.ceil(100 * needed / float(course_info["assessment"][-1]["weight"]))
     bot.post_message(command.channel_id, f"You need to achieve at least"
-                                         f"{result}% on the final exam.\n"
+                                         f" {result}% on the final exam.\n"
                                          f"_Disclaimer: this does not take hurdles into account_\n"
                                          f"_Powered by http://uqfinal.com_")
 
@@ -80,7 +79,7 @@ def get_uqfinal_semesters():
         semester_response: Response = get(UQFINAL_API + "/semesters")
         if semester_response.status_code != 200:
             bot.logger.error(f"UQFinal returned {semester_response.status_code}"
-                             f"when getting the current semester")
+                             f" when getting the current semester")
             return None
         return semester_response.json()["data"]["semesters"].pop()
     except RequestException as e:
@@ -97,7 +96,7 @@ def get_uqfinal_course(semester, course: str):
         course_response = get("/".join([UQFINAL_API, "course", str(semester["uqId"]), course]))
         if course_response.status_code != 200:
             bot.logger.error(f"UQFinal returned {course_response.status_code}"
-                             f"when getting the course {course}")
+                             f" when getting the course {course}")
             return None
         return course_response.json()["data"]
     except RequestException as e:
