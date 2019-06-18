@@ -1,26 +1,14 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 from unittest.mock import patch
 
-TEST_SEMESTER = {
+from typing import Optional, Dict
 
-}
+TEST_SEMESTER: Optional[Dict[str, str]] = {}
 
-TEST_COURSE = {
-    "assessment": [
-        {
-            "weight": 10
-        },
-        {
-            "weight": 15
-        },
-        {
-            "weight": 15
-        },
-        {
-            "weight": 60
-        }
-    ]
-}
+TEST_COURSE = {"assessment": [{"weight": 10},
+                              {"weight": 15},
+                              {"weight": 15},
+                              {"weight": 60}]}
 
 
 def get_uqfinal_course(semester, course: str):

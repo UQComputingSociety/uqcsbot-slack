@@ -11,7 +11,7 @@ UQFINAL_API = "https://api.uqfinal.com"
 @loading_status
 def handle_uqfinal(command: Command):
     """
-    `!uqfinal <CODE> <GRADES>` - Check UQFinal for course CODE 
+    `!uqfinal <CODE> <GRADES>` - Check UQFinal for course CODE
     with the first assessment pieces as <GRADES> as percentages
     """
     # Makes sure the query is not empty
@@ -27,9 +27,10 @@ def handle_uqfinal(command: Command):
 
     for str_score in string_scores:
         try:
-            temp = float(str_score)
+            temp = float(str_score.rstrip("%"))
         except ValueError:
-            bot.post_message(command.channel_id, f"\"{str_score}\" could not be converted to a number")
+            bot.post_message(command.channel_id, f"\"{str_score}\" could"
+                                                 f"not be converted to a number")
             return
         if temp <= 1:
             temp *= 100
@@ -61,11 +62,12 @@ def handle_uqfinal(command: Command):
         total += score * float(course_info["assessment"][i]["weight"]) / 100
 
     needed = 50 - total
-    result = math.ceil(needed / float(course_info["assessment"][num_assessment - 1]["weight"]) * 100)
-    bot.post_message(command.channel_id, "You need to achieve at least " +
-                     str(result) +
-                     "% on the final exam.\n_Disclaimer: this does not take hurdles into account_\n_Powered by "
-                     "http://uqfinal.com_")
+    result = needed / float(course_info["assessment"][num_assessment - 1]["weight"])
+    result = math.ceil(result * 100)
+    bot.post_message(command.channel_id, f"You need to achieve at least"
+                                         f"{result}% on the final exam.\n"
+                                         f"_Disclaimer: this does not take hurdles into account_\n"
+                                         f"_Powered by http://uqfinal.com_")
 
 
 def get_uqfinal_semesters():
@@ -77,7 +79,8 @@ def get_uqfinal_semesters():
         # Assume current semester
         semester_response: Response = get(UQFINAL_API + "/semesters")
         if semester_response.status_code != 200:
-            bot.logger.error(f"UQFinal returned {semester_response.status_code} when getting the current semester")
+            bot.logger.error(f"UQFinal returned {semester_response.status_code}"
+                             f"when getting the current semester")
             return None
         return semester_response.json()["data"]["semesters"].pop()
     except RequestException as e:
@@ -93,7 +96,8 @@ def get_uqfinal_course(semester, course: str):
     try:
         course_response = get("/".join([UQFINAL_API, "course", str(semester["uqId"]), course]))
         if course_response.status_code != 200:
-            bot.logger.error(f"UQFinal returned {course_response.status_code} when getting the course {course}")
+            bot.logger.error(f"UQFinal returned {course_response.status_code}"
+                             f"when getting the course {course}")
             return None
         return course_response.json()["data"]
     except RequestException as e:
