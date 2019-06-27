@@ -1,4 +1,6 @@
 from uqcsbot import bot, Command
+from re import match
+from typing import Optional
 
 POKEDEX = {"bulbasaur": 1,
            "ivysaur": 2,
@@ -457,6 +459,23 @@ SUFFIX = {1: "basaur",
           151: "ew"}
 
 
+def lookup(command: Command, arg: str) -> Optional[int]:
+    """
+    converts a string representing a pokemon's name or number to an integer
+    """
+    try:
+        num = int(arg)
+    except ValueError:
+        if arg not in POKEDEX:
+            bot.post_message(command.channel_id, f"Could Not Find Pokemon: {arg}")
+            return None
+        num = POKEDEX[arg]
+    if num <= 0 or num > 151:
+        bot.post_message(command.channel_id, f"Out of Range: {arg}")
+        return None
+    return num
+
+
 @bot.on_command('pokemash')
 def handle_pokemash(command: Command):
     """
@@ -464,39 +483,18 @@ def handle_pokemash(command: Command):
     Can use Pokemon names or Pokedex numbers (first gen only)
     """
     cmd = command.arg.lower()
+    # checks for exactly two pokemon
+    # mr. mime is the only pokemon with a space in it's name
     if not cmd or (cmd.count(" ") - cmd.count("mr. mime")) != 1:
         bot.post_message(command.channel_id, "Incorrect Number of Pokemon")
         return
 
-    if cmd.startswith("mr. mime"):
-        arg_left = "mr. mime"
-        arg_right = cmd[9:]
-    elif cmd.endswith("mr. mime"):
-        arg_left = cmd[:-9]
-        arg_right = "mr. mime"
-    else:
-        arg_left, arg_right = cmd.split(" ")
+    # two pokemon split
+    arg_left, arg_right = match(r"(mr\. mime|\S+) (mr\. mime|\S+)", cmd).group(1, 2)
 
-    try:
-        num_left = int(arg_left)
-    except ValueError:
-        if arg_left not in POKEDEX:
-            bot.post_message(command.channel_id, f"Could Not Find Pokemon: {arg_left}")
-            return
-        num_left = POKEDEX[arg_left]
-    if num_left <= 0 or num_left > 151:
-        bot.post_message(command.channel_id, f"Out of Range: {num_left}")
-        return
-
-    try:
-        num_right = int(arg_right)
-    except ValueError:
-        if arg_right not in POKEDEX:
-            bot.post_message(command.channel_id, f"Could Not Find Pokemon: {arg_right}")
-            return
-        num_right = POKEDEX[arg_right]
-    if num_right <= 0 or num_right > 151:
-        bot.post_message(command.channel_id, f"Out of Range: {num_right}")
+    num_left = lookup(command, arg_left)
+    num_right = lookup(command, arg_right)
+    if num_left is None or num_right is None:
         return
 
     bot.post_message(command.channel_id,
