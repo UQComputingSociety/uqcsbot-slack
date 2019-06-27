@@ -5,6 +5,7 @@ from typing import List
 from uqcsbot.utils.command_utils import loading_status
 
 UQFINAL_API = "https://api.uqfinal.com"
+GRADES = [(0.5, 'four'), (0.65, 'five'), (0.75, 'six'), (0.85, 'seven')]
 
 
 @bot.on_command("uqfinal")
@@ -84,7 +85,7 @@ def handle_uqfinal(command: Command):
 
     # calculate marks needed to achieve grades
     message = []
-    for cutoff_deci, grade in [(0.5, 'four'), (0.65, 'five'), (0.75, 'six'), (0.85, 'seven')]:
+    for cutoff_deci, grade in GRADES:
         needed_perc = ceil(100 * (cutoff_deci - total_deci) / remain_deci)
         if needed_perc > 100:
             break
