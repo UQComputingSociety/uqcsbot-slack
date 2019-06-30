@@ -1,7 +1,8 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 from unittest.mock import patch
+from typing import Dict, Any
 
-TEST_SEMESTER = {}
+TEST_SEMESTER: Dict[str, Any] = {}
 
 TEST_COURSE = {"assessment": [{'taskName': 'Assignment 1', "weight": 10},
                               {'taskName': 'Assignment 2', "weight": 15},
