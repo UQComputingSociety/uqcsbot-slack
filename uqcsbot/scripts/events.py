@@ -10,7 +10,7 @@ from uqcsbot.utils.command_utils import UsageSyntaxException
 from uqcsbot.utils.itee_seminar_utils import (get_seminars, HttpException, InvalidFormatException)
 
 CALENDAR_URL = ("https://calendar.google.com/calendar/ical/"
-                "q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics")
+                + "q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics")
 FILTER_REGEX = re.compile('(full|all|[0-9]+( weeks?)?)')
 BRISBANE_TZ = timezone('Australia/Brisbane')
 MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
@@ -178,7 +178,7 @@ def handle_events(command: Command):
     if not events:
         message = (f"_{event_filter.get_no_result_msg()}_\r\n"
                    "For a full list of events, visit: https://uqcs.org.au/calendar.html"
-                   " and https://www.itee.uq.edu.au/seminar-list")
+                   + " and https://www.itee.uq.edu.au/seminar-list")
     else:
         message = f"{event_filter.get_header()}\r\n" + '\r\n'.join(str(e) for e in events)
 

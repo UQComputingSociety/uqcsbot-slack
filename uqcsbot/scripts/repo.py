@@ -6,4 +6,5 @@ def handle_repo(command: Command):
     """
     `!repo` - Returns the url for the uqcsbot repo.
     """
-    bot.post_message(command.channel_id, "https://github.com/UQComputingSociety/uqcsbot")
+    bot.post_message(command.channel_id, "UQ Computing Society :github: Repository\n"
+                     "https://github.com/UQComputingSociety/uqcsbot")

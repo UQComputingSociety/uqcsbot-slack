@@ -500,4 +500,4 @@ def handle_pokemash(command: Command):
     bot.post_message(command.channel_id,
                      f"_{PREFIX[num_left]+SUFFIX[num_right]}_\n"
                      f"https://images.alexonsager.net/pokemon/fused/"
-                     f"{num_right}/{num_right}.{num_left}.png")
+                     + f"{num_right}/{num_right}.{num_left}.png")

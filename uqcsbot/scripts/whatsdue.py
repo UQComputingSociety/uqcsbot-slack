@@ -61,9 +61,9 @@ def handle_whatsdue(command: Command):
         return
 
     message = ('_*WARNING:* Assessment information may vary/change/be entirely'
-               ' different! Use at your own discretion_\n>>>')
+               + ' different! Use at your own discretion_\n>>>')
     message += '\n'.join(map(get_formatted_assessment_item, assessment))
     if not is_full_output:
         message += ('\n_Note: This may not be the full assessment list. Use -f'
-                    '/--full to print out the full list._')
+                    + '/--full to print out the full list._')
     bot.post_message(channel, message)

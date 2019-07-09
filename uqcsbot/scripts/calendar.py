@@ -33,9 +33,10 @@ def get_calendar(assessment):
             # TODO(mitch): Keep track of these instances to attempt to accurately
             # parse them in future. Will require manual detection + parsing.
             start_datetime = end_datetime = datetime.today()
-            event['summary'] = ('WARNING: DATE PARSING FAILED\nPlease manually'
-                                'set date for event!\nThe provided due date'
-                                'from UQ was \'{due_date}\'.' + event['summary'])
+            event['summary'] = ("WARNING: DATE PARSING FAILED\n"
+                                "Please manually set date for event!\n"
+                                "The provided due date from UQ was"
+                                + f" '{due_date}\'. {event['summary']}")
         event.add('dtstart', start_datetime)
         event.add('dtend', end_datetime)
         calendar.add_component(event)

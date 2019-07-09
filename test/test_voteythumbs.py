@@ -7,5 +7,5 @@ def test_voteythumbs(uqcsbot: MockUQCSBot):
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, '!voteythumbs ye/na/maybz?')
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
-    # Make sure there are three reactions (thumbsup, thumbsdown, eyes)
+    # Make sure there are three reactions (thumbsup, thumbsdown, thumbsright)
     assert len(messages[-1]['reactions']) == 3

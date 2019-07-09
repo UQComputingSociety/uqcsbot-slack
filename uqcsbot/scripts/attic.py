@@ -75,9 +75,9 @@ def handle_attic(command: Command) -> None:
     course_code = course_code.upper()
 
     # Make request for UQAttic root directory contents.
-    root_directory_request_url = (f"{BASE_API_URL}files?q='{BASE_ATTIC_FOLDER}' "
-                                  "in parents and mimeType = 'application/"
-                                  f"vnd.google-apps.folder'&pageSize=1000&key={API_KEY}")
+    root_directory_request_url = (f"{BASE_API_URL}files?q='{BASE_ATTIC_FOLDER}'"
+                                  + " in parents and mimeType = 'application/vnd.google-apps"
+                                  + f".folder'&pageSize=1000&key={API_KEY}")
     root_directory = requests.get(root_directory_request_url)
     if not root_directory.status_code == 200:
         bot.post_message(channel, 'There was an error getting the root UQAttic directory.')
@@ -108,8 +108,8 @@ def handle_attic(command: Command) -> None:
     # Send response message with formatted list of files.
     if len(files) > 0:
         response_message = ('All of the UQAttic files found for the course'
-                            f'<{BASE_FOLDER_URL}{course["id"]} | {course["name"]}>'
-                            'are listed below:\n' + '\n'.join(format_files(files)))
+                            + f' <{BASE_FOLDER_URL}{course["id"]} | {course["name"]}>'
+                            + ' are listed below:\n' + '\n'.join(format_files(files)))
     else:
         response_message = f'There were no files found in the {course_code} course folder.'
     bot.post_message(response_channel, response_message)

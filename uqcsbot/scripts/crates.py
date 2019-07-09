@@ -145,8 +145,8 @@ def parse_arguments(arg_str: str) -> argparse.Namespace:
     search_parser.add_argument('-h', '--help', action='store_true', help='Prints this help message')
     search_parser.add_argument('-l', '--limit', default=5, type=search_limit,
                                help='When not searching for a specific crate how'
-                                     ' many results should be shown? '
-                                    '(max: ' + str(MAX_LIMIT) + ', default: %(default)s)')
+                                    + ' many results should be shown?'
+                                    + ' (max: ' + str(MAX_LIMIT) + ', default: %(default)s)')
     search_parser.add_argument('-c', '--category', default='', type=category_formatter,
                                help="Limit results to crates in this category")
     search_parser.add_argument('-u', '--user', default='', type=str,
@@ -154,22 +154,22 @@ def parse_arguments(arg_str: str) -> argparse.Namespace:
     search_parser.add_argument('-o', '--sort', choices=['alpha', 'downloads'],
                                default='downloads', type=str.lower,
                                help='Sort the results by alphabetical order or by number'
-                                    ' of downloads (default: %(default)s)')
+                                    + ' of downloads (default: %(default)s)')
     search_parser.set_defaults(execute_action=handle_search_crates_route, route=SubCommand.SEARCH)
 
     # For "!crates categories {args}"
     category_parser = subparsers.add_parser('categories', add_help=False,
                                             help='Sub-command to get information about'
-                                            ' categories instead of crates')
+                                            + ' categories instead of crates')
     category_parser.add_argument('-h', '--help', action='store_true',
                                  help='Prints this help message')
     category_parser.add_argument('name', nargs='?', default='', type=category_formatter,
                                  help='Optional. Specify a specific category to get more'
-                                      ' information about it')
+                                      + ' information about it')
     category_parser.add_argument('-s', '--sort', choices=['alpha', 'crates'],
                                  default='alpha', type=str.lower,
                                  help='Sort the result by alphabetical order or'
-                                      ' by number of crates in the category')
+                                      + ' by number of crates in the category')
     category_parser.set_defaults(execute_action=handle_categories_route,
                                  route=SubCommand.CATEGORIES)
 
@@ -446,7 +446,7 @@ def handle_search_crates_route(channel: Channel, args: CrateSearch):
     # The beginning of the formatted response
     blocks = [
         create_slack_section_block(TextBlock(f'*Showing {min(args.limit, total)}'
-                                             f' of {total} results*')),
+                                             + f' of {total} results*')),
         create_slack_divider_block()
     ]
 

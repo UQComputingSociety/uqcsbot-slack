@@ -79,7 +79,7 @@ def handle_trivia(command: Command):
         if first_valid:
             channel_message = f'Try <#{first_valid.id}|{VALID_SEQUETIAL_CHANNELS[0]}>.'
         bot.post_message(command.channel_id, f'You cannot use the sequential questions '
-                         f'feature in this channel. {channel_message}')
+                         + f'feature in this channel. {channel_message}')
         return
 
     handle_question(command.channel_id, args)
@@ -219,7 +219,7 @@ def get_question_data(channel: Channel, args: argparse.Namespace) -> Optional[Qu
     response_content = json.loads(http_response.content)
     if response_content['response_code'] == 2:
         bot.post_message(channel, "Invalid category id. "
-                         "Try !trivia --cats for a list of valid categories.")
+                         + "Try !trivia --cats for a list of valid categories.")
         return None
     elif response_content['response_code'] != 0:
         bot.post_message(channel, "No results were returned")

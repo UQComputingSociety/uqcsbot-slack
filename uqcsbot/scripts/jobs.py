@@ -13,27 +13,28 @@ CODE_OF_CONDUCT = "https://github.com/UQComputingSociety/code-of-conduct"
 UQCS_EMAIL = "mailto:contact@uqcs.org.au"
 WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "#jobs-bulletin is a little different to your average"
-    " UQCS :slack: channel and has a few extra rules:",
-    "*Rules for Everyone* \n1. The _only_ posts allowed in this channel are job advertisements.\n"
+    + " UQCS :slack: channel and has a few extra rules:",
+    "*Rules for Everyone* \n"
+    "1. The _only_ posts allowed in this channel are job advertisements.\n"
     "2. All discussion about the posted jobs must take place in the #jobs-discussion "
-    " channel or by direct message with the person posting the advertisement."
-    " Please be respectful when interacting with companies and sponsors.",
+    + " channel or by direct message with the person posting the advertisement."
+    + " Please be respectful when interacting with companies and sponsors.",
     "*Additional Rules for Employers Posting Jobs/Internship Opportunities:*\n"
     "3. We take the rights of our members and associates seriously. If you are posting an unpaid"
-    " position, please be up front about the lack of remuneration and *mindful of*"
-    f"<{FAIR_WORK_INFO}|*your obligations*> under the"
-    " _Fair Work Act (2009)_ :fairwork:. \n"
+    + " position, please be up front about the lack of remuneration and *mindful of*"
+    + f" <{FAIR_WORK_INFO}|*your obligations*> under the"
+    + " _Fair Work Act (2009)_ :fairwork:. \n"
     "_> tldr: if an intern (whether called that or not) adds value to"
-    " (or 'does productive work' for) your business, they must be remunerated with a fair wage._"
-    " If you ignore these warnings, please expect to face criticism from the community"
-    " (we will protect our members from being exploited)."
-    f" Additionally, all <{EAIT_UNPAID_JOBS}|unpaid placements> for students in the "
-    f"<{EAIT_FACULTY}|EAIT Faculty> must be approved by the faculty placement advisers.",
+    + " (or 'does productive work' for) your business, they must be remunerated with a fair wage._"
+    + " If you ignore these warnings, please expect to face criticism from the community"
+    + " (we will protect our members from being exploited)."
+    + f" Additionally, all <{EAIT_UNPAID_JOBS}|unpaid placements> for students in the"
+    + f" <{EAIT_FACULTY}|EAIT Faculty> must be approved by the faculty placement advisers.",
     f"4. Job postings _must_ conform to our <{CODE_OF_CONDUCT}|Code of Conduct>"
-    " and must not discriminate against applicants based on race, religion,"
-    " sexual orientation, gender identity or age.",
+    + " and must not discriminate against applicants based on race, religion,"
+    + " sexual orientation, gender identity or age.",
     "If you have any questions, please get in touch with the committee in"
-    f" #uqcs-meta or by email at <{UQCS_EMAIL}|contact@uqcs.org.au>."
+    + f" #uqcs-meta or by email at <{UQCS_EMAIL}|contact@uqcs.org.au>."
 ]
 
 
@@ -86,15 +87,15 @@ def job_response(evt: dict):
 
     channel_message = (f"{user.name} has posted a new job in #jobs-bulletin! :tada: \n"
                        f"Please ask any questions in #jobs-discussion"
-                       f" or in a private message to <@{user.user_id}>")
+                       + f" or in a private message to <@{user.user_id}>")
     bot.post_message(jobs_bulletin, insert_channel_links(channel_message))
 
     user_message = (f"Hey {user.name}, you've just posted in #jobs-bulletin! \n"
                     f"Just a quick reminder of the conditions"
-                    f" surrounding the use of this channel:\n"
-                    + f"\n".join(WELCOME_MESSAGES[1:] + [""]) +
+                    + f" surrounding the use of this channel:\n" +
+                    f"\n".join(WELCOME_MESSAGES[1:] + [""]) +
                     f"*Broken one of these rules?*\n"
                     f"It's not too late! Please go back ASAP and"
-                    f" edit your message in #jobs-bulletin so it complies (or ask a committee"
-                    f" member to delete it). Thanks!")
+                    + f" edit your message in #jobs-bulletin so it complies (or ask a committee"
+                    + f" member to delete it). Thanks!")
     bot.post_message(user.user_id, insert_channel_links(user_message))

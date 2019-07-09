@@ -1,8 +1,8 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 
-LONG_MESSAGE = 'I\'m going to say a really long sentence that has a really low'\
-               + ' probability of outputting a random-case mocked message that'\
-               + ' is equal to the original.'
+LONG_MESSAGE = ("I'm going to say a really long sentence that has a really low"
+                + " probability of outputting a random-case mocked message that"
+                + " is equal to the original.")
 
 
 def test_mock_previous_message(uqcsbot: MockUQCSBot):
