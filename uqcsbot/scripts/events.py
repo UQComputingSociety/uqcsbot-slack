@@ -1,6 +1,7 @@
 from typing import List
 import re
 from datetime import date, datetime, timedelta
+from calendar import month_name, month_abbr
 from icalendar import Calendar
 import requests
 from pytz import timezone, utc
@@ -10,17 +11,12 @@ from uqcsbot.utils.command_utils import UsageSyntaxException, loading_status
 from uqcsbot.utils.itee_seminar_utils import (get_seminars, HttpException, InvalidFormatException)
 
 CALENDAR_URL = ("https://calendar.google.com/calendar/ical/"
-                "q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics")
+                + "q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics")
 FILTER_REGEX = re.compile('full|all|[0-9]+( weeks?)?|jan.*|feb.*|mar.*|apr.*|may.*|jun.*'
-                          '|jul.*|aug.*|sep.*|oct.*|nov.*|dec.*')
+                          + '|jul.*|aug.*|sep.*|oct.*|nov.*|dec.*')
 BRISBANE_TZ = timezone('Australia/Brisbane')
 # empty string to one-index
-MONTH_ABBR = ["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-              "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
-MONTH_FULL = ["", "January", "February", "March", "April", "May", "June",
-              "July", "August", "September", "October", "November", "December"]
-MONTH_NUMBER = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
-                "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
+MONTH_NUMBER = {month.lower(): index for index, month in enumerate(month_abbr)}
 
 
 class EventFilter(object):
@@ -65,7 +61,7 @@ class EventFilter(object):
         elif self._weeks is not None:
             return f"Events in the *next _{self._weeks}_ weeks*"
         elif self._month is not None:
-            return f"Events in *_{MONTH_FULL[self._month]}_*"
+            return f"Events in *_{month_name[self._month]}_*"
         else:
             return f"The *next _{self._cap}_ events*"
 
@@ -73,7 +69,7 @@ class EventFilter(object):
         if self._weeks is not None:
             return f"There don't appear to be any events in the next *{self._weeks}* weeks"
         elif self._month is not None:
-            return f"There don't appear to be any events in *{MONTH_FULL[self._month]}*"
+            return f"There don't appear to be any events in *{month_name[self._month]}*"
         else:
             return "There don't appear to be any upcoming events..."
 
@@ -129,9 +125,9 @@ class Event(object):
         d1 = self.start.astimezone(BRISBANE_TZ)
         d2 = self.end.astimezone(BRISBANE_TZ)
 
-        start_str = f"{MONTH_ABBR[d1.month]} {d1.day} {d1.hour}:{d1.minute:02}"
+        start_str = f"{month_abbr[d1.month].upper()} {d1.day} {d1.hour}:{d1.minute:02}"
         if (d1.month, d1.day) != (d2.month, d2.day):
-            end_str = f"{MONTH_ABBR[d2.month]} {d2.day} {d2.hour}:{d2.minute:02}"
+            end_str = f"{month_abbr[d2.month].upper()} {d2.day} {d2.hour}:{d2.minute:02}"
         else:
             end_str = f"{d2.hour}:{d2.minute:02}"
 
@@ -144,6 +140,14 @@ class Event(object):
             return f"*{start_str} - {end_str}* - `{summary_str}` - _{location_str}_"
         else:
             return f"*{start_str} - {end_str}* - `<{self.link}|{summary_str}>` - _{location_str}_"
+
+
+def get_current_time():
+    """
+    returns the current date and time
+    this function exists purely so it can be mocked for testing
+    """
+    return datetime.now(tz=BRISBANE_TZ).astimezone(utc)
 
 
 @bot.on_command('events')
@@ -159,8 +163,7 @@ def handle_events(command: Command):
         raise UsageSyntaxException()
 
     cal = Calendar.from_ical(get_calendar_file())
-
-    current_time = datetime.now(tz=BRISBANE_TZ).astimezone(utc)
+    current_time = get_current_time()
 
     events = []
     # subcomponents are how icalendar returns the list of things in the calendar
