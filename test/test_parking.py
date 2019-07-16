@@ -33,7 +33,7 @@ def test_parking(uqcsbot: MockUQCSBot):
             "29 Carparks Available in P8 - Athletics Roof (14P Daily)\n"
             "21 Carparks Available in P9 - Boatshed (14P Daily)\n"
             "167 Carparks Available in P10 - UQ Centre"
-            " & Playing Fields (14P Daily/14P Daily Capped)\n"
+            + " & Playing Fields (14P Daily/14P Daily Capped)\n"
             "Few Carparks Available in P11 - Conifer Knoll Roof (14P Daily Restricted)")
 
 
@@ -58,7 +58,7 @@ def test_parking_all(uqcsbot: MockUQCSBot):
             "29 Carparks Available in P8 - Athletics Roof (14P Daily)\n"
             "21 Carparks Available in P9 - Boatshed (14P Daily)\n"
             "167 Carparks Available in P10 - UQ Centre"
-            " & Playing Fields (14P Daily/14P Daily Capped)\n"
+            + " & Playing Fields (14P Daily/14P Daily Capped)\n"
             "23 Carparks Available in P11 - Conifer Knoll Lower (Staff)\n"
             "Few Carparks Available in P11 - Conifer Knoll Upper (Staff)\n"
             "Few Carparks Available in P11 - Conifer Knoll Roof (14P Daily Restricted)")

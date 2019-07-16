@@ -3,11 +3,10 @@ import time
 from slackclient import SlackClient
 import threading
 import logging
-from typing import (
-    TYPE_CHECKING, List, Iterable, Optional, Generator, Any, Union, TypeVar, Dict, Type
-)
+from typing import (TYPE_CHECKING, List, Iterable, Optional, Generator,
+                    Any, Union, TypeVar, Dict, Type)
 if TYPE_CHECKING:
-    from uqcsbot.base import UQCSBot # noqa
+    from uqcsbot.base import UQCSBot  # noqa
 
 T = TypeVar('T')
 ChanT = TypeVar('ChanT', bound='Channel')
@@ -18,8 +17,8 @@ LOGGER = logging.getLogger(__name__)
 
 class Paginator(Iterable[dict]):
     """
-    Provides synchronous and asynchronous iterators over the pages of responses
-    from a cursor-based paginated Slack
+    Provides synchronous and asynchronous iterators over the
+    pages of responses from a cursor-based paginated Slack
 
     See https://api.slack.com/docs/pagination for details
     """
@@ -57,11 +56,7 @@ class APIMethodProxy(object):
 
         Attempts to retry the API call if rate-limited.
         """
-        fn = partial(
-            self._client.api_call,
-            self._method,
-            **kwargs
-        )
+        fn = partial(self._client.api_call, self._method, **kwargs)
         retry_count = 0
         while retry_count < 5:
             result = fn()
@@ -75,15 +70,14 @@ class APIMethodProxy(object):
         else:
             result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
         if not result['ok']:
-            LOGGER.error(f'Slack API error calling {self._method} with kwargs'
-                         f' {kwargs}: {result["error"]}')
+            LOGGER.error(f'Slack API error calling {self._method} with'
+                         f' kwargs {kwargs}: {result["error"]}')
         return result
 
     def paginate(self, **kwargs) -> Paginator:
         """
-        Returns a `Paginator` which allows you to iterate over each page of
-        response data from a Slack response that is paginated in the
-        cursor-style.
+        Returns a `Paginator` which allows you to iterate over each page of response data
+        from a Slack response that is paginated in the cursor-style.
 
         Count/oldest/latest and page/count methods require manual pagination.
         """
@@ -108,8 +102,8 @@ class APIMethodProxy(object):
 
 class APIWrapper(object):
     """
-    Wraps the Slack API client to make it possible to use dotted methods. Can
-    perform API requests both synchronously and asynchronously.
+    Wraps the Slack API client to make it possible to use dotted methods.
+    Can perform API requests both synchronously and asynchronously.
 
     Example usage:
         > api = APIWrapper(client)
@@ -119,28 +113,22 @@ class APIWrapper(object):
         self._client = client
 
     def __getattr__(self, item) -> APIMethodProxy:
-        return APIMethodProxy(
-            client=self._client,
-            method=item,
-        )
+        return APIMethodProxy(client=self._client, method=item)
 
     def __repr__(self) -> str:
         return f"<APIWrapper of {repr(self._client)}>"
 
 
 class Channel(object):
-    def __init__(
-            self,
-            bot: 'UQCSBot',
-            channel_id: str,
-            name: str,
-            is_group: bool = False,
-            is_im: bool = False,
-            is_public: bool = False,
-            is_private: bool = False,
-            is_archived: bool = False,
-            previous_names: List[str] = None
-    ) -> None:
+    def __init__(self, bot: 'UQCSBot',
+                 channel_id: str,
+                 name: str,
+                 is_group: bool = False,
+                 is_im: bool = False,
+                 is_public: bool = False,
+                 is_private: bool = False,
+                 is_archived: bool = False,
+                 previous_names: List[str] = None) -> None:
         self._bot = bot
         self.id = channel_id
         self.name = name
@@ -175,16 +163,14 @@ class Channel(object):
 
     @classmethod
     def from_dict(cls: Type[ChanT], bot, chan_dict: dict) -> ChanT:
-        chan = cls(
-            bot=bot,
-            channel_id=chan_dict['id'],
-            name=chan_dict['name'],
-            is_group=chan_dict.get('is_group', False),
-            is_im=chan_dict.get('is_im', False),
-            is_public=chan_dict.get('is_public', False),
-            is_private=chan_dict.get('is_private', False),
-            is_archived=chan_dict.get('is_archived', False),
-        )
+        chan = cls(bot=bot,
+                   channel_id=chan_dict['id'],
+                   name=chan_dict['name'],
+                   is_group=chan_dict.get('is_group', False),
+                   is_im=chan_dict.get('is_im', False),
+                   is_public=chan_dict.get('is_public', False),
+                   is_private=chan_dict.get('is_private', False),
+                   is_archived=chan_dict.get('is_archived', False))
         return chan
 
 
@@ -231,8 +217,7 @@ class ChannelWrapper(object):
                     if im['is_user_deleted']:
                         continue
                     # Set the channel name to the user being directly messaged
-                    # for easier reverse lookups. Note: `user` here is the
-                    # user_id.
+                    # for easier reverse lookups. Note: `user` here is the user_id.
                     im['name'] = im['user']
                     self._add_channel(im)
             self._initialised = True
@@ -246,9 +231,8 @@ class ChannelWrapper(object):
             for ctype in ['channels', 'groups', 'ims']:
                 for chan in data[ctype]:
                     if ctype == 'ims':
-                        # Set the channel name to the user being directly
-                        # messaged for easier reverse lookups. Note: `user` here
-                        # is the user_id.
+                        # Set the channel name to the user being directly messaged
+                        # for easier reverse lookups. Note: `user` here is the user_id.
                         chan['name'] = chan['user']
                     self._add_channel(chan)
                 self._bot.logger.info(
@@ -260,9 +244,8 @@ class ChannelWrapper(object):
         self._initialised = False
         self._initialise()
 
-    def get(
-            self, name_or_id: str, default: Optional[T] = None, use_cache: bool =True
-    ) -> Union[Channel, Optional[T]]:
+    def get(self, name_or_id: str, default: Optional[T] = None,
+            use_cache: bool = True) -> Union[Channel, Optional[T]]:
         if use_cache and not self._initialised:
             self._initialise()
         if name_or_id in self._channels_by_id:
@@ -380,9 +363,8 @@ class UsersWrapper(object):
         self._initialised = False
         self._initialise()
 
-    def get(
-            self, user_id: str, default: Optional[T] = None, use_cache: bool =True
-    ) -> Union['User', Optional[T]]:
+    def get(self, user_id: str, default: Optional[T] = None,
+            use_cache: bool = True) -> Union['User', Optional[T]]:
         if use_cache and not self._initialised:
             self._initialise()
         if user_id in self._users_by_id:
@@ -428,17 +410,14 @@ class UsersWrapper(object):
 
 
 class User(object):
-    def __init__(
-            self,
-            user_id: str,
-            deleted: bool,
-            is_admin: bool,
-            is_owner: bool,
-            is_bot: bool,
-            display_name: str,
-            real_name: str,
-            lock: Optional[threading.RLock] = None
-    ) -> None:
+    def __init__(self, user_id: str,
+                 deleted: bool,
+                 is_admin: bool,
+                 is_owner: bool,
+                 is_bot: bool,
+                 display_name: str,
+                 real_name: str,
+                 lock: Optional[threading.RLock] = None) -> None:
         self.user_id = user_id
         self.deleted = deleted
         self.is_admin = is_admin
@@ -453,22 +432,20 @@ class User(object):
 
     @classmethod
     def _parse_dict(self, data_dict: dict) -> dict:
-        return {
-            "user_id": data_dict['id'],
-            "deleted": data_dict.get('deleted', False),
-            "is_admin": data_dict.get('is_admin', False),
-            "is_owner": data_dict.get('is_owner', False),
-            "is_bot": data_dict.get('is_bot', False),
-            "display_name": data_dict.get('profile', {}).get('display_name'),
-            "real_name": data_dict.get('profile', {}).get('real_name'),
-        }
+        return {"user_id": data_dict['id'],
+                "deleted": data_dict.get('deleted', False),
+                "is_admin": data_dict.get('is_admin', False),
+                "is_owner": data_dict.get('is_owner', False),
+                "is_bot": data_dict.get('is_bot', False),
+                "display_name": data_dict.get('profile', {}).get('display_name'),
+                "real_name": data_dict.get('profile', {}).get('real_name')}
 
     @classmethod
     def from_dict(cls: Type[UserT], data: dict) -> UserT:
         return cls(**cls._parse_dict(data))
 
     def update_from_dict(self, data: dict) -> None:
-        # Sorry that this is kind of hacky. It dramatically reduces code
-        # duplication so I'm not that sorry.
+        # Sorry that this is kind of hacky. It dramatically
+        # reduces code duplication so I'm not that sorry.
         with self._lock:
             type(self).__init__(self, lock=self._lock, **self._parse_dict(data))

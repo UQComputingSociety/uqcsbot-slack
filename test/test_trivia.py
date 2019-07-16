@@ -14,7 +14,7 @@ def test_trivia_multiple(uqcsbot: MockUQCSBot):
 
 def test_trivia_boolean(uqcsbot: MockUQCSBot):
     """
-        Tests !trivia with the true/false option
+    Tests !trivia with the true/false option
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, '!trivia -t boolean')
     uqcsbot.post_message(TEST_CHANNEL_ID, '!trivia --type boolean')

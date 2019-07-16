@@ -1,14 +1,14 @@
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 
-LONG_MESSAGE = 'I\'m going to say a really long sentence that has a really low'\
-               + ' probability of outputting a random-case mocked message that'\
-               + ' is equal to the original.'
+LONG_MESSAGE = ("I'm going to say a really long sentence that has a really low"
+                + " probability of outputting a random-case mocked message that"
+                + " is equal to the original.")
 
 
 def test_mock_previous_message(uqcsbot: MockUQCSBot):
-    '''
+    """
     Test !mock on the immediately previous message
-    '''
+    """
     uqcsbot.post_message(TEST_CHANNEL_ID, LONG_MESSAGE)
     uqcsbot.post_message(TEST_CHANNEL_ID, '!mock')
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
@@ -18,9 +18,9 @@ def test_mock_previous_message(uqcsbot: MockUQCSBot):
 
 
 def test_mock_past_message(uqcsbot: MockUQCSBot):
-    '''
+    """
     Test !mock on a message from the past
-    '''
+    """
     uqcsbot.post_message(TEST_CHANNEL_ID, LONG_MESSAGE)
     uqcsbot.post_message(TEST_CHANNEL_ID, 'just')
     uqcsbot.post_message(TEST_CHANNEL_ID, 'some')
@@ -34,9 +34,9 @@ def test_mock_past_message(uqcsbot: MockUQCSBot):
 
 
 def test_mock_given_message(uqcsbot: MockUQCSBot):
-    '''
+    """
     Test !mock works for given text.
-    '''
+    """
     uqcsbot.post_message(TEST_CHANNEL_ID, f'!mock {LONG_MESSAGE}')
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2

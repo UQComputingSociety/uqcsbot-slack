@@ -1,6 +1,7 @@
 from random import choice
 from uqcsbot import bot, Command
 
+
 @bot.on_command("dice")
 def handle_dice(command: Command):
     """
@@ -12,7 +13,8 @@ def handle_dice(command: Command):
         rolls = 1
 
     response = []
-    emoji = (':dice-one:', ':dice-two:', ':dice-three:', ':dice-four:', ':dice-five:', ':dice-six:')
+    emoji = (':dice-one:', ':dice-two:', ':dice-three:',
+             ':dice-four:', ':dice-five:', ':dice-six:')
     for i in range(rolls):
         response.append(choice(emoji))
 

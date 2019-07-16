@@ -15,9 +15,9 @@ COURSE_LIMIT = 6
 
 
 def get_calendar(assessment):
-    '''
+    """
     Returns a compiled calendar containing the given assessment.
-    '''
+    """
     calendar = Calendar()
     for assessment_item in assessment:
         course, task, due_date, weight = assessment_item
@@ -28,14 +28,15 @@ def get_calendar(assessment):
             start_datetime, end_datetime = get_parsed_assessment_due_date(assessment_item)
         except DateSyntaxException as e:
             bot.logger.error(e.message)
-            # If we can't parse a date, set its due date to today and let the
-            # user know through its summary.
+            # If we can't parse a date, set its due date to today
+            # and let the user know through its summary.
             # TODO(mitch): Keep track of these instances to attempt to accurately
             # parse them in future. Will require manual detection + parsing.
             start_datetime = end_datetime = datetime.today()
-            event['summary'] = 'WARNING: DATE PARSING FAILED\nPlease manually' \
-                               + 'set date for event!\nThe provided due date' \
-                               + 'from UQ was \'{due_date}\'.' + event['summary']
+            event['summary'] = ("WARNING: DATE PARSING FAILED\n"
+                                "Please manually set date for event!\n"
+                                "The provided due date from UQ was"
+                                + f" '{due_date}\'. {event['summary']}")
         event.add('dtstart', start_datetime)
         event.add('dtend', end_datetime)
         calendar.add_component(event)
@@ -46,10 +47,10 @@ def get_calendar(assessment):
 @success_status
 @loading_status
 def handle_calendar(command: Command):
-    '''
+    """
     `!calendar <COURSE CODE 1> [COURSE CODE 2] ...` - Returns a compiled
     calendar containing all the assessment for a given list of course codes.
-    '''
+    """
     channel = bot.channels.get(command.channel_id)
     course_names = command.arg.split() if command.has_arg() else [channel.name]
 

@@ -14,10 +14,10 @@ NO_FONT_MESSAGE = "Cannot find the specified font in the fontslist."
 
 
 def mocked_get_fontslist(*args, **kwargs):
-    '''
-    Mocks get fontslist by retuning a local file containing fonts for
-    offline testing
-    '''
+    """
+    Mocks get fontslist by retuning a local file
+    containing fonts for offline testing
+    """
     with open('test/fontslist.txt', 'r') as file:
         content = file.readlines()
         fontslist = []
@@ -27,10 +27,10 @@ def mocked_get_fontslist(*args, **kwargs):
 
 
 def mocked_asciify(text, font):
-    '''
+    """
     Mocks ascii art API response, returns DEFAULT_FONT if called without
     a custom font, returns CUSTOM_FONT if called with a custom font
-    '''
+    """
     if font is not None:
         return f"CUSTOM_FONT {font}"
     else:

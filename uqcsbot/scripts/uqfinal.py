@@ -75,7 +75,7 @@ def handle_uqfinal(command: Command):
     for i, score_deci in enumerate(scores):
         total_deci += score_deci * float(assessments[i]["weight"]) / 100
         results.append(f"Inputted score of {round(score_deci * 100)}% for"
-                       f" {assessments[i]['taskName']} (weighted {assessments[i]['weight']}%)")
+                       + f" {assessments[i]['taskName']} (weighted {assessments[i]['weight']}%)")
     bot.post_message(command.channel_id, "\n".join(results))
 
     # calculate remaining marks
@@ -93,17 +93,17 @@ def handle_uqfinal(command: Command):
             message.append(f"You have achieved a {grade} :toot:.")
         elif len(scores) == len(assessments) - 1:
             message.append(f"You need to score at least {needed_perc}%"
-                           f" on the {assessments[-1]['taskName']} to achieve a {grade}.")
+                           + f" on the {assessments[-1]['taskName']} to achieve a {grade}.")
         else:
             message.append(f"You need to score at least a weighted average of {needed_perc}%"
-                           f" on the remaining {len(assessments) - len(scores)}"
-                           f" assessments to achieve a {grade}.")
+                           + f" on the remaining {len(assessments) - len(scores)}"
+                           + f" assessments to achieve a {grade}.")
 
     # if getting a four impossible
     if not message:
         message.append("I am a servant of the Secret Fire, wielder of the flame of Anor."
-                       " The dark fire will not avail you, flame of Udûn. Go back to the Shadow!"
-                       " *You cannot pass.*")
+                       + " The dark fire will not avail you, flame of Udûn."
+                       + " Go back to the Shadow! *You cannot pass.*")
     message.append("_Disclaimer: this does not take hurdles into account._")
     message.append("_Powered by http://uqfinal.com_")
     bot.post_message(command.channel_id, "\n".join(message))
@@ -119,7 +119,7 @@ def get_uqfinal_semesters():
         semester_response: Response = get(UQFINAL_API + "/semesters")
         if semester_response.status_code != 200:
             bot.logger.error(f"UQFinal returned {semester_response.status_code}"
-                             f" when getting the current semester")
+                             + f" when getting the current semester")
             return None
         return semester_response.json()["data"]["semesters"].pop()
     except RequestException as e:
@@ -136,7 +136,7 @@ def get_uqfinal_course(semester, course: str):
         course_response = get("/".join([UQFINAL_API, "course", str(semester["uqId"]), course]))
         if course_response.status_code != 200:
             bot.logger.error(f"UQFinal returned {course_response.status_code}"
-                             f" when getting the course {course}")
+                             + f" when getting the course {course}")
             return None
         return course_response.json()["data"]
     except RequestException as e:

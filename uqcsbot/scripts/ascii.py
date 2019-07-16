@@ -11,14 +11,15 @@ NO_FONT_MESSAGE = "Cannot find the specified font in the fontslist."
 ASCII_URL = "http://artii.herokuapp.com/make?text="
 FONT_URL = "http://artii.herokuapp.com/fonts_list"
 
+
 @bot.on_command("asciify")
 @loading_status
 def handle_asciify(command: Command):
     """
-    `!asciify [--fontslist] [--randomfont | --<CUSTOM FONT>] <TEXT>` - Returns
-    ASCIIfyed text. `--fontslist` also returns a URL to available fonts, `--randomfont`
-    returns, well... a random font. A custom font from the fonts list can also be
-    specified.
+    `!asciify [--fontslist] [--randomfont | --<CUSTOM FONT>] <TEXT>` - Returns  ASCIIfyed text.
+    `--fontslist` also returns a URL to available fonts,
+    `--randomfont`  returns, well... a random font.
+    A custom font from the fonts list can also be specified.
     """
     # Makes sure the query is not empty
     if not command.has_arg():
@@ -28,15 +29,15 @@ def handle_asciify(command: Command):
     random_font = False
     custom_font = False
     return_fonts = False
-    #check for font list option
+    # check for font list option
     if '--fontslist' in command_args:
         return_fonts = True
         command_args.remove('--fontslist')
-    #check for random font option
+    # check for random font option
     if '--randomfont' in command_args:
         random_font = True
         command_args.remove('--randomfont')
-    #check for custom font option
+    # check for custom font option
     fontslist = get_fontslist()
     if not fontslist:
         bot.post_message(command.channel_id, ERROR_MESSAGE)
@@ -51,15 +52,15 @@ def handle_asciify(command: Command):
             else:
                 bot.post_message(command.channel_id, NO_FONT_MESSAGE)
                 return
-    #check for invalid options
+    # check for invalid options
     if random_font and custom_font:
         bot.post_message(command.channel_id, BOTH_OPTIONS_MESSAGE)
         return
     if not command_args:
         text = None
-    else: 
+    else:
         text = ' '.join(command_args)
-    #asciification
+    # asciification
     if text is None:
         bot.post_message(command.channel_id, NO_QUERY_MESSAGE)
         ascii_text = None
@@ -74,7 +75,7 @@ def handle_asciify(command: Command):
         if ascii_text is None:
             bot.post_message(command.channel_id, ERROR_MESSAGE)
             return
-    #message posts
+    # message posts
     if return_fonts:
         bot.post_message(command.channel_id, FONT_URL)
     if ascii_text:
@@ -93,9 +94,9 @@ def asciify(text: str, font: str) -> str:
         resp = get(url)
         ascii_text = f"```\n{resp.text}\n```"
         return ascii_text
-    except RequestException as e:
+    except RequestException:
         return None
-    
+
 
 def get_random_font() -> str:
     fontslist = get_fontslist()
@@ -110,7 +111,5 @@ def get_fontslist() -> set:
         resp = get('http://artii.herokuapp.com/fonts_list')
         fontslist = set(resp.text.split())
         return fontslist
-    except RequestException as e:
+    except RequestException:
         return None
-    
-    
