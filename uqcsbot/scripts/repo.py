@@ -1,17 +1,17 @@
 from uqcsbot import bot, Command
 
 repos = {
-        "uqcsbot": "https://github.com/UQComputingSociety/uqcsbot",
-        "desgin": "https://github.com/UQComputingSociety/design",
-        "constitution": "https://github.com/UQComputingSociety/constitution",
-        "signup": "https://github.com/UQComputingSociety/signup",
-        "website": "https://github.com/UQComputingSociety/website",
-        "inviter": "https://github.com/UQComputingSociety/slack-invite-automation",  # noqa
-        "coc": "https://github.com/UQComputingSociety/code-of-conduct",
-        "shirts": "https://github.com/UQComputingSociety/shirts",
-        "events": "https://github.com/UQComputingSociety/events",
-        "cookbook": "https://github.com/UQComputingSociety/cookbook",
-        "minutes": "https://github.com/UQComputingSociety/minutes"
+    "coc": "https://github.com/UQComputingSociety/code-of-conduct",
+    "constitution": "https://github.com/UQComputingSociety/constitution",
+    "cookbook": "https://github.com/UQComputingSociety/cookbook",
+    "desgin": "https://github.com/UQComputingSociety/design",
+    "events": "https://github.com/UQComputingSociety/events",
+    "inviter": "https://github.com/UQComputingSociety/slack-invite-automation",
+    "minutes": "https://github.com/UQComputingSociety/minutes"
+    "shirts": "https://github.com/UQComputingSociety/shirts",
+    "signup": "https://github.com/UQComputingSociety/signup",
+    "uqcsbot": "https://github.com/UQComputingSociety/uqcsbot",
+    "website": "https://github.com/UQComputingSociety/website",
 }
 
 
