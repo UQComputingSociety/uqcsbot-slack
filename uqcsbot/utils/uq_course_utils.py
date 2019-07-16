@@ -5,6 +5,7 @@ from dateutil import parser
 from bs4 import BeautifulSoup
 from functools import partial
 from binascii import hexlify
+from typing import List
 
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 BASE_ASSESSMENT_URL = ('https://www.courses.uq.edu.au/'
@@ -165,10 +166,10 @@ def is_assessment_after_cutoff(assessment, cutoff):
     return end_datetime >= cutoff if end_datetime else start_datetime >= cutoff
 
 
-def get_course_assessment_page(course_names):
+def get_course_assessment_page(course_names: List[str]) -> str:
     """
-    Returns all the course assessment for the given
-    courses that occur after the given cutoff.
+    Determines the course ids from the course names and returns the
+    url to the assement table for the provided courses
     """
     profile_ids = map(get_course_profile_id, course_names)
     return BASE_ASSESSMENT_URL + ','.join(profile_ids)
