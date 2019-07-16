@@ -44,15 +44,16 @@ def handle_repo(command: Command):
         # Add only the uqcsbot as the default result
         if len(command_args) == 0:
             repo_strs.append(f"<{repos['uqcsbot']}|uqcsbot>")
-            if not is_list_output:
-                bot.post_message(channel, "_Note: the list is not complete," +
-                                          " please use -l/--list to print" +
-                                          " the full list_")
         else:
-            # Add each of the specified repos, don't prompt with -l
+            # Add each of the specified repos to be printed
             for c in command_args:
                 repo_strs.append(f"<{repos[c]}|{c}>")
 
     # Send the message to the channel
     bot.post_message(channel, "Click the link to go to to the repo: " +
                               ", ".join(repo_strs))
+
+    # Prompt for a complete list if they did not specify a repo or list
+    if not is_list_output and len(command_args) == 0:
+        bot.post_message(channel, "_Note: the list is not complete, please " +
+                                  "use -l/--list to print the full list_")
