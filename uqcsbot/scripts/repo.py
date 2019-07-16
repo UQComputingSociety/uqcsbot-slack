@@ -6,7 +6,7 @@ repos = {
     "coc": "code-of-conduct",
     "constitution": "constitution",
     "cookbook": "cookbook",
-    "desgin": "design",
+    "design": "design",
     "events": "events",
     "inviter": "slack-invite-automation",
     "minutes": "minutes",
@@ -29,10 +29,8 @@ def handle_repo(command: Command):
 
     # Checks for the list command
     is_list_output = False
-    if '--list' in command_args:
+    if '--list' in command_args or '-l' in command_args:
         command_args.remove('--list')
-        is_list_output = True
-    if '-l' in command_args:
         command_args.remove('-l')
         is_list_output = True
 
@@ -40,8 +38,8 @@ def handle_repo(command: Command):
     repo_strs = []
     if is_list_output:
         # Add all repos formatted as links
-        for k, v in repos.items():
-            repo_strs.append(f"<{UQCS_REPO_URL + v}|{k}>")
+        for name, url in repos.items():
+            repo_strs.append(f"<{UQCS_REPO_URL + url}|{name}>")
     else:
         # Add only the uqcsbot as the default result
         if len(command_args) == 0:
@@ -49,7 +47,10 @@ def handle_repo(command: Command):
         else:
             # Add each of the specified repos to be printed
             for c in command_args:
-                repo_strs.append(f"<{UQCS_REPO_URL + repos[c]}|{c}>")
+                if c not in repos.keys():
+                    repo_strs.append(f"Unknown repo \"{c}\"")
+                else:
+                    repo_strs.append(f"<{UQCS_REPO_URL + repos[c]}|{c}>")
 
     # Send the message to the channel
     bot.post_message(channel, "Click the link to go to to the repo: " +
@@ -58,4 +59,4 @@ def handle_repo(command: Command):
     # Prompt for a complete list if they did not specify a repo or list
     if not is_list_output and len(command_args) == 0:
         bot.post_message(channel, "_Note: the list is not complete, please " +
-                                  "use -l/--list to print the full list_")
+                                  "use `-l`/`--list` to print the full list_")
