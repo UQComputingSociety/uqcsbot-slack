@@ -30,8 +30,10 @@ def handle_repo(command: Command):
     # Checks for the list command
     is_list_output = False
     if '--list' in command_args or '-l' in command_args:
-        command_args.remove('--list')
-        command_args.remove('-l')
+        if '--list' in command_args:
+            command_args.remove('--list')
+        if '-l' in command_args:
+            command_args.remove('-l')
         is_list_output = True
 
     # Setup the empty list of formatted repo strings
