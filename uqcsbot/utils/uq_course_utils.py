@@ -7,15 +7,16 @@ from functools import partial
 from binascii import hexlify
 
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
-BASE_ASSESSMENT_URL = 'https://www.courses.uq.edu.au/student_section_report.php?report=assessment&profileIds=' # noqa
+BASE_ASSESSMENT_URL = ('https://www.courses.uq.edu.au/'
+                       'student_section_report.php?report=assessment&profileIds=')
 BASE_CALENDAR_URL = 'http://www.uq.edu.au/events/calendar_view.php?category_id=16&year='
 OFFERING_PARAMETER = 'offer'
 
 
 class DateSyntaxException(Exception):
-    '''
+    """
     Raised when an unparsable date syntax is encountered.
-    '''
+    """
     def __init__(self, date, course_name):
         self.message = f'Could not parse date \'{date}\' for course \'{course_name}\'.'
         self.date = date
@@ -24,9 +25,9 @@ class DateSyntaxException(Exception):
 
 
 class CourseNotFoundException(Exception):
-    '''
+    """
     Raised when a given course cannot be found for UQ.
-    '''
+    """
     def __init__(self, course_name):
         self.message = f'Could not find course \'{course_name}\'.'
         self.course_name = course_name
@@ -34,9 +35,9 @@ class CourseNotFoundException(Exception):
 
 
 class ProfileNotFoundException(Exception):
-    '''
+    """
     Raised when a profile cannot be found for a given course.
-    '''
+    """
     def __init__(self, course_name):
         self.message = f'Could not find profile for course \'{course_name}\'.'
         self.course_name = course_name
@@ -44,15 +45,16 @@ class ProfileNotFoundException(Exception):
 
 
 class HttpException(Exception):
-    '''
-    Raised when a HTTP request returns an unsuccessful (i.e. not 200 OK) status
-    code.
-    '''
+    """
+    Raised when a HTTP request returns an
+    unsuccessful (i.e. not 200 OK) status code.
+    """
     def __init__(self, url, status_code):
         self.message = f'Received status code {status_code} from \'{url}\'.'
         self.url = url
         self.status_code = status_code
         super().__init__(self.message, self.url, self.status_code)
+
 
 def get_offering_code(semester=None, campus='STLUC', is_internal=True):
     """
@@ -71,9 +73,9 @@ def get_offering_code(semester=None, campus='STLUC', is_internal=True):
 
 
 def get_course_profile_url(course_name):
-    '''
+    """
     Returns the URL to the latest course profile for the given course.
-    '''
+    """
     course_url = BASE_COURSE_URL + course_name
     http_response = requests.get(
         course_url, params={OFFERING_PARAMETER: get_offering_code()}
@@ -90,21 +92,22 @@ def get_course_profile_url(course_name):
 
 
 def get_course_profile_id(course_name):
-    '''
+    """
     Returns the ID to the latest course profile for the given course.
-    '''
+    """
     profile_url = get_course_profile_url(course_name)
-    profile_id_index = profile_url.index('profileId=') + len('profileId=')
-    return profile_url[profile_id_index:]
+    # The profile url looks like this
+    # https://course-profiles.uq.edu.au/student_section_loader/section_1/100728
+    return profile_url[profile_url.rindex('/')+1:]
 
 
 def get_current_exam_period():
-    '''
+    """
     Returns the start and end datetimes for the current semester's exam period.
 
-    Note: Assumes that Semester 1 always occurs before or during June, with
-    Semester 2 occurring after.
-    '''
+    Note: Assumes that Semester 1 always occurs before or
+    during June, with Semester 2 occurring after.
+    """
     today = datetime.today()
     current_calendar_url = BASE_CALENDAR_URL + str(today.year)
     http_response = requests.get(current_calendar_url)
@@ -125,10 +128,10 @@ def get_current_exam_period():
 
 
 def get_parsed_assessment_due_date(assessment_item):
-    '''
+    """
     Returns the parsed due date for the given assessment item as a datetime
     object. If the date cannot be parsed, a DateSyntaxException is raised.
-    '''
+    """
     course_name, _, due_date, _ = assessment_item
     if due_date == 'Examination Period':
         return get_current_exam_period()
@@ -148,9 +151,9 @@ def get_parsed_assessment_due_date(assessment_item):
 
 
 def is_assessment_after_cutoff(assessment, cutoff):
-    '''
+    """
     Returns whether the assessment occurs after the given cutoff.
-    '''
+    """
     try:
         start_datetime, end_datetime = get_parsed_assessment_due_date(assessment)
     except DateSyntaxException as e:
@@ -163,10 +166,10 @@ def is_assessment_after_cutoff(assessment, cutoff):
 
 
 def get_course_assessment(course_names, cutoff=None):
-    '''
-    Returns all the course assessment for the given courses that occur after
-    the given cutoff.
-    '''
+    """
+    Returns all the course assessment for the given
+    courses that occur after the given cutoff.
+    """
     profile_ids = map(get_course_profile_id, course_names)
     joined_assessment_url = BASE_ASSESSMENT_URL + ','.join(profile_ids)
     http_response = requests.get(joined_assessment_url)
@@ -185,22 +188,22 @@ def get_course_assessment(course_names, cutoff=None):
 
 
 def get_element_inner_html(dom_element):
-    '''
+    """
     Returns the inner html for the given element.
-    '''
+    """
     return dom_element.decode_contents(formatter='html')
 
 
 def get_parsed_assessment_item(assessment_item):
-    '''
-    Returns the parsed assessment details for the given assessment item table
-    row element.
+    """
+    Returns the parsed assessment details for the
+    given assessment item table row element.
 
     Note: Because of the inconsistency of UQ assessment details, I've had to
     make some fairly strict assumptions about the structure of each field.
-    This is likely insufficient to handle every course's structure, and thus
-    is subject to change.
-    '''
+    This is likely insufficient to handle every course's
+    structure, and thus is subject to change.
+    """
     course_name, task, due_date, weight = assessment_item.findAll('div')
     # Handles courses of the form 'CSSE1001 - Sem 1 2018 - St Lucia - Internal'.
     # Thus, this bit of code will extract the course.

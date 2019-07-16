@@ -1,6 +1,7 @@
 from random import choice
 from uqcsbot import bot, Command
 
+
 @bot.on_command("coin")
 def handle_coin(command: Command):
     """

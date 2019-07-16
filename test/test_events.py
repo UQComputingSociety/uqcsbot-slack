@@ -63,8 +63,8 @@ def mocked_html_details_partial(url: str) -> bytes:
 
 def mocked_events_ics() -> bytes:
     """
-    Returns a locally stored .ics file that imitates the UQCS Calendar on
-    Google Calendar.
+    Returns a locally stored .ics file that
+    imitates the UQCS Calendar on Google Calendar.
     """
     with open("test/test_events_events.ics", "rb") as events_file:
         return events_file.read()
@@ -90,8 +90,8 @@ def mocked_get_no_time():
        new=mocked_html_details_full)
 def test_seminars_events_typical():
     """
-    This test checks Seminar Utilities correctly provides seminar information when
-    all ITEE website pages are available and correctly formatted.
+    This test checks Seminar Utilities correctly provides seminar information
+    when all ITEE website pages are available and correctly formatted.
     """
     summaries = get_seminars()
     brisbaneTime = timezone('Australia/Brisbane')
@@ -118,9 +118,8 @@ def test_seminars_events_typical():
        new=mocked_html_details_partial)
 def test_seminars_events_partial_results():
     """
-    This test checks Seminar Utilities correctly provides partial seminar information
-    when the seminar listings page is available on the ITEE website, but not all of the
-    details pages.
+    This test checks Seminar Utilities correctly provides partial seminar information when the
+    seminar listings page is available on the ITEE website, but not all of the details pages.
     """
     summaries = get_seminars()
     brisbaneTime = timezone('Australia/Brisbane')
@@ -144,8 +143,8 @@ def test_seminars_events_partial_results():
        new=mocked_html_summary_get_no_results)
 def test_seminars_events_no_results():
     """
-    This test checks Seminar Utilities correctly handles no seminars being listed on the
-    ITEE website.
+    This test checks Seminar Utilities correctly handles
+    no seminars being listed on the ITEE website.
     """
     summaries = get_seminars()
     assert len(summaries) == 0
@@ -313,8 +312,8 @@ def test_events_no_events(uqcsbot: MockUQCSBot):
 def test_events_live(uqcsbot: MockUQCSBot):
     """
     This test simulates a user invoking '!events' against the live UQCS calendar
-    and ITEE website. No particular assertion is made about the content of the bot's
-    response, other than that there is one and it is not an error.
+    and ITEE website. No particular assertion is made about the content of the
+    bot's response, other than that there is one and it is not an error.
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])

@@ -1,15 +1,15 @@
 import re
 from uqcsbot import bot
 
-CAESAR_REGEX = re.compile('!caesar(|-?\d+) (.+)')
+CAESAR_REGEX = re.compile(r'!caesar(|-?\d+) (.+)')
 
 
 @bot.on('message')
 def handle_caesar(message: dict):
-    '''
-    `!caesar[N] <TEXT>` - Performs caesar shift with a left shift of N on given
-    text. If unspecified, will shift by 47.
-    '''
+    """
+    `!caesar[N] <TEXT>` - Performs caesar shift with a left shift of N on given text.
+    If unspecified, will shift by 47.
+    """
     text = message.get("text")
     if message.get("subtype") == "bot_message" or text is None:
         return

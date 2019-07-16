@@ -6,7 +6,8 @@ from urllib.parse import quote
 API_URL = "https://memegen.link/"
 # Many different characters need to be replaced in order to work in url format
 # See the API_URL for details
-REPLACEMENTS = str.maketrans({'_': '__', ' ': '_', '-': '--', '?': '~q', '%': '~p', '#': '~h', '/': '~s'})
+REPLACEMENTS = str.maketrans({'_': '__', ' ': '_', '-': '--', '?': '~q',
+                              '%': '~p', '#': '~h', '/': '~s'})
 MEME_NAMES = {
     "aag": "Ancient Aliens Guy",
     "ackbar": "It's A Trap!",
@@ -132,8 +133,9 @@ MEME_NAMES = {
 @loading_status
 def handle_meme(command: Command):
     """
-    `!meme <names | (<MEME NAME> "<TOP TEXT>" "<BOTTOM TEXT>")>` - Generates a meme of the given format with the
-    provided top and bottom text. For a full list of formats, try `!meme names`.
+    `!meme <names | (<MEME NAME> "<TOP TEXT>" "<BOTTOM TEXT>")>`
+    Generates a meme of the given format with the provided top and
+    bottom text. For a full list of formats, try `!meme names`.
     """
     channel = command.channel_id
 
@@ -145,7 +147,8 @@ def handle_meme(command: Command):
         send_meme_names(command)
         return
     elif name not in MEME_NAMES.keys():
-        bot.post_message(channel, "The meme name is invalid. Try `!meme names` to get a list of all valid names")
+        bot.post_message(channel, "The meme name is invalid. "
+                         "Try `!meme names` to get a list of all valid names")
         return
 
     args = get_meme_arguments(command.arg)
@@ -161,7 +164,9 @@ def handle_meme(command: Command):
 
 @success_status
 def send_meme_names(command: Command):
-    """Sends the full list of meme names to the users channel to avoid channel spam"""
+    """
+    Sends the full list of meme names to the users channel to avoid channel spam
+    """
     user_channel = bot.channels.get(command.user_id)
     names_text = "\n".join((f"{full_name}: {name}" for (name, full_name) in MEME_NAMES.items()))
     attachments = [{'text': names_text, 'title': "Meme Names:"}]
@@ -169,7 +174,10 @@ def send_meme_names(command: Command):
 
 
 def get_meme_arguments(input_args: str):
-    """Gets the top and bottom text and returns them in a url friendly form that conforms with the api standards"""
+    """
+    Gets the top and bottom text and returns them in a
+    url friendly form that conforms with the api standards
+    """
     # This gets the text between the quotation marks (and ignores \")
     args = re.findall(r'"(.*?(?<!\\))"', input_args)
 

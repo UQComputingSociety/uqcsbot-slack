@@ -31,24 +31,20 @@ class Command(object):
         if message.get("subtype") == "bot_message" or not text.startswith("!"):
             return None
         name, *arg = text[1:].split(" ", 1)
-        return cls(
-            name=name,
-            arg=None if not arg else arg[0],
-            message=message
-        )
+        return cls(name=name, arg=None if not arg else arg[0], message=message)
 
     @property
     def user_id(self):
-        '''
+        """
         Returns the id of the user who called the command.
-        '''
+        """
         return self.message['user']
 
     @property
     def channel_id(self):
-        '''
+        """
         Returns the id of the channel that the command was called in.
-        '''
+        """
         return self.message['channel']
 
 
@@ -104,17 +100,16 @@ class UQCSBot(object):
 
     def on_command(self, command_name: str):
         def decorator(command_fn):
-            '''
+            """
             Decorator function which returns a wrapper function that catches any
-            UsageSyntaxExceptions and sends the wrapped command's helper doc to
-            the calling channel. Also adds the function as a handler for the
-            given command name.
-            '''
+            UsageSyntaxExceptions and sends the wrapped command's helper doc to the calling channel.
+            Also adds the function as a handler for the given command name.
+            """
             @wraps(command_fn)
             def wrapper(command: Command):
                 try:
                     return command_fn(command)
-                except UsageSyntaxException as e:
+                except UsageSyntaxException:
                     helper_doc = get_helper_doc(command.name)
                     self.post_message(command.channel_id, f'usage: {helper_doc}')
             self._command_registry[command_name].append(wrapper)
@@ -199,11 +194,7 @@ class UQCSBot(object):
         if command is None:
             return
         for handler in self._command_registry[command.name]:
-            self.executor.submit(
-                self._execute_catching_error,
-                handler,
-                command,
-            )
+            self.executor.submit(self._execute_catching_error, handler, command)
 
     def _run_handlers(self, event: dict):
         """
@@ -214,14 +205,8 @@ class UQCSBot(object):
         if "type" not in event:
             self.logger.error(f"No type in message: {event}")
         handlers = self._handlers[event['type']] + self._handlers['']
-        return [
-            self.executor.submit(
-                self._execute_catching_error,
-                handler,
-                event,
-            )
-            for handler in handlers
-        ]
+        return [self.executor.submit(self._execute_catching_error, handler, event)
+                for handler in handlers]
 
     def run(self, api_token, verification_token, **kwargs):
         """

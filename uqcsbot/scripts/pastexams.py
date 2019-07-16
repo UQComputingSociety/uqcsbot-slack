@@ -8,11 +8,11 @@ from uqcsbot.utils.command_utils import loading_status
 @bot.on_command('pastexams')
 @loading_status
 def handle_pastexams(command: Command):
-    '''
+    """
     `!pastexams [COURSE CODE]` - Retrieves past exams for a given course code.
-    If unspecified, will attempt to find the ECP for the channel the command was
-    called from.
-    '''
+    If unspecified, will attempt to find the ECP
+    for the channel the command was called from.
+    """
     channel = bot.channels.get(command.channel_id)
     course_code = command.arg if command.has_arg() else channel.name
     bot.post_message(channel, get_past_exams(course_code))
@@ -48,8 +48,8 @@ def get_exam_data(soup: BeautifulSoup) -> Iterable[Tuple[str, str]]:
 
 def get_past_exams(course_code: str) -> str:
     """
-    Gets the past exams for the course with the specified course code. Returns intuitive error
-    messages if this fails.
+    Gets the past exams for the course with the specified course code.
+    Returns intuitive error messages if this fails.
     """
     url = 'https://www.library.uq.edu.au/exams/papers.php?'
     http_response = requests.get(url, params={'stub': course_code})
