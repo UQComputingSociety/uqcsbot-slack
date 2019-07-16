@@ -165,13 +165,24 @@ def is_assessment_after_cutoff(assessment, cutoff):
     return end_datetime >= cutoff if end_datetime else start_datetime >= cutoff
 
 
-def get_course_assessment(course_names, cutoff=None):
+def get_course_assessment_page(course_names):
     """
     Returns all the course assessment for the given
     courses that occur after the given cutoff.
     """
     profile_ids = map(get_course_profile_id, course_names)
-    joined_assessment_url = BASE_ASSESSMENT_URL + ','.join(profile_ids)
+    return BASE_ASSESSMENT_URL + ','.join(profile_ids)
+
+
+def get_course_assessment(course_names, cutoff=None, assement_url=None):
+    """
+    Returns all the course assessment for the given
+    courses that occur after the given cutoff.
+    """
+    if assement_url is None:
+        joined_assessment_url = get_course_assessment_page(course_names)
+    else:
+        joined_assessment_url = assement_url
     http_response = requests.get(joined_assessment_url)
     if http_response.status_code != requests.codes.ok:
         raise HttpException(joined_assessment_url, http_response.status_code)
