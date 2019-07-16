@@ -1,64 +1,68 @@
 from uqcsbot import bot, Command
+from uqcsbot.utils.command_utils import loading_status
+from typing import List, Optional
+
 
 UQCS_REPO_URL = "https://github.com/UQComputingSociety/"
 
-repos = {
-    "coc": "code-of-conduct",
-    "constitution": "constitution",
-    "cookbook": "cookbook",
-    "design": "design",
-    "events": "events",
-    "inviter": "slack-invite-automation",
-    "minutes": "minutes",
-    "shirts": "shirts",
-    "signup": "signup",
-    "uqcsbot": "uqcsbot",
-    "website": "website"
+REPOS = {
+    "coc": ("code-of-conduct", "The UQCS Code of Conduct to be followed by all community members"),
+    "constitution": ("constitution", "All the business details"),
+    "cookbook": ("cookbook", "A cookbook of recipes contributed by UQCS members"),
+    "design": ("design", "All UQCS design assets"),
+    "events": ("events", "A repository for events and talk materials"),
+    "inviter": ("slack-invite-automation", "A tiny web application to invite a user to our slack team"),
+    "minutes": ("minutes", "Minutes from UQCS committee meetings and general meetings"),
+    "shirts": ("shirts", "A payment system to accept preorders of UQCS tshirts"),
+    "signup": ("signup", "The UQCS membership signup system"),
+    "uqcsbot": ("uqcsbot", "Our friendly little Slack bot"),
+    "website": ("website", "The UQ Computing Society website"),
 }
 
 
+def format_repo_message(repos: Optional[List[str]]) -> str:
+    """
+    Takes a list of repo names and matches them to REPOS keys, constructing a message from the
+    relevant repo information.
+    :param repos: list of strings of repo names
+    :return: a single string with a formatted message containing repo info for the given names
+    """
+    repo_strings = []
+    for potential_repo in repos:
+        if potential_repo not in REPOS.keys():
+            repo_strings.append(f"> Unrecognised repo \"{potential_repo}\"\n")
+        else:
+            repo_strings.append(f"> • <{UQCS_REPO_URL + REPOS[potential_repo][0]}|*{potential_repo}*>:"
+                                f" {REPOS[potential_repo][1]}\n")
+    return "".join(repo_strings)
+
+
 @bot.on_command("repo")
+@loading_status
 def handle_repo(command: Command):
     """
-    `!repo` - Returns the url for the uqcsbot repo.
+    `!repo` - Returns the url for the uqcsbot Github repository and other club repos
     """
+
     # Setup for message passing
     channel = bot.channels.get(command.channel_id)
     # Read the commands provided
-    command_args = command.arg.split() if command.has_arg() else []
+    arguments = command.arg.split() if command.has_arg() else []
 
-    # Checks for the list command
-    is_list_output = False
-    if '--list' in command_args or '-l' in command_args:
-        if '--list' in command_args:
-            command_args.remove('--list')
-        if '-l' in command_args:
-            command_args.remove('-l')
-        is_list_output = True
+    # All repos
+    if len(arguments) > 0 and arguments[0] in ["--list", "-l", "list", "full", "all"]:
+        return bot.post_message(channel,
+                                "_Useful :uqcs: Github repositories_:\n"
+                                + format_repo_message(list(REPOS.keys())))
 
-    # Setup the empty list of formatted repo strings
-    repo_strs = []
-    if is_list_output:
-        # Add all repos formatted as links
-        for name, url in repos.items():
-            repo_strs.append(f"<{UQCS_REPO_URL + url}|{name}>")
-    else:
-        # Add only the uqcsbot as the default result
-        if len(command_args) == 0:
-            repo_strs.append(f"<{UQCS_REPO_URL + repos['uqcsbot']}|uqcsbot>")
-        else:
-            # Add each of the specified repos to be printed
-            for c in command_args:
-                if c not in repos.keys():
-                    repo_strs.append(f"Unknown repo \"{c}\"")
-                else:
-                    repo_strs.append(f"<{UQCS_REPO_URL + repos[c]}|{c}>")
+    # List of specific repos
+    if len(arguments) > 0:
+        return bot.post_message(channel,
+                                "_Requested :uqcs: Github repositories_:\n"
+                                + format_repo_message(arguments))
 
-    # Send the message to the channel
-    bot.post_message(channel, "Click the link to go to to the repo: " +
-                              ", ".join(repo_strs))
-
-    # Prompt for a complete list if they did not specify a repo or list
-    if not is_list_output and len(command_args) == 0:
-        bot.post_message(channel, "_Note: the list is not complete, please " +
-                                  "use `-l`/`--list` to print the full list_")
+    # Default option: just uqcsbot link
+    return bot.post_message(channel,
+                            "_Have you considered contributing to the bot?_\n" +
+                            format_repo_message(["uqcsbot"]) +
+                            "\n _For more repositories, try_ `!repo list`")
