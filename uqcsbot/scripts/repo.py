@@ -1,17 +1,19 @@
 from uqcsbot import bot, Command
 
+UQCS_REPO_URL = "https://github.com/UQComputingSociety/"
+
 repos = {
-    "coc": "https://github.com/UQComputingSociety/code-of-conduct",
-    "constitution": "https://github.com/UQComputingSociety/constitution",
-    "cookbook": "https://github.com/UQComputingSociety/cookbook",
-    "desgin": "https://github.com/UQComputingSociety/design",
-    "events": "https://github.com/UQComputingSociety/events",
-    "inviter": "https://github.com/UQComputingSociety/slack-invite-automation",
-    "minutes": "https://github.com/UQComputingSociety/minutes",
-    "shirts": "https://github.com/UQComputingSociety/shirts",
-    "signup": "https://github.com/UQComputingSociety/signup",
-    "uqcsbot": "https://github.com/UQComputingSociety/uqcsbot",
-    "website": "https://github.com/UQComputingSociety/website"
+    "coc": "code-of-conduct",
+    "constitution": "constitution",
+    "cookbook": "cookbook",
+    "desgin": "design",
+    "events": "events",
+    "inviter": "slack-invite-automation",
+    "minutes": "minutes",
+    "shirts": "shirts",
+    "signup": "signup",
+    "uqcsbot": "uqcsbot",
+    "website": "website"
 }
 
 
@@ -39,15 +41,15 @@ def handle_repo(command: Command):
     if is_list_output:
         # Add all repos formatted as links
         for k, v in repos.items():
-            repo_strs.append(f"<{v}|{k}>")
+            repo_strs.append(f"<{UQCS_REPO_URL + v}|{k}>")
     else:
         # Add only the uqcsbot as the default result
         if len(command_args) == 0:
-            repo_strs.append(f"<{repos['uqcsbot']}|uqcsbot>")
+            repo_strs.append(f"<{UQCS_REPO_URL + repos['uqcsbot']}|uqcsbot>")
         else:
             # Add each of the specified repos to be printed
             for c in command_args:
-                repo_strs.append(f"<{repos[c]}|{c}>")
+                repo_strs.append(f"<{UQCS_REPO_URL + repos[c]}|{c}>")
 
     # Send the message to the channel
     bot.post_message(channel, "Click the link to go to to the repo: " +
