@@ -96,8 +96,9 @@ def get_course_profile_id(course_name):
     Returns the ID to the latest course profile for the given course.
     """
     profile_url = get_course_profile_url(course_name)
-    profile_id_index = profile_url.index('profileId=') + len('profileId=')
-    return profile_url[profile_id_index:]
+    # The profile url looks like this
+    # https://course-profiles.uq.edu.au/student_section_loader/section_1/100728
+    return profile_url[profile_url.rindex('/')+1:]
 
 
 def get_current_exam_period():
