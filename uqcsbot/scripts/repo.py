@@ -11,7 +11,7 @@ REPOS = {
     "cookbook": ("cookbook", "A cookbook of recipes contributed by UQCS members"),
     "design": ("design", "All UQCS design assets"),
     "events": ("events", "A repository for events and talk materials"),
-    "inviter": ("slack-invite-automation", "A tiny web application to invite a user to our slack team"),
+    "inviter": ("slack-invite-automation", "Web application to invite users to our slack team"),
     "minutes": ("minutes", "Minutes from UQCS committee meetings and general meetings"),
     "shirts": ("shirts", "A payment system to accept preorders of UQCS tshirts"),
     "signup": ("signup", "The UQCS membership signup system"),
@@ -32,8 +32,8 @@ def format_repo_message(repos: Optional[List[str]]) -> str:
         if potential_repo not in REPOS.keys():
             repo_strings.append(f"> Unrecognised repo \"{potential_repo}\"\n")
         else:
-            repo_strings.append(f"> • <{UQCS_REPO_URL + REPOS[potential_repo][0]}|*{potential_repo}*>:"
-                                f" {REPOS[potential_repo][1]}\n")
+            repo_strings.append(f"> • <{UQCS_REPO_URL + REPOS[potential_repo][0]}|"
+                                f"*{potential_repo}*>: {REPOS[potential_repo][1]}\n")
     return "".join(repo_strings)
 
 
