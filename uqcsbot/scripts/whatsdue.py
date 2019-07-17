@@ -68,5 +68,5 @@ def handle_whatsdue(command: Command):
     if not is_full_output:
         message += ('\n_Note: This may not be the full assessment list. Use -f'
                     + '/--full to print out the full list._')
-    message += f'\nLink to assesment page <{asses_page}|here>'
+    message += f'\nLink to assessment page <{asses_page}|here>'
     bot.post_message(channel, message)
