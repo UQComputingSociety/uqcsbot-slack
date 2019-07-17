@@ -2,6 +2,7 @@ from datetime import datetime
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
 from uqcsbot.utils.uq_course_utils import (get_course_assessment,
+                                           get_course_assessment_page,
                                            HttpException,
                                            CourseNotFoundException,
                                            ProfileNotFoundException)
@@ -51,7 +52,8 @@ def handle_whatsdue(command: Command):
     # If full output is not specified, set the cutoff to today's date.
     cutoff = None if is_full_output else datetime.today()
     try:
-        assessment = get_course_assessment(course_names, cutoff)
+        asses_page = get_course_assessment_page(course_names)
+        assessment = get_course_assessment(course_names, cutoff, asses_page)
     except HttpException as e:
         bot.logger.error(e.message)
         bot.post_message(channel, f'An error occurred, please try again.')
@@ -66,4 +68,5 @@ def handle_whatsdue(command: Command):
     if not is_full_output:
         message += ('\n_Note: This may not be the full assessment list. Use -f'
                     + '/--full to print out the full list._')
+    message += f'\nLink to assessment page <{asses_page}|here>'
     bot.post_message(channel, message)
