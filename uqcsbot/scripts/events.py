@@ -124,8 +124,7 @@ class Event(object):
         d1 = self.start.astimezone(BRISBANE_TZ)
         d2 = self.end.astimezone(BRISBANE_TZ)
 
-        start_str = f"{day_abbr[d1.weekday()].upper()} {month_abbr[d1.month].upper(
-        )} {d1.day} {d1.hour}:{d1.minute:02}"
+        start_str = f"{day_abbr[d1.weekday()].upper()} {month_abbr[d1.month].upper()} {d1.day} {d1.hour}:{d1.minute:02}"
         if (d1.month, d1.day) != (d2.month, d2.day):
             end_str = f"{day_abbr[d2.weekday()].upper()} {month_abbr[d2.month].upper()} {d2.day} {d2.hour}:{d2.minute:02}"
         else:
