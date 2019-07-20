@@ -226,7 +226,7 @@ def test_UQCS_events_full(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     expected = ("List of *all* upcoming events\r\n"
-                "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - _River City Labs_\r\n"
+             "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - _River City Labs_\r\n"
                 "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
                 "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford` - "
                 "_Hawken 50-T103_\r\n"
@@ -239,7 +239,7 @@ def test_UQCS_events_full(uqcsbot: MockUQCSBot):
                   "_Hawken 50-T103_\r\n"
                 "*FRI AUG 23 18:00 - SUN AUG 25 20:00* - `UQCS Hackathon` - "
                   "_AEB 49-301_\r\n"
-                "*THU AUG 29 18:00 - 20:00* - `Six Key Things - Peter Laurie` - _Hawken 50-T103_\r\n"
+             "*THU AUG 29 18:00 - 20:00* - `Six Key Things - Peter Laurie` - _Hawken 50-T103_\r\n"
                 "*THU SEP 5 18:00 - 20:00* - `3D printing: The Future for DIY - Stephanie Piper`"
                 + " - _Hawken 50-T103_\r\n"
                 "*THU SEP 19 18:00 - 20:00* - `Intro to Firebase - Max Bo` - "
