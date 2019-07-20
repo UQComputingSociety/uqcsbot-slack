@@ -294,7 +294,7 @@ def test_events_normal(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = ("Events in the *next _2_ weeks*\r\n"
+    expected =  ("Events in the *next _2_ weeks*\r\n"
                 "*TUE MAY 28 12:00 - 13:00* - "
                 "`<https://www.itee.uq.edu.au/introduction"
                 + "-functional-programming|Introduction to functional programming"
