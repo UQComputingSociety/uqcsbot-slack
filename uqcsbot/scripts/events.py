@@ -1,7 +1,7 @@
 from typing import List
 import re
 from datetime import date, datetime, timedelta
-from calendar import month_name, month_abbr
+from calendar import month_name, month_abbr, day_abbr
 from icalendar import Calendar
 import requests
 from pytz import timezone, utc
@@ -124,9 +124,11 @@ class Event(object):
         d1 = self.start.astimezone(BRISBANE_TZ)
         d2 = self.end.astimezone(BRISBANE_TZ)
 
-        start_str = f"{month_abbr[d1.month].upper()} {d1.day} {d1.hour}:{d1.minute:02}"
+        start_str = (f"{day_abbr[d1.weekday()].upper()}"
+                     + f" {month_abbr[d1.month].upper()} {d1.day} {d1.hour}:{d1.minute:02}")
         if (d1.month, d1.day) != (d2.month, d2.day):
-            end_str = f"{month_abbr[d2.month].upper()} {d2.day} {d2.hour}:{d2.minute:02}"
+            end_str = (f"{day_abbr[d2.weekday()].upper()}"
+                       + f" {month_abbr[d2.month].upper()} {d2.day} {d2.hour}:{d2.minute:02}")
         else:
             end_str = f"{d2.hour}:{d2.minute:02}"
 
