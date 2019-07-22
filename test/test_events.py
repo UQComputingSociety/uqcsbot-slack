@@ -179,12 +179,11 @@ def test_seminar_events_typical(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     expected = ("Events in the *next _2_ weeks*\r\n"
-                "*TUE MAY 28 12:00 - 13:00* - "
-                "`<https://www.itee.uq.edu.au/introduction"
+                "*TUE MAY 28 12:00 - 13:00* - `<https://www.itee.uq.edu.au/introduction"
                 + "-functional-programming|Introduction to functional programming"
                 + " - Tony Morris, Software Engineer at Data61>` - _78-420_\r\n"
-                "*WED MAY 29 13:00 - 14:00* - "
-                  "`<https://www.itee.uq.edu.au/performance-enhancement-"
+                "*WED MAY 29 13:00 - 14:00*"
+                + " - `<https://www.itee.uq.edu.au/performance-enhancement-"
                 + "software-defined-cellular-5g-and-internet-things-networks"
                 + "|Performance Enhancement of Software Defined Cellular 5G &amp;"
                 + " Internet-of-Things Networks - Furqan Khan>` - _78-430_")
@@ -204,13 +203,13 @@ def test_UQCS_events_typical(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     expected = ("Events in the *next _2_ weeks*\r\n"
-                "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - "
-                "_River City Labs_\r\n"
+                "*FRI AUG 2 0:00 - MON AUG 5 23:59*"
+                + " - `CodeNetwork Hackathon` - _River City Labs_\r\n"
                 "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
-                "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford` "
-                "- _Hawken 50-T103_\r\n"
-                "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS "
-                "Social Event` - _Hawken 50-C207_")
+                "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford`"
+                + " - _Hawken 50-T103_\r\n"
+                "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS"
+                + " Social Event` - _Hawken 50-C207_")
     assert messages[1].get('text') == expected
 
 
@@ -229,30 +228,23 @@ def test_UQCS_events_full(uqcsbot: MockUQCSBot):
         "List of *all* upcoming events\r\n"
         "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - _River City Labs_\r\n"
         "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
-        "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford` - "
-        "_Hawken 50-T103_\r\n"
-        "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS "
-        "Social Event`"
+        "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford`"
+        + " - _Hawken 50-T103_\r\n"
+        "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS Social Event`"
         + " - _Hawken 50-C207_\r\n"
-        "*TUE AUG 20 18:00 - 20:00* - `How to Hackathon` - _Hawken "
-        "50-T103_\r\n"
-        "*THU AUG 22 18:00 - 20:00* - `C++ Talk - Dr Joel Fenwick` - "
-        "_Hawken 50-T103_\r\n"
-        "*FRI AUG 23 18:00 - SUN AUG 25 20:00* - `UQCS Hackathon` - "
-        "_AEB 49-301_\r\n"
+        "*TUE AUG 20 18:00 - 20:00* - `How to Hackathon` - _Hawken 50-T103_\r\n"
+        "*THU AUG 22 18:00 - 20:00* - `C++ Talk - Dr Joel Fenwick`"
+        + " - _Hawken 50-T103_\r\n"
+        "*FRI AUG 23 18:00 - SUN AUG 25 20:00* - `UQCS Hackathon` - _AEB 49-301_\r\n"
         "*THU AUG 29 18:00 - 20:00* - `Six Key Things - Peter Laurie` - _Hawken 50-T103_\r\n"
         "*THU SEP 5 18:00 - 20:00* - `3D printing: The Future for DIY - Stephanie Piper`"
         + " - _Hawken 50-T103_\r\n"
-        "*THU SEP 19 18:00 - 20:00* - `Intro to Firebase - Max Bo` - "
-        "_Hawken 50-T103_\r\n"
+        "*THU SEP 19 18:00 - 20:00* - `Intro to Firebase - Max Bo` - _Hawken 50-T103_\r\n"
         "*TUE OCT 8 18:00 - 20:00* - `UQCS AGM` - _TBC_\r\n"
         "*THU OCT 17 17:00 - 21:00* - `Games Night` - _TBC_\r\n"
-        "*TUE OCT 29 0:00 - WED OCT 30 23:59* - `Study Session` - "
-        "_ITLC: "
-        "GP South 78-217_\r\n"
-        "*THU OCT 31 0:00 - FRI NOV 1 23:59* - `Study Session` - "
-        "_ITLC: GP "
-        "South 78-217_"
+        "*TUE OCT 29 0:00 - WED OCT 30 23:59* - `Study Session` - _ITLC:"
+        + " GP South 78-217_\r\n"
+        "*THU OCT 31 0:00 - FRI NOV 1 23:59* - `Study Session` - _ITLC: GP South 78-217_"
     )
     assert messages[1].get('text') == expected
 
@@ -271,12 +263,10 @@ def test_UQCS_events_october(uqcsbot: MockUQCSBot):
     expected = ("Events in *_October_*\r\n"
                 "*TUE OCT 8 18:00 - 20:00* - `UQCS AGM` - _TBC_\r\n"
                 "*THU OCT 17 17:00 - 21:00* - `Games Night` - _TBC_\r\n"
-                "*TUE OCT 29 0:00 - WED OCT 30 23:59* - `Study Session` - "
-                "_ITLC: "
-                "GP South 78-217_\r\n"
-                "*THU OCT 31 0:00 - FRI NOV 1 23:59* - `Study Session` - "
-                "_ITLC: GP "
-                "South 78-217_")
+                "*TUE OCT 29 0:00 - WED OCT 30 23:59* - `Study Session` - _ITLC:"
+                + " GP South 78-217_\r\n"
+                "*THU OCT 31 0:00 - FRI NOV 1 23:59* - `Study Session` - _ITLC: GP"
+                + " South 78-217_")
     assert messages[1].get('text') == expected
 
 
@@ -305,14 +295,11 @@ def test_events_normal(uqcsbot: MockUQCSBot):
         + "software-defined-cellular-5g-and-internet-things-networks"
         + "|Performance Enhancement of Software Defined Cellular 5G &amp;"
         + " Internet-of-Things Networks - Furqan Khan>` - _78-430_\r\n"
-        "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - "
-        "_River City Labs_\r\n"
+        "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - _River City Labs_\r\n"
         "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
-        "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford` - "
-        "_Hawken 50-T103_\r\n"
-        "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS "
-        "Social Event`"
-        + " - _Hawken 50-C207_"
+        "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford` - _Hawken 50-T103_\r\n"
+        "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS"
+        + " Social Event` - _Hawken 50-C207_"
     )
     assert messages[1].get('text') == expected
 
