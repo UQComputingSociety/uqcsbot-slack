@@ -286,12 +286,10 @@ def test_events_normal(uqcsbot: MockUQCSBot):
     assert len(messages) == 2
     expected = (
         "Events in the *next _2_ weeks*\r\n"
-        "*TUE MAY 28 12:00 - 13:00* - "
-        "`<https://www.itee.uq.edu.au/introduction"
+        "*TUE MAY 28 12:00 - 13:00* - `<https://www.itee.uq.edu.au/introduction"
         + "-functional-programming|Introduction to functional programming"
         + " - Tony Morris, Software Engineer at Data61>` - _78-420_\r\n"
-        "*WED MAY 29 13:00 - 14:00* - "
-        "`<https://www.itee.uq.edu.au/performance-enhancement-"
+        "*WED MAY 29 13:00 - 14:00* - `<https://www.itee.uq.edu.au/performance-enhancement-"
         + "software-defined-cellular-5g-and-internet-things-networks"
         + "|Performance Enhancement of Software Defined Cellular 5G &amp;"
         + " Internet-of-Things Networks - Furqan Khan>` - _78-430_\r\n"
