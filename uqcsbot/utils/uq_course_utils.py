@@ -1,11 +1,12 @@
 from uqcsbot import bot
 import requests
+from requests.exceptions import RequestException
 from datetime import datetime
 from dateutil import parser
 from bs4 import BeautifulSoup
 from functools import partial
 from binascii import hexlify
-from typing import List
+from typing import List, Dict, Optional
 
 BASE_COURSE_URL = 'https://my.uq.edu.au/programs-courses/course.html?course_code='
 BASE_ASSESSMENT_URL = ('https://www.courses.uq.edu.au/'
@@ -73,14 +74,30 @@ def get_offering_code(semester=None, campus='STLUC', is_internal=True):
     return hexlify(f'{campus}{semester}{location}'.encode('utf-8')).decode('utf-8')
 
 
+def get_uq_request(url: str, params: Optional[Dict[str, str]] = None) -> requests.Response:
+    """
+    Handles specific error handelling and header provision for requests.get to
+    uq course urls
+    """
+    headers = {'User-Agent': 'UQCS'}
+    try:
+        return requests.get(url, params=params, headers=headers)
+    except RequestException as ex:
+        # For some reason this is the most specific exception for the
+        # "http.client.RemoteDisconnected: Remote end closed connection without
+        # response" exception, return a more useful error
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        raise HttpException(message, 500)
+
+
 def get_course_profile_url(course_name):
     """
     Returns the URL to the latest course profile for the given course.
     """
     course_url = BASE_COURSE_URL + course_name
-    http_response = requests.get(
-        course_url, params={OFFERING_PARAMETER: get_offering_code()}
-    )
+    http_response = get_uq_request(
+        course_url, params={OFFERING_PARAMETER: get_offering_code()})
     if http_response.status_code != requests.codes.ok:
         raise HttpException(course_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
@@ -111,7 +128,7 @@ def get_current_exam_period():
     """
     today = datetime.today()
     current_calendar_url = BASE_CALENDAR_URL + str(today.year)
-    http_response = requests.get(current_calendar_url)
+    http_response = get_uq_request(current_calendar_url)
     if http_response.status_code != requests.codes.ok:
         raise HttpException(current_calendar_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
@@ -184,7 +201,7 @@ def get_course_assessment(course_names, cutoff=None, assessment_url=None):
         joined_assessment_url = get_course_assessment_page(course_names)
     else:
         joined_assessment_url = assessment_url
-    http_response = requests.get(joined_assessment_url)
+        http_response = get_uq_request(joined_assessment_url)
     if http_response.status_code != requests.codes.ok:
         raise HttpException(joined_assessment_url, http_response.status_code)
     html = BeautifulSoup(http_response.content, 'html.parser')
