@@ -74,7 +74,7 @@ def get_offering_code(semester=None, campus='STLUC', is_internal=True):
     return hexlify(f'{campus}{semester}{location}'.encode('utf-8')).decode('utf-8')
 
 
-def get_uq_request(url: str, params: Optional[Dict[str, str]] = None):
+def get_uq_request(url: str, params: Optional[Dict[str, str]] = None) -> requests.Response:
     """
     Handles specific error handelling and header provision for requests.get to
     uq course urls
