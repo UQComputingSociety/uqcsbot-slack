@@ -74,7 +74,7 @@ def get_offering_code(semester=None, campus='STLUC', is_internal=True):
     return hexlify(f'{campus}{semester}{location}'.encode('utf-8')).decode('utf-8')
 
 
-def get_uq_request(url: str, params: Optional[Dict[str, str]]=None):
+def get_uq_request(url: str, params: Optional[Dict[str, str]] = None):
     """
     Handles specific error handelling and header provision for requests.get to
     uq course urls
@@ -83,8 +83,8 @@ def get_uq_request(url: str, params: Optional[Dict[str, str]]=None):
     try:
         return requests.get(url, params=params, headers=headers)
     except RequestException as ex:
-        # For some reason this is the most specific exception for the 
-        # "http.client.RemoteDisconnected: Remote end closed connection without 
+        # For some reason this is the most specific exception for the
+        # "http.client.RemoteDisconnected: Remote end closed connection without
         # response" exception, return a more useful error
         template = "An exception of type {0} occurred. Arguments:\n{1!r}"
         message = template.format(type(ex).__name__, ex.args)
