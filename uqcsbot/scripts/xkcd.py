@@ -1,6 +1,6 @@
-import datetime
 import requests
-import feedparser
+from feedparser import FeedParserDict, parse
+from datetime import datetime, timedelta
 from urllib.parse import quote
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
@@ -44,13 +44,13 @@ def get_by_search_phrase(search_phrase: str) -> str:
     return get_by_id(comic_number)
 
 
-def get_latest() -> str:
+def get_latest() -> FeedParserDict:
     """
     Gets the most recently published xkcd comic by examining the RSS feed.
     :return: the URL to the latest xkcd comic.
     """
-    rss = feedparser.parse(XKCD_RSS_URL)
-    latest = rss['entries'][0]['guid']
+    rss = parse(XKCD_RSS_URL)
+    latest = rss['entries'][0]
     return latest
 
 
@@ -89,7 +89,7 @@ def handle_xkcd(command: Command) -> None:
     bot.post_message(command.channel_id, response, unfurl_links=True, unfurl_media=True)
 
 
-@bot.on_schedule('cron', hour=14, minute=1, day_of_week='mon,wed,fri',
+@bot.on_schedule('cron', minute=5, day_of_week='mon,wed,fri',
                  timezone='Australia/Brisbane')
 def new_xkcd() -> None:
     """
@@ -98,19 +98,29 @@ def new_xkcd() -> None:
 
     @no_help
     """
-    link = get_latest()
+    latest_xkcd = get_latest()
 
-    day = datetime.datetime.today().weekday()
-    if (day == 0):  # Monday
-        message = "It's Monday, 4 days till Friday; here's the"
-    elif (day == 2):  # Wednesday
-        message = "Half way through the week, time for the"
-    elif (day == 4):  # Friday
+    published = datetime.strptime(latest_xkcd['published'], "%a, %d %b %Y %H:%M:%S %z")
+    now = datetime.utcnow()
+    delta = now - published
+
+    if not delta < timedelta(minutes=5):
+        return
+
+    day = datetime.today().weekday()
+
+    if day == 0:  # Monday
+        message = "Happy Monday, maybe the latest xkcd comic will cheer you up: "
+    elif day == 2:  # Wednesday
+        message = "Half way through the week, time for the latest xkcd comic: "
+    elif day == 4:  # Friday
         message = (":musical_note: It's Friday, Friday\nGotta get down on Friday\n"
-                   "Everybody's lookin' forward to the")
+                   "Everybody's lookin' forward to the the latest xkcd comic: ")
     else:
-        message = "@pah It is day " + str(day) + ", please fix me... Here's the"
-    message += " latest xkcd comic "
+        return
 
     general = bot.channels.get("general")
-    bot.post_message(general.id, message + link, unfurl_links=True, unfurl_media=True)
+    bot.post_message(general.id,
+                     message + latest_xkcd['guid'],
+                     unfurl_links=True,
+                     unfurl_media=True)
