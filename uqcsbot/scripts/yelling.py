@@ -37,7 +37,8 @@ def yelling(evt: dict):
 
     response = choice(["WHAT'S THAT?", "SPEAK UP!", "STOP WHISPERING!", "I CAN'T HEAR YOU!",
                        "I THOUGHT I HEARD SOMETHING!", "I CAN'T UNDERSTAND YOU WHEN YOU MUMBLE!",
-                       "YOU'RE GONNA NEED TO SPEAK UP!",
+                       "YOU'RE GONNA NEED TO BE LOUDER!", "WHY ARE YOU SO QUIET?",
+                       "QUIET PEOPLE SHOULD BE DRAGGED OUT INTO THE STREET AND SHOT",
                        ":disapproval:", ":oldmanyellsatcloud:",
                        f"DID YOU SAY \n>{mutate_lower(evt['text'])}".upper()])
 
