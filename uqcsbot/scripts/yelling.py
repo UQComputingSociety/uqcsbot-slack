@@ -17,6 +17,17 @@ def mutate_lower(message: str) -> str:
     return result
 
 
+def random_lower(message: str) -> str:
+    """
+    Gets a random lowercase letter from a string
+    """
+    possible = ""
+    for c in message:
+        if c in ascii_lowercase:
+            possible += c
+    return choice(possible)
+
+
 @bot.on("message")
 def yelling(evt: dict):
     """
@@ -35,14 +46,19 @@ def yelling(evt: dict):
     if user is None or user.is_bot:
         return
 
-    response = choice(["WHAT'S THAT?", "SPEAK UP!", "STOP WHISPERING!", "I CAN'T HEAR YOU!",
-                       "I THOUGHT I HEARD SOMETHING!", "I CAN'T UNDERSTAND YOU WHEN YOU MUMBLE!",
-                       "YOU'RE GONNA NEED TO BE LOUDER!", "WHY ARE YOU SO QUIET?",
-                       "QUIET PEOPLE SHOULD BE DRAGGED OUT INTO THE STREET AND SHOT",
+    text = evt['text']
+    response = choice(["WHAT’S THAT‽", "SPEAK UP!", "STOP WHISPERING!", "I CAN’T HEAR YOU!",
+                       "I THOUGHT I HEARD SOMETHING!", "I CAN’T UNDERSTAND YOU WHEN YOU MUMBLE!",
+                       "YOU’RE GONNA NEED TO BE LOUDER!", "WHY ARE YOU SO QUIET‽",
+                       "QUIET PEOPLE SHOULD BE DRAGGED OUT INTO THE STREET AND SHOT!",
+                       "PLEASE USE YOUR OUTSIDE VOICE!",
+                       "FORMER PRESIDENT THEODORE ROOSEVELT’S FOREIGN POLICY IS A SHAM!",
                        ":disapproval:", ":oldmanyellsatcloud:",
-                       f"DID YOU SAY \n>{mutate_lower(evt['text'])}".upper()])
+                       f"DID YOU SAY \n>{mutate_lower(text)}".upper(),
+                       f"WHAT IS THE MEANING OF THIS ARCANE SYMBOL “{random_lower(text)}”‽"
+                       + " I RECOGNISE IT NOT!"])
 
-    for c in evt['text']:
+    for c in text:
         if c in ascii_lowercase:
             bot.post_message(evt.get("channel"), response)
             return
