@@ -1,8 +1,7 @@
 from uqcsbot import bot
-from uqcsbot.utils.message_utils import insert_channel_links
 
-from functools import partial
 from string import ascii_lowercase
+
 
 @bot.on("message")
 def yelling(evt: dict):
