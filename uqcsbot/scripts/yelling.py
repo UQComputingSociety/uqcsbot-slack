@@ -51,7 +51,7 @@ def yelling(evt: dict):
                        "I THOUGHT I HEARD SOMETHING!", "I CAN’T UNDERSTAND YOU WHEN YOU MUMBLE!",
                        "YOU’RE GONNA NEED TO BE LOUDER!", "WHY ARE YOU SO QUIET‽",
                        "QUIET PEOPLE SHOULD BE DRAGGED OUT INTO THE STREET AND SHOT!",
-                       "PLEASE USE YOUR OUTSIDE VOICE!",
+                       "PLEASE USE YOUR OUTSIDE VOICE!", "IT’S NEXT TO THE “A” KEY!",
                        "FORMER PRESIDENT THEODORE ROOSEVELT’S FOREIGN POLICY IS A SHAM!",
                        ":disapproval:", ":oldmanyellsatcloud:",
                        f"DID YOU SAY \n>{mutate_lower(text)}".upper(),
