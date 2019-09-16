@@ -1,52 +1,54 @@
 from uqcsbot import bot
 
-from string import ascii_lowercase
 from random import choice, random
 
 
-def mutate_lower(message: str) -> str:
+def mutate_minuscule(message: str) -> str:
     """
-    Randomly mutates 40% of lowercase letters to other letters
+    Randomly mutates 40% of minuscule letters to other minuscule letters
     """
     result = ""
     for c in message:
-        if c in ascii_lowercase and random() < 0.4:
-            result += choice(ascii_lowercase)
+        if c.islower() and random() < 0.4:
+            result += choice('abcdefghijklmnopqrstuvwxyz')
         else:
             result += c
     return result
 
 
-def random_lower(message: str) -> str:
+def random_minuscule(message: str) -> str:
     """
-    Gets a random lowercase letter from a string
+    Returns a random minuscule letter from a string
     """
     possible = ""
     for c in message:
-        if c in ascii_lowercase:
+        if c.islower():
             possible += c
-    return choice(possible)
+    return choice(possible) if possible else ""
 
 
 @bot.on("message")
-def yelling(evt: dict):
+def yelling(event: dict):
     """
     Responds to people talking quietly in #yelling
     """
-    channel = bot.channels.get(evt.get("channel"))
 
-    if channel.name != "yelling":
+    # ensure in #yelling channel
+    channel = event.get("channel")
+    if bot.channels.get(channel).name != "yelling":
         return
 
-    if evt.get("subtype") in ["channel_join", "channel_leave"]:
+    # ensure message proper
+    if "subtype" in event:
         return
 
-    user = bot.users.get(evt.get("user"))
-
+    # ensure user proper
+    user = bot.users.get(event.get("user"))
     if user is None or user.is_bot:
         return
 
-    text = evt['text']
+    text = event['text']
+    # randomly select a response
     response = choice(["WHAT’S THAT‽",
                        "SPEAK UP!",
                        "STOP WHISPERING!",
@@ -57,17 +59,18 @@ def yelling(evt: dict):
                        "WHY ARE YOU SO QUIET‽",
                        "QUIET PEOPLE SHOULD BE DRAGGED OUT INTO THE STREET AND SHOT!",
                        "PLEASE USE YOUR OUTSIDE VOICE!",
-                       "IT’S NEXT TO THE “A” KEY!",
+                       "IT’S ON THE LEFT OF THE “A” KEY!",
                        "FORMER PRESIDENT THEODORE ROOSEVELT’S FOREIGN POLICY IS A SHAM!",
                        "#YELLING IS FOR EXTERNAL SCREAMING!"
                        + " (FOR INTERNAL SCREAMING, VISIT #CRIPPLINGDEPRESSION!)",
                        ":disapproval:",
                        ":oldmanyellsatcloud:",
-                       f"DID YOU SAY \n>{mutate_lower(text)}".upper(),
-                       f"WHAT IS THE MEANING OF THIS ARCANE SYMBOL “{random_lower(text)}”‽"
+                       f"DID YOU SAY \n>{mutate_minuscule(text)}".upper(),
+                       f"WHAT IS THE MEANING OF THIS ARCANE SYMBOL “{random_minuscule(text)}”‽"
                        + " I RECOGNISE IT NOT!"])
 
+    # check if minuscule in message, and if so, post response
     for c in text:
-        if c in ascii_lowercase:
-            bot.post_message(evt.get("channel"), response)
+        if c.islower():
+            bot.post_message(channel, response)
             return
