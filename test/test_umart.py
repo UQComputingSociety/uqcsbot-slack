@@ -8,17 +8,17 @@ NO_QUERY_MESSAGE = "You can't look for nothing. `!umart <QUERY>`"
 NO_RESULTS_MESSAGE = "I can't find nothing baus! Try `!umart <SOMETHING NOT AS SPECIFIC>`"
 ERROR_MESSAGE = "I tried to get the things but alas I could not. Error with HTTP Request."
 
-GOOD_MESSAGE = """```Name: <https://www.umart.com.au/umart1/pro/Product1|Product1>
-Price: $1999.00
-Name: <https://www.umart.com.au/umart1/pro/Product2|Product2>
-Price: $1099.00
-Name: <https://www.umart.com.au/umart1/pro/Product3|Product3>
-Price: $1399.00
-Name: <https://www.umart.com.au/umart1/pro/Product4|Product4>
-Price: $1269.00
-Name: <https://www.umart.com.au/umart1/pro/Product5|Product5>
-Price: $1239.00
-```"""
+GOOD_MESSAGE = ("```Name: <https://www.umart.com.au/umart1/pro/Product1|Product1>\n"
+                "Price: $1999.00\n"
+                "Name: <https://www.umart.com.au/umart1/pro/Product2|Product2>\n"
+                "Price: $1099.00\n"
+                "Name: <https://www.umart.com.au/umart1/pro/Product3|Product3>\n"
+                "Price: $1399.00\n"
+                "Name: <https://www.umart.com.au/umart1/pro/Product4|Product4>\n"
+                "Price: $1269.00\n"
+                "Name: <https://www.umart.com.au/umart1/pro/Product5|Product5>\n"
+                "Price: $1239.00\n"
+                "```")
 
 
 def mocked_html_get(*args, **kwargs):

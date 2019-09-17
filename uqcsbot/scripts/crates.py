@@ -20,9 +20,8 @@ HelpCommand = NamedTuple('HelpCommand', [('help_string', str)])
 ExactCrate = NamedTuple('ExactCrate', [('name', str)])
 
 # NamedTuple for the search sub-command that deals with searching for specific crates
-CrateSearch = NamedTuple('CrateSearch',
-                         [('name', str), ('limit', int), ('category', str), ('user', str), ('sort', str),
-                          ('search', str)])
+CrateSearch = NamedTuple('CrateSearch', [('name', str), ('limit', int), ('category', str),
+                                         ('user', str), ('sort', str), ('search', str)])
 
 # NamedTuple for the default categories sub-command that deals with searching for categories
 CategorySearch = NamedTuple('CategorySearch', [('name', str), ('sort', str)])
@@ -31,13 +30,16 @@ CategorySearch = NamedTuple('CategorySearch', [('name', str), ('sort', str)])
 UserSearch = NamedTuple('UserSearch', [('username', str)])
 
 # Named tuple for a crate that was found in a search
-CrateResult = NamedTuple('CrateResult', [('name', str), ('downloads', int), ('homepage', str), ('description', str)])
+CrateResult = NamedTuple('CrateResult', [('name', str), ('downloads', int),
+                                         ('homepage', str), ('description', str)])
 
 # Named tuple for a category that was found in a search
-CategoryResult = NamedTuple('CategoryResult', [('name', str), ('description', str), ('crates', int)])
+CategoryResult = NamedTuple('CategoryResult', [('name', str), ('description', str),
+                                               ('crates', int)])
 
 # Named tuple for a user that was found in a search
-UserResult = NamedTuple('UserResult', [('id', int), ('username', str), ('name', str), ('avatar', str), ('url', str)])
+UserResult = NamedTuple('UserResult', [('id', int), ('username', str), ('name', str),
+                                       ('avatar', str), ('url', str)])
 
 
 class SlackBlock(ABC):
@@ -48,41 +50,45 @@ class SlackBlock(ABC):
 
     @abstractmethod
     def get_formatted_block(self) -> Dict[str, str]:
-        """Gets the dictionary which maps the required properties for the given block"""
+        """
+        Gets the dictionary which maps the required properties for the given block
+        """
         pass
 
 
 class ImageBlock(SlackBlock):
-    """SlackBlock that represents an image block (contains an image url and alternate text for that image)"""
+    """
+    SlackBlock that represents an image block
+    (contains an image url and alternate text for that image)
+    """
 
     def __init__(self, url: str, alt_text: str):
         self.url = url
         self.alt_text = alt_text
 
     def get_formatted_block(self):
-        return {
-            'type': 'image',
-            'image_url': self.url,
-            'alt_text': self.alt_text
-        }
+        return {'type': 'image', 'image_url': self.url, 'alt_text': self.alt_text}
 
 
 class TextBlock(SlackBlock):
-    """SlackBlock that represents a text block (contains an image url and alternate text for that image)"""
+    """
+    SlackBlock that represents a text block
+    (contains an image url and alternate text for that image)
+    """
 
     def __init__(self, text: str, markdown: bool = True):
         self.text = text
         self.markdown = markdown
 
     def get_formatted_block(self):
-        return {
-            'type': 'mrkdwn' if self.markdown else 'plain_text',
-            'text': self.text
-        }
+        return {'type': 'mrkdwn' if self.markdown else 'plain_text',
+                'text': self.text}
 
 
 class SubCommand(Enum):
-    """Distinguishes the type of sub command that was invoked"""
+    """
+    Distinguishes the type of sub command that was invoked
+    """
     EXACT = 1,
     SEARCH = 2,
     CATEGORIES = 3,
@@ -98,7 +104,8 @@ def handle_crates(command: Command):
     """
     args = parse_arguments(command.arg if command.has_arg() else '')
 
-    # Executes the function that was stored by the arg parser depending on which sub-command was used
+    # Executes the function that was stored by the arg
+    # parser depending on which sub-command was used
     args.execute_action(command.channel_id, args)  # type: ignore
 
 
@@ -131,29 +138,40 @@ def parse_arguments(arg_str: str) -> argparse.Namespace:
     main_parser.set_defaults(execute_action=handle_exact_crate_route, route=SubCommand.EXACT)
 
     # For !crates search {args}
-    search_parser = subparsers.add_parser('search', add_help=False, help='Sub-command to search for a crate')
-    search_parser.add_argument('search', nargs='?', default='', type=str.lower, help='The string to use for the search')
+    search_parser = subparsers.add_parser('search', add_help=False,
+                                          help='Sub-command to search for a crate')
+    search_parser.add_argument('search', nargs='?', default='', type=str.lower,
+                               help='The string to use for the search')
     search_parser.add_argument('-h', '--help', action='store_true', help='Prints this help message')
     search_parser.add_argument('-l', '--limit', default=5, type=search_limit,
-                               help='When not searching for a specific crate how many results should be shown? '
-                                    '(max: ' + str(MAX_LIMIT) + ', default: %(default)s)')
+                               help='When not searching for a specific crate how'
+                                    + ' many results should be shown?'
+                                    + ' (max: ' + str(MAX_LIMIT) + ', default: %(default)s)')
     search_parser.add_argument('-c', '--category', default='', type=category_formatter,
                                help="Limit results to crates in this category")
-    search_parser.add_argument('-u', '--user', default='', type=str, help='Limit results by crate author')
-    search_parser.add_argument('-o', '--sort', choices=['alpha', 'downloads'], default='downloads', type=str.lower,
-                               help='Sort the results by alphabetical order or by number of downloads '
-                                    '(default: %(default)s)')
+    search_parser.add_argument('-u', '--user', default='', type=str,
+                               help='Limit results by crate author')
+    search_parser.add_argument('-o', '--sort', choices=['alpha', 'downloads'],
+                               default='downloads', type=str.lower,
+                               help='Sort the results by alphabetical order or by number'
+                                    + ' of downloads (default: %(default)s)')
     search_parser.set_defaults(execute_action=handle_search_crates_route, route=SubCommand.SEARCH)
 
     # For "!crates categories {args}"
     category_parser = subparsers.add_parser('categories', add_help=False,
-                                            help='Sub-command to get information about categories instead of crates')
-    category_parser.add_argument('-h', '--help', action='store_true', help='Prints this help message')
+                                            help='Sub-command to get information about'
+                                            + ' categories instead of crates')
+    category_parser.add_argument('-h', '--help', action='store_true',
+                                 help='Prints this help message')
     category_parser.add_argument('name', nargs='?', default='', type=category_formatter,
-                                 help='Optional. Specify a specific category to get more information about it')
-    category_parser.add_argument('-s', '--sort', choices=['alpha', 'crates'], default='alpha', type=str.lower,
-                                 help='Sort the result by alphabetical order or by number of crates in the category')
-    category_parser.set_defaults(execute_action=handle_categories_route, route=SubCommand.CATEGORIES)
+                                 help='Optional. Specify a specific category to get more'
+                                      + ' information about it')
+    category_parser.add_argument('-s', '--sort', choices=['alpha', 'crates'],
+                                 default='alpha', type=str.lower,
+                                 help='Sort the result by alphabetical order or'
+                                      + ' by number of crates in the category')
+    category_parser.set_defaults(execute_action=handle_categories_route,
+                                 route=SubCommand.CATEGORIES)
 
     # For "!crates users {args}"
     users_parser = subparsers.add_parser('user', add_help=False,
@@ -162,34 +180,38 @@ def parse_arguments(arg_str: str) -> argparse.Namespace:
     users_parser.add_argument('-h', '--help', action='store_true', help='Prints this help message')
     users_parser.set_defaults(execute_action=handle_users_route, route=SubCommand.USERS)
 
-    # We need to check if the first argument is "categories" or "search" otherwise we add "main" to get around an
-    # issue were argparse will complain that the name isn't one of the subparser names
+    # We need to check if the first argument is "categories" or "search"
+    # otherwise we add "main" to get around an issue were argparse will
+    # complain that the name isn't one of the subparser names
     split_args = arg_str.split()
-    if not split_args or (split_args[0] != "categories" and split_args[0] != "search" and split_args[0] != 'user'):
+    if not split_args or (split_args[0] != "categories" and split_args[0] != "search"
+                          and split_args[0] != 'user'):
         split_args.insert(0, "main")
 
     args = parser.parse_args(split_args)
 
-    # If the arguments show that help was requested then change the execute_action and add the correct help string
+    # If the arguments show that help was requested then
+    # change the execute_action and add the correct help string
     if args.help:
         args.execute_action = handle_help_route
         if args.route == SubCommand.EXACT:
-            # Because we had to break parser up into main this help message needs to be manually typed to be useful
+            # Because we had to break parser up into main this
+            # help message needs to be manually typed to be useful
             args.help_string = """
 *Usage: !crates [[name] | {search,categories,users}]*
 
 *Sub-Commands*:
  {search,categories,users}
-   search              Search for a crate with conditions
-   categories          Get information about categories instead of crates
-   users               Get information about a user from their username  
-   
+   search        Search for a crate with conditions
+   categories    Get information about categories instead of crates
+   users         Get information about a user from their username
+
 *Default Usage*:
     usage: !crates [-h] [name]
-    
+
     *Positional Arguments*:
-     name        The exact name of the crate to get information about (use search for non-exact name)
-    
+     name    The exact name of the crate to get information about (use search for non-exact name)
+
     *Optional Arguments*:
      -h, --help  Prints this help message
             """
@@ -204,12 +226,16 @@ def parse_arguments(arg_str: str) -> argparse.Namespace:
 
 
 def handle_help_route(channel: Channel, args: HelpCommand):
-    """This is called whenever the -h argument is invoked regardless of sub-command."""
+    """
+    This is called whenever the -h argument is invoked regardless of sub-command.
+    """
     bot.post_message(channel, args.help_string)
 
 
 def get_user_id(username: str) -> int:
-    """"Tries to get the users numerical id from their username. (Ex: BurntSushi -> 189). -1 on failure."""
+    """
+    Tries to get the users numerical id from their username. (Ex: BurntSushi -> 189). -1 on failure.
+    """
     url = f'{BASE_URL}/users/{username}'
     response = requests.get(url)
 
@@ -229,15 +255,20 @@ def get_user_id(username: str) -> int:
 
 
 def convert_crate_result(crate: Dict[str, Union[str, int]]) -> Optional[CrateResult]:
-    """Tries to convert a dictionary response from the api into a CrateResult. Returns None on error."""
+    """
+    Tries to convert a dictionary response from the api into a CrateResult.
+    Returns None on error.
+    """
     try:
-        # Sometimes the homepage is null so we try to grab something else if possible otherwise default to crates.io
+        # Sometimes the homepage is null so we try to grab
+        # something else if possible otherwise default to crates.io
         homepage = crate['homepage']
         homepage = crate['repository'] if homepage is None else homepage
         homepage = crate['documentation'] if homepage is None else homepage
         homepage = "https://crates.io" if homepage is None else homepage
 
-        return CrateResult(crate['name'], crate['downloads'], homepage, crate['description'])  # type: ignore
+        return CrateResult(crate['name'], crate['downloads'],  # type: ignore
+                           homepage, crate['description'])
     except KeyError:
         return None
 
@@ -315,16 +346,21 @@ def create_slack_divider_block() -> Dict[str, str]:
 
 
 def get_crate_blocks(crate: CrateResult) -> List[dict]:
-    """Converts a crate into its block based message format for posting to slack"""
+    """
+    Converts a crate into its block based message format for posting to slack
+    """
     return [
-        create_slack_section_block(TextBlock(f'*<{crate.homepage}|{crate.name}>*\n{crate.description}')),
+        create_slack_section_block(TextBlock(f'*<{crate.homepage}|{crate.name}>*\n'
+                                             f'{crate.description}')),
         create_slack_context_block([TextBlock(f'Downloads: {crate.downloads}', markdown=False)]),
         create_slack_divider_block()
     ]
 
 
 def handle_exact_crate_route(channel: Channel, args: ExactCrate):
-    """Handles what happens when a single crate is being searched for by exact name"""
+    """
+    Handles what happens when a single crate is being searched for by exact name
+    """
     crate = get_crate_name_result(channel, args.name)
     if crate is None:
         return
@@ -337,7 +373,8 @@ def get_crates_search_results(channel: Channel,
                               params: dict,
                               page: int = 1, ) -> Optional[Tuple[List[CrateResult], int]]:
     """
-    Gets a list of crates and the total number of results from the api based on input parameters and the page number
+    Gets a list of crates and the total number of results
+    from the api based on input parameters and the page number
     :param channel: The channel to post any error messages to
     :param search: The string to search for
     :param params: The parameters dictionary that gets passed to requests.get
@@ -375,7 +412,9 @@ def get_crates_search_results(channel: Channel,
 
 
 def handle_search_crates_route(channel: Channel, args: CrateSearch):
-    """Handles what happens when a crates are being searched for through multiple criteria"""
+    """
+    Handles what happens when a crates are being searched for through multiple criteria
+    """
     # Generate the parameters to search with
     params = {'sort': args.sort}
 
@@ -406,7 +445,8 @@ def handle_search_crates_route(channel: Channel, args: CrateSearch):
 
     # The beginning of the formatted response
     blocks = [
-        create_slack_section_block(TextBlock(f'*Showing {min(args.limit, total)} of {total} results*')),
+        create_slack_section_block(TextBlock(f'*Showing {min(args.limit, total)}'
+                                             + f' of {total} results*')),
         create_slack_divider_block()
     ]
 
@@ -436,7 +476,8 @@ def get_category_page(channel: Channel, sort: str, page: int) -> Tuple[Optional[
     :param channel: The channel to post any errors to
     :param sort: The order to sort by. One of "crates" or "alpha"
     :param page: The page number to get the categories from
-    :return: A tuple containing a list of category names (or None on error) and the total number of categories
+    :return: A tuple containing a list of category names (or None on error)
+        and the total number of categories
     """
     # Get the categories
     url = BASE_URL + '/categories'
@@ -459,7 +500,9 @@ def get_category_page(channel: Channel, sort: str, page: int) -> Tuple[Optional[
 
 
 def display_all_categories(channel: Channel, args: CategorySearch):
-    """Displays just the names of all the categories in one big list"""
+    """
+    Displays just the names of all the categories in one big list
+    """
     categories, total = get_category_page(channel, args.sort, 1)
     if categories is None:
         return  # Error occurred
@@ -487,9 +530,9 @@ def display_all_categories(channel: Channel, args: CategorySearch):
 def display_specific_category(channel: Channel, args: CategorySearch):
     """
     Displays a single category in more detail
-    For example !crates categories algorithms would return a description of the algorithms category and the number of
-    crates that falls into the algorithms category. A search for a crate with "!crates search" can be filtered based on
-    these categories using the -c flag.
+    For example !crates categories algorithms would return a description of the algorithms
+    category and the number of crates that falls into the algorithms category. A search for
+    a crate with "!crates search" can be filtered based on these categories using the -c flag.
     """
     # Get the categories
     url = BASE_URL + f'/categories/{args.name}'
@@ -524,7 +567,10 @@ def display_specific_category(channel: Channel, args: CategorySearch):
 
 
 def handle_categories_route(channel: Channel, args: CategorySearch):
-    """Handles the categories sub-command by determining whether or not to display all categories or just one"""
+    """
+    Handles the categories sub-command by determining whether
+    or not to display all categories or just on
+    """
     if args.name:
         display_specific_category(channel, args)
     else:
@@ -559,7 +605,9 @@ def get_user(channel: Channel, username: str) -> Optional[UserResult]:
 
 
 def handle_users_route(channel: Channel, args: UserSearch):
-    """Displays information about a user from their username"""
+    """
+    Displays information about a user from their username
+    """
     user = get_user(channel, args.username)
 
     # Error occurred
@@ -572,7 +620,8 @@ def handle_users_route(channel: Channel, args: UserSearch):
         text += f'*Homepage:* {user.url}'
 
     blocks = [
-        create_slack_section_block(TextBlock(text), accessory=ImageBlock(user.avatar, 'User Avatar')),
+        create_slack_section_block(TextBlock(text),
+                                   accessory=ImageBlock(user.avatar, 'User Avatar')),
         create_slack_divider_block()
     ]
 

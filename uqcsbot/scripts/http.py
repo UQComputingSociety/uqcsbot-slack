@@ -1,4 +1,3 @@
-import os
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException
 
@@ -12,15 +11,15 @@ AVAILABLE_CODES = {
 
 @bot.on_command('http')
 def handle_http(command: Command):
-    '''
+    """
     `!http <CODE>` - Returns a HTTP cat.
-    '''
+    """
     if not command.has_arg():
         raise UsageSyntaxException()
 
     try:
         http_code = int(command.arg.strip())
-    except ValueError as e:
+    except ValueError:
         raise UsageSyntaxException()
 
     if http_code not in AVAILABLE_CODES:

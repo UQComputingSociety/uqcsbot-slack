@@ -2,6 +2,7 @@ from datetime import datetime
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
 from uqcsbot.utils.uq_course_utils import (get_course_assessment,
+                                           get_course_assessment_page,
                                            HttpException,
                                            CourseNotFoundException,
                                            ProfileNotFoundException)
@@ -11,10 +12,10 @@ COURSE_LIMIT = 6
 
 
 def get_formatted_assessment_item(assessment_item):
-    '''
-    Returns the given assessment item in a pretty message format to display to
-    a user.
-    '''
+    """
+    Returns the given assessment item in a pretty
+    message format to display to a user.
+    """
     course, task, due, weight = assessment_item
     return f'*{course}*: `{weight}` _{task}_ *({due})*'
 
@@ -22,13 +23,13 @@ def get_formatted_assessment_item(assessment_item):
 @bot.on_command('whatsdue')
 @loading_status
 def handle_whatsdue(command: Command):
-    '''
+    """
     `!whatsdue [-f] [--full] [COURSE CODE 1] [COURSE CODE 2] ...` - Returns all
     the assessment for a given list of course codes that are scheduled to occur
     after today. If unspecified, will attempt to return the assessment for the
     channel that the command was called from. If -f/--full is provided, will
     return the full assessment list without filtering by cutoff dates.
-    '''
+    """
     channel = bot.channels.get(command.channel_id)
     command_args = command.arg.split() if command.has_arg() else []
 
@@ -51,7 +52,8 @@ def handle_whatsdue(command: Command):
     # If full output is not specified, set the cutoff to today's date.
     cutoff = None if is_full_output else datetime.today()
     try:
-        assessment = get_course_assessment(course_names, cutoff)
+        asses_page = get_course_assessment_page(course_names)
+        assessment = get_course_assessment(course_names, cutoff, asses_page)
     except HttpException as e:
         bot.logger.error(e.message)
         bot.post_message(channel, f'An error occurred, please try again.')
@@ -60,10 +62,11 @@ def handle_whatsdue(command: Command):
         bot.post_message(channel, e.message)
         return
 
-    message = '_*WARNING:* Assessment information may vary/change/be entirely' \
-              + ' different! Use at your own discretion_\n>>>'
+    message = ('_*WARNING:* Assessment information may vary/change/be entirely'
+               + ' different! Use at your own discretion_\n>>>')
     message += '\n'.join(map(get_formatted_assessment_item, assessment))
     if not is_full_output:
-        message += '\n_Note: This may not be the full assessment list. Use -f' \
-                   + '/--full to print out the full list._'
+        message += ('\n_Note: This may not be the full assessment list. Use -f'
+                    + '/--full to print out the full list._')
+    message += f'\nLink to assessment page <{asses_page}|here>'
     bot.post_message(channel, message)

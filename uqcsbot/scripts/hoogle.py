@@ -5,6 +5,7 @@ import json
 import html
 import re
 
+
 def get_endpoint(type_sig: str) -> str:
     unescaped = html.unescape(type_sig)
 
@@ -14,7 +15,7 @@ def get_endpoint(type_sig: str) -> str:
 def pretty_hoogle_result(result: dict, is_verbose: bool) -> str:
     url = result['url']
     type_sig = re.sub('<[^<]+?>', '', result['item'])
-    docs = re.sub('<[^<]+?>', '', result['docs']).replace('\n',' ').replace('&gt;&gt;&gt;','\n>')
+    docs = re.sub('<[^<]+?>', '', result['docs']).replace('\n', ' ').replace('&gt;&gt;&gt;', '\n>')
 
     if is_verbose:
         return f"`{type_sig}` <{url}|link>\n{docs}"
@@ -25,10 +26,10 @@ def pretty_hoogle_result(result: dict, is_verbose: bool) -> str:
 @bot.on_command("hoogle")
 @loading_status
 def handle_hoogle(command: Command):
-    '''
+    """
     `!hoogle [-v] [--verbose] <TYPE_SIGNATURE>` - Queries the Hoogle Haskell API search engine,
     searching Haskell libraries by either function name, or by approximate type signature.
-    '''
+    """
     command_args = command.arg.split() if command.has_arg() else []
 
     verbose = False

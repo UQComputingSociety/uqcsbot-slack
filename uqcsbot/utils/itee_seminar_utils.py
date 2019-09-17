@@ -39,8 +39,8 @@ class HttpException(Exception):
 
 def get_seminars() -> List[Tuple[str, str, datetime, str]]:
     """
-    Returns summary information for upcoming ITEE seminars, comprising seminar
-    date, seminar title, venue, and an information link.
+    Returns summary information for upcoming ITEE seminars, comprising
+    seminar date, seminar title, venue, and an information link.
     """
     html = BeautifulSoup(get_seminar_summary_page(), 'html.parser')
     summary_table = html.find('table', summary='ITEE Seminar List')
@@ -72,13 +72,14 @@ def get_seminar_summary(seminar_row) -> Tuple[str, str, datetime, str]:
     This method makes assumptions about the format of seminar information on the
     UQ website and is likely to break if the website is updated.
     :param seminar_row: The table row element (tr) to parse
-    :return: A structure containing seminar information in the order: seminar title, link, date, venue.
+    :return: A structure containing seminar information
+             in the order: seminar title, link, date, venue.
     """
     elements = seminar_row.find_all('td')
     if len(elements) != 3:
         raise InvalidFormatException(ITEE_SEMINAR_LIST_URL,
-                                     f'Unexpected number of elements on seminar row (found {len(elements)}, '
-                                     f'expected 3)')
+                                     f'Unexpected number of elements on seminar row'
+                                     f'(found {len(elements)}, expected 3)')
 
     # The seminar date is in the first column
     seminar_date = parse_seminar_date(elements[0].get_text().strip(), ITEE_SEMINAR_LIST_URL)
@@ -87,7 +88,8 @@ def get_seminar_summary(seminar_row) -> Tuple[str, str, datetime, str]:
     title = elements[1].get_text().strip()
     link_element = elements[1].a
     if (link_element is None) or (link_element['href'] is None):
-        raise InvalidFormatException(ITEE_SEMINAR_LIST_URL, f'The link for seminar \'{title}\' could not be found')
+        raise InvalidFormatException(ITEE_SEMINAR_LIST_URL,
+                                     f'The link for seminar \'{title}\' could not be found')
     link = ITEE_BASE_URL + link_element['href']
 
     # Venue is in the third column

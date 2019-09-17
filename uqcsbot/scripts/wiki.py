@@ -6,9 +6,9 @@ from uqcsbot.utils.command_utils import UsageSyntaxException
 
 @bot.on_command("wiki")
 def handle_wiki(command: Command):
-    '''
+    """
     `!wiki <TOPIC>` - Returns a snippet of text from a relevent wikipedia entry.
-    '''
+    """
     if not command.has_arg():
         raise UsageSyntaxException()
 
@@ -30,7 +30,7 @@ def handle_wiki(command: Command):
     title, snippet, url = title_list[0], snippet_list[0], url_list[0]
 
     # Sometimes the first element is an empty string which is weird so we handle that rare case here
-    if len(title) == 0 or len(snippet) == 0 or len(url) == 0:
+    if len(title) * len(snippet) * len(url) == 0:
         bot.post_message(command.channel_id, "Sorry, there was something funny about the result")
         return
 

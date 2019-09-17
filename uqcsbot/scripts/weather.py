@@ -48,7 +48,7 @@ def process_arguments(arguments: str) -> Tuple[str, str, int]:
 def find_location(root: ET.Element, location: str, future: int) \
                   -> Tuple[Union[None, ET.Element], Union[None, str]]:
     """
-    Rreturns the XML for a given the location and how far into the future
+    Returns the XML for a given the location and how far into the future
     """
     node = root.find(f".//area[@description='{location}']")
     if node is None:
@@ -63,12 +63,12 @@ def find_location(root: ET.Element, location: str, future: int) \
 
 def response_header(node: ET.Element, location: str) -> str:
     """
-    Returns the response header, in the form "{Location}'s Weather Forcast For {Day}"
+    Returns the response header, in the form "{Location}'s Weather Forecast For {Day}"
     """
-    forcast_date = DT.strptime("".join(node.get('start-time-local')
-                                       .rsplit(":", 1)), "%Y-%m-%dT%H:%M:%S%z").date()
+    forecast_date = DT.strptime("".join(node.get('start-time-local')
+                                        .rsplit(":", 1)), "%Y-%m-%dT%H:%M:%S%z").date()
     today_date = DT.now().date()
-    date_delta = (forcast_date - today_date).days
+    date_delta = (forecast_date - today_date).days
     if date_delta == 0:
         date_name = "Today"
     elif date_delta == 1:
@@ -77,13 +77,13 @@ def response_header(node: ET.Element, location: str) -> str:
         # can happen during the witching hours
         date_name = "Yesterday"
     else:
-        date_name = forcast_date.strftime("%A")
-    return f"*{date_name}'s Weather Forcast For {location}*"
+        date_name = forecast_date.strftime("%A")
+    return f"*{date_name}'s Weather Forecast For {location}*"
 
 
 def response_overall(node: ET.Element) -> str:
     """
-    Returns the overall forcast
+    Returns the overall forecast
     """
     icon_code = node.find(".//element[@type='forecast_icon_code']")
     if icon_code is not None:
@@ -114,7 +114,7 @@ def response_temperature(node: ET.Element) -> str:
 
 def response_precipitation(node: ET.Element) -> str:
     """
-    Returns the precipitaion forecast
+    Returns the precipitation forecast
     """
     rain_range = node.find(".//element[@type='precipitation_range']")
     precip_prob = node.find(".//text[@type='probability_of_precipitation']")
@@ -160,9 +160,9 @@ def response_brisbane_detailed() -> Tuple[str, str, str]:
 @loading_status
 def handle_weather(command: Command) -> None:
     """
-    `!weather [[state] location] [day]` - Returns the weather forcaset for a location
+    `!weather [[state] location] [day]` - Returns the weather forecast for a location
     `day` is how many days into the future the forecast is for (0 is today and default)
-    `location` defaults to Brisbane, and `state` defualts to QLD
+    `location` defaults to Brisbane, and `state` defaults to QLD
     """
 
     (state, location, future) = process_arguments(command.arg)
