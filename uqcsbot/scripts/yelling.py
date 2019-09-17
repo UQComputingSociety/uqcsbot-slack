@@ -67,7 +67,10 @@ def yelling(event: dict):
                        ":oldmanyellsatcloud:",
                        f"DID YOU SAY \n>{mutate_minuscule(text)}".upper(),
                        f"WHAT IS THE MEANING OF THIS ARCANE SYMBOL “{random_minuscule(text)}”‽"
-                       + " I RECOGNISE IT NOT!"])
+                       + " I RECOGNISE IT NOT!"]
+                      # the following is a reference to both "The Wicker Man" and "Nethack"
+                      + (['OH, NO! NOT THE `a`S! NOT THE `a`S! AAAAAHHHHH!']
+                         if 'a' in text else []))
 
     # check if minuscule in message, and if so, post response
     for c in text:
