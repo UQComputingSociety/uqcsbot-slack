@@ -73,7 +73,5 @@ def yelling(event: dict):
                          if 'a' in text else []))
 
     # check if minuscule in message, and if so, post response
-    for c in text:
-        if c.islower():
-            bot.post_message(channel, response)
-            return
+    if any(c.islower() for c in text):
+        bot.post_message(channel, response)
