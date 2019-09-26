@@ -1,6 +1,7 @@
 from uqcsbot import bot
 
 from random import choice, random
+from re import sub, UNICODE
 
 
 def mutate_minuscule(message: str) -> str:
@@ -47,7 +48,7 @@ def yelling(event: dict):
     if user is None or user.is_bot:
         return
 
-    text = event['text']
+    text = sub(r":[\w\-\+']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
     # randomly select a response
     response = choice(["WHAT’S THAT‽",
                        "SPEAK UP!",
