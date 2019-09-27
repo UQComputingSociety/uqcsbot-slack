@@ -20,11 +20,12 @@ def handle_emojify(command: Command):
                    choice([":card-ace-clubs:", ":card-ace-diamonds:",
                            ":card-ace-hearts:", ":card-ace-spades:"])]
     master['B'] = [":bhinking:", ":bitcoin:", ":blutes:"]
-    master['C'] = [":c:", ":clang:", ":cplusplus:", ":copyright:"]
+    master['C'] = [":c:", ":clang:", ":cplusplus:", ":copyright:", ":clipchamp:"]
     master['D'] = [":d:", ":disney:"]
-    master['E'] = [":e:", ":ecorp:", ":emacs:", ":erlang:", ":ie10:", ":thonk_slow:"]
+    master['E'] = [":ecorp:", ":emacs:", ":erlang:", ":ie10:", ":thonk_slow:", ":edge:",
+                   ":expedia_group:"]
     master['F'] = [":f:", ":facebook:"]
-    master['G'] = [":g+:", ":google:", ":nintendo_gamecube:"]
+    master['G'] = [":g+:", ":google:", ":nintendo_gamecube:", ":gatsbyjs:"]
     master['H'] = [":hackerrank:", ":homejoy:"]
     master['I'] = [":information_source:"]
     master['J'] = [":hook:", choice([":card-jack-clubs:", ":card-jack-diamonds:",
@@ -86,7 +87,7 @@ def handle_emojify(command: Command):
     master['$'] = [":thonk_money:", ":moneybag:"]
     # '&' converts to '&AMP;'
     master['&'] = [":ampersand:", ":dnd:"]
-    master['*'] = [":day:", ":nab:", ":youtried:", ":msn_star:", ":rune_prayer:"]
+    master['*'] = [":day:", ":nab:", ":youtried:", ":msn_star:", ":rune_prayer:", ":wolfram:"]
     master['+'] = [":tf2_medic:", ":flag-ch:", ":flag-england:"]
     master['-'] = [":no_entry:"]
     master['.'] = [":black_small_square:"]
@@ -107,6 +108,8 @@ def handle_emojify(command: Command):
     master['Β'] = [":beta:"]
     # 'Λ' converts to 'L'
     master['Λ'] = [":halflife:", ":haskell:", ":lambda:", ":racket:"]
+    # 'Π' converts to 'P'
+    master['Π'] = [":pi:"]
     # 'Σ' converts to 'S'
     master['Σ'] = [":polymathian:"]
 
