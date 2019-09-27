@@ -268,7 +268,7 @@ def convert_crate_result(crate: Dict[str, Union[str, int]]) -> Optional[CrateRes
         homepage = "https://crates.io" if homepage is None else homepage
 
         return CrateResult(crate['name'], crate['downloads'],  # type: ignore
-                           homepage, crate['description'])
+                           homepage, crate['description'])  # type: ignore
     except KeyError:
         return None
 
