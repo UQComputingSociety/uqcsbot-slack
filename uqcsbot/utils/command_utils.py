@@ -3,15 +3,19 @@ from functools import wraps
 from typing import List
 import uqcsbot  # Necessary to avoid circular imports.
 
-LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid',
-                  'twiddle_thumbs', 'boredparrot', 'trex',
-                  'hourglass_flowing_sand', 'slowparrot', 'late']
+LOADING_REACTS = ['waiting', 'apple_waiting', 'waiting_droid', 'twiddle_thumbs',
+                  'boredparrot', 'trex', 'hourglass_flowing_sand',
+                  'slowparrot', 'late', 'archerwait']
 SUCCESS_REACTS = ['thumbsup', 'thumbsup_all', 'msn_thumbsup', 'ok-hand', 'nice',
                   'noice', 'feels_good', 'woohoo', 'tada', 'pepelewis',
-                  'justright', 'doublethumbsup', 'toot', 'smashing']
+                  'justright', 'doublethumbsup', 'toot', 'smashing', 'antony_yes']
 HYPE_REACTS = ['nice', 'noice', 'ok-hand', 'exclamation', 'fiestaparrot',
                'github_square3', 'sweating', 'pogchamp', 'alert', 'asdf',
-               'caramelldansen_hyper', 'yeet', 'feelsgoodman', 'keen', 'spooky']
+               'caramelldansen_hyper', 'yeet', 'feelsgoodman', 'keen',
+               'spooky', 'birdparty', '10x', 'party_hard']
+FAILURE_REACTS = ['blood_drops', 'confusedparrot', 'dumpster_fire', 'excuse_me_what_the_fuck',
+                  'mtg_b', 'oof', "ph'nglui_mglw'nafh_cthulhu_r'lyeh_wgah'nagl_fhtagn",
+                  'sob_blood', 'tf2_sapper', "time's_end", 'ohno', 'dead_link']
 
 
 class UsageSyntaxException(Exception):
