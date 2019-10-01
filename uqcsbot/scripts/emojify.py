@@ -131,6 +131,7 @@ def handle_emojify(command: Command):
     # revert HTML conversions
     text = text.replace("&AMP;", "&")
     text = text.replace("&GT;", ">")
+    text = text.replace("&LT;", "<")
 
     lexicon = {}
     for character in set(text+'…'):
