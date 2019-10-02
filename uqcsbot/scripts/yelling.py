@@ -84,7 +84,7 @@ def yelling(event: dict):
                        + " (FOR INTERNAL SCREAMING, VISIT #CRIPPLINGDEPRESSION!)",
                        ":disapproval:",
                        ":oldmanyellsatcloud:",
-                       f"DID YOU SAY \n>{mutate_minuscule(text)}".upper(),
+                       f"DID YOU SAY \n>>>{mutate_minuscule(text)}".upper(),
                        f"WHAT IS THE MEANING OF THIS ARCANE SYMBOL “{random_minuscule(text)}”‽"
                        + " I RECOGNISE IT NOT!"]
                       # the following is a reference to both "The Wicker Man" and "Nethack"
