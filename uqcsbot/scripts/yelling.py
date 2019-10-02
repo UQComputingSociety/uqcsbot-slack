@@ -56,7 +56,7 @@ def yelling(event: dict):
         return
 
     # ensure message proper
-    if "subtype" in event:
+    if "subtype" in event and event.get("subtype") != "thread_broadcast":
         return
 
     # ensure user proper
@@ -64,7 +64,9 @@ def yelling(event: dict):
     if not is_human(user):
         return
 
+    # ignore emoji
     text = sub(r":[\w\-\+']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
+    text = text.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&")
     # randomly select a response
     response = choice(["WHAT’S THAT‽",
                        "SPEAK UP!",
@@ -91,4 +93,8 @@ def yelling(event: dict):
 
     # check if minuscule in message, and if so, post response
     if any(c.islower() for c in text):
-        bot.post_message(channel, response)
+        if event.get("subtype") == "thread_broadcast":
+            bot.post_message(channel, response, reply_broadcast=True,
+                             thread_ts=event.get("thread_ts"))
+        else:
+            bot.post_message(channel, response, thread_ts=event.get("thread_ts"))
