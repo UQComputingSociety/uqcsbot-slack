@@ -4,6 +4,22 @@ from random import choice, random
 from re import sub, UNICODE
 
 
+def in_yelling(channel):
+    """
+    checks that channel is #yelling
+    exists for test mocking
+    """
+    return bot.channels.get(channel).name == "yelling"
+
+
+def is_human(user):
+    """
+    checks that the user is not a bot
+    exists for test mocking
+    """
+    return user is not None and not user.is_bot
+
+
 def mutate_minuscule(message: str) -> str:
     """
     Randomly mutates 40% of minuscule letters to other minuscule letters
@@ -36,7 +52,7 @@ def yelling(event: dict):
 
     # ensure in #yelling channel
     channel = event.get("channel")
-    if bot.channels.get(channel).name != "yelling":
+    if not in_yelling(channel):
         return
 
     # ensure message proper
@@ -45,7 +61,7 @@ def yelling(event: dict):
 
     # ensure user proper
     user = bot.users.get(event.get("user"))
-    if user is None or user.is_bot:
+    if not is_human(user):
         return
 
     text = sub(r":[\w\-\+']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
