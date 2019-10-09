@@ -49,11 +49,15 @@ def get_helper_docs(command_name=None) -> List[str]:
     Otherwise, will return a list of length 1. Will filter out any commands that
     do not have a valid helper docstring (see 'is_valid_helper_doc' function).
     """
-    return sorted(sanitize_doc(fn.__doc__)
-                  for command, functions in uqcsbot.bot._command_registry.items()
-                  for fn in functions
-                  if is_valid_helper_doc(fn.__doc__)
-                  and (command_name is None or command_name == command))
+    # functions matching this command, possibly with duplicates
+    fns = (fn for command, functions in uqcsbot.bot._command_registry.items()
+              for fn in functions
+              if command_name is None or command_name == command)
+    # we need to remove duplicates after getting docs because @bot.on_command
+    # makes distinct copies of functions for aliases.
+    docs = set(sanitize_doc(fn.__doc__) for fn in fns
+               if is_valid_helper_doc(fn.__doc__))
+    return list(sorted(docs))
 
 
 def get_helper_doc(command_name) -> str:
