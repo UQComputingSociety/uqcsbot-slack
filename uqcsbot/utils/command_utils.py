@@ -51,8 +51,8 @@ def get_helper_docs(command_name=None) -> List[str]:
     """
     # functions matching this command, possibly with duplicates
     fns = (fn for command, functions in uqcsbot.bot._command_registry.items()
-              for fn in functions
-              if command_name is None or command_name == command)
+           for fn in functions
+           if command_name is None or command_name == command)
     # we need to remove duplicates after getting docs because @bot.on_command
     # makes distinct copies of functions for aliases.
     docs = set(sanitize_doc(fn.__doc__) for fn in fns
