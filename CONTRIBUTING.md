@@ -61,7 +61,7 @@ See the [README](README.md) for getting started on local development.
      ```
 
 1. Create your patch, **including test cases where appropriate**.
-1. If creating a script that can be called by a user, ensure you write an appropriate [helper docstring](http://www.pythonforbeginners.com/basics/python-docstrings). Examples can be found in any of the [existing scripts](https://github.com/UQComputingSociety/uqcsbot/tree/python-rewrite/uqcsbot/scripts), and additional usage syntax can be found [here](https://en.wikipedia.org/wiki/Usage_message#Pattern).
+1. If creating a script that can be called by a user, ensure you write an appropriate [helper docstring](http://www.pythonforbeginners.com/basics/python-docstrings). Examples can be found in any of the [existing scripts](https://github.com/UQComputingSociety/uqcsbot/tree/master/uqcsbot/scripts), and additional usage syntax can be found [here](https://en.wikipedia.org/wiki/Usage_message#Pattern).
 1. All Python code must adhere to the [PEP-8 Styleguide](https://www.python.org/dev/peps/pep-0008/) as closely as possible. Line lengths are usually not an issue, but do try and keep them under 80/100 characters where possible.
 1. Run the full test suite, as described in the [README](README.md), and ensure that all tests pass.
 1. Commit your changes using a descriptive commit message.
@@ -77,7 +77,7 @@ See the [README](README.md) for getting started on local development.
     git push origin my-fix-branch
     ```
 
-1. In GitHub, send a pull request to `uqcsbot:python-rewrite`.
+1. In GitHub, send a pull request to `uqcsbot:master`.
     * If we suggest changes then:
     * Make the required updates.
     * Re-run the test suite to ensure tests are still passing.
