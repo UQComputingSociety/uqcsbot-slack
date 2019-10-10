@@ -193,8 +193,12 @@ class UQCSBot(object):
         command = Command.from_message(message)
         if command is None:
             return
-        for handler in self._command_registry[command.name]:
-            self.executor.submit(self._execute_catching_error, handler, command)
+        handlers = self._command_registry[command.name]
+        if not handlers:
+            self.post_message(command.channel_id, "Unknown command. Use !help to retrieve a list of supported commands")
+        else:
+            for handler in self._command_registry[command.name]:
+                self.executor.submit(self._execute_catching_error, handler, command)
 
     def _run_handlers(self, event: dict):
         """
