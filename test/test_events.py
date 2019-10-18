@@ -333,3 +333,55 @@ def test_events_live(uqcsbot: MockUQCSBot):
     assert (messages[1].get('text').startswith("_There don't appear to be any events"
                                                + " in the next *2* weeks_\r\n") or
             messages[1].get('text').startswith("Events in the *next _2_ weeks*\r\n"))
+
+
+# unit tests both seminars and UQCS events, filter to only UQCS events
+@patch("uqcsbot.scripts.events.get_calendar_file", new=mocked_events_ics)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_typical)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_details_page",
+       new=mocked_html_details_full)
+@patch("uqcsbot.scripts.events.get_current_time", new=mocked_get_august_time)
+def test_events_filter_uqcs(uqcsbot: MockUQCSBot):
+    """
+    This test simulates the user invoking '!events', for both UQCS and Seminar calendars
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!events uqcs")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    expected = (
+        "Events in the *next _2_ weeks*\r\n"
+        "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - _River City Labs_\r\n"
+        "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
+        "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford` - _Hawken 50-T103_\r\n"
+        "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS"
+        + " Social Event` - _Hawken 50-C207_"
+    )
+    assert messages[1].get('text') == expected
+
+
+# unit tests both seminars and UQCS events, filter to only ITEE events
+@patch("uqcsbot.scripts.events.get_calendar_file", new=mocked_events_ics)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_typical)
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_details_page",
+       new=mocked_html_details_full)
+@patch("uqcsbot.scripts.events.get_current_time", new=mocked_get_august_time)
+def test_events_filter_itee(uqcsbot: MockUQCSBot):
+    """
+    This test simulates the user invoking '!events', for both UQCS and Seminar calendars
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!events itee")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    expected = (
+        "Events in the *next _2_ weeks*\r\n"
+        "*TUE MAY 28 12:00 - 13:00* - `<https://www.itee.uq.edu.au/introduction"
+        + "-functional-programming|Introduction to functional programming"
+        + " - Tony Morris, Software Engineer at Data61>` - _78-420_\r\n"
+        "*WED MAY 29 13:00 - 14:00* - `<https://www.itee.uq.edu.au/performance-enhancement-"
+        + "software-defined-cellular-5g-and-internet-things-networks"
+        + "|Performance Enhancement of Software Defined Cellular 5G &amp;"
+        + " Internet-of-Things Networks - Furqan Khan>` - _78-430_"
+    )
+    assert messages[1].get('text') == expected
