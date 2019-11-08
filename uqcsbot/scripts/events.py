@@ -12,8 +12,8 @@ from uqcsbot.utils.itee_seminar_utils import (get_seminars, HttpException, Inval
 
 CALENDAR_URL = ("https://calendar.google.com/calendar/ical/"
                 + "q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics")
-FILTER_REGEX = re.compile('full|all|[0-9]+( weeks?)?|jan.*|feb.*|mar.*|apr.*|may.*|jun.*'
-                          + '|jul.*|aug.*|sep.*|oct.*|nov.*|dec.*')
+FILTER_REGEX = re.compile('full|all|[0-9]+( weeks?)?|jan.*|feb.*|mar.*'
+                          + '|apr.*|may.*|jun.*|jul.*|aug.*|sep.*|oct.*|nov.*|dec.*')
 BRISBANE_TZ = timezone('Australia/Brisbane')
 # empty string to one-index
 MONTH_NUMBER = {month.lower(): index for index, month in enumerate(month_abbr)}
@@ -28,11 +28,11 @@ class EventFilter(object):
         self._month = month
 
     @classmethod
-    def from_command(cls, command: Command):
-        if not command.has_arg():
+    def from_argument(cls, argument: str):
+        if not argument:
             return cls(weeks=2)
         else:
-            match = re.match(FILTER_REGEX, command.arg.lower())
+            match = re.match(FILTER_REGEX, argument.lower())
             if not match:
                 return cls(is_valid=False)
             filter_str = match.group(0)
@@ -155,11 +155,24 @@ def get_current_time():
 @loading_status
 def handle_events(command: Command):
     """
-    `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks]` - Lists all the UQCS and
-    ITEE events that are scheduled to occur within the given filter.
+    `!events [full|all|NUM EVENTS|<NUM WEEKS> weeks] [uqcs|itee]`
+    - Lists all the UQCS and/or  ITEE events that are
+    scheduled to occur within the given filter.
     If unspecified, will return the next 2 weeks of events.
     """
-    event_filter = EventFilter.from_command(command)
+
+    argument = command.arg if command.has_arg() else ""
+
+    source_get = {"uqcs": False, "itee": False}
+    for k in source_get:
+        if k in argument:
+            source_get[k] = True
+            argument = argument.replace(k, "")
+    argument = argument.strip()
+    if not any(source_get.values()):
+        source_get = dict.fromkeys(source_get, True)
+
+    event_filter = EventFilter.from_argument(argument)
     if not event_filter.is_valid:
         raise UsageSyntaxException()
 
@@ -168,28 +181,30 @@ def handle_events(command: Command):
 
     events = []
     # subcomponents are how icalendar returns the list of things in the calendar
-    for c in cal.subcomponents:
-        # TODO: support recurring events
-        # we are only interested in ones with the name VEVENT as they
-        # are events we also currently filter out recurring events
-        if c.name != 'VEVENT' or c.get('RRULE') is not None:
-            continue
+    if source_get["uqcs"]:
+        for c in cal.subcomponents:
+            # TODO: support recurring events
+            # we are only interested in ones with the name VEVENT as they
+            # are events we also currently filter out recurring events
+            if c.name != 'VEVENT' or c.get('RRULE') is not None:
+                continue
 
-        # we convert it to our own event class
-        event = Event.from_cal_event(c)
-        # then we want to filter out any events that are not after the current time
-        if event.start > current_time:
-            events.append(event)
+            # we convert it to our own event class
+            event = Event.from_cal_event(c)
+            # then we want to filter out any events that are not after the current time
+            if event.start > current_time:
+                events.append(event)
 
-    try:
-        # Try to include events from the ITEE seminars page
-        seminars = get_seminars()
-        for seminar in seminars:
-            # The ITEE website only lists current events.
-            event = Event.from_seminar(seminar)
-            events.append(event)
-    except (HttpException, InvalidFormatException) as e:
-        bot.logger.error(e.message)
+    if source_get["itee"]:
+        try:
+            # Try to include events from the ITEE seminars page
+            seminars = get_seminars()
+            for seminar in seminars:
+                # The ITEE website only lists current events.
+                event = Event.from_seminar(seminar)
+                events.append(event)
+        except (HttpException, InvalidFormatException) as e:
+            bot.logger.error(e.message)
 
     # then we apply our event filter as generated earlier
     events = event_filter.filter_events(events, current_time)
