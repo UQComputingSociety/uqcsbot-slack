@@ -17,9 +17,10 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     + " members well-being and safety. You can view a copy of this code of conduct at",
     "https://github.com/UQComputingSociety/code-of-conduct",
     "Your friendly committee and admins are"
-    + " Nicholas Lambourne (@ndl), Jack Caperon (@jam), Bradley Stone (@Σ),"
-    + " Joshua Sutton (@jsutton), Ella de Lore (@Ella), Matthew Lake (@mgtlake),"
-    + " Ishraque Zahin (@Ishraque), Ryan Kurz (@lighthou) and Raghav Mishra (@rm)",
+    + " Madhav Kumar (@kumar-ish), Matthew Low (@mcl), Bradley (@Σ),"
+    + " Sannidhi Bosamia (@sanni), Jack Caperon (@jam), James Copperthwaite (@jcopperthwaite),"
+    + " Kenton Lam (@Kenton), Nicholas Lambourne (@noodle), Olivia Mackenzie-Ross (@Liv),"
+    + " Raghav Mishra (@rm) and Brian Riwu Kaho (@pipInstall)"
     "For a list of upcoming events check out the #events channel, or type \"!events\"",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
     "Be sure to download the Slack desktop and phone apps as well,"
