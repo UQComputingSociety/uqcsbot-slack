@@ -14,17 +14,17 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     + " subject-specific ones (e.g #csse1001, #math1051, #csse2310)",
     "To find and join a channel, tap on the channels header in the sidebar",
     "The UQCS Slack is a friendly community with a code of conduct in place to ensure our"
-    + " members well-being and safety. You can view a copy of this code of conduct at",
-    "https://github.com/UQComputingSociety/code-of-conduct",
+    + " members well-being and safety. You can view a copy of this code of conduct at:",
+    ">https://github.com/UQComputingSociety/code-of-conduct",
     "Your friendly committee and admins are"
-    + " Madhav Kumar (@kumar-ish), Matthew Low (@mcl), Bradley (@Σ),"
-    + " Sannidhi Bosamia (@sanni), Jack Caperon (@jam), James Copperthwaite (@jcopperthwaite),"
-    + " Kenton Lam (@Kenton), Nicholas Lambourne (@noodle), Olivia Mackenzie-Ross (@Liv),"
-    + " Raghav Mishra (@rm) and Brian Riwu Kaho (@pipInstall)"
+    + "\n>Madhav Kumar (@kumar-ish)\n>Matthew Low (@mcl)\n>Bradley (@Σ)"
+    + "\n>Sanni Bosamia (@sanni)\n>Jack Caperon (@jam)\n>James Copperthwaite (@jcopperthwaite)"
+    + "\n>Kenton Lam (@Kenton)\n>Nicholas Lambourne (@noodle)\n>Olivia Mackenzie-Ross (@Liv)"
+    + "\n>Raghav Mishra (@rm)\n>Brian Riwu Kaho (@pipInstall)", 
     "For a list of upcoming events check out the #events channel, or type \"!events\"",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
     "Be sure to download the Slack desktop and phone apps as well,"
-    + "so you'll be able to catch any important announcements",
+    + " so you'll be able to catch any important announcements",
     "and again, welcome :)"
 ]
 
