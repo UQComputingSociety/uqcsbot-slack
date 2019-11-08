@@ -16,7 +16,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "The UQCS Slack is a friendly community with a code of conduct in place to ensure our"
     + " members well-being and safety. You can view a copy of this code of conduct at:"
     + "\n>https://github.com/UQComputingSociety/code-of-conduct",
-    "Your friendly committee and admins are"
+    "Your friendly committee and admins are:"
     + "\n>Madhav Kumar (@kumar-ish)\n>Matthew Low (@mcl)\n>Bradley (@Σ)"
     + "\n>Sanni Bosamia (@sanni)\n>Jack Caperon (@jam)\n>James Copperthwaite (@jcopperthwaite)"
     + "\n>Kenton Lam (@Kenton)\n>Nicholas Lambourne (@noodle)\n>Olivia Mackenzie-Ross (@Liv)"
