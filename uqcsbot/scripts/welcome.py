@@ -10,20 +10,23 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "Hey there! Welcome to the UQCS Slack!",
     "This is the first time I've seen you, so you're probably new here",
     "I'm UQCSbot, your friendly (open source) robot helper",
-    "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many"
-    + " subject-specific ones (e.g #csse1001, #math1051, #csse2310)",
+    "We've got a bunch of generic channels (e.g. <#C0D0BEYPM|banter>,"
+    + " <#C0DKX7NGP|games>, <#CB2K0Q09K|adulting>) along with many subject-specific"
+    + " ones (e.g <#C0MAN4BRS|csse1001>, <#C0Q2KTCK1|math1051>, <#C0DKSDGLE|csse2310>)",
     "To find and join a channel, tap on the channels header in the sidebar",
     "The UQCS Slack is a friendly community with a code of conduct in place to ensure our"
-    + " members well-being and safety. You can view a copy of this code of conduct at",
-    "https://github.com/UQComputingSociety/code-of-conduct",
-    "Your friendly committee and admins are"
-    + " Nicholas Lambourne (@ndl), Jack Caperon (@jam), Bradley Stone (@Σ),"
-    + " Joshua Sutton (@jsutton), Ella de Lore (@Ella), Matthew Lake (@mgtlake),"
-    + " Ishraque Zahin (@Ishraque), Ryan Kurz (@lighthou) and Raghav Mishra (@rm)",
+    + " members well-being and safety. You can view a copy of this code of conduct at:"
+    + "\n>https://github.com/UQComputingSociety/code-of-conduct",
+    "Your friendly committee and admins are:"
+    + "\n>Madhav Kumar (<@UFB9R5QFM>)\n>Matthew Low (<@U8JN3NR1C>)\n>Bradley (<@U4AJ0EDE3>)"
+    + "\n>Sanni Bosamia (<@UM55HGLUT>)\n>Jack Caperon (<@U29STGM63>)"
+    + "\n>James Copperthwaite (<@U1H1R3NGK>)\n>Kenton Lam (<@U9LMBPJG5>)"
+    + "\n>Nicholas Lambourne (<@U0LG4V4NN>)\n>Olivia Mackenzie-Ross (<@UA25BSPGT>)"
+    + "\n>Raghav Mishra (<@U73H0R0QH>)\n>Brian Riwu Kaho (<@UCYC0TKMM>)",
     "For a list of upcoming events check out the #events channel, or type \"!events\"",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
     "Be sure to download the Slack desktop and phone apps as well,"
-    + "so you'll be able to catch any important announcements",
+    + " so you'll be able to catch any important announcements",
     "and again, welcome :)"
 ]
 
