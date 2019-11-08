@@ -20,7 +20,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     + "\n>Madhav Kumar (@kumar-ish)\n>Matthew Low (@mcl)\n>Bradley (@Σ)"
     + "\n>Sanni Bosamia (@sanni)\n>Jack Caperon (@jam)\n>James Copperthwaite (@jcopperthwaite)"
     + "\n>Kenton Lam (@Kenton)\n>Nicholas Lambourne (@noodle)\n>Olivia Mackenzie-Ross (@Liv)"
-    + "\n>Raghav Mishra (@rm)\n>Brian Riwu Kaho (@pipInstall)", 
+    + "\n>Raghav Mishra (@rm)\n>Brian Riwu Kaho (@pipInstall)",
     "For a list of upcoming events check out the #events channel, or type \"!events\"",
     "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
     "Be sure to download the Slack desktop and phone apps as well,"
