@@ -50,7 +50,11 @@ def get_latest() -> str:
     :return: the URL to the latest xkcd comic.
     """
     rss = feedparser.parse(XKCD_RSS_URL)
-    latest = rss['entries'][0]['guid']
+    i = 0
+    latest = rss['entries'][i]['guid']
+    while not latest[17:][:-1].isdigit():
+        i += 1
+        latest = rss['entries'][i]['guid']
     return latest
 
 
@@ -90,7 +94,7 @@ def handle_xkcd(command: Command) -> None:
 
 
 @bot.on_schedule('cron', hour=14, minute=1, day_of_week='mon,wed,fri',
-                 timezone='Australia/Brisbane')
+                timezone='Australia/Brisbane')
 def new_xkcd() -> None:
     """
     Posts new xkcd comic when they are released every Monday,
