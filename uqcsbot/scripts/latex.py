@@ -5,7 +5,7 @@ from uqcsbot.utils.command_utils import UsageSyntaxException
 
 
 def handle_latex_internal(channel, data):
-    url = f"http://latex.codecogs.com/gif.latex?{quote(data)}"
+    url = f"http://latex.codecogs.com/gif.latex?\\bg_white&space;{quote(data)}"
     bot.post_message(
         channel,
         text=f"LaTeX render for \"{data}\"",
