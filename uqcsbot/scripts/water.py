@@ -7,7 +7,6 @@ from functools import partial
 import asyncio
 from uqcsbot.utils.command_utils import UsageSyntaxException
 
-BASE_URL = "http://acronyms.thefreedictionary.com"
 LIST_COMMAND = ['ls', 'list', 'dir']
 REGIONS = {
     'seq': {
