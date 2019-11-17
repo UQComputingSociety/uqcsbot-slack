@@ -1,10 +1,7 @@
 from uqcsbot import bot, Command
 import requests
-from urllib.parse import quote
 from bs4 import BeautifulSoup
 from typing import List, Tuple
-from functools import partial
-import asyncio
 from uqcsbot.utils.command_utils import UsageSyntaxException
 
 LIST_COMMAND = ['ls', 'list', 'dir']
@@ -39,7 +36,7 @@ def handle_water(command: Command):
             response.append(f">{region} (aliases: {', '.join(REGIONS[region]['aliases'])})")
     else:
         # Print the info for a specific region
-        if words[0].lower() in REGIONS or words[0].lower() in [alias for region in REGIONS for alias in REGIONS[region]['aliases']]:
+        if words[0].lower() in REGIONS or words[0].lower() in [alias['aliases'] for alias in REGIONS.values()]:
             actual_region = words[0].lower()
             name = words[0]
             if words[0].lower() not in REGIONS:    
@@ -59,7 +56,7 @@ def handle_water(command: Command):
 
                 maximum = int("".join(list(filter(str.isdigit, maximum_reading.get_text()))))
                 current = int("".join(list(filter(str.isdigit, current_reading.get_text()))))
-                percent = (1.0 * current / maximum) * 100.0
+                percent = 100 * (current / maximum)
 
                 response.append(f"{name} is at *{percent:3.2f}%* ({current:,}ML of {maximum:,}ML)")
             else:
