@@ -1,6 +1,6 @@
 from functools import partial
 import time
-from slackclient import SlackClient
+import slack
 import threading
 import logging
 from typing import (TYPE_CHECKING, List, Iterable, Optional, Generator,
@@ -30,7 +30,7 @@ class Paginator(Iterable[dict]):
     def _gen(self) -> Generator[dict, Any, None]:
         kwargs = self._kwargs.copy()
         while True:
-            page = self._client.api_call(self._method, **kwargs)
+            page = getattr(self._client, self._method.replace('.', '_'))(**kwargs)
             yield page
             cursor = page.get('response_metadata', {}).get('next_cursor')
             if not cursor:
@@ -45,7 +45,7 @@ class APIMethodProxy(object):
     """
     Helper class used to implement APIWrapper
     """
-    def __init__(self, client: SlackClient, method: str) -> None:
+    def __init__(self, client: slack.WebClient, method: str) -> None:
         self._client = client
         self._method = method
 
@@ -56,7 +56,7 @@ class APIMethodProxy(object):
 
         Attempts to retry the API call if rate-limited.
         """
-        fn = partial(self._client.api_call, self._method, **kwargs)
+        fn = partial(getattr(self._client, self._method.replace('.', '_')), **kwargs)
         retry_count = 0
         while retry_count < 5:
             result = fn()
@@ -109,7 +109,7 @@ class APIWrapper(object):
         > api = APIWrapper(client)
         > api.chat.postMessage(channel="general", text="message")
     """
-    def __init__(self, client: SlackClient) -> None:
+    def __init__(self, client: slack.WebClient) -> None:
         self._client = client
 
     def __getattr__(self, item) -> APIMethodProxy:
@@ -206,20 +206,15 @@ class ChannelWrapper(object):
             self._initialised = True
             self._channels_by_id = {}
             self._channels_by_name = {}
-            for page in self._bot.api.channels.list.paginate():
+            for page in self._bot.api.conversations.list.paginate(exclude_members='true', types="public_channel,private_channel,mpim,im"):
                 for chan in page['channels']:
+                    if chan["is_im"]:
+                        if chan['is_user_deleted']:
+                            continue
+                        # Set the channel name to the user being directly messaged
+                        # for easier reverse lookups. Note: `user` here is the user_id.
+                        chan['name'] = chan['user']
                     self._add_channel(chan)
-            for group in self._bot.api.groups.list(exclude_members=True).get('groups', []):
-                self._add_channel(group)
-            # The ims cover the direct messages between the bot and users
-            for page in self._bot.api.im.list.paginate():
-                for im in page['ims']:
-                    if im['is_user_deleted']:
-                        continue
-                    # Set the channel name to the user being directly messaged
-                    # for easier reverse lookups. Note: `user` here is the user_id.
-                    im['name'] = im['user']
-                    self._add_channel(im)
             self._initialised = True
 
     def populate_from_team_state(self, data):
