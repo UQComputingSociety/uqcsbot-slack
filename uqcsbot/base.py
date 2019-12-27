@@ -1,4 +1,4 @@
-from slackclient import SlackClient
+import slack
 from uqcsbot.api import APIWrapper, ChannelWrapper, Channel, UsersWrapper
 from functools import partial, wraps
 import collections
@@ -6,9 +6,10 @@ import asyncio
 import concurrent.futures
 import logging
 import time
+import inspect
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_doc
 from unidecode import unidecode
 
@@ -65,9 +66,47 @@ def underscored_getter(s: str) -> Any:
     return protected_property(s, '_' + s)
 
 
+class ModifiedRTMClient(slack.RTMClient):
+    def __init__(self, *, executor, handlers, **kwargs):
+        super().__init__(**kwargs, connect_method='rtm.connect')
+        self._executor = executor
+        self._callbacks = handlers
+
+    async def _dispatch_event(self, event, data=None):
+        for callback in self._callbacks[event]:
+            self._logger.debug(
+                "Running %s callbacks for event: '%s'",
+                len(self._callbacks[event]),
+                event,
+            )
+            try:
+                if self._stopped and event not in ["close", "error"]:
+                    # Don't run callbacks if client was stopped unless they're
+                    # close/error callbacks.
+                    break
+
+                if inspect.iscoroutinefunction(callback):
+                    await callback(
+                        rtm_client=self, web_client=self._web_client, data=data
+                    )
+                else:
+                    await self._execute_in_thread(callback, data)
+            except Exception as err:
+                name = callback.__name__
+                module = callback.__module__
+                msg = f"When calling '#{name}()' in the '{module}' module the following error was raised: {err}"
+                self._logger.error(msg)
+                raise
+    _dispatch_event.__doc__ = slack.RTMClient._dispatch_event.__doc__
+
+    def _execute_in_thread(self, callback, data):
+        return self._event_loop.run_in_executor(self._executor, callback, data)
+
+
 class UQCSBot(object):
     api_token: Optional[str] = underscored_getter("api_token")
-    client: Optional[SlackClient] = underscored_getter("client")
+    web_client: Optional[slack.WebClient] = underscored_getter("web_client")
+    rtm_client: Optional[slack.RTMClient] = underscored_getter("rtm_client")
     verification_token: Optional[str] = underscored_getter("verification_token")
     executor: concurrent.futures.ThreadPoolExecutor = underscored_getter("executor")
 
@@ -79,7 +118,7 @@ class UQCSBot(object):
         self.logger = logger or logging.getLogger("uqcsbot")
         self._handlers: DefaultDict[str, list] = collections.defaultdict(list)
         self._command_registry: DefaultDict[str, list] = collections.defaultdict(list)
-        self._scheduler = BackgroundScheduler()
+        self._scheduler = AsyncIOScheduler()
 
         self.register_handler('message', self._handle_command)
         self.register_handler('hello', self._handle_hello)
@@ -133,16 +172,16 @@ class UQCSBot(object):
         return handler_fn
 
     def api_call(self, *args, **kwargs):
-        self.client.api_call(*args, **kwargs)
+        self.web_client.api_call(*args, **kwargs)
 
-    api_call.__doc__ = SlackClient.api_call.__doc__
+    api_call.__doc__ = slack.WebClient.api_call.__doc__
 
     @property
     def api(self):
         """
         See uqcsbot.api.APIWrapper for usage information.
         """
-        return APIWrapper(self.client)
+        return APIWrapper(self.web_client)
 
     def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
         channel_id = channel if isinstance(channel, str) else channel.id
@@ -164,14 +203,18 @@ class UQCSBot(object):
         """
         Starts the scheduler for timed tasks, and on error does cleanup
         """
+        self._loop = self.get_event_loop()
+        self._scheduler.configure(event_loop=self._loop)
         self._scheduler.start()
         try:
             yield
         except Exception:
             self.logger.exception("An error occurred, exiting")
+            raise
+        finally:
             self._scheduler.shutdown()
             self._executor.shutdown()
-            raise
+            self._loop.close()
 
     def _execute_catching_error(self, handler, evt):
         """
@@ -196,7 +239,7 @@ class UQCSBot(object):
         for handler in self._command_registry[command.name]:
             self.executor.submit(self._execute_catching_error, handler, command)
 
-    def _run_handlers(self, event: dict):
+    async def _run_handlers(self, event: dict):
         """
         Run handlers for raw messages based on message type. Handlers are
         executed by a ThreadPoolExecutor.
@@ -205,8 +248,15 @@ class UQCSBot(object):
         if "type" not in event:
             self.logger.error(f"No type in message: {event}")
         handlers = self._handlers[event['type']] + self._handlers['']
-        return [self.executor.submit(self._execute_catching_error, handler, event)
-                for handler in handlers]
+        futures = [
+            self._loop.run_in_executor(
+                self.executor,
+                self._execute_catching_error,
+                handler,
+                event
+            ) for handler in handlers
+        ]
+        return list(await asyncio.gather(futures, self._loop))
 
     def run(self, api_token, verification_token, **kwargs):
         """
@@ -216,20 +266,18 @@ class UQCSBot(object):
         verification_token: Events API verification token
         """
         self._api_token = api_token
-        self._client = SlackClient(api_token)
-        self._verification_token = verification_token
+        self._web_client = slack.WebClient(token=api_token)
         with self._execution_context():
-            if not self.client.rtm_connect(with_team_state=True, auto_reconnect=True):
-                raise OSError("Error connecting to RTM API")
-            connect_state = self.client.server.login_data
-            self.channels.populate_from_team_state(connect_state)
-            self.users.populate_from_team_state(connect_state)
-            while True:
-                for message in self.client.rtm_read():
-                    self._run_handlers(message)
-                    if message.get('type') == "goodbye":
-                        break
-                time.sleep(0.5)
+            self._rtm_client = ModifiedRTMClient(
+                token=api_token,
+                executor=self.executor,
+                handlers=self._handlers,
+                loop=self._loop,
+            )
+            try:
+                self.rtm_client.start()
+            except KeyboardInterrupt:
+                self.rtm_client.stop()
 
 
 bot = UQCSBot()
