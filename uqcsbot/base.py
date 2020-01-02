@@ -72,31 +72,36 @@ class ModifiedRTMClient(slack.RTMClient):
         self._executor = executor
         self._callbacks = handlers
 
-    async def _dispatch_event(self, event, data=None):
+    async def _dispatch_event(self, event: str, data=None):
+        """
+        Similar to the original implementation, but assumes that tasks never
+        fail and sync code should always be run in a thread.
+        """
+        waiting = []
+        # calling code does a .pop here
+        if data is not None:
+            data['type'] = event
         for callback in self._callbacks[event]:
             self._logger.debug(
-                "Running %s callbacks for event: '%s'",
+                "Starting %s callbacks for event: '%s'",
                 len(self._callbacks[event]),
                 event,
             )
-            try:
-                if self._stopped and event not in ["close", "error"]:
-                    # Don't run callbacks if client was stopped unless they're
-                    # close/error callbacks.
-                    break
+            if self._stopped and event not in ["close", "error"]:
+                # Don't run callbacks if client was stopped unless they're
+                # close/error callbacks.
+                break
 
-                if inspect.iscoroutinefunction(callback):
-                    await callback(
-                        rtm_client=self, web_client=self._web_client, data=data
-                    )
-                else:
-                    await self._execute_in_thread(callback, data)
-            except Exception as err:
-                name = callback.__name__
-                module = callback.__module__
-                msg = f"When calling '#{name}()' in the '{module}' module the following error was raised: {err}"
-                self._logger.error(msg)
-                raise
+            if inspect.iscoroutinefunction(callback):
+                waiting.append(asyncio.ensure_future(
+                    callback(rtm_client=self, web_client=self._web_client, data=data)
+                ))
+            else:
+                waiting.append(asyncio.ensure_future(
+                    self._execute_in_thread(callback, data)
+                ))
+        for coro in waiting:
+            await coro
     _dispatch_event.__doc__ = slack.RTMClient._dispatch_event.__doc__
 
     def _execute_in_thread(self, callback, data):
@@ -104,15 +109,19 @@ class ModifiedRTMClient(slack.RTMClient):
 
 
 class UQCSBot(object):
-    api_token: Optional[str] = underscored_getter("api_token")
-    web_client: Optional[slack.WebClient] = underscored_getter("web_client")
+    user_token: Optional[str] = underscored_getter("user_token")
+    bot_token: Optional[str] = underscored_getter("bot_token")
+    bot_client: Optional[slack.WebClient] = underscored_getter("bot_client")
+    user_client: Optional[slack.WebClient] = underscored_getter("user_client")
     rtm_client: Optional[slack.RTMClient] = underscored_getter("rtm_client")
     verification_token: Optional[str] = underscored_getter("verification_token")
     executor: concurrent.futures.ThreadPoolExecutor = underscored_getter("executor")
 
     def __init__(self, logger=None):
-        self._api_token = None
-        self._client = None
+        self._user_token = None
+        self._user_client = None
+        self._bot_token = None
+        self._bot_client = None
         self._verification_token = None
         self._executor = concurrent.futures.ThreadPoolExecutor()
         self.logger = logger or logging.getLogger("uqcsbot")
@@ -171,8 +180,8 @@ class UQCSBot(object):
         self._handlers[message_type].append(handler_fn)
         return handler_fn
 
-    def api_call(self, *args, **kwargs):
-        self.web_client.api_call(*args, **kwargs)
+    def api_call(self, method, **kwargs):
+        return getattr(self.api, method)(**kwargs)
 
     api_call.__doc__ = slack.WebClient.api_call.__doc__
 
@@ -181,7 +190,7 @@ class UQCSBot(object):
         """
         See uqcsbot.api.APIWrapper for usage information.
         """
-        return APIWrapper(self.web_client)
+        return APIWrapper(self.user_client, self.bot_client)
 
     def post_message(self, channel: Union[Channel, str], text: str, **kwargs):
         channel_id = channel if isinstance(channel, str) else channel.id
@@ -258,18 +267,21 @@ class UQCSBot(object):
         ]
         return list(await asyncio.gather(futures, self._loop))
 
-    def run(self, api_token, verification_token, **kwargs):
+    def run(self, user_token, bot_token):
         """
         Run the bot.
 
         api_token: Slack API token
         verification_token: Events API verification token
         """
-        self._api_token = api_token
-        self._web_client = slack.WebClient(token=api_token)
+        self._user_token = user_token
+        self._bot_token = bot_token
+        self._user_client = slack.WebClient(token=self.user_token)
+        self._bot_client = slack.WebClient(token=self.bot_token)
+
         with self._execution_context():
             self._rtm_client = ModifiedRTMClient(
-                token=api_token,
+                token=self.bot_token,
                 executor=self.executor,
                 handlers=self._handlers,
                 loop=self._loop,

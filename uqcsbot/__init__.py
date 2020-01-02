@@ -12,6 +12,7 @@ LOGGER = logging.getLogger("uqcsbot")
 
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
+SLACK_USER_TOKEN = os.environ.get("SLACK_USER_TOKEN", "")
 # Channel group which contains all the bots. Easy way to get all their ids.
 SECRET_BOT_MEETING_ROOM = 'G9JJXHF7S'
 
@@ -117,9 +118,6 @@ def import_scripts():
 
 
 def main():
-    # Import scripts
-    import_scripts()
-
     # Setup the CLI argument parser
     parser = argparse.ArgumentParser(description='Run UQCSBot')
     parser.add_argument('--dev', dest='dev',
@@ -135,9 +133,13 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(level=args.log_level)
 
+    # Import scripts
+    import_scripts()
+
     # If in development mode, attempt to allocate an available bot token,
     # else stick with the default. If no bot could be allocated, exit.
     bot_token = SLACK_BOT_TOKEN
+    user_token = SLACK_USER_TOKEN
     if args.dev:
         test_bot = get_free_test_bot()
         if test_bot is None:
@@ -150,8 +152,11 @@ def main():
     if bot_token is None or bot_token == "":
         LOGGER.error("No bot token found!")
         sys.exit(1)
+    if user_token is None or user_token == "":
+        LOGGER.error("No user token found!")
+        sys.exit(1)
 
-    bot.run(bot_token, SLACK_VERIFICATION_TOKEN)
+    bot.run(user_token, bot_token)
 
 
 if __name__ == "__main__":

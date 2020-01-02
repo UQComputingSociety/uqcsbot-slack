@@ -9,7 +9,8 @@ def in_yelling(channel):
     checks that channel is #yelling
     exists for test mocking
     """
-    return bot.channels.get(channel).name == "yelling"
+    chan = bot.channels.get(channel)
+    return chan and chan.name == "yelling"
 
 
 def is_human(user):
