@@ -51,7 +51,7 @@ class APIMethodProxy(object):
     """
     Helper class used to implement APIWrapper
     """
-    def __init__(self,  user_client: slack.WebClient, bot_client: slack.WebClient, method: str) -> None:
+    def __init__(self,  user_client: slack.WebClient, bot_client: slack.WebClient, method: str):
         self._user_client = user_client
         self._bot_client = bot_client
         self._method = method
@@ -63,13 +63,10 @@ class APIMethodProxy(object):
 
         Attempts to retry the API call if rate-limited.
         """
-        get_fn = lambda c: partial(
-            getattr(
-                getattr(self, f'_{c}_client'),
-                self._method.replace('.', '_')
-            ),
-            **kwargs
-        )
+        def get_fn(call_type):
+            client = getattr(self, f'_{call_type}_client')
+            method = getattr(client, self._method.replace('.', '_'))
+            return partial(method, **kwargs)
         retry_count = 0
         call_type = _CLIENT_METHOD_REGISTRY.get(self._method, 'bot')
         while retry_count < 5:
@@ -233,7 +230,10 @@ class ChannelWrapper(object):
             self._initialised = True
             self._channels_by_id = {}
             self._channels_by_name = {}
-            for page in self._bot.api.conversations.list.paginate(exclude_members='true', types="public_channel,private_channel,mpim,im"):
+            for page in self._bot.api.conversations.list.paginate(
+                    exclude_members='true',
+                    types="public_channel,private_channel,mpim,im",
+            ):
                 for chan in page['channels']:
                     if chan["is_im"]:
                         if chan['is_user_deleted']:

@@ -2,7 +2,6 @@
 Configuration for Pytest
 """
 
-from unittest.mock import MagicMock
 from itertools import islice
 from functools import partial
 from collections import defaultdict
@@ -11,7 +10,7 @@ from typing import Optional
 import pytest
 from slack import WebClient
 import uqcsbot as uqcsbot_module
-from uqcsbot.api import APIWrapper, APIMethodProxy
+from uqcsbot.api import APIWrapper
 from uqcsbot.base import UQCSBot, Command
 from copy import deepcopy
 
@@ -158,7 +157,8 @@ class MockUQCSBot(UQCSBot):
             return channel.get(channel_type, False)
 
         if channel_type == 'all':
-            filter_function = lambda x: True
+            def filter_function(*args):
+                return True
             channel_type = 'channels'
         elif channel_type == 'channels':
             filter_function = partial(is_channel_type, channel_type='is_public')
