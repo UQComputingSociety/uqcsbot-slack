@@ -5,7 +5,6 @@ import collections
 import asyncio
 import concurrent.futures
 import logging
-import time
 import inspect
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
@@ -265,7 +264,7 @@ class UQCSBot(object):
                 event
             ) for handler in handlers
         ]
-        return list(await asyncio.gather(futures, self._loop))
+        return [(await future) for future in futures]
 
     def run(self, user_token, bot_token):
         """
