@@ -65,7 +65,7 @@ def yelling(event: dict):
         return
 
     # ignore emoji
-    text = sub(r":[\w\-\+']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
+    text = sub(r":[\w\-\+\_']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
     text = text.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&")
     # randomly select a response
     response = choice(["WHAT’S THAT‽",
