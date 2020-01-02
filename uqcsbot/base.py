@@ -6,6 +6,7 @@ import asyncio
 import concurrent.futures
 import logging
 import inspect
+import threading
 from contextlib import contextmanager
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -212,6 +213,22 @@ class UQCSBot(object):
         Starts the scheduler for timed tasks, and on error does cleanup
         """
         self._loop = self.get_event_loop()
+        current = threading.current_thread()
+        og_run_until_complete = self._loop.run_until_complete
+
+        def cooked_run_until_complete(fut):
+            if threading.current_thread() == current:
+                return og_run_until_complete(fut)
+            else:
+                evt = threading.Event()
+                fut.add_done_callback(lambda *a: evt.set())
+                evt.wait()
+                return fut.result()
+        self._loop.run_until_complete = cooked_run_until_complete
+
+        self._user_client = slack.WebClient(token=self.user_token, loop=self._loop)
+        self._bot_client = slack.WebClient(token=self.bot_token, loop=self._loop)
+
         self._scheduler.configure(event_loop=self._loop)
         self._scheduler.start()
         try:
@@ -275,9 +292,6 @@ class UQCSBot(object):
         """
         self._user_token = user_token
         self._bot_token = bot_token
-        self._user_client = slack.WebClient(token=self.user_token)
-        self._bot_client = slack.WebClient(token=self.bot_token)
-
         with self._execution_context():
             self._rtm_client = ModifiedRTMClient(
                 token=self.bot_token,
