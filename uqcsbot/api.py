@@ -1,10 +1,12 @@
 from functools import partial
 import time
 import slack
+import slack.errors
 import threading
 import logging
 from typing import (TYPE_CHECKING, List, Iterable, Optional, Generator,
                     Any, Union, TypeVar, Dict, Type)
+from typing_extensions import Literal
 if TYPE_CHECKING:
     from uqcsbot.base import UQCSBot  # noqa
 
@@ -14,6 +16,13 @@ UserT = TypeVar('UserT', bound='User')
 
 LOGGER = logging.getLogger(__name__)
 
+# This is used to track which client is preferred for a given method
+_CLIENT_METHOD_REGISTRY: Dict[str, Union[Literal['bot'], Literal['user']]] = {
+    'chat.postMessage': 'bot',
+    'rtm.connect': 'user',
+    'rtm.start': 'user',
+}
+
 
 class Paginator(Iterable[dict]):
     """
@@ -22,15 +31,14 @@ class Paginator(Iterable[dict]):
 
     See https://api.slack.com/docs/pagination for details
     """
-    def __init__(self, client, method, **kwargs):
-        self._client = client
-        self._method = method
+    def __init__(self, caller: 'APIMethodProxy', **kwargs):
         self._kwargs = kwargs
+        self._caller = caller
 
     def _gen(self) -> Generator[dict, Any, None]:
         kwargs = self._kwargs.copy()
         while True:
-            page = getattr(self._client, self._method.replace('.', '_'))(**kwargs)
+            page = self._caller(**kwargs)
             yield page
             cursor = page.get('response_metadata', {}).get('next_cursor')
             if not cursor:
@@ -45,8 +53,9 @@ class APIMethodProxy(object):
     """
     Helper class used to implement APIWrapper
     """
-    def __init__(self, client: slack.WebClient, method: str) -> None:
-        self._client = client
+    def __init__(self,  user_client: slack.WebClient, bot_client: slack.WebClient, method: str) -> None:
+        self._user_client = user_client
+        self._bot_client = bot_client
         self._method = method
 
     def __call__(self, **kwargs) -> dict:
@@ -56,16 +65,30 @@ class APIMethodProxy(object):
 
         Attempts to retry the API call if rate-limited.
         """
-        fn = partial(getattr(self._client, self._method.replace('.', '_')), **kwargs)
+        get_fn = lambda c: partial(
+            getattr(
+                getattr(self, f'_{c}_client'),
+                self._method.replace('.', '_')
+            ),
+            **kwargs
+        )
         retry_count = 0
+        call_type = _CLIENT_METHOD_REGISTRY.get(self._method, 'bot')
         while retry_count < 5:
-            result = fn()
+            try:
+                result = get_fn(call_type)()
+            except slack.errors.SlackApiError as e:
+                result = e.response
             if not result['ok'] and result['error'] == 'ratelimited':
                 retry_after_secs = int(result['headers']['Retry-After'])
                 LOGGER.info(f'Rate limited, retrying in {retry_after_secs} seconds')
                 time.sleep(retry_after_secs)
                 retry_count += 1
+            elif not result['ok'] and result['error'] == 'not_allowed_token_type':
+                call_type = {'bot': 'user', 'user': 'bot'}[call_type]
+                retry_count += 1
             else:
+                _CLIENT_METHOD_REGISTRY[self._method] = call_type
                 break
         else:
             result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
@@ -81,7 +104,7 @@ class APIMethodProxy(object):
 
         Count/oldest/latest and page/count methods require manual pagination.
         """
-        return Paginator(self._client, self._method, **kwargs)
+        return Paginator(self, **kwargs)
 
     def __getattr__(self, item) -> 'APIMethodProxy':
         """
@@ -95,7 +118,8 @@ class APIMethodProxy(object):
             > APIMethodProxy("chat.postMessage")
         """
         return APIMethodProxy(
-            client=self._client,
+            user_client=self._user_client,
+            bot_client=self._bot_client,
             method=f'{self._method}.{item}',
         )
 
@@ -109,11 +133,16 @@ class APIWrapper(object):
         > api = APIWrapper(client)
         > api.chat.postMessage(channel="general", text="message")
     """
-    def __init__(self, client: slack.WebClient) -> None:
-        self._client = client
+    def __init__(self, user_client: slack.WebClient, bot_client: slack.WebClient) -> None:
+        self._user_client = user_client
+        self._bot_client = bot_client
 
     def __getattr__(self, item) -> APIMethodProxy:
-        return APIMethodProxy(client=self._client, method=item)
+        return APIMethodProxy(
+            user_client=self._user_client,
+            bot_client=self._bot_client,
+            method=item
+        )
 
     def __repr__(self) -> str:
         return f"<APIWrapper of {repr(self._client)}>"
