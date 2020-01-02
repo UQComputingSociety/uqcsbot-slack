@@ -6,7 +6,6 @@ import threading
 import logging
 from typing import (TYPE_CHECKING, List, Iterable, Optional, Generator,
                     Any, Union, TypeVar, Dict, Type)
-from typing_extensions import Literal
 if TYPE_CHECKING:
     from uqcsbot.base import UQCSBot  # noqa
 
@@ -17,10 +16,9 @@ UserT = TypeVar('UserT', bound='User')
 LOGGER = logging.getLogger(__name__)
 
 # This is used to track which client is preferred for a given method
-_CLIENT_METHOD_REGISTRY: Dict[str, Union[Literal['bot'], Literal['user']]] = {
+# Defaults to bot
+_CLIENT_METHOD_REGISTRY: Dict[str, str] = {
     'chat.postMessage': 'bot',
-    'rtm.connect': 'user',
-    'rtm.start': 'user',
 }
 
 
