@@ -13,7 +13,10 @@ def filter_valid_lowercases(msgs: List[T]) -> Generator[T, None, None]:
         msg = body.get('text')
         if msg is None:
             continue
-        if msg.startswith('WHAT IS THE MEANING OF THIS ARCANE SYMBOL') and msg.endswith(" I RECOGNISE IT NOT!"):
+        if (
+                msg.startswith('WHAT IS THE MEANING OF THIS ARCANE SYMBOL')
+                and msg.endswith(" I RECOGNISE IT NOT!")
+        ):
             continue
         if msg == 'OH, NO! NOT THE `a`S! NOT THE `a`S! AAAAAHHHHH!':
             continue
