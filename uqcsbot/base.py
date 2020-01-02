@@ -265,7 +265,7 @@ class UQCSBot(object):
                 event
             ) for handler in handlers
         ]
-        return list(await asyncio.gather(futures, self._loop))
+        return [(await future) for future in futures]
 
     def run(self, user_token, bot_token):
         """
