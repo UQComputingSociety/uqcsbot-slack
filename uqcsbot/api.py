@@ -63,6 +63,12 @@ class APIMethodProxy(object):
 
         Attempts to retry the API call if rate-limited.
         """
+        # slack client 2.0 does not implicitly convert boolean args
+        for key in kwargs:
+            value = kwargs[key]
+            if isinstance(value, bool):
+                kwargs[key] = str(value).lower()
+
         def do_request(call_type):
             client = getattr(self, f'_{call_type}_client')
             method = getattr(client, self._method.replace('.', '_'))

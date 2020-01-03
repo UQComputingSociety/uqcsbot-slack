@@ -110,7 +110,7 @@ class ModifiedRTMClient(slack.RTMClient):
 
             if inspect.iscoroutinefunction(callback):
                 waiting.append(asyncio.ensure_future(
-                    callback(rtm_client=self, web_client=self._web_client, data=data)
+                    callback(data)
                 ))
             else:
                 waiting.append(asyncio.ensure_future(
