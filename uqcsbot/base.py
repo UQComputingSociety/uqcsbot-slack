@@ -18,10 +18,12 @@ CmdT = TypeVar('CmdT', bound='Command')
 
 
 class Command(object):
-    def __init__(self, name: str, arg: Optional[str], message: dict) -> None:
+    def __init__(self, name: str, arg: Optional[str], message: dict, thread_ts: Optional[int] = None, thread_bcast: bool = None) -> None:
         self.name = name
         self.arg = arg
         self.message = message
+        self.thread_ts = thread_ts
+        self.thread_bcast = thread_bcast
 
     def has_arg(self) -> bool:
         return self.arg is not None
@@ -32,7 +34,13 @@ class Command(object):
         if message.get("subtype") == "bot_message" or not text.startswith("!"):
             return None
         name, *arg = text[1:].split(" ", 1)
-        return cls(name=name, arg=None if not arg else arg[0], message=message)
+        return cls(
+            name=name,
+            arg=None if not arg else arg[0],
+            message=message,
+            thread_ts=message.get('thread_ts'),
+            thread_bcast=message.get("subtype") == "thread_broadcast",
+        )
 
     @property
     def user_id(self):
@@ -47,6 +55,14 @@ class Command(object):
         Returns the id of the channel that the command was called in.
         """
         return self.message['channel']
+
+    def reply_with(self, bot, response):
+        if self.thread_bcast:
+            bot.post_message(self.channel_id, response, reply_broadcast=True,
+                             thread_ts=self.thread_ts)
+        else:
+            bot.post_message(self.channel_id, response, thread_ts=self.thread_ts)
+
 
 
 CommandHandler = Callable[[Command], None]

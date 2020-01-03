@@ -80,4 +80,4 @@ def handle_mock(command: Command):
         else:
             response = mock_message(message_to_mock)
 
-    bot.post_message(command.channel_id, response)
+    command.reply_with(bot, response)
