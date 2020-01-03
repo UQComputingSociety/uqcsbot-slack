@@ -18,7 +18,14 @@ CmdT = TypeVar('CmdT', bound='Command')
 
 
 class Command(object):
-    def __init__(self, name: str, arg: Optional[str], message: dict, thread_ts: Optional[int] = None, thread_bcast: bool = None) -> None:
+    def __init__(
+            self,
+            name: str,
+            arg: Optional[str],
+            message: dict,
+            thread_ts: Optional[int] = None,
+            thread_bcast: bool = None,
+    ) -> None:
         self.name = name
         self.arg = arg
         self.message = message
@@ -62,7 +69,6 @@ class Command(object):
                              thread_ts=self.thread_ts)
         else:
             bot.post_message(self.channel_id, response, thread_ts=self.thread_ts)
-
 
 
 CommandHandler = Callable[[Command], None]

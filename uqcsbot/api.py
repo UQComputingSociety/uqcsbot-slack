@@ -1,4 +1,3 @@
-from functools import partial
 import time
 import slack
 import slack.errors
@@ -90,7 +89,10 @@ class APIMethodProxy(object):
             elif not result['ok'] and result['error'] == 'not_allowed_token_type':
                 call_type = {'bot': 'user', 'user': 'bot'}[call_type]
                 if tried_clients == {'bot', 'user'}:
-                    result = {'ok': False, 'error': 'Both clients have a disallowed token, this should never happen'}
+                    result = {
+                        'ok': False,
+                        'error': 'Both clients have a disallowed token, this should never happen',
+                    }
                     break
             else:
                 _CLIENT_METHOD_REGISTRY[self._method] = call_type
