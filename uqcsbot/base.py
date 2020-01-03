@@ -110,11 +110,11 @@ class ModifiedRTMClient(slack.RTMClient):
 
             if inspect.iscoroutinefunction(callback):
                 waiting.append(asyncio.ensure_future(
-                    callback(data)
+                    callback(data), loop=self._event_loop
                 ))
             else:
                 waiting.append(asyncio.ensure_future(
-                    self._execute_in_thread(callback, data)
+                    self._execute_in_thread(callback, data), loop=self._event_loop
                 ))
         for coro in waiting:
             await coro
@@ -152,12 +152,12 @@ class UQCSBot(object):
         self.channels = ChannelWrapper(self)
         self.users = UsersWrapper(self)
 
-    def _handle_hello(self, evt):
+    async def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
             self.logger.debug(f"Hello event has unexpected extras: {evt}")
         self.logger.info(f"Successfully connected to server")
 
-    def _handle_goodbye(self, evt):
+    async def _handle_goodbye(self, evt):
         if evt != {"type": "goodbye"}:
             self.logger.debug(f"Goodbye event has unexpected extras: {evt}")
         self.logger.info(f"Server is about to disconnect")
@@ -169,6 +169,10 @@ class UQCSBot(object):
             UsageSyntaxExceptions and sends the wrapped command's helper doc to the calling channel.
             Also adds the function as a handler for the given command name.
             """
+
+            if asyncio.iscoroutinefunction(command_fn):
+                raise TypeError("Commands currently don't support async functions")
+
             @wraps(command_fn)
             def wrapper(command: Command):
                 try:
@@ -227,20 +231,23 @@ class UQCSBot(object):
     def _execution_context(self):
         """
         Starts the scheduler for timed tasks, and on error does cleanup
+
+        Also configures the event loop
         """
         self._loop = self.get_event_loop()
         current = threading.current_thread()
-        og_run_until_complete = self._loop.run_until_complete
+        original_run_until_complete = self._loop.run_until_complete
 
-        def cooked_run_until_complete(fut):
+        def wait_until_run_complete(fut):
+            fut = asyncio.ensure_future(fut, loop=self._loop)
             if threading.current_thread() == current:
-                return og_run_until_complete(fut)
+                return fut
             else:
                 evt = threading.Event()
-                fut.add_done_callback(lambda *a: evt.set())
+                self._loop.call_soon_threadsafe(fut.add_done_callback, lambda *a: evt.set())
                 evt.wait()
                 return fut.result()
-        self._loop.run_until_complete = cooked_run_until_complete
+        self._loop.run_until_complete = wait_until_run_complete
 
         self._user_client = slack.WebClient(token=self.user_token, loop=self._loop)
         self._bot_client = slack.WebClient(token=self.bot_token, loop=self._loop)
@@ -248,7 +255,7 @@ class UQCSBot(object):
         self._scheduler.configure(event_loop=self._loop)
         self._scheduler.start()
         try:
-            yield
+            yield original_run_until_complete
         except Exception:
             self.logger.exception("An error occurred, exiting")
             raise
@@ -268,7 +275,7 @@ class UQCSBot(object):
             self.logger.exception(f'Error in handler while processing {evt}')
             return None
 
-    def _handle_command(self, message: dict) -> None:
+    async def _handle_command(self, message: dict) -> None:
         """
         Run handlers for commands, wrapping messages in a `Command` object
         before passing them to the handler. Handlers are executed by a
@@ -277,8 +284,17 @@ class UQCSBot(object):
         command = Command.from_message(message)
         if command is None:
             return
-        for handler in self._command_registry[command.name]:
-            self.executor.submit(self._execute_catching_error, handler, command)
+        futures = [
+            asyncio.ensure_future(self._loop.run_in_executor(
+                self.executor,
+                self._execute_catching_error,
+                handler,
+                command,
+            ), loop=self._loop)
+            for handler in self._command_registry[command.name]
+        ]
+        for fut in futures:
+            await fut
 
     async def _run_handlers(self, event: dict):
         """
@@ -308,15 +324,16 @@ class UQCSBot(object):
         """
         self._user_token = user_token
         self._bot_token = bot_token
-        with self._execution_context():
+        with self._execution_context() as run_future:
             self._rtm_client = ModifiedRTMClient(
                 token=self.bot_token,
                 executor=self.executor,
                 handlers=self._handlers,
                 loop=self._loop,
+                run_async=True,
             )
             try:
-                self.rtm_client.start()
+                run_future(self.rtm_client.start())
             except KeyboardInterrupt:
                 self.rtm_client.stop()
 
