@@ -63,15 +63,17 @@ class APIMethodProxy(object):
 
         Attempts to retry the API call if rate-limited.
         """
-        def get_fn(call_type):
+        def do_request(call_type):
             client = getattr(self, f'_{call_type}_client')
             method = getattr(client, self._method.replace('.', '_'))
-            return partial(method, **kwargs)
+            return method(**kwargs)
         retry_count = 0
+        tried_clients = set()
         call_type = _CLIENT_METHOD_REGISTRY.get(self._method, 'bot')
         while retry_count < 5:
             try:
-                result = get_fn(call_type)()
+                tried_clients.add(call_type)
+                result = do_request(call_type)
             except slack.errors.SlackApiError as e:
                 result = e.response
             if not result['ok'] and result['error'] == 'ratelimited':
@@ -81,7 +83,9 @@ class APIMethodProxy(object):
                 retry_count += 1
             elif not result['ok'] and result['error'] == 'not_allowed_token_type':
                 call_type = {'bot': 'user', 'user': 'bot'}[call_type]
-                retry_count += 1
+                if tried_clients == {'bot', 'user'}:
+                    result = {'ok': False, 'error': 'Both clients have a disallowed token, this should never happen'}
+                    break
             else:
                 _CLIENT_METHOD_REGISTRY[self._method] = call_type
                 break

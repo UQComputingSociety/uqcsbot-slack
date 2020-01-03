@@ -159,7 +159,7 @@ class MockUQCSBot(UQCSBot):
         if channel_type == 'all':
             def filter_function(*args):
                 return True
-            channel_type = 'channels'
+            channel_type = 'channels'  # used later as the response key for the channels
         elif channel_type == 'channels':
             filter_function = partial(is_channel_type, channel_type='is_public')
         elif channel_type == 'groups':
