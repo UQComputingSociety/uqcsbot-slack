@@ -147,6 +147,7 @@ def main():
                          ' are bots available and try again later. Exiting.')
             sys.exit(1)
         bot_token = BOT_TOKENS.get(test_bot['user']['id'], None)
+        user_token = "we don't use user tokens on the dev server (yet)"
         LOGGER.info("Bot name: " + test_bot['user']['name'])
 
     if bot_token is None or bot_token == "":
