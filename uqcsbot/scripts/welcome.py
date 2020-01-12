@@ -22,7 +22,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "To find and join a channel, tap on the channels header in the sidebar.",
     "The UQCS Slack is a friendly community and we have a code of conduct in place to ensure our "
     + "members' well-being and safety. You can view a copy of this code of conduct here:"
-    + "\n>https://github.com/UQComputingSociety/code-of-conduct .",
+    + "\n>https://github.com/UQComputingSociety/code-of-conduct",
     "UQCS elects a leadership committee every year who also serve as our friendly admins. This "
     "year's committee consists of:"
     + "\n>Madhav (<@UFB9R5QFM>)\n>Matthew (<@U8JN3NR1C>)\n>Bradley (<@U4AJ0EDE3>)"
@@ -33,7 +33,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "If you have any questions about UQCS, or need to get in touch, please reach out to them.",
     "For a list of upcoming events check out the <#C0D0G52PP|events> channel and use the command "
     "`!events`.",
-    "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
+    "Type `help` here, or `!help` anywhere else to find out what I can do!",
     f"Be sure to download the Slack <https://slack.com/downloads|desktop> and "
     f"<{SLACK_DOWNLOAD_GUIDE}|mobile> apps as well, so you'll be able to catch any important "
     f"announcements, and again, welcome to the UQ Computing Society :)"
@@ -42,7 +42,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
 PROFILE_MESSAGE = "Don't forget to let people know who you are! Choose a profile pic, set a " \
                   "status and tell us what you're studying. These small touches help the UQCS " \
                   "community understand who you are and, in turn, help you to more quickly " \
-                  "become an active member of the society. If you need any help, check out " \
+                  "become an integral part of the society. If you need any help, check out " \
                   f"this handy <{SLACK_PROFILE_GUIDE}|guide> or ask one admins for help!\n" \
                   f"Once that's all done, why not introduce yourself in <#C2R8W0YPJ|general>."
 
