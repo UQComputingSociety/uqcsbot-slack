@@ -25,8 +25,8 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "\n>https://github.com/UQComputingSociety/code-of-conduct",
     "UQCS elects a leadership committee every year who also serve as our friendly Slack admins. "
     "This year's committee consists of:\n"
-    ">Madhav (<@UFB9R5QFM>), Matthew (<@U8JN3NR1C>), Bradley (<@U4AJ0EDE3>)"
-    "Sanni (<@UM55HGLUT>), Jack (<@U29STGM63>), James (<@U1H1R3NGK>), Kenton (<@U9LMBPJG5>),"
+    ">Madhav (<@UFB9R5QFM>), Matthew (<@U8JN3NR1C>), Bradley (<@U4AJ0EDE3>) "
+    "Sanni (<@UM55HGLUT>), Jack (<@U29STGM63>), James (<@U1H1R3NGK>), Kenton (<@U9LMBPJG5>), "
     "Nick (<@U0LG4V4NN>), Olivia (<@UA25BSPGT>), Raghav (<@U73H0R0QH>), "
     "and Brian (<@UCYC0TKMM>)\n"
     "If you have any questions or need to get in touch, please reach out to them.",
