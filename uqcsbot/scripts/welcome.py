@@ -36,7 +36,7 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "status and tell us what you're studying. These small touches help the UQCS "
     "community understand who you are and, in turn, help you to more quickly "
     "become an integral part of the society. If you need any help, check out "
-    f"this handy <{SLACK_PROFILE_GUIDE}|guide> or ask one admins for help!\n"
+    f"this handy <{SLACK_PROFILE_GUIDE}|guide> or ask one admins for help! "
     "Once that's all done, why not introduce yourself in <#C2R8W0YPJ|general>.",
     "Be sure to download the Slack <https://slack.com/downloads|desktop> and "
     f"<{SLACK_DOWNLOAD_GUIDE}|mobile> apps as well, so you'll be able to catch any important "
