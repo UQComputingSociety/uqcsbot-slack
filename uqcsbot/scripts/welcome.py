@@ -5,8 +5,8 @@ from uqcsbot import bot
 import time
 
 MEMBER_MILESTONE = 50  # Number of members between posting a celebration
-MESSAGE_PAUSE = 3   # Number of seconds between sending bot messages
-LONG_PAUSE = 600   # Number of seconds before follow-up (profile) message is sent
+MESSAGE_PAUSE = 2.5   # Number of seconds between sending bot messages
+LONG_PAUSE = 5   # Number of seconds before follow-up (profile) message is sent
 SLACK_DOWNLOAD_GUIDE = "https://slack.com/intl/en-au/help/categories/360000049043-Getting-" \
                        "Started#download-the-slack-app"
 UQCSBOT_REPO = "https://github.com/UQComputingSociety/uqcsbot"
