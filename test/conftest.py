@@ -2,14 +2,13 @@
 Configuration for Pytest
 """
 
-from unittest.mock import MagicMock
 from itertools import islice
 from functools import partial
 from collections import defaultdict
 import time
 from typing import Optional
 import pytest
-from slackclient import SlackClient
+from slack import WebClient
 import uqcsbot as uqcsbot_module
 from uqcsbot.api import APIWrapper
 from uqcsbot.base import UQCSBot, Command
@@ -41,6 +40,10 @@ TEST_CHANNELS = {
                      'is_private': True, 'is_user_deleted': False,
                      'user': TEST_USER_ID}
 }
+for item in ['is_im', 'is_public', 'is_private', 'is_group']:
+    for chan in TEST_CHANNELS.values():
+        if item not in chan:
+            chan[item] = False
 
 
 class MockUQCSBot(UQCSBot):
@@ -50,21 +53,26 @@ class MockUQCSBot(UQCSBot):
         self.test_users = deepcopy(TEST_USERS)
         self.test_channels = deepcopy(TEST_CHANNELS)
 
-        def mocked_api_call(method, **kwargs):
+        def mocked_api_call(method, *, http_verb='POST', **kwargs):
             '''
             Called the mocked version of a Slack API call.
             '''
             mocked_method = 'mocked_' + method.replace('.', '_')
+
             if mocked_method not in dir(type(self)):
                 raise NotImplementedError(f'{method} has not been mocked.')
+            if http_verb == 'GET':
+                kwargs.update(kwargs.pop('params', {}))
+            elif http_verb == 'POST':
+                kwargs.update(kwargs.pop('json', {}))
             return getattr(self, mocked_method)(**kwargs)
 
-        self.mocked_client = MagicMock(spec=SlackClient)
+        self.mocked_client = WebClient('fake-token')
         self.mocked_client.api_call = mocked_api_call
 
     @property
     def api(self):
-        return APIWrapper(self.mocked_client)
+        return APIWrapper(self.mocked_client, self.mocked_client)
 
     def mocked_users_info(self, **kwargs):
         '''
@@ -74,7 +82,7 @@ class MockUQCSBot(UQCSBot):
 
         user = self.test_users.get(user_id)
         if user is None:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
 
         return {'ok': True, 'user': user}
 
@@ -88,12 +96,12 @@ class MockUQCSBot(UQCSBot):
 
         channel = self.test_channels.get(channel_id)
         if channel is None:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
 
         all_members = channel.get('members', [])
         sliced_members = all_members[cursor: cursor + limit + 1]
         cursor += len(sliced_members)
-        if cursor == len(all_members):
+        if cursor >= len(all_members):
             cursor = None
 
         return {'ok': True, 'members': sliced_members, 'cursor': cursor}
@@ -107,12 +115,12 @@ class MockUQCSBot(UQCSBot):
         limit = kwargs.get('limit', 100)
 
         if channel_id not in self.test_channels:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
 
         all_messages = self.test_messages.get(channel_id, [])[::-1]  # Most recent first
         sliced_messages = list(islice(all_messages, cursor, cursor + limit + 1))
         cursor += len(sliced_messages)
-        if cursor == len(all_messages):
+        if cursor >= len(all_messages):
             cursor = None
 
         return {'ok': True, 'messages': sliced_messages, 'cursor': cursor}
@@ -129,6 +137,12 @@ class MockUQCSBot(UQCSBot):
         '''
         return self.mocked_channels_list(channel_type='ims', **kwargs)
 
+    def mocked_conversations_list(self, **kwargs):
+        '''
+        Mocks conversations.list api call.
+        '''
+        return self.mocked_channels_list(channel_type='all', **kwargs)
+
     def mocked_channels_list(self, channel_type='channels', **kwargs):
         '''
         Mocks channels.list api call.
@@ -142,19 +156,23 @@ class MockUQCSBot(UQCSBot):
             '''
             return channel.get(channel_type, False)
 
-        if channel_type == 'channels':
+        if channel_type == 'all':
+            def filter_function(*args):
+                return True
+            channel_type = 'channels'  # used later as the response key for the channels
+        elif channel_type == 'channels':
             filter_function = partial(is_channel_type, channel_type='is_public')
         elif channel_type == 'groups':
             filter_function = partial(is_channel_type, channel_type='is_group')
         elif channel_type == 'ims':
             filter_function = partial(is_channel_type, channel_type='is_im')
         else:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
 
         all_channels = list(filter(filter_function, self.test_channels.values()))
         sliced_channels = all_channels[cursor: cursor + limit + 1]
         cursor += len(sliced_channels)
-        if cursor == len(all_channels):
+        if cursor >= len(all_channels):
             cursor = None
 
         return {'ok': True, channel_type: sliced_channels, 'cursor': cursor}
@@ -169,7 +187,7 @@ class MockUQCSBot(UQCSBot):
         all_members = list(self.test_users.values())
         sliced_members = all_members[cursor: cursor + limit + 1]
         cursor += len(sliced_members)
-        if cursor == len(all_members):
+        if cursor >= len(all_members):
             cursor = None
 
         return {'ok': True, 'members': sliced_members, 'cursor': cursor}
@@ -197,7 +215,7 @@ class MockUQCSBot(UQCSBot):
         name = kwargs.get('name')
         message = self.get_channel_message(**kwargs)
         if name is None or message is None:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
         # Note: 'user' is not a part of Slack API for reactions.add, just a
         # convenient way to set the calling user during testing. If not passed,
         # reaction is assumed to be from bot.
@@ -227,23 +245,23 @@ class MockUQCSBot(UQCSBot):
         name = kwargs.get('name')
         message = self.get_channel_message(**kwargs)
         if name is None or message is None:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
         # Note: 'user' is not a part of Slack API for reactions.add, just a
         # convenient way to set the calling user during testing. If not passed,
         # reaction is assumed to be from bot.
         user = kwargs.get('user', TEST_BOT_ID)
 
         if 'reactions' not in message:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
 
         # Retrieves the reaction with the given name if found, else None.
         reaction_object = next((r for r in message['reactions'] if r['name'] == name), None)
 
         # Error if there was no reaction or the calling user was not a reactee.
         if reaction_object is None:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
         if user not in reaction_object['users']:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
 
         reaction_object['count'] -= 1
         reaction_object['users'].remove(user)
@@ -266,7 +284,7 @@ class MockUQCSBot(UQCSBot):
 
         channel = self.channels.get(channel_id_or_name)
         if channel is None:
-            return {'ok': False}
+            return {'ok': False, 'error': 'test'}
 
         # Strip the kwargs down to only ones which are valid for this api call.
         # Note: If there is an additional argument you need supported, add it

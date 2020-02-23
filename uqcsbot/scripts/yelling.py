@@ -9,7 +9,8 @@ def in_yelling(channel):
     checks that channel is #yelling
     exists for test mocking
     """
-    return bot.channels.get(channel).name == "yelling"
+    chan = bot.channels.get(channel)
+    return chan and chan.name == "yelling"
 
 
 def is_human(user):
@@ -65,7 +66,7 @@ def yelling(event: dict):
         return
 
     # ignore emoji
-    text = sub(r":[\w\-\+']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
+    text = sub(r":[\w\-\+\_']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
     text = text.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&")
     # randomly select a response
     response = choice(["WHAT’S THAT‽",

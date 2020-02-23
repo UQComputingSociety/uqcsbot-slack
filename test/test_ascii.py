@@ -3,6 +3,7 @@ Tests for ascii.py
 """
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
 from unittest.mock import patch
+from pathlib import Path
 
 
 TEST_TEXT = "ThIS iS a TeST MesSAgE"
@@ -18,7 +19,8 @@ def mocked_get_fontslist(*args, **kwargs):
     Mocks get fontslist by retuning a local file
     containing fonts for offline testing
     """
-    with open('test/fontslist.txt', 'r') as file:
+    path = Path(__file__).parent / Path('fontslist.txt')
+    with path.open('r') as file:
         content = file.readlines()
         fontslist = []
         for i in content:

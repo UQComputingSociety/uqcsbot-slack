@@ -12,4 +12,4 @@ def handle_cat(command: Command):
                      " _.-' _..--.'_    \\                    `(^) )    ",
                      "((..-'    (< _     ;_..__               ; `'   fL",
                      "           `-._,_)'      ``--...____..-'         ```"))
-    bot.post_message(command.channel_id, cat)
+    command.reply_with(bot, cat)
