@@ -6,6 +6,7 @@ from urllib.parse import quote
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
 
+
 # HTTP Endpoints
 XKCD_BASE_URL = "https://xkcd.com/"
 XKCD_RSS_URL = "https://xkcd.com/rss.xml"
