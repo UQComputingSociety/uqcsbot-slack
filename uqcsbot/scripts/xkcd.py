@@ -1,10 +1,10 @@
 import datetime
 import requests
 import feedparser
+import re
 from urllib.parse import quote
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
-import re
 
 # HTTP Endpoints
 XKCD_BASE_URL = "https://xkcd.com/"
