@@ -178,15 +178,7 @@ def test_seminar_events_typical(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = ("Events in the *next _2_ weeks*\r\n"
-                "*TUE MAY 28 12:00 - 13:00* - `<https://www.itee.uq.edu.au/introduction"
-                + "-functional-programming|Introduction to functional programming"
-                + " - Tony Morris, Software Engineer at Data61>` - _78-420_\r\n"
-                "*WED MAY 29 13:00 - 14:00*"
-                + " - `<https://www.itee.uq.edu.au/performance-enhancement-"
-                + "software-defined-cellular-5g-and-internet-things-networks"
-                + "|Performance Enhancement of Software Defined Cellular 5G &amp;"
-                + " Internet-of-Things Networks - Furqan Khan>` - _78-430_")
+    expected = "_Events in the next *2 weeks*:_"
     assert messages[1].get('text') == expected
 
 
@@ -202,14 +194,7 @@ def test_UQCS_events_typical(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = ("Events in the *next _2_ weeks*\r\n"
-                "*FRI AUG 2 0:00 - MON AUG 5 23:59*"
-                + " - `CodeNetwork Hackathon` - _River City Labs_\r\n"
-                "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
-                "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford`"
-                + " - _Hawken 50-T103_\r\n"
-                "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS"
-                + " Social Event` - _Hawken 50-C207_")
+    expected = "_Events in the next *2 weeks*:_"
     assert messages[1].get('text') == expected
 
 
@@ -224,28 +209,7 @@ def test_UQCS_events_full(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events full")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = (
-        "List of *all* upcoming events\r\n"
-        "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - _River City Labs_\r\n"
-        "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
-        "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford`"
-        + " - _Hawken 50-T103_\r\n"
-        "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS Social Event`"
-        + " - _Hawken 50-C207_\r\n"
-        "*TUE AUG 20 18:00 - 20:00* - `How to Hackathon` - _Hawken 50-T103_\r\n"
-        "*THU AUG 22 18:00 - 20:00* - `C++ Talk - Dr Joel Fenwick`"
-        + " - _Hawken 50-T103_\r\n"
-        "*FRI AUG 23 18:00 - SUN AUG 25 20:00* - `UQCS Hackathon` - _AEB 49-301_\r\n"
-        "*THU AUG 29 18:00 - 20:00* - `Six Key Things - Peter Laurie` - _Hawken 50-T103_\r\n"
-        "*THU SEP 5 18:00 - 20:00* - `3D printing: The Future for DIY - Stephanie Piper`"
-        + " - _Hawken 50-T103_\r\n"
-        "*THU SEP 19 18:00 - 20:00* - `Intro to Firebase - Max Bo` - _Hawken 50-T103_\r\n"
-        "*TUE OCT 8 18:00 - 20:00* - `UQCS AGM` - _TBC_\r\n"
-        "*THU OCT 17 17:00 - 21:00* - `Games Night` - _TBC_\r\n"
-        "*TUE OCT 29 0:00 - WED OCT 30 23:59* - `Study Session` - _ITLC:"
-        + " GP South 78-217_\r\n"
-        "*THU OCT 31 0:00 - FRI NOV 1 23:59* - `Study Session` - _ITLC: GP South 78-217_"
-    )
+    expected = "_List of *all* upcoming events:_"
     assert messages[1].get('text') == expected
 
 
@@ -260,13 +224,7 @@ def test_UQCS_events_october(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events oct")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = ("Events in *_October_*\r\n"
-                "*TUE OCT 8 18:00 - 20:00* - `UQCS AGM` - _TBC_\r\n"
-                "*THU OCT 17 17:00 - 21:00* - `Games Night` - _TBC_\r\n"
-                "*TUE OCT 29 0:00 - WED OCT 30 23:59* - `Study Session` - _ITLC:"
-                + " GP South 78-217_\r\n"
-                "*THU OCT 31 0:00 - FRI NOV 1 23:59* - `Study Session` - _ITLC: GP"
-                + " South 78-217_")
+    expected = "_Events in *October*:_"
     assert messages[1].get('text') == expected
 
 
@@ -284,21 +242,7 @@ def test_events_normal(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = (
-        "Events in the *next _2_ weeks*\r\n"
-        "*TUE MAY 28 12:00 - 13:00* - `<https://www.itee.uq.edu.au/introduction"
-        + "-functional-programming|Introduction to functional programming"
-        + " - Tony Morris, Software Engineer at Data61>` - _78-420_\r\n"
-        "*WED MAY 29 13:00 - 14:00* - `<https://www.itee.uq.edu.au/performance-enhancement-"
-        + "software-defined-cellular-5g-and-internet-things-networks"
-        + "|Performance Enhancement of Software Defined Cellular 5G &amp;"
-        + " Internet-of-Things Networks - Furqan Khan>` - _78-430_\r\n"
-        "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - _River City Labs_\r\n"
-        "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
-        "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford` - _Hawken 50-T103_\r\n"
-        "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS"
-        + " Social Event` - _Hawken 50-C207_"
-    )
+    expected = "_Events in the next *2 weeks*:_"
     assert messages[1].get('text') == expected
 
 
@@ -315,7 +259,7 @@ def test_events_no_events(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[1].get('text') == ("_There don't appear to be any events"
-                                       + " in the next *2* weeks_\r\n"
+                                       + " in the next *2* weeks_\n"
                                        "For a full list of events, visit:"
                                        + " https://uqcs.org.au/calendar.html"
                                        + " and https://www.itee.uq.edu.au/seminar-list")
@@ -331,8 +275,8 @@ def test_events_live(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert (messages[1].get('text').startswith("_There don't appear to be any events"
-                                               + " in the next *2* weeks_\r\n") or
-            messages[1].get('text').startswith("Events in the *next _2_ weeks*\r\n"))
+                                               + " in the next *2* weeks_\n") or
+            messages[1].get('text').startswith("_Events in the next *2 weeks*:_"))
 
 
 # unit tests both seminars and UQCS events, filter to only UQCS events
@@ -349,14 +293,7 @@ def test_events_filter_uqcs(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events uqcs")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = (
-        "Events in the *next _2_ weeks*\r\n"
-        "*FRI AUG 2 0:00 - MON AUG 5 23:59* - `CodeNetwork Hackathon` - _River City Labs_\r\n"
-        "*FRI AUG 2 18:00 - 20:00* - `Dr Corey Shou` - _TBC_\r\n"
-        "*TUE AUG 6 18:00 - 20:00* - `vim &amp; tmux - Neil Ashford` - _Hawken 50-T103_\r\n"
-        "*TUE AUG 13 18:00 - 20:00* - `Robogals x UQ Robotics x UQCS"
-        + " Social Event` - _Hawken 50-C207_"
-    )
+    expected = "_Events in the next *2 weeks*:_"
     assert messages[1].get('text') == expected
 
 
@@ -374,14 +311,5 @@ def test_events_filter_itee(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events itee")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = (
-        "Events in the *next _2_ weeks*\r\n"
-        "*TUE MAY 28 12:00 - 13:00* - `<https://www.itee.uq.edu.au/introduction"
-        + "-functional-programming|Introduction to functional programming"
-        + " - Tony Morris, Software Engineer at Data61>` - _78-420_\r\n"
-        "*WED MAY 29 13:00 - 14:00* - `<https://www.itee.uq.edu.au/performance-enhancement-"
-        + "software-defined-cellular-5g-and-internet-things-networks"
-        + "|Performance Enhancement of Software Defined Cellular 5G &amp;"
-        + " Internet-of-Things Networks - Furqan Khan>` - _78-430_"
-    )
+    expected = "_Events in the next *2 weeks*:_"
     assert messages[1].get('text') == expected
