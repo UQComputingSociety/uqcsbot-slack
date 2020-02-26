@@ -18,7 +18,8 @@ install_requires = [
     'google-api-python-client',
     'pytest-runner',
     'unidecode',
-    'feedparser'
+    'feedparser',
+    'slackblocks'
 ]
 
 tests_require = [

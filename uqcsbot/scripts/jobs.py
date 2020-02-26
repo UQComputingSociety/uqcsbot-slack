@@ -72,6 +72,9 @@ def job_response(evt: dict):
     """
     channel = bot.channels.get(evt.get("channel"))
 
+    if not channel:
+        return
+
     if channel.name != "jobs-bulletin":
         return
 
