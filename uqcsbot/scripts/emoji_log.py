@@ -3,6 +3,7 @@ Logs emoji addition/removal to emoji-request for audit purposes
 """
 from uqcsbot import bot
 
+
 @bot.on("emoji_changed")
 def emoji_log(evt: dict):
     """
@@ -24,5 +25,4 @@ def emoji_log(evt: dict):
         removed = ', '.join(f'`:{name}:`' for name in names)
         plural = 's' if len(names) > 1 else ''
 
-        bot.post_message(emoji_request,
-            f'Emoji{plural} removed: {removed}')
+        bot.post_message(emoji_request, f'Emoji{plural} removed: {removed}')
