@@ -61,7 +61,7 @@ def mocked_html_details_partial(url: str) -> bytes:
     assert False
 
 
-def mocked_events_ics() -> bytes:
+def mocked_events_ics(source: str = "uqcs") -> bytes:
     """
     Returns a locally stored .ics file that
     imitates the UQCS Calendar on Google Calendar.
@@ -261,7 +261,7 @@ def test_events_no_events(uqcsbot: MockUQCSBot):
     assert messages[1].get('text') == ("_There don't appear to be any events"
                                        + " in the next *2* weeks_\n"
                                        "For a full list of events, visit:"
-                                       + " https://uqcs.org.au/calendar.html"
+                                       + " https://uqcs.org/events"
                                        + " and https://www.itee.uq.edu.au/seminar-list")
 
 
