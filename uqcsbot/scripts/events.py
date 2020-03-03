@@ -240,7 +240,8 @@ def handle_events(command: Command):
 
     else:
         for event in events:
-            color = "#5297D1" if event.source == "UQCS" else "#51237A" if event.source == "ITEE" else "#FFFF00"
+            color = "#5297D1" if event.source == "UQCS" else \
+                "#51237A" if event.source == "ITEE" else "#116B17"
             attachments.append(Attachment(SectionBlock(str(event)), color=color))
         message_text = f"_{event_filter.get_header()}_"
 
