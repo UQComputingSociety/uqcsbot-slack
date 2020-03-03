@@ -13,8 +13,10 @@ from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException, loading_status
 from uqcsbot.utils.itee_seminar_utils import (get_seminars, HttpException, InvalidFormatException)
 
-CALENDAR_URL = ("https://calendar.google.com/calendar/ical/"
-                + "q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics")
+UQCS_CALENDAR_URL = "https://calendar.google.com/calendar/ical/" \
+                    "q3n3pce86072n9knt3pt65fhio%40group.calendar.google.com/public/basic.ics"
+EXTERNAL_CALENDAR_URL = "https://calendar.google.com/calendar/ical/" \
+                        "72abf01afvsl3bjd9oq2g1avgg%40group.calendar.google.com/public/basic.ics"
 FILTER_REGEX = re.compile('full|all|[0-9]+( weeks?)?|jan.*|feb.*|mar.*'
                           + '|apr.*|may.*|jun.*|jul.*|aug.*|sep.*|oct.*|nov.*|dec.*')
 BRISBANE_TZ = timezone('Australia/Brisbane')
@@ -102,7 +104,7 @@ class Event(object):
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     @classmethod
-    def from_cal_event(cls, cal_event):
+    def from_cal_event(cls, cal_event, source: str = "UQCS"):
         start = cal_event.get('dtstart').dt
         end = cal_event.get('dtend').dt
         # ical 'dt' properties are parsed as a 'DDD' (datetime, date, duration) type.
@@ -113,7 +115,8 @@ class Event(object):
             end = datetime.combine(end, datetime.max.time()).astimezone(utc)
         location = cal_event.get('location', 'TBA')
         summary = cal_event.get('summary')
-        return cls(start, end, location, summary, None, "UQCS")
+        return cls(start, end, location,
+                   f"{'[EXTERNAL] ' if source == 'external' else ''}{summary}", None, source)
 
     @classmethod
     def from_seminar(cls, seminar_event: Tuple[str, str, datetime, str]):
@@ -121,7 +124,7 @@ class Event(object):
         # ITEE doesn't specify the length of seminars, but they are normally one hour
         end = start + timedelta(hours=1)
         # Note: this
-        return cls(start, end, location, title, link, "ITEE")
+        return cls(start, end, location, f"[ITEE SEMINAR] {title}", link, "ITEE")
 
     def __str__(self):
         d1 = self.start.astimezone(BRISBANE_TZ)
@@ -168,7 +171,7 @@ def handle_events(command: Command):
 
     argument = command.arg if command.has_arg() else ""
 
-    source_get = {"uqcs": False, "itee": False}
+    source_get = {"uqcs": False, "itee": False, "external": False}
     for k in source_get:
         if k in argument:
             source_get[k] = True
@@ -181,13 +184,13 @@ def handle_events(command: Command):
     if not event_filter.is_valid:
         raise UsageSyntaxException()
 
-    cal = Calendar.from_ical(get_calendar_file())
+    uqcs_calendar = Calendar.from_ical(get_calendar_file("uqcs"))
     current_time = get_current_time()
 
     events = []
     # subcomponents are how icalendar returns the list of things in the calendar
     if source_get["uqcs"]:
-        for c in cal.subcomponents:
+        for c in uqcs_calendar.subcomponents:
             # TODO: support recurring events
             # we are only interested in ones with the name VEVENT as they
             # are events we also currently filter out recurring events
@@ -196,6 +199,18 @@ def handle_events(command: Command):
 
             # we convert it to our own event class
             event = Event.from_cal_event(c)
+            # then we want to filter out any events that are not after the current time
+            if event.start > current_time:
+                events.append(event)
+
+    if source_get["external"]:
+        external_calendar = Calendar.from_ical(get_calendar_file("external"))
+        for c in external_calendar.subcomponents:
+            if c.name != 'VEVENT' or c.get('RRULE') is not None:
+                continue
+
+            # we convert it to our own event class
+            event = Event.from_cal_event(c, "external")
             # then we want to filter out any events that are not after the current time
             if event.start > current_time:
                 events.append(event)
@@ -220,12 +235,13 @@ def handle_events(command: Command):
     if not events:
         message_text = f"_{event_filter.get_no_result_msg()}_\n" \
                        f"For a full list of events, visit: " \
-                       f"https://uqcs.org.au/calendar.html " \
+                       f"https://uqcs.org/events " \
                        f"and https://www.itee.uq.edu.au/seminar-list"
 
     else:
         for event in events:
-            color = "#5297D1" if event.source == "UQCS" else "#51237A"
+            color = "#5297D1" if event.source == "UQCS" else \
+                "#51237A" if event.source == "ITEE" else "#116B17"
             attachments.append(Attachment(SectionBlock(str(event)), color=color))
         message_text = f"_{event_filter.get_header()}_"
 
@@ -233,11 +249,14 @@ def handle_events(command: Command):
                      attachments=[attachment._resolve() for attachment in attachments])
 
 
-def get_calendar_file() -> bytes:
+def get_calendar_file(calendar: str = "uqcs") -> bytes:
     """
-    Loads the UQCS Events calender .ics file from Google Calendar.
+    Loads the UQCS or External Events calender .ics file from Google Calendar.
     This method is mocked by unit tests.
     :return: The returned ics calendar file, as a stream
     """
-    http_response = requests.get(CALENDAR_URL)
+    if calendar == "uqcs":
+        http_response = requests.get(UQCS_CALENDAR_URL)
+    else:
+        http_response = requests.get(EXTERNAL_CALENDAR_URL)
     return http_response.content
