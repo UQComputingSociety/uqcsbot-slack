@@ -15,10 +15,17 @@ def emoji_log(evt: dict):
     subtype = evt.get("subtype")
 
     if subtype == 'add':
-        emoji_name = evt["name"]
-        added = f':{emoji_name}: (`:{emoji_name}:`)'
+        name = evt["name"]
+        value = evt["value"]
 
-        bot.post_message(emoji_request, f'Emoji added: {added}')
+        if value.startswith('alias:'):
+            _, alias = value.split('alias:')
+
+            bot.post_message(emoji_request,
+                             f'Emoji alias added: `:{name}:` :arrow_right: `:{alias}:` (:{name}:)')
+
+        else:
+            bot.post_message(emoji_request, f'Emoji added: :{name}: (`:{name}:`)')
 
     elif subtype == 'remove':
         names = evt.get("names")
