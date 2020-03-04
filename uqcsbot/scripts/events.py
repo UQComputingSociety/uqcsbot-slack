@@ -116,7 +116,7 @@ class Event(object):
         location = cal_event.get('location', 'TBA')
         summary = cal_event.get('summary')
         return cls(start, end, location,
-                   f"{'[EXTERNAL] ' if source == 'external' else ''}{summary}", None, source)
+                   f"{'[External] ' if source == 'external' else ''}{summary}", None, source)
 
     @classmethod
     def from_seminar(cls, seminar_event: Tuple[str, str, datetime, str]):
@@ -124,7 +124,7 @@ class Event(object):
         # ITEE doesn't specify the length of seminars, but they are normally one hour
         end = start + timedelta(hours=1)
         # Note: this
-        return cls(start, end, location, f"[ITEE SEMINAR] {title}", link, "ITEE")
+        return cls(start, end, location, f"[ITEE Seminar] {title}", link, "ITEE")
 
     def __str__(self):
         d1 = self.start.astimezone(BRISBANE_TZ)
