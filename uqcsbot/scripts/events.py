@@ -144,7 +144,9 @@ class Event(object):
         location_str = Event.encode_text(self.location)
 
         if self.link is None:
-            return f"`{summary_str}`\n" \
+            return f"{'*' if self.source == 'UQCS' else ''}" \
+                   f"`{summary_str}`" \
+                   f"{'*' if self.source == 'UQCS' else ''}\n" \
                    f"*{start_str} - {end_str}* (_{location_str}_)"
         else:
             return f"`<{self.link}|{summary_str}>`\n" \
@@ -237,7 +239,6 @@ def handle_events(command: Command):
                        f"For a full list of events, visit: " \
                        f"https://uqcs.org/events " \
                        f"and https://www.itee.uq.edu.au/seminar-list"
-
     else:
         for event in events:
             color = "#5297D1" if event.source == "UQCS" else \
