@@ -116,7 +116,7 @@ class Event(object):
         location = cal_event.get('location', 'TBA')
         summary = cal_event.get('summary')
         return cls(start, end, location,
-                   f"{'[EXTERNAL] ' if source == 'external' else ''}{summary}", None, source)
+                   f"{'[External] ' if source == 'external' else ''}{summary}", None, source)
 
     @classmethod
     def from_seminar(cls, seminar_event: Tuple[str, str, datetime, str]):
@@ -124,7 +124,7 @@ class Event(object):
         # ITEE doesn't specify the length of seminars, but they are normally one hour
         end = start + timedelta(hours=1)
         # Note: this
-        return cls(start, end, location, f"[ITEE SEMINAR] {title}", link, "ITEE")
+        return cls(start, end, location, f"[ITEE Seminar] {title}", link, "ITEE")
 
     def __str__(self):
         d1 = self.start.astimezone(BRISBANE_TZ)
@@ -144,7 +144,9 @@ class Event(object):
         location_str = Event.encode_text(self.location)
 
         if self.link is None:
-            return f"`{summary_str}`\n" \
+            return f"{'*' if self.source == 'UQCS' else ''}" \
+                   f"`{summary_str}`" \
+                   f"{'*' if self.source == 'UQCS' else ''}\n" \
                    f"*{start_str} - {end_str}* (_{location_str}_)"
         else:
             return f"`<{self.link}|{summary_str}>`\n" \
@@ -237,7 +239,6 @@ def handle_events(command: Command):
                        f"For a full list of events, visit: " \
                        f"https://uqcs.org/events " \
                        f"and https://www.itee.uq.edu.au/seminar-list"
-
     else:
         for event in events:
             color = "#5297D1" if event.source == "UQCS" else \
