@@ -15,5 +15,5 @@ def handle_voteythumbs(command: Command):
         timestamp=command.message['ts'],
     )
 
-    for emoji in ["thumbsup", "thumbsdown", "thumbsright"]:
+    for emoji in ["thumbsup", "thumbsdown", "thumbsright", "doublethumbsup"]:
         add_vote_react(name=emoji)
