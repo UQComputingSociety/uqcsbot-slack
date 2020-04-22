@@ -25,7 +25,9 @@ def emoji_log(evt: dict):
                              f'Emoji alias added: `:{name}:` :arrow_right: `:{alias}:` (:{name}:)')
 
         else:
-            bot.post_message(emoji_request, f'Emoji added: :{name}: (`:{name}:`)')
+            message = bot.post_message(emoji_request, f'Emoji added: :{name}: (`:{name}:`)')
+            bot.api.reactions.add(channel=message["channel"],
+                                  timestamp=message["ts"], name=name)
 
     elif subtype == 'remove':
         names = evt.get("names")
