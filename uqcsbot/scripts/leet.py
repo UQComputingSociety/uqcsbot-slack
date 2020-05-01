@@ -81,7 +81,7 @@ def select_question(questions: list) -> Tuple[str, str]:
     return random.choice(questions)
 
 
-def collect_questions(questions: List[str], difficulty: str):
+def collect_questions(questions: List[Tuple[str, str]], difficulty: str):
     """
     Helper method to send GET requests to various Leetcode and HackerRank APIs.
     Populates provided dict (urls) with any successfully retrieved data,
