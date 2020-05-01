@@ -5,6 +5,7 @@ import json
 import requests
 import random
 from slackblocks import Attachment, SectionBlock
+from typing import List, Tuple, Dict
 
 LC_DIFFICULTY_MAP = ["easy", "medium", "hard"]  # leetcode difficulty is 1,2,3, need to map
 HR_DS_API_LINK = ("https://www.hackerrank.com/rest/contests/master/tracks/" +
@@ -41,14 +42,14 @@ def handle_leet(command: Command) -> None:
         difficulty = random.choice(LC_DIFFICULTY_MAP)  # No difficulty specified, randomly generate
 
     # List to store questions collected
-    questions = []
+    questions: List[Tuple[str, str]] = []
 
     # Go fetch questions from APIs
     collect_questions(questions, difficulty)
     selected_question = select_question(questions)  # Get a random question
 
     # If we didn't find any questions for this difficulty, try again, probably timeout on all 3
-    if (len(selected_question) == 0):
+    if (selected_question is None):
         bot.post_message(command.channel_id,
                          "Hmm, the internet pipes are blocked. Try that one again.")
         return
@@ -71,16 +72,16 @@ def handle_leet(command: Command) -> None:
                      attachments=[Attachment(SectionBlock(msg_text), color=color)._resolve()])
 
 
-def select_question(questions: list):
+def select_question(questions: list) -> Tuple[str, str]:
     """
     Small helper method that selects a question from a list randomly
     """
     if (len(questions) == 0):
-        return ()
+        return None
     return random.choice(questions)
 
 
-def collect_questions(questions: list, difficulty: str):
+def collect_questions(questions: List[str], difficulty: str):
     """
     Helper method to send GET requests to various Leetcode and HackerRank APIs.
     Populates provided dict (urls) with any successfully retrieved data,
@@ -101,21 +102,22 @@ def collect_questions(questions: list, difficulty: str):
             print(name + " API timed out!" + "\n" + str(error))
             results.append((name, None))
 
-    json_blobs = {}
+    json_blobs: Dict[str, List[Dict]] = {}
 
     for name, response in results:
         if (response is None or response.status_code != HTTPStatus.OK):
             if (name != "Leetcode"):
                 json_blobs["parsed_hr_all"] = json_blobs.get("parsed_hr_all", []) + []
             else:
-                json_blobs["parsed_lc_all"] = {"stat_status_pairs": []}
+                json_blobs["parsed_lc_all"] = []
         else:
             if (name != "Leetcode"):
                 parsed_hr_data = json.loads(response.text)
                 json_blobs["parsed_hr_all"] = (json_blobs.get("parsed_hr_all", []) +
                                                parsed_hr_data["models"])
             else:
-                json_blobs["parsed_lc_all"] = json.loads(response.text)
+                parsed_lc_data = json.loads(response.text)
+                json_blobs["parsed_lc_all"] = parsed_lc_data["stat_status_pairs"]
 
     # Build HackerRank questions tuples from data
     for question in json_blobs["parsed_hr_all"]:
@@ -132,7 +134,7 @@ def collect_questions(questions: list, difficulty: str):
             questions.append(question_data)
 
     # Build leetcode question tuples from data, but only the free ones
-    for question in json_blobs["parsed_lc_all"]["stat_status_pairs"]:
+    for question in json_blobs["parsed_lc_all"]:
         if (question["paid_only"] is False):
             question_data = (question["stat"]["question__title"], "https://leetcode.com/problems/"
                              + question["stat"]["question__title_slug"] + "/")

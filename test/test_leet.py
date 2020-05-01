@@ -22,7 +22,7 @@ def mocked_api_request(questions, difficulty):
 
 
 def mocked_empty_api_call(questions, difficulty):
-    return questions
+    return []
 
 
 def mocked_easy_only(questions, difficulty):
