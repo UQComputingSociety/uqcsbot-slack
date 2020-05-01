@@ -147,10 +147,10 @@ class Event(object):
             return f"{'*' if self.source == 'UQCS' else ''}" \
                    f"`{summary_str}`" \
                    f"{'*' if self.source == 'UQCS' else ''}\n" \
-                   f"*{start_str} - {end_str}* (_{location_str}_)"
+                   f"*{start_str} - {end_str}* {'_(' + location_str + ')_' if location_str else ''}"
         else:
             return f"`<{self.link}|{summary_str}>`\n" \
-                   f"*{start_str} - {end_str}* {'(_' + location_str + '_)' if location_str else ''}"
+                   f"*{start_str} - {end_str}* {'_(' + location_str + ')_' if location_str else ''}"
 
 
 def get_current_time():
