@@ -430,7 +430,7 @@ class UsersWrapper(object):
             self._bot.on(mtype, attr)
 
     def _on_user_change(self, evt):
-        user = self._users_by_id[evt['user']['id']]
+        user = self._users_by_id.get(evt['user']['id'], None)
         if user is not None:
             user.update_from_dict(evt['user'])
         else:
