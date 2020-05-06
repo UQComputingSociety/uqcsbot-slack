@@ -392,6 +392,7 @@ class UsersWrapper(object):
             for page in self._bot.api.users.list.paginate():
                 for user in page['members']:
                     self._add_user(user)
+            self._initialised = True
 
     def reload(self):
         self._initialised = False
@@ -430,17 +431,18 @@ class UsersWrapper(object):
             self._bot.on(mtype, attr)
 
     def _on_user_change(self, evt):
-        user = self._users_by_id[evt['user']['id']]
-        if user is not None:
-            user.update_from_dict(evt['user'])
-        else:
-            LOGGER.error("User change event for unknown user - adding")
-            with self._lock:
+        with self._lock:
+            user = self._users_by_id.get(evt['user']['id'], None)
+            if user is not None:
+                user.update_from_dict(evt['user'])
+            else:
                 self._add_user(evt['user'])
 
     def _on_team_join(self, evt):
-        with self._lock:
-            self._add_user(evt['user'])
+        # Because the _on_team_join event is not reliably happening before 
+        # _on_user_change, just handle both updating and adding new users in
+        # _on_user_change.
+        self._on_user_change(evt)
 
 
 class User(object):
