@@ -439,7 +439,7 @@ class UsersWrapper(object):
                 self._add_user(evt['user'])
 
     def _on_team_join(self, evt):
-        # Because the _on_team_join event is not reliably happening before 
+        # Because the _on_team_join event is not reliably happening before
         # _on_user_change, just handle both updating and adding new users in
         # _on_user_change.
         self._on_user_change(evt)
