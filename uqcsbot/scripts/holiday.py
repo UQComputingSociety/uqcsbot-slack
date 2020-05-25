@@ -7,7 +7,7 @@ from requests.exceptions import RequestException
 import requests
 
 HOLIDAY_URL = "https://www.timeanddate.com/holidays/fun/"
-HOLIDAY_CSV_PATH = "geek_holidays.csv"
+HOLIDAY_CSV_PATH = "uqcsbot/static/geek_holidays.csv"
 
 
 class Holiday:
