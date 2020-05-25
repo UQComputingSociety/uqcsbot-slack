@@ -5,6 +5,7 @@ from datetime import datetime
 from random import choice
 from requests.exceptions import RequestException
 import requests
+import csv
 
 HOLIDAY_URL = "https://www.timeanddate.com/holidays/fun/"
 HOLIDAY_CSV_PATH = "uqcsbot/static/geek_holidays.csv"
@@ -24,7 +25,7 @@ class Holiday:
         return self.date.month == now.month and self.date.day == now.day
 
 
-@bot.on_schedule('cron', hour=9, timezone='Australia/Brisbane')
+@bot.on_schedule('cron', hour=17, minute = 55, timezone='Australia/Brisbane')
 def holiday() -> None:
     """
     Posts a random celebratory day on #general from
@@ -86,7 +87,8 @@ def get_holidays_from_csv():
     holidays = []
     with open(HOLIDAY_CSV_PATH, "r") as csvfile:
         for row in csv.reader(csvfile):
-            holiday = Holiday(row[0], row[1], row[2])
+            date = datetime.strptime(row[0], "%d %b")
+            holiday = Holiday(date, row[1], row[2])
             holidays.append(holiday)
 
     return holidays
