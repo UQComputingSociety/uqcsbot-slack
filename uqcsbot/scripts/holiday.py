@@ -25,7 +25,7 @@ class Holiday:
         return self.date.month == now.month and self.date.day == now.day
 
 
-@bot.on_schedule('cron', hour=17, minute = 55, timezone='Australia/Brisbane')
+@bot.on_schedule('cron', hour=9, timezone='Australia/Brisbane')
 def holiday() -> None:
     """
     Posts a random celebratory day on #general from
