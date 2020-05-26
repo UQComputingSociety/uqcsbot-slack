@@ -90,9 +90,8 @@ def get_holidays_from_csv():
             date = datetime.strptime(row[0], "%d %b")
             holiday = Holiday(date, row[1], row[2])
             holidays.append(holiday)
-
+    
     return holidays
-                
 
 def get_holiday_page() -> bytes:
     """
