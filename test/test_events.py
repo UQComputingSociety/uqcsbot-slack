@@ -83,6 +83,7 @@ def mocked_get_no_time():
     """
     return datetime(2099, 8, 1, tzinfo=BRISBANE_TZ).astimezone(utc)
 
+
 # unit tests of the Seminars component only
 @patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
        new=mocked_html_summary_get_typical)
