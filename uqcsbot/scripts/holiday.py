@@ -6,6 +6,7 @@ from random import choice
 from requests.exceptions import RequestException
 import requests
 import csv
+from typing import List
 
 HOLIDAY_URL = "https://www.timeanddate.com/holidays/fun/"
 HOLIDAY_CSV_PATH = "uqcsbot/static/geek_holidays.csv"
@@ -58,7 +59,7 @@ def get_holiday() -> Holiday:
     return choice(holidays_today) if holidays_today else None
 
 
-def get_holidays_from_page(holiday_page) -> list:
+def get_holidays_from_page(holiday_page) -> List[Holiday]:
     """
     Strips results from html page
     """
@@ -79,7 +80,7 @@ def get_holidays_from_page(holiday_page) -> list:
     return holidays
 
 
-def get_holidays_from_csv():
+def get_holidays_from_csv() -> List[Holiday]:
     """
     Returns list of holiday objects, one for each holiday in csv file
     csv rows in format: date,description,link
