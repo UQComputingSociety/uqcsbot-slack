@@ -105,7 +105,8 @@ def handle_emojify(command: Command):
     master['>'] = [":accenture:", ":implying:", ":plex:", ":powershell:"]
     master['?'] = [":question:"]
     master['@'] = [":whip:"]
-    master['^'] = [":this:", ":typographical_carrot:", ":arrow_up:", ":this_but_it's_an_actual_caret:"]
+    master['^'] = [":this:", ":typographical_carrot:", ":arrow_up:",
+                   ":this_but_it's_an_actual_caret:"]
     master['~'] = [":wavy_dash:"]
 
     # slack/uqcsbot convert the following to other symbols
