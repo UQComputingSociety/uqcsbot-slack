@@ -24,7 +24,7 @@ def handle_emojify(command: Command):
     master['D'] = [":d:", ":disney:", ":deloitte:"]
     master['E'] = [":ecorp:", ":emacs:", ":erlang:", ":ie10:", ":thonk_slow:", ":edge:",
                    ":expedia_group:"]
-    master['F'] = [":f:", ":facebook:", ":flutter:"]
+    master['F'] = [":f:", ":facebook:", ":flutter:", ":figma:"]
     master['G'] = [":g+:", ":google:", ":nintendo_gamecube:", ":gatsbyjs:"]
     master['H'] = [":hackerrank:", ":homejoy:"]
     master['I'] = [":information_source:", ":indoorooshs:"]
@@ -38,7 +38,8 @@ def handle_emojify(command: Command):
                    ":jmod:"]
     master['N'] = [":nano:", ":neovim:", ":netscape_navigator:",
                    ":nginx:", ":nintendo_64:", ":office_onenote:", ":netflix-n:"]
-    master['O'] = [":office_outlook:", ":oracle:", ":o_:", ":tetris_o:", ":ubuntu:"]
+    master['O'] = [":office_outlook:", ":oracle:", ":o_:", ":tetris_o:", ":ubuntu:",
+                   choice([":portal_blue:", ":portal_orange:"])]
     master['P'] = [":auspost:", ":office_powerpoint:", ":office_publisher:",
                    ":pinterest:", ":paypal:", ":producthunt:", ":uqpain:"]
     master['Q'] = [":quora:", ":quantium:", choice([":card-queen-clubs:", ":card-queen-diamonds:",
@@ -58,7 +59,7 @@ def handle_emojify(command: Command):
 
     # numbers
     master['0'] = [":chrome:", ":suncorp:", ":disney_zero:", ":firefox:",
-                   ":mars:", choice([":dvd:", ":cd:"])]
+                   ":mars:", ":0_:", choice([":dvd:", ":cd:"])]
     master['1'] = [":techone:", ":testtube:", ":thonk_ping:", ":first_place_medal:",
                    ":critical_fail:"]
     master['2'] = [":second_place_medal:", choice([":card-2-clubs:", ":card-2-diamonds:",
@@ -90,6 +91,8 @@ def handle_emojify(command: Command):
     master['$'] = [":thonk_money:", ":moneybag:"]
     # '&' converts to '&AMP;'
     master['&'] = [":ampersand:", ":dnd:"]
+    master['('] = [":lparen:"]
+    master[')'] = [":rparen:"]
     master['*'] = [":day:", ":nab:", ":youtried:", ":msn_star:", ":rune_prayer:", ":wolfram:",
                    ":shuriken:", ":mtg_s:"]
     master['+'] = [":tf2_medic:", ":flag-ch:", ":flag-england:"]
@@ -97,11 +100,13 @@ def handle_emojify(command: Command):
     master['.'] = [":black_small_square:"]
     master[','] = [":comma:"]
     master['/'] = [":slash:"]
+    master[';'] = [":semi-colon:"]
     # '>' converts to '&GT;'
     master['>'] = [":accenture:", ":implying:", ":plex:", ":powershell:"]
     master['?'] = [":question:"]
     master['@'] = [":whip:"]
-    master['^'] = [":this:", ":typographical_carrot:", ":arrow_up:"]
+    master['^'] = [":this:", ":typographical_carrot:", ":arrow_up:",
+                   ":this_but_it's_an_actual_caret:"]
     master['~'] = [":wavy_dash:"]
 
     # slack/uqcsbot convert the following to other symbols
