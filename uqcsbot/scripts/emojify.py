@@ -100,7 +100,7 @@ def handle_emojify(command: Command):
     master['.'] = [":black_small_square:"]
     master[','] = [":comma:"]
     master['/'] = [":slash:"]
-    master[':'] = [":semi-colon:"]
+    master[';'] = [":semi-colon:"]
     # '>' converts to '&GT;'
     master['>'] = [":accenture:", ":implying:", ":plex:", ":powershell:"]
     master['?'] = [":question:"]
