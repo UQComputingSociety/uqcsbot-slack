@@ -10,6 +10,9 @@ def test_emoji_log(uqcsbot: MockUQCSBot):
     """
     events = [
         generate_event_object(MESSAGE_TYPE_CHANNEL_CREATED,
+                              channel={'id': 'uqcs-meta', 'name': 'uqcs-meta',
+                                       'is_public': True}),
+        generate_event_object(MESSAGE_TYPE_CHANNEL_CREATED,
                               channel={'id': 'emoji-request', 'name': 'emoji-request',
                                        'is_public': True}),
         # normal add comes with an image URL
