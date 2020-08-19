@@ -169,7 +169,9 @@ def handle_weather(command: Command) -> None:
 
     root = get_xml(state)
     if root is None:
-        bot.post_message(command.channel_id, "Could Not Retrieve BOM Data")
+        failure_respone = bot.post_message(command.channel_id, "Could Not Retrieve BOM Data")
+        bot.api.reactions.add(channel=failure_respone["channel"],
+                              timestamp=failure_respone["ts"], name="disapproval")
         return
 
     node, find_response = find_location(root, location, future)
