@@ -79,7 +79,7 @@ def get_board_game_parameters(identity: str) -> Optional[dict]:
                 if j.tag == "ranks":
                     for k in j:
                         if (k.attrib.get("name") == "boardgame"
-                            and k.attrib.get("value").isnumeric()):
+                                and k.attrib.get("value").isnumeric()):
                             n = int(k.attrib.get("value"))
                             o = "tsnrhtdd"[(n/10 % 10 != 1) * (n % 10 < 4) * n % 10::4]
                             parameters["rank"] = f"{n:d}{o:s}"
