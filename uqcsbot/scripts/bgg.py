@@ -57,8 +57,9 @@ def get_board_game_parameters(identity: str) -> Optional[dict]:
                               * (-1 if k.attrib["value"] == "Not Recommended" else 1))
                 if votes > 0:
                     players.add(j.attrib["numplayers"])
-            parameters["min_players"] = min(players)
-            parameters["max_players"] = max(players)
+            if players:
+                parameters["min_players"] = min(players)
+                parameters["max_players"] = max(players)
         # sets the name of the board game
         elif i.tag == "name" and i.attrib.get("type") == "primary":
             parameters["name"] = i.attrib["value"]
@@ -77,12 +78,12 @@ def get_board_game_parameters(identity: str) -> Optional[dict]:
                     parameters["users"] = j.attrib["value"]
                 if j.tag == "ranks":
                     for k in j:
-                        if k.attrib.get("name") == "boardgame":
-                            n = int(k.attrib["value"])
+                        if k.attrib.get("name") == "boardgame" and k.attrib.get("value").isnumeric():
+                            n = int(k.attrib.get("value"))
                             o = "tsnrhtdd"[(n/10 % 10 != 1) * (n % 10 < 4) * n % 10::4]
                             parameters["rank"] = f"{n:d}{o:s}"
-                        else:
-                            n = int(k.attrib["value"])
+                        elif k.attrib.get("value").isnumeric():
+                            n = int(k.attrib.get("value"))
                             o = "tsnrhtdd"[(n/10 % 10 != 1) * (n % 10 < 4) * n % 10::4]
                             s = " ".join(k.attrib["friendlyname"].split(" ")[:-1])
                             parameters["subranks"][s] = f"{n:d}{o:s}"
