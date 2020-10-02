@@ -26,7 +26,7 @@ def has_link(message: str):
     checks if the message sent contains a link
     """
     return ('https://' in message or 'http://' in message)
-    
+
 
 def mutate_minuscule(message: str) -> str:
     """
