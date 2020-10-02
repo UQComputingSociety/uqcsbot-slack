@@ -8,6 +8,8 @@ from typing import Dict, Optional, Any
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException, loading_status
 
+MAX_SLACK_MESSAGE_LENGTH = 4000
+
 
 def get_bgg_id(search_name: str) -> Optional[str]:
     """
@@ -23,12 +25,13 @@ def get_bgg_id(search_name: str) -> Optional[str]:
 
     # filters for the closest name match
     match = {}
-    for i in results:
-        if i.get("id") is None:
+    for element in results:
+        if element.get("id") is None:
             continue
-        for j in i:
-            if j.tag == "name":
-                match[i.get("id")] = SequenceMatcher(None, search_name, j.get("value")).ratio()
+        for subelement in element:
+            if subelement.tag == "name":
+                match[element.get("id")] = SequenceMatcher(None, search_name,
+                                                           subelement.get("value")).ratio()
     return max(match, key=match.get)
 
 
@@ -46,62 +49,91 @@ def get_board_game_parameters(identity: str) -> Optional[dict]:
     parameters["subranks"] = {}
     parameters["identity"] = identity
 
-    for i in result:
+    for element in result:
+        tag = element.tag
+        tag_name = element.attrib.get("name")
+        tag_value = element.attrib.get("value")
+        tag_type = element.attrib.get("type")
+        tag_text = element.text
+
         # sets the range of players
-        if i.tag == "poll" and i.attrib.get("name") == "suggested_numplayers":
+        if tag == "poll" and tag_name == "suggested_numplayers":
             players = set()
-            for j in i:
+            for subelement in element:
+                numplayers = subelement.attrib.get("numplayers")
                 votes = 0
-                for k in j:
-                    votes += (int(k.attrib["numvotes"])
-                              * (-1 if k.attrib["value"] == "Not Recommended" else 1))
+
+                for subsubelement in subelement:
+                    numvotes = int(subsubelement.attrib.get("numvotes"))
+                    direction = -1 if subsubelement.attrib.get("value") == "Not Recommended" else 1
+                    votes += numvotes * direction
+
                 if votes > 0:
-                    players.add(j.attrib["numplayers"])
+                    players.add(numplayers)
+
             if players:
                 parameters["min_players"] = min(players)
                 parameters["max_players"] = max(players)
+
         # sets the name of the board game
-        elif i.tag == "name" and i.attrib.get("type") == "primary":
-            parameters["name"] = i.attrib["value"]
+        elif tag == "name" and tag_type == "primary":
+            parameters["name"] = tag_value
+
         # adds a category
-        elif i.tag == "link" and i.attrib.get("type") == "boardgamecategory":
-            parameters["categories"].add(i.attrib["value"])
+        elif tag == "link" and tag_type == "boardgamecategory":
+            parameters["categories"].add(tag_value)
+
         # adds a mechanic
-        elif i.tag == "link" and i.attrib.get("type") == "boardgamemechanic":
-            parameters["mechanics"].add(i.attrib["value"])
+        elif tag == "link" and tag_type == "boardgamemechanic":
+            parameters["mechanics"].add(tag_value)
+
         # sets the user ratings
-        elif i.tag == "statistics":
-            for j in i[0]:
-                if j.tag == "average":
-                    parameters["score"] = j.attrib["value"]
-                if j.tag == "usersrated":
-                    parameters["users"] = j.attrib["value"]
-                if j.tag == "ranks":
-                    for k in j:
-                        if (k.attrib.get("name") == "boardgame"
-                                and k.attrib.get("value").isnumeric()):
-                            n = int(k.attrib.get("value"))
-                            o = "tsnrhtdd"[(n/10 % 10 != 1) * (n % 10 < 4) * n % 10::4]
-                            parameters["rank"] = f"{n:d}{o:s}"
-                        elif k.attrib.get("value").isnumeric():
-                            n = int(k.attrib.get("value"))
-                            o = "tsnrhtdd"[(n/10 % 10 != 1) * (n % 10 < 4) * n % 10::4]
-                            s = " ".join(k.attrib["friendlyname"].split(" ")[:-1])
-                            parameters["subranks"][s] = f"{n:d}{o:s}"
+        elif tag == "statistics":
+            for subelement in element[0]:
+                subtag = subelement.tag
+                subvalue = subelement.attrib.get("value")
+                if subtag == "average":
+                    try:
+                        parameters["score"] = str(round(float(subvalue), 2))
+                    except ValueError:
+                        parameters["score"] = subvalue
+                if subtag == "usersrated":
+                    parameters["users"] = subvalue
+                if subtag == "ranks":
+                    for subsubelement in subelement:
+                        subsubname = subsubelement.attrib.get("name")
+                        subsubvalue = subsubelement.get("value")
+                        if subsubname == "boardgame" and subsubvalue.isnumeric():
+                            position = int(subsubvalue)
+                            # gets the ordinal suffix
+                            suffix = "tsnrhtdd"[(position/10 % 10 != 1) *
+                                                (position % 10 < 4) * position % 10::4]
+                            parameters["rank"] = f"{position:d}{suffix:s}"
+                        elif subsubelement.attrib.get("value").isnumeric():
+                            friendlyname = subsubelement.attrib.get("friendlyname")
+                            # removes "game" as last word
+                            friendlyname = " ".join(friendlyname.split(" ")[:-1])
+                            position = int(subsubvalue)
+                            # gets the ordinal suffix
+                            suffix = "tsnrhtdd"[(position/10 % 10 != 1) *
+                                                (position % 10 < 4) * position % 10::4]
+                            parameters["subranks"][friendlyname] = f"{position:d}{suffix:s}"
+
         # sets the discription
-        elif i.tag == "description":
-            parameters["description"] = i.text
+        elif tag == "description":
+            parameters["description"] = tag_text
         # sets the minimum playing time
-        elif i.tag == "minplaytime":
-            parameters["min_time"] = i.attrib["value"]
-        elif i.tag == "maxplaytime":
-            parameters["max_time"] = i.attrib["value"]
+        elif tag == "minplaytime":
+            parameters["min_time"] = tag_value
+        elif tag == "maxplaytime":
+            parameters["max_time"] = tag_value
 
     return parameters
 
 
 def format_board_game_parameters(parameters: dict) -> str:
-    message = (f"*{parameters.get('name', ':question:'):s}*\n"
+    message = (f"*<https://boardgamegeek.com/boardgame/{parameters.get('identity'):s}"
+               + f"|{parameters.get('name', ':question:'):s}>*\n"
                f"A board game for {parameters.get('min_players', ':question:'):s} to"
                + f" {parameters.get('max_players', ':question:'):s} players, with a"
                + f" playing time of {parameters.get('min_time', ':question:'):s} minutes"
@@ -110,17 +142,16 @@ def format_board_game_parameters(parameters: dict) -> str:
                f"Rated {parameters.get('score', ':question:'):s}/10 by"
                + f" {parameters.get('users', ':question:'):s} users.\n"
                f"Ranked {parameters.get('rank', ':question:'):s} overall on _Board Game Geek_.\n"
-               + "".join(f"• Ranked {value:s} in the {key:s} category.\n"
+               + "".join(f"• Ranked {value:s} in the {key:s} genre.\n"
                          for key, value in parameters.get("subranks", {}).items()) +
                f"Categories: {', '.join(parameters.get('categories', set())):s}\n"
                f"Mechanics: {', '.join(parameters.get('mechanics', set())):s}\n"
-               f"https://boardgamegeek.com/boardgame/{parameters.get('identity', ':question:'):s}\n"
                f">>>{parameters.get('description', ':question:'):s}")
     message = unescape(message)
     while "\n\n" in message:
         message = message.replace("\n\n", "\n")
-    if len(message) > 4000:
-        message = message[:3999] + "…"
+    if len(message) > MAX_SLACK_MESSAGE_LENGTH:
+        message = message[:MAX_SLACK_MESSAGE_LENGTH-1] + "…"
     return message
 
 
