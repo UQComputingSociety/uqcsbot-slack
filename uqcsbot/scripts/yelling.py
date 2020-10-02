@@ -21,6 +21,13 @@ def is_human(user):
     return user is not None and not user.is_bot
 
 
+def has_link(message: str):
+    """
+    checks if the message sent contains a link
+    """
+    return ('https://' in message or 'http://' in message)
+    
+
 def mutate_minuscule(message: str) -> str:
     """
     Randomly mutates 40% of minuscule letters to other minuscule letters
@@ -63,6 +70,10 @@ def yelling(event: dict):
     # ensure user proper
     user = bot.users.get(event.get("user"))
     if not is_human(user):
+        return
+
+    # ensure that the bot ignores links
+    if has_link(event['text']):
         return
 
     # ignore emoji
