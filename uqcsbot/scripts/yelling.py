@@ -2,6 +2,7 @@ from uqcsbot import bot
 
 from random import choice, random
 from re import sub, UNICODE
+import re
 
 
 def in_yelling(channel):
@@ -21,11 +22,12 @@ def is_human(user):
     return user is not None and not user.is_bot
 
 
-def has_link(message: str):
+def clear_url(message: str):
     """
-    checks if the message sent contains a link
+    removes any urls in the message
     """
-    return ('https://' in message or 'http://' in message)
+    expr = r'((http|ftp|https):\/\/)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'
+    return re.sub(expr,'',message).strip()
 
 
 def mutate_minuscule(message: str) -> str:
@@ -72,13 +74,11 @@ def yelling(event: dict):
     if not is_human(user):
         return
 
-    # ensure that the bot ignores links
-    if has_link(event['text']):
-        return
-
     # ignore emoji
     text = sub(r":[\w\-\+\_']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
     text = text.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&")
+    # ignore urls
+    text = clear_url(text)
     # randomly select a response
     response = choice(["WHAT’S THAT‽",
                        "SPEAK UP!",
