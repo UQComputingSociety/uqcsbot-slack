@@ -26,8 +26,9 @@ def clear_url(message: str):
     """
     removes any urls in the message
     """
-    expr = r'((http|ftp|https):\/\/)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'
-    return re.sub(expr,'',message).strip()
+    expr = r'''((http|ftp|https):\/\/)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\
+.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'''
+    return re.sub(expr, '', message).strip()
 
 
 def mutate_minuscule(message: str) -> str:
