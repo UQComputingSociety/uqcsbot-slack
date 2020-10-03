@@ -1,6 +1,8 @@
 from uqcsbot import bot
 from re import findall
 
+MAX_ANSWER = 10**512
+
 
 def is_human(user):
     """
@@ -32,6 +34,11 @@ def factorial(event: dict):
         answer = 1
         for i in range(number, 0, -degree):
             answer *= i
+            if answer >= MAX_ANSWER:
+                break
+        if answer >= MAX_ANSWER:
+            results.append(f"{factorial:s} ≈ ∞")
+            continue
         results.append(f"{factorial:s} = {answer:d}")
 
     # post results

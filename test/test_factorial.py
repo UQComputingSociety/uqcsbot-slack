@@ -55,3 +55,14 @@ def test_double_factorial(uqcsbot: MockUQCSBot):
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
     assert messages[-1]['text'] == "8!! = 384"
+
+
+@patch("uqcsbot.scripts.factorial.is_human", new=lambda user: True)
+def test_large_factorial(uqcsbot: MockUQCSBot):
+    """
+    test factorial with a large number
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "65536!")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    assert messages[-1]['text'] == "65536! ≈ ∞"
