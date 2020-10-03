@@ -153,7 +153,7 @@ def format_board_game_parameters(parameters: dict) -> str:
     message = unescape(message)
     while "\n\n" in message:
         message = message.replace("\n\n", "\n")
-    
+
     if len(message) > MAX_MESSAGE_LENGTH:
         read_more = ("…\n\t\t<https://boardgamegeek.com/boardgame/"
                      + f"{parameters.get('identity'):s}|[read more]>")
