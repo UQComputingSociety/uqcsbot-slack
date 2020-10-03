@@ -8,7 +8,7 @@ from typing import Dict, Optional, Any
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException, loading_status
 
-MAX_SLACK_MESSAGE_LENGTH = 4000
+MAX_MESSAGE_LENGTH = 1500
 
 
 def get_bgg_id(search_name: str) -> Optional[str]:
@@ -69,7 +69,10 @@ def get_board_game_parameters(identity: str) -> Optional[dict]:
                     votes += numvotes * direction
 
                 if votes > 0:
-                    players.add(numplayers)
+                    try:
+                        players.add(int(numplayers))
+                    except ValueError:
+                        pass
 
             if players:
                 parameters["min_players"] = min(players)
@@ -134,8 +137,8 @@ def get_board_game_parameters(identity: str) -> Optional[dict]:
 def format_board_game_parameters(parameters: dict) -> str:
     message = (f"*<https://boardgamegeek.com/boardgame/{parameters.get('identity'):s}"
                + f"|{parameters.get('name', ':question:'):s}>*\n"
-               f"A board game for {parameters.get('min_players', ':question:'):s} to"
-               + f" {parameters.get('max_players', ':question:'):s} players, with a"
+               f"A board game for {parameters.get('min_players', ':question:'):d} to"
+               + f" {parameters.get('max_players', ':question:'):d} players, with a"
                + f" playing time of {parameters.get('min_time', ':question:'):s} minutes"
                + ("" if parameters.get('min_time') == parameters.get('max_time')
                   else f" to {parameters.get('max_time', ':question:'):s} minutes") + ".\n"
@@ -150,8 +153,11 @@ def format_board_game_parameters(parameters: dict) -> str:
     message = unescape(message)
     while "\n\n" in message:
         message = message.replace("\n\n", "\n")
-    if len(message) > MAX_SLACK_MESSAGE_LENGTH:
-        message = message[:MAX_SLACK_MESSAGE_LENGTH-1] + "…"
+    
+    if len(message) > MAX_MESSAGE_LENGTH:
+        read_more = ("…\n\t\t<https://boardgamegeek.com/boardgame/"
+                     + f"{parameters.get('identity'):s}|[read more]>")
+        message = message[:MAX_MESSAGE_LENGTH-len(read_more)] + read_more
     return message
 
 
