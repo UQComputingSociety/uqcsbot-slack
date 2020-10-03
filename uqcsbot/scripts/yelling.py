@@ -13,14 +13,6 @@ def in_yelling(channel):
     return chan and (chan.name == "yelling" or chan.name == "cheering")
 
 
-def is_human(user):
-    """
-    checks that the user is not a bot
-    exists for test mocking
-    """
-    return user is not None and not user.is_bot
-
-
 def mutate_minuscule(message: str) -> str:
     """
     Randomly mutates 40% of minuscule letters to other minuscule letters
@@ -62,7 +54,7 @@ def yelling(event: dict):
 
     # ensure user proper
     user = bot.users.get(event.get("user"))
-    if not is_human(user):
+    if user is None or user.is_bot:
         return
 
     # ignore emoji
