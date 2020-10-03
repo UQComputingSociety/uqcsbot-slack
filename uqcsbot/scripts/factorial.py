@@ -4,14 +4,6 @@ from re import findall
 MAX_ANSWER = 10**512
 
 
-def is_human(user):
-    """
-    checks that the user is not a bot
-    exists for test mocking
-    """
-    return user is not None and not user.is_bot
-
-
 @bot.on("message")
 def factorial(event: dict):
     """
@@ -20,7 +12,7 @@ def factorial(event: dict):
 
     # ensure user proper
     user = bot.users.get(event.get("user"))
-    if not is_human(user):
+    if user is None or user.is_bot:
         return
 
     # find factorials
@@ -44,5 +36,3 @@ def factorial(event: dict):
     # post results
     if results:
         bot.post_message(event.get("channel"), "\n".join(results))
-
-    
