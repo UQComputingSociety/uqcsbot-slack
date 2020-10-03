@@ -5,6 +5,7 @@ from uqcsbot import bot
 from random import choice, random
 from re import sub, UNICODE
 
+
 def in_yelling(channel):
     """
     checks that channel is #yelling
@@ -13,13 +14,16 @@ def in_yelling(channel):
     chan = bot.channels.get(channel)
     return chan and (chan.name == "yelling" or chan.name == "cheering")
 
+
 def clear_url(message: str):
     """
     removes any urls in the message
     """
     expr = r'''<(?:(?:https?|ftp):\/\/|\b(?:[a-z\d]+\.))(?:(?:[^\s()<>]+|\((?:[^\s()<>]+
-    |(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))?>'''
+    |(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};
+    :'".,<>?«»“”‘’]))?>'''
     return re.sub(expr, '', message).strip()
+
 
 def is_human(user):
     """
@@ -27,6 +31,7 @@ def is_human(user):
     exists for test mocking
     """
     return user is not None and not user.is_bot
+
 
 def mutate_minuscule(message: str) -> str:
     """
@@ -110,4 +115,3 @@ def yelling(event: dict):
                              thread_ts=event.get("thread_ts"))
         else:
             bot.post_message(channel, response, thread_ts=event.get("thread_ts"))
-    
