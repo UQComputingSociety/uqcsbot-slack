@@ -25,13 +25,13 @@ def get_bgg_id(search_name: str) -> Optional[str]:
 
     # filters for the closest name match
     match = {}
-    for element in results:
-        if element.get("id") is None:
+    for item in results:
+        if item.get("id") is None:
             continue
-        for subelement in element:
-            if subelement.tag == "name":
-                match[element.get("id")] = SequenceMatcher(None, search_name,
-                                                           subelement.get("value")).ratio()
+        for element in item:
+            if element.tag == "name":
+                match[item.get("id")] = SequenceMatcher(None, search_name,
+                                                        element.get("value")).ratio()
     return max(match, key=match.get)
 
 
