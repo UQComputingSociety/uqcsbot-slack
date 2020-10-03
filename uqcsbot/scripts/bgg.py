@@ -59,13 +59,13 @@ def get_board_game_parameters(identity: str) -> Optional[dict]:
         # sets the range of players
         if tag == "poll" and tag_name == "suggested_numplayers":
             players = set()
-            for subelement in element:
-                numplayers = subelement.attrib.get("numplayers")
+            for option in element:
+                numplayers = option.attrib.get("numplayers")
                 votes = 0
 
-                for subsubelement in subelement:
-                    numvotes = int(subsubelement.attrib.get("numvotes"))
-                    direction = -1 if subsubelement.attrib.get("value") == "Not Recommended" else 1
+                for result in option:
+                    numvotes = int(result.attrib.get("numvotes"))
+                    direction = -1 if result.attrib.get("value") == "Not Recommended" else 1
                     votes += numvotes * direction
 
                 if votes > 0:
@@ -89,31 +89,31 @@ def get_board_game_parameters(identity: str) -> Optional[dict]:
 
         # sets the user ratings
         elif tag == "statistics":
-            for subelement in element[0]:
-                subtag = subelement.tag
-                subvalue = subelement.attrib.get("value")
-                if subtag == "average":
+            for statistic in element[0]:
+                stat_tag = statistic.tag
+                stat_value = statistic.attrib.get("value")
+                if stat_tag == "average":
                     try:
-                        parameters["score"] = str(round(float(subvalue), 2))
+                        parameters["score"] = str(round(float(stat_value), 2))
                     except ValueError:
-                        parameters["score"] = subvalue
-                if subtag == "usersrated":
-                    parameters["users"] = subvalue
-                if subtag == "ranks":
-                    for subsubelement in subelement:
-                        subsubname = subsubelement.attrib.get("name")
-                        subsubvalue = subsubelement.get("value")
-                        if subsubname == "boardgame" and subsubvalue.isnumeric():
-                            position = int(subsubvalue)
+                        parameters["score"] = stat_value
+                if stat_tag == "usersrated":
+                    parameters["users"] = stat_value
+                if stat_tag == "ranks":
+                    for genre in statistic:
+                        genre_name = genre.attrib.get("name")
+                        genre_value = genre.attrib.get("value")
+                        if genre_name == "boardgame" and genre_value.isnumeric():
+                            position = int(genre_value)
                             # gets the ordinal suffix
                             suffix = "tsnrhtdd"[(position/10 % 10 != 1) *
                                                 (position % 10 < 4) * position % 10::4]
                             parameters["rank"] = f"{position:d}{suffix:s}"
-                        elif subsubelement.attrib.get("value").isnumeric():
-                            friendlyname = subsubelement.attrib.get("friendlyname")
+                        elif genre_value.isnumeric():
+                            friendlyname = genre.attrib.get("friendlyname")
                             # removes "game" as last word
                             friendlyname = " ".join(friendlyname.split(" ")[:-1])
-                            position = int(subsubvalue)
+                            position = int(genre_value)
                             # gets the ordinal suffix
                             suffix = "tsnrhtdd"[(position/10 % 10 != 1) *
                                                 (position % 10 < 4) * position % 10::4]
