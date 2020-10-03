@@ -1,9 +1,9 @@
+import re
+
 from uqcsbot import bot
 
 from random import choice, random
 from re import sub, UNICODE
-import re
-
 
 def in_yelling(channel):
     """
@@ -13,6 +13,13 @@ def in_yelling(channel):
     chan = bot.channels.get(channel)
     return chan and (chan.name == "yelling" or chan.name == "cheering")
 
+def clear_url(message: str):
+    """
+    removes any urls in the message
+    """
+    expr = r'''<(?:(?:https?|ftp):\/\/|\b(?:[a-z\d]+\.))(?:(?:[^\s()<>]+|\((?:[^\s()<>]+
+    |(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))?>'''
+    return re.sub(expr, '', message).strip()
 
 def is_human(user):
     """
@@ -20,16 +27,6 @@ def is_human(user):
     exists for test mocking
     """
     return user is not None and not user.is_bot
-
-
-def clear_url(message: str):
-    """
-    removes any urls in the message
-    """
-    expr = r'''((http|ftp|https):\/\/)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\
-.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'''
-    return re.sub(expr, '', message).strip()
-
 
 def mutate_minuscule(message: str) -> str:
     """
@@ -104,6 +101,8 @@ def yelling(event: dict):
                       + (['OH, NO! NOT THE `a`S! NOT THE `a`S! AAAAAHHHHH!']
                          if 'a' in text else []))
 
+    response = f"DID YOU SAY \n>>>{mutate_minuscule(text)}".upper()
+
     # check if minuscule in message, and if so, post response
     if any(c.islower() for c in text):
         if event.get("subtype") == "thread_broadcast":
@@ -111,3 +110,4 @@ def yelling(event: dict):
                              thread_ts=event.get("thread_ts"))
         else:
             bot.post_message(channel, response, thread_ts=event.get("thread_ts"))
+    
