@@ -10,4 +10,4 @@ def test_help_help(uqcsbot: MockUQCSBot):
     assert len(messages) == 2
     assert messages[-1]['text'] == (">>> `!help [COMMAND]` - Display the helper docstring"
                                     + " for the given command. If unspecified, will return"
-                                    + "the helper docstrings for all commands.")
+                                    + " the helper docstrings for all commands. ")
