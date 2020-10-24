@@ -112,7 +112,7 @@ def jobs_board():
     """
     channel = bot.channels.get("jobs-discussion")
     message = f"Looking for an internship, a grad job, or something casual? \n Why not check out " \
-              f"our job board at <{JOBS_BOARD}|link.uqcs.org>.\n Got a job to offer, or " \
+              f"our job board at <{JOBS_BOARD}|link.uqcs.org/jobs>.\n Got a job to offer, or " \
               f"something wrong/out of date? Ping `@committee` and let us know."
 
     message = bot.post_message(channel, message)
