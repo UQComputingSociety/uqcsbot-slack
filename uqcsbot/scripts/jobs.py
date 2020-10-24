@@ -6,6 +6,7 @@ from uqcsbot.utils.message_utils import insert_channel_links
 import time
 
 MESSAGE_PAUSE = 2   # Number of seconds between sending bot messages
+JOBS_BOARD = "https://link.uqcs.org/jobs"
 FAIR_WORK_INFO = "https://www.fairwork.gov.au/pay/unpaid-work/work-experience-and-internships"
 EAIT_UNPAID_JOBS = "https://www.eait.uq.edu.au/engineering-professional-practice-unpaid-placements"
 EAIT_FACULTY = "https://www.eait.uq.edu.au/"
@@ -102,3 +103,17 @@ def job_response(evt: dict):
                     + f" edit your message in #jobs-bulletin so it complies (or ask a committee"
                     + f" member to delete it). Thanks!")
     bot.post_message(user.user_id, insert_channel_links(user_message))
+
+
+@bot.on_schedule("cron", hour=22, minute=33, day_of_week='sat', timezone='Australia/Brisbane')
+def jobs_board():
+    """
+    Lets people know the UQCS jobs board exists by messaging #jobs-discussion every week.
+    """
+    channel = bot.channels.get("jobs-discussion")
+    message = f"Looking for an internship, a grad job, or something casual? \n Why not check out " \
+              f"our job board at <{JOBS_BOARD}|link.uqcs.org>.\n Got a job to offer, or " \
+              f"something wrong/out of date? Ping `@committee` and let us know."
+
+    message = bot.post_message(channel, message)
+    bot.api.reactions.add(name="briefcase", channel=channel.id, timestamp=message.get("ts"))
