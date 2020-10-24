@@ -105,7 +105,7 @@ def job_response(evt: dict):
     bot.post_message(user.user_id, insert_channel_links(user_message))
 
 
-@bot.on_schedule("cron", hour=9, day_of_week='mon', timezone='Australia/Brisbane')
+@bot.on_schedule("cron", hour=9, day_of_week="mon", timezone="Australia/Brisbane")
 def jobs_board():
     """
     Lets people know the UQCS jobs board exists by messaging #jobs-discussion every week.
