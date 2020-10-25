@@ -1,12 +1,19 @@
 """
 Monitors #jobs-bulletin and reminds employers and users of their rights and responsibilities.
 """
-from uqcsbot import bot
-from uqcsbot.utils.message_utils import insert_channel_links
 import time
 
+from random import shuffle
+
+from uqcsbot import bot
+from uqcsbot.utils.message_utils import insert_channel_links
+
+
 MESSAGE_PAUSE = 2   # Number of seconds between sending bot messages
-JOBS_BOARD = "https://link.uqcs.org/jobs"
+JOBS_BOARD = "https://jobs.uqcs.org"
+JOBS_EMOJI = ["briefcase", "justdoit", "flying_money_with_wings", "moneybag", "money_mouth_face",
+              "stonks", "dollar", "yen", "euro", "flyingmoneyparrot", "female-technologist",
+              "fairwork"]
 FAIR_WORK_INFO = "https://www.fairwork.gov.au/pay/unpaid-work/work-experience-and-internships"
 EAIT_UNPAID_JOBS = "https://www.eait.uq.edu.au/engineering-professional-practice-unpaid-placements"
 EAIT_FACULTY = "https://www.eait.uq.edu.au/"
@@ -105,15 +112,18 @@ def job_response(evt: dict):
     bot.post_message(user.user_id, insert_channel_links(user_message))
 
 
-@bot.on_schedule("cron", hour=9, day_of_week="mon", timezone="Australia/Brisbane")
+@bot.on_schedule("cron", hour=21, minute=35, day_of_week="sun", timezone="Australia/Brisbane")
 def jobs_board():
     """
     Lets people know the UQCS jobs board exists by messaging #jobs-discussion every week.
     """
     channel = bot.channels.get("jobs-discussion")
     message = f"Looking for an internship, a grad job, or something casual? \n Why not check out " \
-              f"our job board at <{JOBS_BOARD}|link.uqcs.org/jobs>.\n Got a job to offer, or " \
+              f"our job board at <{JOBS_BOARD}|jobs.uqcs.org>?\n Got a job to offer, or " \
               f"something wrong/out of date? Ping `@committee` and let us know."
 
     message = bot.post_message(channel, message)
-    bot.api.reactions.add(name="briefcase", channel=channel.id, timestamp=message.get("ts"))
+
+    shuffle(JOBS_EMOJI)
+    for emoji in JOBS_EMOJI[:8]:
+        bot.api.reactions.add(name=emoji, channel=channel.id, timestamp=message.get("ts"))
