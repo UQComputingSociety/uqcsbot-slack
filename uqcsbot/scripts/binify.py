@@ -9,7 +9,7 @@ def handle_binify(command: Command):
     """
     if not command.has_arg():
         response = "Please include string to convert."
-    elif set(command.arg).issubset(["0", "1"]) and len(command.arg) > 2:
+    elif set(command.arg).issubset(["0", "1", " "]) and len(command.arg) > 2:
         if len(command.arg) % 8 != 0:
             response = "Binary string contains partial byte."
         else:
