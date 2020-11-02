@@ -69,10 +69,11 @@ def get_updates_page():
     """
     Gets the service updates page HTML
     """
+    headers = {'User-Agent': 'UQCS'}
     try:
-        resp = get(ITS_SERVICE_UPDATES_URL)
+        resp = get(ITS_SERVICE_UPDATES_URL, headers=headers)
         return resp.content
     except RequestException as e:
         bot.logger.error(
-            f"A request error {e.resp.status} occurred:\n{e.content}")
+            f"A request error occurred:\n{e.content}")
         return None
