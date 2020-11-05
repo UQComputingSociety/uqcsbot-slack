@@ -8,9 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 install_requires = [
-    'slackclient==1.3.1',
-    # TODO: delete this
-    'websocket-client==0.54.0',
+    'slackclient~=2.5.0',
     'requests',
     'BeautifulSoup4',
     'apscheduler',
@@ -20,7 +18,8 @@ install_requires = [
     'google-api-python-client',
     'pytest-runner',
     'unidecode',
-    'feedparser'
+    'feedparser',
+    'slackblocks'
 ]
 
 tests_require = [

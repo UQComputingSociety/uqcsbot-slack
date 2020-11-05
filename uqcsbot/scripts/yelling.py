@@ -9,15 +9,8 @@ def in_yelling(channel):
     checks that channel is #yelling
     exists for test mocking
     """
-    return bot.channels.get(channel).name == "yelling"
-
-
-def is_human(user):
-    """
-    checks that the user is not a bot
-    exists for test mocking
-    """
-    return user is not None and not user.is_bot
+    chan = bot.channels.get(channel)
+    return chan and (chan.name == "yelling" or chan.name == "cheering")
 
 
 def mutate_minuscule(message: str) -> str:
@@ -61,11 +54,11 @@ def yelling(event: dict):
 
     # ensure user proper
     user = bot.users.get(event.get("user"))
-    if not is_human(user):
+    if user is None or user.is_bot:
         return
 
     # ignore emoji
-    text = sub(r":[\w\-\+']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
+    text = sub(r":[\w\-\+\_']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
     text = text.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&")
     # randomly select a response
     response = choice(["WHAT’S THAT‽",

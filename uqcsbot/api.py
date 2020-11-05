@@ -1,6 +1,6 @@
-from functools import partial
 import time
-from slackclient import SlackClient
+import slack
+import slack.errors
 import threading
 import logging
 from typing import (TYPE_CHECKING, List, Iterable, Optional, Generator,
@@ -14,6 +14,12 @@ UserT = TypeVar('UserT', bound='User')
 
 LOGGER = logging.getLogger(__name__)
 
+# This is used to track which client is preferred for a given method
+# Defaults to bot
+_CLIENT_METHOD_REGISTRY: Dict[str, str] = {
+    'chat.postMessage': 'bot',
+}
+
 
 class Paginator(Iterable[dict]):
     """
@@ -22,15 +28,14 @@ class Paginator(Iterable[dict]):
 
     See https://api.slack.com/docs/pagination for details
     """
-    def __init__(self, client, method, **kwargs):
-        self._client = client
-        self._method = method
+    def __init__(self, caller: 'APIMethodProxy', **kwargs):
         self._kwargs = kwargs
+        self._caller = caller
 
     def _gen(self) -> Generator[dict, Any, None]:
         kwargs = self._kwargs.copy()
         while True:
-            page = self._client.api_call(self._method, **kwargs)
+            page = self._caller(**kwargs)
             yield page
             cursor = page.get('response_metadata', {}).get('next_cursor')
             if not cursor:
@@ -45,8 +50,9 @@ class APIMethodProxy(object):
     """
     Helper class used to implement APIWrapper
     """
-    def __init__(self, client: SlackClient, method: str) -> None:
-        self._client = client
+    def __init__(self,  user_client: slack.WebClient, bot_client: slack.WebClient, method: str):
+        self._user_client = user_client
+        self._bot_client = bot_client
         self._method = method
 
     def __call__(self, **kwargs) -> dict:
@@ -56,16 +62,40 @@ class APIMethodProxy(object):
 
         Attempts to retry the API call if rate-limited.
         """
-        fn = partial(self._client.api_call, self._method, **kwargs)
+        # slack client 2.0 does not implicitly convert boolean args
+        for key in kwargs:
+            value = kwargs[key]
+            if isinstance(value, bool):
+                kwargs[key] = str(value).lower()
+
+        def do_request(call_type):
+            client = getattr(self, f'_{call_type}_client')
+            method = getattr(client, self._method.replace('.', '_'))
+            return method(**kwargs)
         retry_count = 0
+        tried_clients = set()
+        call_type = _CLIENT_METHOD_REGISTRY.get(self._method, 'bot')
         while retry_count < 5:
-            result = fn()
+            try:
+                tried_clients.add(call_type)
+                result = do_request(call_type)
+            except slack.errors.SlackApiError as e:
+                result = e.response
             if not result['ok'] and result['error'] == 'ratelimited':
                 retry_after_secs = int(result['headers']['Retry-After'])
                 LOGGER.info(f'Rate limited, retrying in {retry_after_secs} seconds')
                 time.sleep(retry_after_secs)
                 retry_count += 1
+            elif not result['ok'] and result['error'] == 'not_allowed_token_type':
+                call_type = {'bot': 'user', 'user': 'bot'}[call_type]
+                if tried_clients == {'bot', 'user'}:
+                    result = {
+                        'ok': False,
+                        'error': 'Both clients have a disallowed token, this should never happen',
+                    }
+                    break
             else:
+                _CLIENT_METHOD_REGISTRY[self._method] = call_type
                 break
         else:
             result = {'ok': False, 'error': 'Reached max rate-limiting retries'}
@@ -81,7 +111,7 @@ class APIMethodProxy(object):
 
         Count/oldest/latest and page/count methods require manual pagination.
         """
-        return Paginator(self._client, self._method, **kwargs)
+        return Paginator(self, **kwargs)
 
     def __getattr__(self, item) -> 'APIMethodProxy':
         """
@@ -95,7 +125,8 @@ class APIMethodProxy(object):
             > APIMethodProxy("chat.postMessage")
         """
         return APIMethodProxy(
-            client=self._client,
+            user_client=self._user_client,
+            bot_client=self._bot_client,
             method=f'{self._method}.{item}',
         )
 
@@ -109,11 +140,16 @@ class APIWrapper(object):
         > api = APIWrapper(client)
         > api.chat.postMessage(channel="general", text="message")
     """
-    def __init__(self, client: SlackClient) -> None:
-        self._client = client
+    def __init__(self, user_client: slack.WebClient, bot_client: slack.WebClient) -> None:
+        self._user_client = user_client
+        self._bot_client = bot_client
 
     def __getattr__(self, item) -> APIMethodProxy:
-        return APIMethodProxy(client=self._client, method=item)
+        return APIMethodProxy(
+            user_client=self._user_client,
+            bot_client=self._bot_client,
+            method=item
+        )
 
     def __repr__(self) -> str:
         return f"<APIWrapper of {repr(self._client)}>"
@@ -206,20 +242,18 @@ class ChannelWrapper(object):
             self._initialised = True
             self._channels_by_id = {}
             self._channels_by_name = {}
-            for page in self._bot.api.channels.list.paginate():
+            for page in self._bot.api.conversations.list.paginate(
+                    exclude_members='true',
+                    types="public_channel,private_channel,mpim,im",
+            ):
                 for chan in page['channels']:
+                    if chan["is_im"]:
+                        if chan['is_user_deleted']:
+                            continue
+                        # Set the channel name to the user being directly messaged
+                        # for easier reverse lookups. Note: `user` here is the user_id.
+                        chan['name'] = chan['user']
                     self._add_channel(chan)
-            for group in self._bot.api.groups.list(exclude_members=True).get('groups', []):
-                self._add_channel(group)
-            # The ims cover the direct messages between the bot and users
-            for page in self._bot.api.im.list.paginate():
-                for im in page['ims']:
-                    if im['is_user_deleted']:
-                        continue
-                    # Set the channel name to the user being directly messaged
-                    # for easier reverse lookups. Note: `user` here is the user_id.
-                    im['name'] = im['user']
-                    self._add_channel(im)
             self._initialised = True
 
     def populate_from_team_state(self, data):
@@ -358,6 +392,7 @@ class UsersWrapper(object):
             for page in self._bot.api.users.list.paginate():
                 for user in page['members']:
                     self._add_user(user)
+            self._initialised = True
 
     def reload(self):
         self._initialised = False
@@ -396,17 +431,18 @@ class UsersWrapper(object):
             self._bot.on(mtype, attr)
 
     def _on_user_change(self, evt):
-        user = self._users_by_id[evt['user']['id']]
-        if user is not None:
-            user.update_from_dict(evt['user'])
-        else:
-            LOGGER.error("User change event for unknown user - adding")
-            with self._lock:
+        with self._lock:
+            user = self._users_by_id.get(evt['user']['id'], None)
+            if user is not None:
+                user.update_from_dict(evt['user'])
+            else:
                 self._add_user(evt['user'])
 
     def _on_team_join(self, evt):
-        with self._lock:
-            self._add_user(evt['user'])
+        # Because the _on_team_join event is not reliably happening before
+        # _on_user_change, just handle both updating and adding new users in
+        # _on_user_change.
+        self._on_user_change(evt)
 
 
 class User(object):

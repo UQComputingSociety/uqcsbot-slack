@@ -6,25 +6,51 @@ import time
 
 MEMBER_MILESTONE = 50  # Number of members between posting a celebration
 MESSAGE_PAUSE = 2.5   # Number of seconds between sending bot messages
+SLACK_DOWNLOAD_GUIDE = "https://slack.com/intl/en-au/help/categories/360000049043-Getting-" \
+                       "Started#download-the-slack-app"
+UQCSBOT_REPO = "https://github.com/UQComputingSociety/uqcsbot"
+SLACK_PROFILE_GUIDE = "https://slack.com/intl/en-au/help/articles/204092246-Edit-your-profile"
+
 WELCOME_MESSAGES = [    # Welcome messages sent to new members
     "Hey there! Welcome to the UQCS Slack!",
-    "This is the first time I've seen you, so you're probably new here",
-    "I'm UQCSbot, your friendly (open source) robot helper",
-    "We've got a bunch of generic channels (e.g. #banter, #games, #projects) along with many"
-    + " subject-specific ones (e.g #csse1001, #math1051, #csse2310)",
-    "To find and join a channel, tap on the channels header in the sidebar",
-    "The UQCS Slack is a friendly community with a code of conduct in place to ensure our"
-    + " members well-being and safety. You can view a copy of this code of conduct at",
-    "https://github.com/UQComputingSociety/code-of-conduct",
-    "Your friendly committee and admins are"
-    + " Nicholas Lambourne (@ndl), Jack Caperon (@jam), Bradley Stone (@Σ),"
-    + " Joshua Sutton (@jsutton), Ella de Lore (@Ella), Matthew Lake (@mgtlake),"
-    + " Ishraque Zahin (@Ishraque), Ryan Kurz (@lighthou) and Raghav Mishra (@rm)",
-    "For a list of upcoming events check out the #events channel, or type \"!events\"",
-    "Type \"help\" here, or \"!help\" anywhere else to find out what I can do!",
-    "Be sure to download the Slack desktop and phone apps as well,"
-    + "so you'll be able to catch any important announcements",
-    "and again, welcome :)"
+
+    "This is the first time I've seen you, so you're probably new here.",
+
+    f"I'm UQCSbot, your friendly (<{UQCSBOT_REPO}|open source>) robot helper!",
+
+    "You can type `help` here, or `!help` anywhere else to find out what I can do!",
+
+    "We've got a bunch of generic channels (e.g. <#C0D0BEYPM|banter>,"
+    " <#C0DKX7NGP|games>, <#CB2K0Q09K|adulting>) along with many subject-specific"
+    " ones (e.g <#C0MAN4BRS|csse1001>, <#C0Q2KTCK1|math1051>, <#C0DKSDGLE|csse2310>).",
+
+    "To find and join a channel, tap on the channels header in the sidebar.",
+
+    "The UQCS Slack is a friendly community and we have a code of conduct in place to ensure our "
+    "members' well-being and safety. You can view a copy of this code of conduct here:"
+    "\n>https://github.com/UQComputingSociety/code-of-conduct",
+
+    "UQCS elects a leadership committee every year who also serve as our friendly Slack admins. "
+    "This year's committee consists of:\n"
+    ">James (<@U9D6J8HB8>), Sanni (<@UM55HGLUT>), Kenton (<@U9LMBPJG5>), "
+    "Darren (<@U4B6LPU2J>), Madhav (<@UFB9R5QFM>), Matthew (<@U8JN3NR1C>), "
+    "Olivia (<@UA25BSPGT>), Paul (<@UTYTKAB89>), Sylvia (<@U01BXR5TX9T>), "
+    "Tom (<@UAGPENV96>), and Utkarsh (<@U010W5VDR36>).\n"
+    "If you have any questions or need to get in touch, please reach out to them.",
+
+    "We also hold heaps of events events during semester. For a list of upcoming events check "
+    "out the <#C0D0G52PP|events> channel and use the command `!events`.",
+
+    "Don't forget to let people know who you are! Choose a profile pic, set a "
+    "status and tell us what you're studying. These small touches help the UQCS "
+    "community understand who you are and, in turn, help you to more quickly "
+    "become an integral part of the society. If you need any help, check out "
+    f"this handy <{SLACK_PROFILE_GUIDE}|guide> or ask one admins for help! "
+    "Once that's all done, why not introduce yourself in <#C2R8W0YPJ|general>.",
+
+    "Be sure to download the Slack <https://slack.com/downloads|desktop> and "
+    f"<{SLACK_DOWNLOAD_GUIDE}|mobile> apps as well, so you'll be able to catch any important "
+    "announcements, and again, welcome to the UQ Computing Society :)"
 ]
 
 
@@ -47,7 +73,7 @@ def welcome(evt: dict):
         return
 
     # Welcome user in general.
-    bot.post_message(general, f"Welcome, <@{user.user_id}>!")
+    bot.post_message(general, f"Welcome to UQCS, <@{user.user_id}>! :tada:")
 
     # Calculate number of members, ignoring deleted users and bots.
     num_members = 0
