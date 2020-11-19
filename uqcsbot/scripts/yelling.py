@@ -17,12 +17,25 @@ def in_yelling(channel):
 
 def clear_url(message: str):
     """
-    removes any urls in the message
+    removes any urls in the message and returns the stripped url separately with urls
+
+    returns:
+        - tuple : no url message, list of urls and their starting positions
     """
     expr = r'''<(?:(?:https?|ftp):\/\/|\b(?:[a-z\d]+\.))(?:(?:[^\s()<>]+|\((?:[^\s()<>]+
     |(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};
     :'".,<>?«»“”‘’]))?>'''
-    return re.sub(expr, '', message).strip()
+
+    # find all urls and their starting positions respectively
+    start_positions = [(m.start(0)) for m in re.finditer(expr,message)]
+    all_urls = re.findall(expr,message)
+
+    # create a list denoting all the urls and their starting positions in the string
+    url_and_positions = []
+    for i in range(len(all_urls)):
+        url_and_positions.append((start_positions[i],all_urls[i]))
+
+    return (re.sub(expr, '', message).strip(),url_and_positions)
 
 
 def is_human(user):
@@ -33,9 +46,10 @@ def is_human(user):
     return user is not None and not user.is_bot
 
 
-def mutate_minuscule(message: str) -> str:
+def mutate_minuscule(message: str, urls : list) -> str:
     """
     Randomly mutates 40% of minuscule letters to other minuscule letters
+    and then inserts the original urls to their places
     """
     result = ""
     for c in message:
@@ -43,6 +57,11 @@ def mutate_minuscule(message: str) -> str:
             result += choice('abcdefghijklmnopqrstuvwxyz')
         else:
             result += c
+
+    # reinserts all urls into their respective positions
+    for position, url in urls:
+        result = result[:position] + url + result[position:]
+
     return result
 
 
@@ -80,8 +99,10 @@ def yelling(event: dict):
     # ignore emoji
     text = sub(r":[\w\-\+\_']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
     text = text.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&")
-    # ignore urls
-    text = clear_url(text)
+    
+    # find the url-clean string together with a list of urls and their starting positions
+    text, urls = clear_url(text)
+
     # randomly select a response
     response = choice(["WHAT’S THAT‽",
                        "SPEAK UP!",
@@ -99,14 +120,12 @@ def yelling(event: dict):
                        + " (FOR INTERNAL SCREAMING, VISIT #CRIPPLINGDEPRESSION!)",
                        ":disapproval:",
                        ":oldmanyellsatcloud:",
-                       f"DID YOU SAY \n>>>{mutate_minuscule(text)}".upper(),
+                       f"DID YOU SAY \n>>>{mutate_minuscule(text, urls)}".upper(),
                        f"WHAT IS THE MEANING OF THIS ARCANE SYMBOL “{random_minuscule(text)}”‽"
                        + " I RECOGNISE IT NOT!"]
                       # the following is a reference to both "The Wicker Man" and "Nethack"
                       + (['OH, NO! NOT THE `a`S! NOT THE `a`S! AAAAAHHHHH!']
                          if 'a' in text else []))
-
-    response = f"DID YOU SAY \n>>>{mutate_minuscule(text)}".upper()
 
     # check if minuscule in message, and if so, post response
     if any(c.islower() for c in text):
