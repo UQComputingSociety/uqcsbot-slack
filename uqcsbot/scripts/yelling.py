@@ -27,15 +27,15 @@ def clear_url(message: str):
     :'".,<>?«»“”‘’]))?>'''
 
     # find all urls and their starting positions respectively
-    start_positions = [(m.start(0)) for m in re.finditer(expr,message)]
-    all_urls = re.findall(expr,message)
+    start_positions = [(m.start(0)) for m in re.finditer(expr, message)]
+    all_urls = re.findall(expr, message)
 
     # create a list denoting all the urls and their starting positions in the string
     url_and_positions = []
     for i in range(len(all_urls)):
-        url_and_positions.append((start_positions[i],all_urls[i]))
+        url_and_positions.append((start_positions[i], all_urls[i]))
 
-    return (re.sub(expr, '', message).strip(),url_and_positions)
+    return (re.sub(expr, '', message).strip(), url_and_positions)
 
 
 def is_human(user):
@@ -46,7 +46,7 @@ def is_human(user):
     return user is not None and not user.is_bot
 
 
-def mutate_minuscule(message: str, urls : list) -> str:
+def mutate_minuscule(message: str, urls: list) -> str:
     """
     Randomly mutates 40% of minuscule letters to other minuscule letters
     and then inserts the original urls to their places
@@ -99,7 +99,7 @@ def yelling(event: dict):
     # ignore emoji
     text = sub(r":[\w\-\+\_']+:", lambda m: m.group(0).upper(), event['text'], flags=UNICODE)
     text = text.replace("&gt;", ">").replace("&lt;", "<").replace("&amp;", "&")
-    
+
     # find the url-clean string together with a list of urls and their starting positions
     text, urls = clear_url(text)
 
