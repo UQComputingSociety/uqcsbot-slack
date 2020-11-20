@@ -5,6 +5,8 @@ from uqcsbot import bot
 from random import choice, random
 from re import sub, UNICODE
 
+from uqcsbot.utils.patterns import URL_PATTERN
+
 
 def in_yelling(channel):
     """
@@ -22,20 +24,11 @@ def clear_url(message: str):
     returns:
         - tuple : no url message, list of urls and their starting positions
     """
-    expr = r'''<(?:(?:https?|ftp):\/\/|\b(?:[a-z\d]+\.))(?:(?:[^\s()<>]+|\((?:[^\s()<>]+
-    |(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};
-    :'".,<>?«»“”‘’]))?>'''
-
     # find all urls and their starting positions respectively
-    start_positions = [(m.start(0)) for m in re.finditer(expr, message)]
-    all_urls = re.findall(expr, message)
+    all_urls = [(m.start(0), m.group(0))
+                for m in re.finditer(URL_PATTERN, message)]
 
-    # create a list denoting all the urls and their starting positions in the string
-    url_and_positions = []
-    for i in range(len(all_urls)):
-        url_and_positions.append((start_positions[i], all_urls[i]))
-
-    return (re.sub(expr, '', message).strip(), url_and_positions)
+    return re.sub(URL_PATTERN, '', message).strip(), all_urls
 
 
 def is_human(user):
