@@ -1,6 +1,6 @@
 import re
 
-
+# Adapted from: https://gist.github.com/dperini/729294#gistcomment-1296121
 URL_PATTERN = re.compile(
     r"((?:(?:https?|ftp)://)?"
     r"(?:\S+(?::\S*)?@)?"
