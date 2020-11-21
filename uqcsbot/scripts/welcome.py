@@ -32,10 +32,10 @@ WELCOME_MESSAGES = [    # Welcome messages sent to new members
 
     "UQCS elects a leadership committee every year who also serve as our friendly Slack admins. "
     "This year's committee consists of:\n"
-    ">Madhav (<@UFB9R5QFM>), Matthew (<@U8JN3NR1C>), Bradley (<@U4AJ0EDE3>), "
-    "Alby (<@U4J1AGST1>), Sanni (<@UM55HGLUT>), Paul (<@UTYTKAB89>), "
-    "James C. (<@U1H1R3NGK>), James D. (<@U9D6J8HB8>), Kenton (<@U9LMBPJG5>), "
-    "Nick (<@U0LG4V4NN>), and Olivia (<@UA25BSPGT>).\n"
+    ">James (<@U9D6J8HB8>), Sanni (<@UM55HGLUT>), Kenton (<@U9LMBPJG5>), "
+    "Darren (<@U4B6LPU2J>), Madhav (<@UFB9R5QFM>), Matthew (<@U8JN3NR1C>), "
+    "Olivia (<@UA25BSPGT>), Paul (<@UTYTKAB89>), Sylvia (<@U01BXR5TX9T>), "
+    "Tom (<@UAGPENV96>), and Utkarsh (<@U010W5VDR36>).\n"
     "If you have any questions or need to get in touch, please reach out to them.",
 
     "We also hold heaps of events events during semester. For a list of upcoming events check "

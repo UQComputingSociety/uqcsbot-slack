@@ -9,7 +9,7 @@ from uqcsbot.utils.patterns import URL_PATTERN
 
 def in_yelling(channel: Optional[Channel]) -> bool:
     """
-    Checks that channel is #yelling. Exists for test mocking
+    Checks that channel is #yelling. Exists for test mocking.
 
     :param channel: the channel the instigating message was sent in
     :return: true if message was sent in yelling, false otherwise
@@ -96,7 +96,7 @@ def yelling(event: dict) -> None:
 
     # ensure user proper
     user = bot.users.get(event.get("user"))
-    if not is_human(user):
+    if user is None or user.is_bot:
         return
 
     # ignore emoji
