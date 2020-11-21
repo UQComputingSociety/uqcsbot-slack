@@ -107,26 +107,25 @@ def yelling(event: dict) -> None:
     text, urls = clear_url(text)
 
     # randomly select a response
-    response = choice([
-                          "WHAT’S THAT‽",
-                          "SPEAK UP!",
-                          "STOP WHISPERING!",
-                          "I CAN’T HEAR YOU!",
-                          "I THOUGHT I HEARD SOMETHING!",
-                          "I CAN’T UNDERSTAND YOU WHEN YOU MUMBLE!",
-                          "YOU’RE GONNA NEED TO BE LOUDER!",
-                          "WHY ARE YOU SO QUIET‽",
-                          "QUIET PEOPLE SHOULD BE DRAGGED OUT INTO THE STREET AND SHOT!",
-                          "PLEASE USE YOUR OUTSIDE VOICE!",
-                          "IT’S ON THE LEFT OF THE “A” KEY!",
-                          "FORMER PRESIDENT THEODORE ROOSEVELT’S FOREIGN POLICY IS A SHAM!",
-                          "#YELLING IS FOR EXTERNAL SCREAMING!"
-                          + " (FOR INTERNAL SCREAMING, VISIT #CRIPPLINGDEPRESSION!)",
-                          ":disapproval:",
-                          ":oldmanyellsatcloud:",
-                          f"DID YOU SAY \n>>>{mutate_minuscule(text, urls)}".upper(),
-                          f"WHAT IS THE MEANING OF THIS ARCANE SYMBOL “{random_minuscule(text)}”‽"
-                          + " I RECOGNISE IT NOT!"]
+    response = choice(["WHAT’S THAT‽",
+                       "SPEAK UP!",
+                       "STOP WHISPERING!",
+                       "I CAN’T HEAR YOU!",
+                       "I THOUGHT I HEARD SOMETHING!",
+                       "I CAN’T UNDERSTAND YOU WHEN YOU MUMBLE!",
+                       "YOU’RE GONNA NEED TO BE LOUDER!",
+                       "WHY ARE YOU SO QUIET‽",
+                       "QUIET PEOPLE SHOULD BE DRAGGED OUT INTO THE STREET AND SHOT!",
+                       "PLEASE USE YOUR OUTSIDE VOICE!",
+                       "IT’S ON THE LEFT OF THE “A” KEY!",
+                       "FORMER PRESIDENT THEODORE ROOSEVELT’S FOREIGN POLICY IS A SHAM!",
+                       "#YELLING IS FOR EXTERNAL SCREAMING!"
+                       + " (FOR INTERNAL SCREAMING, VISIT #CRIPPLINGDEPRESSION!)",
+                       ":disapproval:",
+                       ":oldmanyellsatcloud:",
+                       f"DID YOU SAY \n>>>{mutate_minuscule(text, urls)}".upper(),
+                       f"WHAT IS THE MEANING OF THIS ARCANE SYMBOL “{random_minuscule(text)}”‽"
+                       + " I RECOGNISE IT NOT!"]
                       # the following is a reference to both "The Wicker Man" and "Nethack"
                       + (['OH, NO! NOT THE `a`S! NOT THE `a`S! AAAAAHHHHH!']
                          if 'a' in text else []))
