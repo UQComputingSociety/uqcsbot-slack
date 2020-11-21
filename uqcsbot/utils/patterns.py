@@ -17,5 +17,5 @@ URL_PATTERN = re.compile(
     r"(?:\.(?:[a-z\u00a1-\uffff]{2,}))"
     r")"
     r"(?::\d{2,5})?"
-    r"(?:/\S*)?)"
-    , re.UNICODE)
+    r"(?:/\S*)?)",
+    re.UNICODE)
