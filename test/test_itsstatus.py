@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 GOOD_MESSAGE = ("```Title: Routine server maintenence for Jac Production.\n"
                 + "GITF (Global IT Factory is the Vendor) / Jac will be conducting routine server"
-                + "maintenance and this requires downtime.\n"
+                + " maintenance and this requires downtime.\n"
                 + "Reason: Hardening production services based on Oracle recommendations to apply"
                 + " updated privileges to system accounts for Oracle cloud object storage.  GITF"
                 + " have tested the change and implemented the configuration on other client"
