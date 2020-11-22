@@ -5,8 +5,11 @@ from datetime import datetime
 from random import choice
 from requests.exceptions import RequestException
 import requests
+import csv
+from typing import List
 
-HOLIDAY_URL = 'https://www.timeanddate.com/holidays/fun/'
+HOLIDAY_URL = "https://www.timeanddate.com/holidays/fun/"
+HOLIDAY_CSV_PATH = "uqcsbot/static/geek_holidays.csv"
 
 
 class Holiday:
@@ -48,14 +51,15 @@ def get_holiday() -> Holiday:
     if holiday_page is None:
         return None
 
+    geek_holidays = get_holidays_from_csv()
     holidays = get_holidays_from_page(holiday_page)
 
-    holidays_today = [holiday for holiday in holidays if holiday.is_today()]
+    holidays_today = [holiday for holiday in holidays + geek_holidays if holiday.is_today()]
 
     return choice(holidays_today) if holidays_today else None
 
 
-def get_holidays_from_page(holiday_page) -> list:
+def get_holidays_from_page(holiday_page) -> List[Holiday]:
     """
     Strips results from html page
     """
@@ -72,6 +76,21 @@ def get_holidays_from_page(holiday_page) -> list:
         date = datetime.strptime(date_string, '%d %b')
         holiday = Holiday(date, description, url)
         holidays.append(holiday)
+
+    return holidays
+
+
+def get_holidays_from_csv() -> List[Holiday]:
+    """
+    Returns list of holiday objects, one for each holiday in csv file
+    csv rows in format: date,description,link
+    """
+    holidays = []
+    with open(HOLIDAY_CSV_PATH, "r") as csvfile:
+        for row in csv.reader(csvfile):
+            date = datetime.strptime(row[0], "%d %b")
+            holiday = Holiday(date, row[1], row[2])
+            holidays.append(holiday)
 
     return holidays
 
