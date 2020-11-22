@@ -1,6 +1,7 @@
 import datetime
 import requests
 import feedparser
+import re
 from urllib.parse import quote
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
@@ -50,7 +51,15 @@ def get_latest() -> str:
     :return: the URL to the latest xkcd comic.
     """
     rss = feedparser.parse(XKCD_RSS_URL)
-    latest = rss['entries'][0]['guid']
+    entries = rss['entries']
+    if len(entries) > 0:
+        i = 0
+        latest = entries[i]['guid']
+        if not re.match(r"https://xkcd\.com/\d+/", latest):
+            i += 1
+            latest = entries[i]['guid']
+    else:
+        latest = 'https://xkcd.com/2200/'
     return latest
 
 
