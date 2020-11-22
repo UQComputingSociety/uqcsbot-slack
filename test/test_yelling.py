@@ -1,6 +1,8 @@
-from test.conftest import MockUQCSBot, TEST_CHANNEL_ID, TEST_USER_ID
-from unittest.mock import patch
+from time import sleep
 from typing import Mapping, TypeVar, Generator, Any, List
+from unittest.mock import patch
+
+from test.conftest import MockUQCSBot, TEST_CHANNEL_ID, TEST_USER_ID
 
 T = TypeVar('T', bound=Mapping[str, Any])
 
@@ -21,6 +23,10 @@ def filter_valid_lowercases(msgs: List[T]) -> Generator[T, None, None]:
         if msg == 'OH, NO! NOT THE `a`S! NOT THE `a`S! AAAAAHHHHH!':
             continue
         yield msg
+
+
+def count_messages(uqcsbot: MockUQCSBot):
+    return len(list(uqcsbot.test_messages.get(TEST_CHANNEL_ID)))
 
 
 def count_lowercase_msgs(uqcsbot):
@@ -99,8 +105,9 @@ def test_thread_blatant_minuscule(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 1
     thread = float(uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])[-1].get('ts', 0))
-    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute",
-                         reply_broadcast=True, thread_ts=thread, user=TEST_USER_ID)
+    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute", reply_broadcast=True, thread_ts=thread,
+                         user=TEST_USER_ID)
+    sleep(1)
     assert count_lowercase_msgs(uqcsbot) == 3
 
 
@@ -115,3 +122,22 @@ def test_thread_blatant_majuscule(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "WINTERMUTE",
                          reply_broadcast=True, thread_ts=thread, user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 2
+
+
+@patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: True)
+def test_url(uqcsbot: MockUQCSBot):
+    """
+    Test that URLs are not detected as talking quietly.
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "Hoogle", user=TEST_USER_ID)
+    assert count_messages(uqcsbot) == 2
+    uqcsbot.post_message(TEST_CHANNEL_ID, "hoogle.haskell.org/", user=TEST_USER_ID)
+    assert count_messages(uqcsbot) == 3
+    thread = float(uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])[-1].get('ts', 0))
+    uqcsbot.post_message(TEST_CHANNEL_ID, "https://google.com",
+                         reply_broadcast=True,
+                         thread_ts=thread,
+                         user=TEST_USER_ID)
+    assert count_messages(uqcsbot) == 4
+    uqcsbot.post_message(TEST_CHANNEL_ID, "<https://google.com|google.com>", user=TEST_USER_ID)
+    assert count_messages(uqcsbot) == 5
