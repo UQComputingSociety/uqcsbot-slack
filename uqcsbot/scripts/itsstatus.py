@@ -4,7 +4,8 @@ from requests.exceptions import RequestException
 from bs4 import BeautifulSoup
 from uqcsbot.utils.command_utils import loading_status
 
-ITS_SERVICE_UPDATES_URL = "https://my.uq.edu.au/information-and-services/information-technology/it-service-updates"
+ITS_SERVICE_UPDATES_URL = "https://my.uq.edu.au/information-and-services" + \
+    "/information-technology/it-service-updates"
 
 
 ERROR_MESSAGE = "I tried to get service updates but I failed. Error with HTTP Request."
@@ -37,7 +38,7 @@ def handle_itsstatus(command: Command):
 def get_its_service_updates():
     updates_html = get_updates_page()
 
-    if updates_html == None:
+    if updates_html is None:
         return None
 
     return get_updates_from_page(updates_html)
@@ -60,7 +61,11 @@ def get_updates_from_page(updates_page):
         end_date = div.select(".service-view__event-end-date")[0].get_text()
 
         update_items.append(
-            {"title": title, "status": status, "details": details, "start_date": start_date, "end_date": end_date})
+            {"title": title,
+             "status": status,
+             "details": details,
+             "start_date": start_date,
+             "end_date": end_date})
 
     return update_items
 
