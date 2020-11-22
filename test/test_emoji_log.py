@@ -9,6 +9,11 @@ def test_emoji_log(uqcsbot: MockUQCSBot):
     Test !emoji_log for a member adding or removing emoji.
     """
     events = [
+        # next event triggers the channel_log function,
+        # and so a #uqcs-meta channel needs to exist to post to
+        generate_event_object(MESSAGE_TYPE_CHANNEL_CREATED,
+                              channel={'id': 'uqcs-meta', 'name': 'uqcs-meta',
+                                       'is_public': True}),
         generate_event_object(MESSAGE_TYPE_CHANNEL_CREATED,
                               channel={'id': 'emoji-request', 'name': 'emoji-request',
                                        'is_public': True}),

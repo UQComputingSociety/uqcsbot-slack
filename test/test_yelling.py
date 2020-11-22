@@ -1,4 +1,4 @@
-from test.conftest import MockUQCSBot, TEST_CHANNEL_ID
+from test.conftest import MockUQCSBot, TEST_CHANNEL_ID, TEST_USER_ID
 from unittest.mock import patch
 from typing import Mapping, TypeVar, Generator, Any, List
 
@@ -30,92 +30,88 @@ def count_lowercase_msgs(uqcsbot):
 
 
 @patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: True)
-@patch("uqcsbot.scripts.yelling.is_human", new=lambda chan: True)
 def test_minuscule(uqcsbot: MockUQCSBot):
     """
     test minuscule string
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 2
 
 
 @patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: True)
-@patch("uqcsbot.scripts.yelling.is_human", new=lambda chan: True)
 def test_majuscule(uqcsbot: MockUQCSBot):
     """
     test majuscule string
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "WINTERMUTE")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "WINTERMUTE", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 1
 
 
 @patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: True)
-@patch("uqcsbot.scripts.yelling.is_human", new=lambda chan: True)
 def test_mixed(uqcsbot: MockUQCSBot):
     """
     test mixed case string
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "wiNTErMUTe")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "wiNTErMUTe", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 2
 
 
 @patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: False)
-@patch("uqcsbot.scripts.yelling.is_human", new=lambda chan: True)
 def test_channel(uqcsbot: MockUQCSBot):
     """
     tests outside of #yeling
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 1
 
 
 @patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: True)
-@patch("uqcsbot.scripts.yelling.is_human", new=lambda chan: True)
 def test_thread_discreet_minuscule(uqcsbot: MockUQCSBot):
     """
     test minuscule string reply to thread
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 1
     thread = float(uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])[-1].get('ts', 0))
-    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute", reply_broadcast=False, thread_ts=thread)
+    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute",
+                         reply_broadcast=False, thread_ts=thread, user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 3
 
 
 @patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: True)
-@patch("uqcsbot.scripts.yelling.is_human", new=lambda chan: True)
 def test_thread_discreet_majuscule(uqcsbot: MockUQCSBot):
     """
     test majuscule string reply to thread
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 1
     thread = float(uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])[-1].get('ts', 0))
-    uqcsbot.post_message(TEST_CHANNEL_ID, "WINTERMUTE", reply_broadcast=False, thread_ts=thread)
+    uqcsbot.post_message(TEST_CHANNEL_ID, "WINTERMUTE",
+                         reply_broadcast=False, thread_ts=thread, user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 2
 
 
 @patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: True)
-@patch("uqcsbot.scripts.yelling.is_human", new=lambda chan: True)
 def test_thread_blatant_minuscule(uqcsbot: MockUQCSBot):
     """
     test minuscule string reply to thread and channel
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 1
     thread = float(uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])[-1].get('ts', 0))
-    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute", reply_broadcast=True, thread_ts=thread)
+    uqcsbot.post_message(TEST_CHANNEL_ID, "wintermute",
+                         reply_broadcast=True, thread_ts=thread, user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 3
 
 
 @patch("uqcsbot.scripts.yelling.in_yelling", new=lambda chan: True)
-@patch("uqcsbot.scripts.yelling.is_human", new=lambda chan: True)
 def test_thread_blatant_majuscule(uqcsbot: MockUQCSBot):
     """
     test majuscule string reply to thread and channel
     """
-    uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER")
+    uqcsbot.post_message(TEST_CHANNEL_ID, "NEUROMANCER", user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 1
     thread = float(uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])[-1].get('ts', 0))
-    uqcsbot.post_message(TEST_CHANNEL_ID, "WINTERMUTE", reply_broadcast=True, thread_ts=thread)
+    uqcsbot.post_message(TEST_CHANNEL_ID, "WINTERMUTE",
+                         reply_broadcast=True, thread_ts=thread, user=TEST_USER_ID)
     assert count_lowercase_msgs(uqcsbot) == 2
