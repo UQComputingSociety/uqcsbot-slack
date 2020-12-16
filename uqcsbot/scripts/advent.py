@@ -1,11 +1,12 @@
+from types import FunctionType
 from uqcsbot import bot, Command
 from uqcsbot.api import Channel
 from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 
 from argparse import ArgumentError, ArgumentParser, Namespace
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from requests.exceptions import RequestException
-from typing import Dict, List
+from typing import Any, Callable, Dict, List
 import os
 import requests
 
@@ -15,10 +16,12 @@ SESSION_ID = os.environ["AOC_SESSION_ID"]
 UQCS_LEADERBOARD = 989288
 
 ADVENT_DAYS = list(range(1, 25 + 1))
+EST_TIMEZONE = timezone(timedelta(hours=-5))
 
 SORT_PART_1 = 'p1'
 SORT_PART_2 = 'p2'
 SORT_DELTA = 'delta'
+
 
 
 class Member:
@@ -26,26 +29,36 @@ class Member:
         self.name = name
         self.score = score
         self.stars = stars
-        self.day_times = {d: [] for d in ADVENT_DAYS}
+        self.day_times = {d: {} for d in ADVENT_DAYS}
         self.day_deltas = {d: None for d in ADVENT_DAYS}
     
     @classmethod 
-    def from_member_data(cls, data):
+    def from_member_data(cls, data: Dict):
         member = cls(data['name'], data['local_score'], data['stars'])
 
         for day, day_data in data['completion_day_level'].items():
             day = int(day)
-            # sort so part 1 is added before part 2
-            for star, star_data in sorted(day_data.items()):
-                star = int(star)
-                member.day_times[day].append(
-                    datetime.fromtimestamp(int(star_data['get_star_ts'])))
+            day_times = member.day_times[day]
 
-                if star == 2:
-                    part_1, part_2 = member.day_times[day]
-                    member.day_deltas[day] = part_2 - part_1
+            for star, star_data in day_data.items():
+                star = int(star)
+                day_times[star] = int(star_data['get_star_ts'])
+
+            if len(day_times) == 2:
+                part_1, part_2 = sorted(day_times.values())
+                member.day_deltas[day] = part_2 - part_1
 
         return member
+
+    @staticmethod 
+    def sort_key(sort, day) -> Callable[['Member'], Any]:
+        if sort == SORT_PART_2:
+            return lambda m: m.day_times[day].get(2)
+        elif sort == SORT_PART_1:
+            return lambda m: m.day_times[day].get(1)
+        elif  sort == SORT_DELTA:
+            return lambda m: m.day_deltas[day]
+        assert False
 
 def parse_arguments(channel: Channel, argv: List[str]) -> Namespace:
     parser = ArgumentParser('!advent', add_help=False)
@@ -60,7 +73,7 @@ def parse_arguments(channel: Channel, argv: List[str]) -> Namespace:
                         help='Year of leaderboard (default: current year)')
     parser.add_argument('-c', '--code', type=int, default=UQCS_LEADERBOARD,
                         help='Leaderboard code (default: UQCS leaderboard)')
-    parser.add_argument('-s', '--sort', 
+    parser.add_argument('-s', '--sort', default=SORT_PART_2,
                         choices=(SORT_PART_1, SORT_PART_2, SORT_DELTA),
                         help='Sorting method when displaying one day ' + 
                             '(default: part 2 completion time)')
@@ -87,6 +100,7 @@ def star_char(num_stars: int):
     assert False
 
 def format_full_leaderboard(members: List[Member]) -> str:
+    # 1)  751 ****************          Cameron Aavik
     def format_member(i: int, m: Member):
         stars = ''.join(star_char(len(m.day_times[d])) for d in ADVENT_DAYS)
         return f'{i:>3}) {m.score:>4} {stars} {m.name}'
@@ -95,7 +109,36 @@ def format_full_leaderboard(members: List[Member]) -> str:
     header = (left_pad + '         1111111111222222\n' 
         + left_pad + '1234567890123456789012345\n')
 
+
     return header + '\n'.join(format_member(i+1, m) for i, m in enumerate(members))
+
+
+def format_day_leaderboard(members: List[Member], year: int, day: int) -> str:
+    DAY_START = int(datetime(year, 12, day, tzinfo=EST_TIMEZONE).timestamp())
+
+    def format_seconds(seconds: int):
+        if not seconds: 
+            return ''
+        delta = timedelta(seconds=seconds)
+        if delta > timedelta(hours=24):
+            return '>24h'
+        return str(delta)
+
+    def format_timestamp(t: int):
+        return format_seconds(t - DAY_START) if t else ''
+
+    #  1) 00:00:00 00:00:00  00:00:00  Name
+    def format_member(i: int, m: Member):
+        part_1 = format_timestamp(m.day_times[day].get(1))
+        part_2 = format_timestamp(m.day_times[day].get(2))
+        delta = format_seconds(m.day_deltas[day])
+        return f'{i:>3}) {part_1:>8} {part_2:>8}  {delta:>8}  {m.name}'
+
+    header = '      Part 1   Part 2     Delta \n'
+    return header + '\n'.join(format_member(i+1, m) for i, m in enumerate(members))
+
+def sort_none_last(key):
+    return lambda x: (key(x) is None, key(x))
 
 
 @bot.on_command("advent")
@@ -121,13 +164,17 @@ def advent(command: Command) -> None:
             'Check the leaderboard code, year, and day.')
         raise
     members = [Member.from_member_data(data) for data in leaderboard["members"].values()]
-    message = '**:star: Advent of Code Leaderboard :trophy:**'
+    message = ':star: *Advent of Code Leaderboard* :trophy:'
 
     if not args.day: 
         members.sort(key=lambda m: (m.score, m.stars), reverse=True)
         message += "\n```\n" + format_full_leaderboard(members) + "```"
     else:
+        members = [m for m in members if m.day_times[args.day]]
+        members.sort(key=sort_none_last(Member.sort_key(args.sort, args.day)))
         message += f' (Day {args.day})\n'
+        message += "\n```\n" \
+            + format_day_leaderboard(members, args.year, args.day) + "```"
 
     bot.post_message(command.channel_id, message)
 
