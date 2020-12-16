@@ -22,6 +22,11 @@ SORT_PART_1 = 'p1'
 SORT_PART_2 = 'p2'
 SORT_DELTA = 'delta'
 
+SORT_LABELS = {
+    SORT_PART_1: 'part 1 completion',
+    SORT_PART_2: 'part 2 completion',
+    SORT_DELTA: 'time delta',
+}
 
 
 class Member:
@@ -64,7 +69,7 @@ def parse_arguments(channel: Channel, argv: List[str]) -> Namespace:
     parser = ArgumentParser('!advent', add_help=False)
 
     def usage_error(message, *args, **kwargs):
-        raise ArgumentError(None, message)
+        raise UsageSyntaxException(message)
 
     parser.add_argument('day', type=int, default=0, nargs='?',
                         help='Show leaderboard for specific day ' + 
@@ -85,8 +90,7 @@ def parse_arguments(channel: Channel, argv: List[str]) -> Namespace:
     args = parser.parse_args(argv.split())
     
     if args.help:
-        bot.post_message(channel, parser.format_help())
-        return None
+        raise UsageSyntaxException(parser.format_help())
 
     return args
 
@@ -149,10 +153,13 @@ def advent(command: Command) -> None:
     """
     channel = bot.channels.get(command.channel_id, use_cache=False)
     
+    def reply(message):
+        bot.post_message(channel, message, thread_ts=command.thread_ts)
+
     try:
         args = parse_arguments(channel, command.arg if command.has_arg() else '')
-    except ArgumentError as error:
-        bot.post_message(channel, error.message)
+    except UsageSyntaxException as error:
+        reply(str(error))
         args = None
     if not args:
         return
@@ -160,7 +167,7 @@ def advent(command: Command) -> None:
     try:
         leaderboard = get_leaderboard(args.year, args.code)
     except ValueError:
-        bot.post_message(channel, 'Error fetching leaderboard data. ' 
+        reply('Error fetching leaderboard data. ' 
             'Check the leaderboard code, year, and day.')
         raise
     members = [Member.from_member_data(data) for data in leaderboard["members"].values()]
@@ -172,11 +179,12 @@ def advent(command: Command) -> None:
     else:
         members = [m for m in members if m.day_times[args.day]]
         members.sort(key=sort_none_last(Member.sort_key(args.sort, args.day)))
-        message += f' (Day {args.day})\n'
+
+        message += f'\n:calendar: *Day {args.day}* (sorted by {SORT_LABELS[args.sort]})\n'
         message += "\n```\n" \
             + format_day_leaderboard(members, args.year, args.day) + "```"
 
-    bot.post_message(command.channel_id, message)
+    reply(message)
 
 
 def get_leaderboard(year: int, code: int) -> Dict:
