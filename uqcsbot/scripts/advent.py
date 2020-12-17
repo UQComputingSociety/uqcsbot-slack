@@ -13,7 +13,7 @@ import requests
 # Leaderboard API URL with placeholders for year and code.
 LEADERBOARD_URL = 'https://adventofcode.com/{year}/leaderboard/private/view/{code}.json'
 # Session cookie (will expire in approx 30 days).
-SESSION_ID = os.environ['AOC_SESSION_ID']
+SESSION_ID = os.environ.get('AOC_SESSION_ID')
 # UQCS leaderboard ID.
 UQCS_LEADERBOARD = 989288
 
