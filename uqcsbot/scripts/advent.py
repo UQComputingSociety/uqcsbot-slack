@@ -32,6 +32,7 @@ class SortMode(Enum):
     def __str__(self):
         return self.value  # needed so --help prints string values
 
+
 # Map of sorting options to friendly name.
 SORT_LABELS = {
     SortMode.PART_1: 'part 1 completion',
@@ -74,7 +75,7 @@ class Member:
     def from_member_data(cls, data: Dict, year: int, day: Optional[int] = None) -> 'Member':
         """
         Constructs a Member from the API response.
-        
+
         Times and delta are calculated for the given year and day.
         """
 
@@ -96,7 +97,7 @@ class Member:
             if len(times) == 2:
                 part_1, part_2 = sorted(times.values())
                 member.all_deltas[d] = part_2 - part_1
-        
+
         # if day is specified, save that day's information into the day_ fields.
         if day:
             member.day = day
@@ -220,10 +221,13 @@ def format_advent_leaderboard(members: List[Member], full: bool, sort: SortMode)
 
 
 def parse_arguments(argv: List[str]) -> Namespace:
+    """
+    Parses !advent arguments from the given list.
 
-    sort_choices = tuple(
-        x.value for x in (SortMode.PART_1, SortMode.PART_2, SortMode.DELTA))
-
+    Returns namespace with argument values or throws UsageSyntaxException.
+    If an exception is thrown, its message should be shown to the user and
+    execution should NOT continue.
+    """
     parser = ArgumentParser('!advent', add_help=False)
 
     parser.add_argument('day', type=int, default=0, nargs='?',
@@ -234,7 +238,7 @@ def parse_arguments(argv: List[str]) -> Namespace:
     parser.add_argument('-c', '--code', type=int, default=UQCS_LEADERBOARD,
                         help='Leaderboard code (default: UQCS leaderboard)')
     parser.add_argument('-s', '--sort', default=SortMode.PART_2, type=SortMode,
-                        choices=(SortMode.PART_1, SortMode.PART_2, SortMode.DELTA), 
+                        choices=(SortMode.PART_1, SortMode.PART_2, SortMode.DELTA),
                         help='Sorting method when displaying one day ' +
                         '(default: part 2 completion time)')
     parser.add_argument('-h', '--help', action='store_true',
