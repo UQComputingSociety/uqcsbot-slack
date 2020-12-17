@@ -28,6 +28,9 @@ SORT_LABELS = {
     SORT_DELTA: 'time delta',
 }
 
+def sort_none_last(key):
+    return lambda x: (key(x) is None, key(x))
+
 
 class Member:
     def __init__(self, name: str, score: int, stars: int) -> None:
@@ -58,12 +61,14 @@ class Member:
     @staticmethod 
     def sort_key(sort, day) -> Callable[['Member'], Any]:
         if sort == SORT_PART_2:
-            return lambda m: m.day_times[day].get(2)
+            key = lambda m: m.day_times[day].get(2)
         elif sort == SORT_PART_1:
-            return lambda m: m.day_times[day].get(1)
+            key = lambda m: m.day_times[day].get(1)
         elif  sort == SORT_DELTA:
-            return lambda m: m.day_deltas[day]
-        assert False
+            key = lambda m: m.day_deltas[day]
+        else:
+            assert False
+        return sort_none_last(key)
 
 def parse_arguments(channel: Channel, argv: List[str]) -> Namespace:
     parser = ArgumentParser('!advent', add_help=False)
@@ -141,8 +146,21 @@ def format_day_leaderboard(members: List[Member], year: int, day: int) -> str:
     header = '      Part 1   Part 2     Delta \n'
     return header + '\n'.join(format_member(i+1, m) for i, m in enumerate(members))
 
-def sort_none_last(key):
-    return lambda x: (key(x) is None, key(x))
+def format_advent_reply(members, year: int, day: int, sort):
+    message = ':star: *Advent of Code Leaderboard* :trophy:'
+
+    if not day: 
+        members.sort(key=lambda m: (m.score, m.stars), reverse=True)
+        message += "\n```\n" + format_full_leaderboard(members) + "```"
+    else:
+        members = [m for m in members if m.day_times[day]]
+        members.sort(key=Member.sort_key(sort, day))
+
+        message += f'\n:calendar: *Day {day}* (sorted by {SORT_LABELS[sort]})\n'
+        message += "\n```\n" \
+            + format_day_leaderboard(members, year, day) + "```"
+
+    return message
 
 
 @bot.on_command("advent")
@@ -171,19 +189,8 @@ def advent(command: Command) -> None:
             'Check the leaderboard code, year, and day.')
         raise
     members = [Member.from_member_data(data) for data in leaderboard["members"].values()]
-    message = ':star: *Advent of Code Leaderboard* :trophy:'
-
-    if not args.day: 
-        members.sort(key=lambda m: (m.score, m.stars), reverse=True)
-        message += "\n```\n" + format_full_leaderboard(members) + "```"
-    else:
-        members = [m for m in members if m.day_times[args.day]]
-        members.sort(key=sort_none_last(Member.sort_key(args.sort, args.day)))
-
-        message += f'\n:calendar: *Day {args.day}* (sorted by {SORT_LABELS[args.sort]})\n'
-        message += "\n```\n" \
-            + format_day_leaderboard(members, args.year, args.day) + "```"
-
+    message = format_advent_reply(members, args.year, args.day, args.sort)
+    
     reply(message)
 
 
