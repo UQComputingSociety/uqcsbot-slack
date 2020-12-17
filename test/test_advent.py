@@ -1,6 +1,6 @@
 import json
 from typing import List
-from uqcsbot.scripts.advent import Member, SORT_DELTA, SORT_PART_1, SORT_PART_2, SORT_SCORE, format_day_leaderboard, format_full_leaderboard
+from uqcsbot.scripts.advent import Member, SORT_DELTA, SORT_PART_1, SORT_PART_2, SORT_SCORE, format_advent_leaderboard, format_day_leaderboard, format_full_leaderboard
 
 with open('./advent_test_data.json', encoding='utf-8') as f:
     ADVENT_TEST_DATA = json.load(f)
@@ -60,9 +60,23 @@ def test_advent_leaderboard_formats():
 
     assert format_full_leaderboard([jason]) == \
         '  1)  282 ******.**..    *          Jason Hassell'
-    assert format_day_leaderboard([jason]) == \
+    assert format_day_leaderboard([jason], 1) == \
         '  1)  0:50:48  0:53:04   0:02:16  Jason Hassell'
 
+    matt = [m for m in members if m.name == 'Matthew Low'][0]
+    assert format_day_leaderboard([matt], 16) == \
+        '  1)  0:45:03                     Matthew Low'
+
+def test_advent_day_leaderboard_filters():
+    """
+    Day leaderboards should only contain users who have finished at least
+    part 1.
+    """
+    members = [Member.from_member_data(m) 
+        for m in ADVENT_TEST_DATA['members'].values()]
+
+    assert 'Jason Hassell' not in format_advent_leaderboard(
+        members, 16, SORT_PART_2)
 
 def test_advent_member_sort():
     """
