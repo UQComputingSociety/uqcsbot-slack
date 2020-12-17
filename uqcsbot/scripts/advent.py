@@ -109,7 +109,9 @@ def star_char(num_stars: int):
     assert False
 
 def format_full_leaderboard(members: List[Member]) -> str:
-    # 1)  751 ****************          Cameron Aavik
+    #  3     4                        25
+    #|-|  |--| |-----------------------|
+    #  1)  751 ****************          Name
     def format_member(i: int, m: Member):
         stars = ''.join(star_char(len(m.day_times[d])) for d in ADVENT_DAYS)
         return f'{i:>3}) {m.score:>4} {stars} {m.name}'
@@ -117,7 +119,6 @@ def format_full_leaderboard(members: List[Member]) -> str:
     left_pad = ' ' * (3 + 2 + 4 + 1) # chars before stars start
     header = (left_pad + '         1111111111222222\n' 
         + left_pad + '1234567890123456789012345\n')
-
 
     return header + '\n'.join(format_member(i+1, m) for i, m in enumerate(members))
 
@@ -136,31 +137,29 @@ def format_day_leaderboard(members: List[Member], year: int, day: int) -> str:
     def format_timestamp(t: int):
         return format_seconds(t - DAY_START) if t else ''
 
-    #  1) 00:00:00 00:00:00  00:00:00  Name
+    #  3         8        8         8
+    #|-|  |------| |------|  |------|
+    #      Part 1   Part 2     Delta 
+    #  1)  0:00:00  0:00:00   0:00:00  Name 1
+    #  2)     >24h     >24h      >24h  Name 2
     def format_member(i: int, m: Member):
         part_1 = format_timestamp(m.day_times[day].get(1))
         part_2 = format_timestamp(m.day_times[day].get(2))
         delta = format_seconds(m.day_deltas[day])
         return f'{i:>3}) {part_1:>8} {part_2:>8}  {delta:>8}  {m.name}'
 
-    header = '      Part 1   Part 2     Delta \n'
+    header = '       Part 1   Part 2     Delta\n'
     return header + '\n'.join(format_member(i+1, m) for i, m in enumerate(members))
 
-def format_advent_reply(members, year: int, day: int, sort):
-    message = ':star: *Advent of Code Leaderboard* :trophy:'
-
+def format_advent_leaderboard(members, year: int, day: int, sort):
     if not day: 
         members.sort(key=lambda m: (m.score, m.stars), reverse=True)
-        message += "\n```\n" + format_full_leaderboard(members) + "```"
+        return format_full_leaderboard(members)
     else:
         members = [m for m in members if m.day_times[day]]
         members.sort(key=Member.sort_key(sort, day))
 
-        message += f'\n:calendar: *Day {day}* (sorted by {SORT_LABELS[sort]})\n'
-        message += "\n```\n" \
-            + format_day_leaderboard(members, year, day) + "```"
-
-    return message
+        return format_day_leaderboard(members, year, day)
 
 
 @bot.on_command("advent")
@@ -189,9 +188,22 @@ def advent(command: Command) -> None:
             'Check the leaderboard code, year, and day.')
         raise
     members = [Member.from_member_data(data) for data in leaderboard["members"].values()]
-    message = format_advent_reply(members, args.year, args.day, args.sort)
+    message = f':star: *Advent of Code Leaderboard {args.code}* :trophy:'
+    if args.day:
+        message += (
+            f'\n:calendar: *Day {args.day}* ' 
+            f'(sorted by {SORT_LABELS[args.sort]})'
+        )
     
-    reply(message)
+    bot.api.files.upload(
+        initial_comment=message,
+        content=format_advent_leaderboard(
+            members, args.year, args.day, args.sort),
+        title=f'advent_{args.code}_{args.year}_{args.day}.txt',
+        filetype='text',
+        channels=channel.id,
+        thread_ts=command.thread_ts
+    )
 
 
 def get_leaderboard(year: int, code: int) -> Dict:
