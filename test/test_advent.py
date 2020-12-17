@@ -1,6 +1,6 @@
 import json
 from typing import List
-from uqcsbot.scripts.advent import Member, SORT_DELTA, SORT_PART_1, SORT_PART_2, SORT_SCORE, format_advent_leaderboard, format_day_leaderboard, format_full_leaderboard
+from uqcsbot.scripts.advent import Member, SortMode, format_advent_leaderboard, format_day_leaderboard, format_full_leaderboard
 
 with open('./test/advent_test_data.json', encoding='utf-8') as f:
     ADVENT_TEST_DATA = json.load(f)
@@ -44,13 +44,13 @@ def test_advent_member_sort_day():
     members = [Member.from_member_data(m, 2020) 
         for m in ADVENT_TEST_DATA['members'].values()]
 
-    members.sort(key=Member.sort_key(SORT_PART_1, 1))
+    members.sort(key=Member.sort_key(SortMode.PART_1, 1))
     assert _names(members[:3]) == ['Cameron Aavik', 'rowboat1', 'kentonlam']
     
-    members.sort(key=Member.sort_key(SORT_PART_2, 1))
+    members.sort(key=Member.sort_key(SortMode.PART_2, 1))
     assert _names(members[:3]) == ['Cameron Aavik', 'rowboat1', 'bradleysigma']
 
-    members.sort(key=Member.sort_key(SORT_DELTA, 1))
+    members.sort(key=Member.sort_key(SortMode.DELTA, 1))
     assert _names(members[:3]) == \
         ['Matthew Low', 'Cameron Aavik', 'bradleysigma']
 
@@ -80,7 +80,7 @@ def test_advent_day_leaderboard_filters():
         for m in ADVENT_TEST_DATA['members'].values()]
 
     assert 'Jason Hassell' not in format_advent_leaderboard(
-        members, 17, SORT_PART_2)
+        members, 17, SortMode.PART_2)
 
 def test_advent_member_sort():
     """
@@ -95,6 +95,6 @@ def test_advent_member_sort():
             Member('foxtrot', 10, 10),
             Member('charlie', 20, 20),
             Member('echo', 10, 40)]
-    members.sort(key=Member.sort_key(SORT_SCORE))
+    members.sort(key=Member.sort_key(SortMode.SCORE))
 
     assert [member.name for member in members] == sorted_names

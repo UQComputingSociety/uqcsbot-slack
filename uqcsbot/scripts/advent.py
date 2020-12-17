@@ -6,7 +6,8 @@ from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 from argparse import ArgumentError, ArgumentParser, Namespace
 from datetime import datetime, timedelta, timezone
 from requests.exceptions import RequestException
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable, Dict, List, Optional, Union
+from enum import Enum
 import os
 import requests
 
@@ -22,19 +23,18 @@ ADVENT_DAYS = list(range(1, 25 + 1))
 # Puzzles are unlocked at midnight EST.
 EST_TIMEZONE = timezone(timedelta(hours=-5))
 
-# String constants used to specify sorting options as arguments.
-SORT_PART_1 = 'p1'
-SORT_PART_2 = 'p2'
-SORT_DELTA = 'delta'
-SORT_SCORE = 'score' # SORT_SCORE is not exposed to user
-
-SortOption = Union[SORT_PART_1, SORT_PART_2, SORT_DELTA, SORT_SCORE]
+class SortMode(Enum):
+    """Options for sorting the leaderboard."""
+    PART_1 = 'p1'
+    PART_2 = 'p2'
+    DELTA = 'delta'
+    SCORE = 'score' # SORT_SCORE is not shown to users
 
 # Map of sorting options to friendly name.
 SORT_LABELS = {
-    SORT_PART_1: 'part 1 completion',
-    SORT_PART_2: 'part 2 completion',
-    SORT_DELTA: 'time delta',
+    SortMode.PART_1: 'part 1 completion',
+    SortMode.PART_2: 'part 2 completion',
+    SortMode.DELTA: 'time delta',
 }
 
 
@@ -46,14 +46,22 @@ def sort_none_last(key):
     """
     return lambda x: (key(x) is None, key(x))
 
+# type aliases for documentation purposes.
+Star = int # from 1 to 25
+Day = int # 1 or 2
+Seconds = int
+DayTimes = Dict[Day, Dict[Star, Seconds]]
+DayDeltas = Dict[Day, Optional[Seconds]]
+# TODO: make these types more specific with TypedDict and Literal when possible.
 
 class Member:
     def __init__(self, name: str, score: int, stars: int) -> None:
         self.name = name
         self.score = score
         self.stars = stars
-        self.day_times = {d: {} for d in ADVENT_DAYS}
-        self.day_deltas = {d: None for d in ADVENT_DAYS}
+        # maps day to 
+        self.day_times: DayTimes = {d: {} for d in ADVENT_DAYS}
+        self.day_deltas: DayDeltas = {d: None for d in ADVENT_DAYS}
     
     @classmethod 
     def from_member_data(cls, data: Dict, year: int):
@@ -80,13 +88,13 @@ class Member:
         return member
 
     @staticmethod 
-    def sort_key(sort: SortOption, day: int=None) -> Callable[['Member'], Any]:
+    def sort_key(sort: SortMode, day: int=None) -> Callable[['Member'], Any]:
         """
         Given sort mode and day, returns a key function which sorts members
         by that option on that day.
         """
 
-        if sort == SORT_SCORE:
+        if sort == SortMode.SCORE:
             # sorts by score, then stars, descending.
             return lambda m: (-m.score, -m.stars)
         
@@ -94,11 +102,11 @@ class Member:
         assert day is not None
 
         # these key functions sort in ascending order of the specified value.
-        if sort == SORT_PART_2:
-            key = lambda m: m.day_times[day].get(2)
-        elif sort == SORT_PART_1:
+        if sort == SortMode.PART_1:
             key = lambda m: m.day_times[day].get(1)
-        elif sort == SORT_DELTA:
+        elif sort == SortMode.PART_2:
+            key = lambda m: m.day_times[day].get(2)
+        elif sort == SortMode.DELTA:
             key = lambda m: m.day_deltas[day]
         else:
             assert False
@@ -172,7 +180,7 @@ def format_day_leaderboard(members: List[Member], day: int) -> str:
 
 
 def format_advent_leaderboard(members: List[Member], 
-                              day: int, sort: SortOption) -> str:
+                              day: int, sort: SortMode) -> str:
     """
     Returns a leaderboard for the given members with the given options.
 
@@ -181,7 +189,7 @@ def format_advent_leaderboard(members: List[Member],
 
     # if no day is specified, show full leaderboard of all days
     if not day: 
-        members.sort(key=Member.sort_key(SORT_SCORE))
+        members.sort(key=Member.sort_key(SortMode.SCORE))
         return format_full_leaderboard(members)
     else:
         # filter to users who have at least one star on this day.
@@ -201,8 +209,9 @@ def parse_arguments(argv: List[str]) -> Namespace:
                         help='Year of leaderboard (default: current year)')
     parser.add_argument('-c', '--code', type=int, default=UQCS_LEADERBOARD,
                         help='Leaderboard code (default: UQCS leaderboard)')
-    parser.add_argument('-s', '--sort', default=SORT_PART_2,
-                        choices=(SORT_PART_1, SORT_PART_2, SORT_DELTA),
+    parser.add_argument('-s', '--sort', default=SortMode.PART_2,
+                        choices=(SortMode.PART_1, SortMode.PART_2, 
+                            SortMode.DELTA),
                         help='Sorting method when displaying one day ' + 
                             '(default: part 2 completion time)')
     parser.add_argument('-h', '--help', action='store_true', 
@@ -211,7 +220,7 @@ def parse_arguments(argv: List[str]) -> Namespace:
     # used to propagate usage errors out
     def usage_error(message, *args, **kwargs):
         raise UsageSyntaxException(message)
-    parser.error = usage_error
+    parser.error = usage_error # type: ignore
 
     args = parser.parse_args(argv)
     
