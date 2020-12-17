@@ -277,10 +277,6 @@ def advent(command: Command) -> None:
         reply(str(error))
         return
 
-    # do not continue if args is unset, e.g. due to --help
-    if not args:
-        return
-
     try:
         leaderboard = get_leaderboard(args.year, args.code)
     except ValueError:
