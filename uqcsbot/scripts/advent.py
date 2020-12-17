@@ -21,6 +21,7 @@ ADVENT_DAYS = list(range(1, 25 + 1))
 # Puzzles are unlocked at midnight EST.
 EST_TIMEZONE = timezone(timedelta(hours=-5))
 
+
 class SortMode(Enum):
     """Options for sorting the leaderboard."""
     PART_1 = 'p1'
@@ -59,7 +60,7 @@ class Member:
         self.name = name
         self.score = score
         self.stars = stars
-        # maps day to
+        
         self.day_times: DayTimes = {d: {} for d in ADVENT_DAYS}
         self.day_deltas: DayDeltas = {d: None for d in ADVENT_DAYS}
 
@@ -102,7 +103,7 @@ class Member:
         assert day is not None
 
         # these key functions sort in ascending order of the specified value.
-        # E731 advises using function definitions over lambdas which is unresonable here
+        # E731 advises using function definitions over lambdas which is unreasonable here
         if sort == SortMode.PART_1:
             key = lambda m: m.day_times[day].get(1)  # noqa: E731
         elif sort == SortMode.PART_2:
@@ -116,8 +117,10 @@ class Member:
 
 
 def star_char(num_stars: int):
-    """Given a number of stars (0, 1, or 2), returns its leaderboard
-    representation."""
+    """
+    Given a number of stars (0, 1, or 2), returns its leaderboard
+    representation.
+    """
     if num_stars == 0:
         return ' '
     elif num_stars == 1:
@@ -141,10 +144,10 @@ def format_full_leaderboard(members: List[Member]) -> str:
         stars = ''.join(star_char(len(m.day_times[d])) for d in ADVENT_DAYS)
         return f'{i:>3}) {m.score:>4} {stars} {m.name}'
 
-    left_pad = ' ' * (3 + 2 + 4 + 1)  # chars before stars start
+    left = ' ' * (3 + 2 + 4 + 1)  # chars before stars start
     header = (
-        left_pad + '         1111111111222222\n'
-        + left_pad + '1234567890123456789012345\n'
+        f'{left}         1111111111222222\n'
+        f'{left}1234567890123456789012345\n'
     )
 
     return header + '\n'.join(
@@ -214,8 +217,7 @@ def parse_arguments(argv: List[str]) -> Namespace:
     parser.add_argument('-c', '--code', type=int, default=UQCS_LEADERBOARD,
                         help='Leaderboard code (default: UQCS leaderboard)')
     parser.add_argument('-s', '--sort', default=SortMode.PART_2,
-                        choices=(SortMode.PART_1, SortMode.PART_2,
-                                 SortMode.DELTA),
+                        choices=(SortMode.PART_1, SortMode.PART_2, SortMode.DELTA),
                         help='Sorting method when displaying one day ' +
                         '(default: part 2 completion time)')
     parser.add_argument('-h', '--help', action='store_true',
