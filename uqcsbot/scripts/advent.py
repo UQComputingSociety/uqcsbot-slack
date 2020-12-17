@@ -26,8 +26,9 @@ EST_TIMEZONE = timezone(timedelta(hours=-5))
 SORT_PART_1 = 'p1'
 SORT_PART_2 = 'p2'
 SORT_DELTA = 'delta'
+SORT_SCORE = 'score' # SORT_SCORE is not exposed to user
 
-SortOption = Union[SORT_PART_1, SORT_PART_2, SORT_DELTA]
+SortOption = Union[SORT_PART_1, SORT_PART_2, SORT_DELTA, SORT_SCORE]
 
 # Map of sorting options to friendly name.
 SORT_LABELS = {
@@ -57,6 +58,7 @@ class Member:
     @classmethod 
     def from_member_data(cls, data: Dict):
         """Constructs a Member from the API response."""
+
         member = cls(data['name'], data['local_score'], data['stars'])
 
         for day, day_data in data['completion_day_level'].items():
@@ -74,19 +76,29 @@ class Member:
         return member
 
     @staticmethod 
-    def sort_key(sort: SortOption, day: int) -> Callable[['Member'], Any]:
+    def sort_key(sort: SortOption, day: int=None) -> Callable[['Member'], Any]:
         """
         Given sort mode and day, returns a key function which sorts members
         by that option on that day.
         """
+
+        if sort == SORT_SCORE:
+            # sorts by score, then stars, descending.
+            return lambda m: (-m.score, -m.stars)
+        
+        # if we get here, we have a day-specific sort. require day parameter.
+        assert day is not None
+
+        # these key functions sort in ascending order of the specified value.
         if sort == SORT_PART_2:
             key = lambda m: m.day_times[day].get(2)
         elif sort == SORT_PART_1:
             key = lambda m: m.day_times[day].get(1)
-        elif  sort == SORT_DELTA:
+        elif sort == SORT_DELTA:
             key = lambda m: m.day_deltas[day]
         else:
             assert False
+
         return sort_none_last(key)
 
 
@@ -168,8 +180,7 @@ def format_advent_leaderboard(
 
     # if no day is specified, show full leaderboard of all days
     if not day: 
-        # sort by score, then stars, descending.
-        members.sort(key=lambda m: (m.score, m.stars), reverse=True)
+        members.sort(key=Member.sort_key(SORT_SCORE))
         return format_full_leaderboard(members)
     else:
         # filter to users who have at least one star on this day.
@@ -201,7 +212,7 @@ def parse_arguments(argv: List[str]) -> Namespace:
         raise UsageSyntaxException(message)
     parser.error = usage_error
 
-    args = parser.parse_args(argv.split())
+    args = parser.parse_args(argv)
     
     if args.help:
         raise UsageSyntaxException('```\n' + parser.format_help() + '\n```')
@@ -222,7 +233,8 @@ def advent(command: Command) -> None:
         bot.post_message(channel, message, thread_ts=command.thread_ts)
 
     try:
-        args = parse_arguments(channel, command.arg if command.has_arg() else '')
+        args = parse_arguments(
+            command.arg.split() if command.has_arg() else [])
     except UsageSyntaxException as error:
         reply(str(error))
         return
