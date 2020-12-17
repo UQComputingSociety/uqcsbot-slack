@@ -29,6 +29,8 @@ class SortMode(Enum):
     DELTA = 'delta'
     SCORE = 'score'  # SORT_SCORE is not shown to users
 
+    def __str__(self):
+        return self.value  # needed so --help prints string values
 
 # Map of sorting options to friendly name.
 SORT_LABELS = {
@@ -48,11 +50,11 @@ def sort_none_last(key):
 
 
 # type aliases for documentation purposes.
-Star = int  # from 1 to 25
-Day = int  # 1 or 2
+Day = int  # from 1 to 25
+Star = int  # 1 or 2
 Seconds = int
-DayTimes = Dict[Day, Dict[Star, Seconds]]
-DayDeltas = Dict[Day, Optional[Seconds]]
+Times = Dict[Star, Seconds]
+Delta = Optional[Seconds]
 # TODO: make these types more specific with TypedDict and Literal when possible.
 
 class Member:
@@ -60,56 +62,68 @@ class Member:
         self.name = name
         self.score = score
         self.stars = stars
-        
-        self.day_times: DayTimes = {d: {} for d in ADVENT_DAYS}
-        self.day_deltas: DayDeltas = {d: None for d in ADVENT_DAYS}
+
+        self.all_times: Dict[Day, Times] = {d: {} for d in ADVENT_DAYS}
+        self.all_deltas: Dict[Day, Delta] = {d: None for d in ADVENT_DAYS}
+
+        self.day: Optional[Day] = None
+        self.day_times: Times = {}
+        self.day_delta: Delta = None
 
     @classmethod
-    def from_member_data(cls, data: Dict, year: int):
-        """Constructs a Member from the API response."""
+    def from_member_data(cls, data: Dict, year: int, day: Optional[int] = None) -> 'Member':
+        """
+        Constructs a Member from the API response.
+        
+        Times and delta are calculated for the given year and day.
+        """
 
         member = cls(data['name'], data['local_score'], data['stars'])
 
-        for day, day_data in data['completion_day_level'].items():
-            day = int(day)
-            day_times = member.day_times[day]
+        for d, day_data in data['completion_day_level'].items():
+            d = int(d)
+            times = member.all_times[d]
 
             # timestamp of puzzle unlock, rounded to whole seconds
             DAY_START = int(
-                datetime(year, 12, day, tzinfo=EST_TIMEZONE).timestamp())
+                datetime(year, 12, d, tzinfo=EST_TIMEZONE).timestamp())
 
             for star, star_data in day_data.items():
                 star = int(star)
-                day_times[star] = int(star_data['get_star_ts']) - DAY_START
+                times[star] = int(star_data['get_star_ts']) - DAY_START
+                assert times[star] >= 0
 
-            if len(day_times) == 2:
-                part_1, part_2 = sorted(day_times.values())
-                member.day_deltas[day] = part_2 - part_1
+            if len(times) == 2:
+                part_1, part_2 = sorted(times.values())
+                member.all_deltas[d] = part_2 - part_1
+        
+        # if day is specified, save that day's information into the day_ fields.
+        if day:
+            member.day = day
+            member.day_times = member.all_times[day]
+            member.day_delta = member.all_deltas[day]
 
         return member
 
     @staticmethod
-    def sort_key(sort: SortMode, day: int = None) -> Callable[['Member'], Any]:
+    def sort_key(sort: SortMode) -> Callable[['Member'], Any]:
         """
-        Given sort mode and day, returns a key function which sorts members
-        by that option on that day.
+        Given sort mode, returns a key function which sorts members
+        by that option using the stored times and delta.
         """
 
         if sort == SortMode.SCORE:
             # sorts by score, then stars, descending.
             return lambda m: (-m.score, -m.stars)
 
-        # if we get here, we have a day-specific sort. require day parameter.
-        assert day is not None
-
         # these key functions sort in ascending order of the specified value.
         # E731 advises using function definitions over lambdas which is unreasonable here
         if sort == SortMode.PART_1:
-            key = lambda m: m.day_times[day].get(1)  # noqa: E731
+            key = lambda m: m.day_times.get(1)  # noqa: E731
         elif sort == SortMode.PART_2:
-            key = lambda m: m.day_times[day].get(2)  # noqa: E731
+            key = lambda m: m.day_times.get(2)  # noqa: E731
         elif sort == SortMode.DELTA:
-            key = lambda m: m.day_deltas[day]  # noqa: E731
+            key = lambda m: m.day_delta  # noqa: E731
         else:
             assert False
 
@@ -141,7 +155,7 @@ def format_full_leaderboard(members: List[Member]) -> str:
     # |-|  |--| |-----------------------|
     #   1)  751 ****************          Name
     def format_member(i: int, m: Member):
-        stars = ''.join(star_char(len(m.day_times[d])) for d in ADVENT_DAYS)
+        stars = ''.join(star_char(len(m.all_times[d])) for d in ADVENT_DAYS)
         return f'{i:>3}) {m.score:>4} {stars} {m.name}'
 
     left = ' ' * (3 + 2 + 4 + 1)  # chars before stars start
@@ -154,7 +168,7 @@ def format_full_leaderboard(members: List[Member]) -> str:
         format_member(i+1, m) for i, m in enumerate(members))
 
 
-def format_day_leaderboard(members: List[Member], day: int) -> str:
+def format_day_leaderboard(members: List[Member]) -> str:
     """
     Returns a string representing the leaderboard of the given members on
     the given day.
@@ -162,8 +176,8 @@ def format_day_leaderboard(members: List[Member], day: int) -> str:
     Full leaderboard includes rank, points, stars (per day), and username.
     """
 
-    def format_seconds(seconds: int):
-        if not seconds:
+    def format_seconds(seconds: Optional[int]) -> str:
+        if seconds is None:
             return ''
         delta = timedelta(seconds=seconds)
         if delta > timedelta(hours=24):
@@ -175,10 +189,11 @@ def format_day_leaderboard(members: List[Member], day: int) -> str:
     #       Part 1   Part 2     Delta
     #   1)  0:00:00  0:00:00   0:00:00  Name 1
     #   2)     >24h     >24h      >24h  Name 2
-    def format_member(i: int, m: Member):
-        part_1 = format_seconds(m.day_times[day].get(1))
-        part_2 = format_seconds(m.day_times[day].get(2))
-        delta = format_seconds(m.day_deltas[day])
+    def format_member(i: int, m: Member) -> str:
+        assert m.day is not None
+        part_1 = format_seconds(m.day_times.get(1))
+        part_2 = format_seconds(m.day_times.get(2))
+        delta = format_seconds(m.day_delta)
         return f'{i:>3}) {part_1:>8} {part_2:>8}  {delta:>8}  {m.name}'
 
     header = '       Part 1   Part 2     Delta\n'
@@ -186,26 +201,28 @@ def format_day_leaderboard(members: List[Member], day: int) -> str:
         format_member(i+1, m) for i, m in enumerate(members))
 
 
-def format_advent_leaderboard(members: List[Member],
-                              day: int, sort: SortMode) -> str:
+def format_advent_leaderboard(members: List[Member], full: bool, sort: SortMode) -> str:
     """
     Returns a leaderboard for the given members with the given options.
 
-    If day is non-zero, the leaderboard is for that day only.
+    If full is True, leaderboard will show progress for all days, otherwise one
+    specific day is shown.
     """
 
-    # if no day is specified, show full leaderboard of all days
-    if not day:
+    if full:
         members.sort(key=Member.sort_key(SortMode.SCORE))
         return format_full_leaderboard(members)
     else:
         # filter to users who have at least one star on this day.
-        members = [m for m in members if m.day_times[day]]
-        members.sort(key=Member.sort_key(sort, day))
-        return format_day_leaderboard(members, day)
+        members = [m for m in members if m.day_times]
+        members.sort(key=Member.sort_key(sort))
+        return format_day_leaderboard(members)
 
 
 def parse_arguments(argv: List[str]) -> Namespace:
+
+    sort_choices = tuple(
+        x.value for x in (SortMode.PART_1, SortMode.PART_2, SortMode.DELTA))
 
     parser = ArgumentParser('!advent', add_help=False)
 
@@ -216,8 +233,8 @@ def parse_arguments(argv: List[str]) -> Namespace:
                         help='Year of leaderboard (default: current year)')
     parser.add_argument('-c', '--code', type=int, default=UQCS_LEADERBOARD,
                         help='Leaderboard code (default: UQCS leaderboard)')
-    parser.add_argument('-s', '--sort', default=SortMode.PART_2,
-                        choices=(SortMode.PART_1, SortMode.PART_2, SortMode.DELTA),
+    parser.add_argument('-s', '--sort', default=SortMode.PART_2, type=SortMode,
+                        choices=(SortMode.PART_1, SortMode.PART_2, SortMode.DELTA), 
                         help='Sorting method when displaying one day ' +
                         '(default: part 2 completion time)')
     parser.add_argument('-h', '--help', action='store_true',
@@ -268,15 +285,17 @@ def advent(command: Command) -> None:
         raise
 
     try:
-        members = [Member.from_member_data(data, args.year)
+        members = [Member.from_member_data(data, args.year, args.day)
                    for data in leaderboard['members'].values()]
     except Exception:
         reply('Error parsing leaderboard data.')
         raise
 
+    # whether to show full leaderboard for all days
+    full = not args.day
     # header message
     message = f':star: *Advent of Code Leaderboard {args.code}* :trophy:'
-    if args.day:
+    if not full:
         message += (
             f'\n:calendar: *Day {args.day}* '
             f'(sorted by {SORT_LABELS[args.sort]})'
@@ -285,8 +304,7 @@ def advent(command: Command) -> None:
     # reply with leaderboard as a file attachment because it gets quite large.
     bot.api.files.upload(
         initial_comment=message,
-        content=format_advent_leaderboard(
-            members, args.day, args.sort),
+        content=format_advent_leaderboard(members, full, args.sort),
         title=f'advent_{args.code}_{args.year}_{args.day}.txt',
         filetype='text',
         channels=channel.id,
