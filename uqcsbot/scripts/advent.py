@@ -56,7 +56,7 @@ class Member:
         self.day_deltas = {d: None for d in ADVENT_DAYS}
     
     @classmethod 
-    def from_member_data(cls, data: Dict):
+    def from_member_data(cls, data: Dict, year: int):
         """Constructs a Member from the API response."""
 
         member = cls(data['name'], data['local_score'], data['stars'])
@@ -65,9 +65,13 @@ class Member:
             day = int(day)
             day_times = member.day_times[day]
 
+            # timestamp of puzzle unlock, rounded to whole seconds
+            DAY_START = int(
+                datetime(year, 12, day, tzinfo=EST_TIMEZONE).timestamp())
+
             for star, star_data in day_data.items():
                 star = int(star)
-                day_times[star] = int(star_data['get_star_ts'])
+                day_times[star] = int(star_data['get_star_ts']) - DAY_START
 
             if len(day_times) == 2:
                 part_1, part_2 = sorted(day_times.values())
@@ -135,16 +139,13 @@ def format_full_leaderboard(members: List[Member]) -> str:
         format_member(i+1, m) for i, m in enumerate(members))
 
 
-def format_day_leaderboard(members: List[Member], year: int, day: int) -> str:
+def format_day_leaderboard(members: List[Member], day: int) -> str:
     """
     Returns a string representing the leaderboard of the given members on
-    the given year and day.
+    the given day.
 
     Full leaderboard includes rank, points, stars (per day), and username.
     """
-
-    # timestamp of puzzle unlock, rounded to whole seconds
-    DAY_START = int(datetime(year, 12, day, tzinfo=EST_TIMEZONE).timestamp())
 
     def format_seconds(seconds: int):
         if not seconds: 
@@ -154,17 +155,14 @@ def format_day_leaderboard(members: List[Member], year: int, day: int) -> str:
             return '>24h'
         return str(delta)
 
-    def format_timestamp(t: int):
-        return format_seconds(t - DAY_START) if t else ''
-
     #  3         8        8         8
     #|-|  |------| |------|  |------|
     #      Part 1   Part 2     Delta 
     #  1)  0:00:00  0:00:00   0:00:00  Name 1
     #  2)     >24h     >24h      >24h  Name 2
     def format_member(i: int, m: Member):
-        part_1 = format_timestamp(m.day_times[day].get(1))
-        part_2 = format_timestamp(m.day_times[day].get(2))
+        part_1 = format_seconds(m.day_times[day].get(1))
+        part_2 = format_seconds(m.day_times[day].get(2))
         delta = format_seconds(m.day_deltas[day])
         return f'{i:>3}) {part_1:>8} {part_2:>8}  {delta:>8}  {m.name}'
 
@@ -173,10 +171,13 @@ def format_day_leaderboard(members: List[Member], year: int, day: int) -> str:
         format_member(i+1, m) for i, m in enumerate(members))
 
 
-def format_advent_leaderboard(
-        members: List[Member], year: int, day: int, sort: SortOption) -> str:
+def format_advent_leaderboard(members: List[Member], 
+                              day: int, sort: SortOption) -> str:
     """
-    Returns a leaderboard for the given members with the given options."""
+    Returns a leaderboard for the given members with the given options.
+
+    If day is non-zero, the leaderboard is for that day only.
+    """
 
     # if no day is specified, show full leaderboard of all days
     if not day: 
@@ -186,7 +187,7 @@ def format_advent_leaderboard(
         # filter to users who have at least one star on this day.
         members = [m for m in members if m.day_times[day]]
         members.sort(key=Member.sort_key(sort, day))
-        return format_day_leaderboard(members, year, day)
+        return format_day_leaderboard(members, day)
 
 
 def parse_arguments(argv: List[str]) -> Namespace:
@@ -251,7 +252,7 @@ def advent(command: Command) -> None:
         raise
 
     try:
-        members = [Member.from_member_data(data)
+        members = [Member.from_member_data(data, args.year)
             for data in leaderboard['members'].values()]
     except Exception:
         reply('Error parsing leaderboard data.')
@@ -269,7 +270,7 @@ def advent(command: Command) -> None:
     bot.api.files.upload(
         initial_comment=message,
         content=format_advent_leaderboard(
-            members, args.year, args.day, args.sort),
+            members, args.day, args.sort),
         title=f'advent_{args.code}_{args.year}_{args.day}.txt',
         filetype='text',
         channels=channel.id,
