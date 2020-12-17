@@ -1,12 +1,13 @@
 import json
 from typing import List
-from uqcsbot.scripts.advent import Member, SortMode, format_advent_leaderboard, format_day_leaderboard, format_full_leaderboard
+from uqcsbot.scripts.advent import Member, SortMode, format_advent_leaderboard, \
+    format_day_leaderboard, format_full_leaderboard
 
 with open('./test/advent_test_data.json', encoding='utf-8') as f:
     ADVENT_TEST_DATA = json.load(f)
 
 # remark: we shouldn't test fetching the leaderboard because the cookie only
-# lasts 30 days and we only care about AoC in December. otherwise, we'd have 
+# lasts 30 days and we only care about AoC in December. otherwise, we'd have
 # to keep the cookie up to date just to pass tests.
 
 def _names(members: List[Member]) -> List[str]:
@@ -17,12 +18,16 @@ def _tail(text: str) -> str:
     """Returns the last line from a string (split by newline character)."""
     return text.split('\n')[-1]
 
+def _parse_members() -> List[Member]:
+    """Returns a list of members from the test data."""
+    return [Member.from_member_data(m, 2020)
+            for m in ADVENT_TEST_DATA['members'].values()]
+
 def test_advent_member_parse():
     """
     Tests parsing of the sample data.
     """
-    members = [Member.from_member_data(m, 2020) 
-        for m in ADVENT_TEST_DATA['members'].values()]
+    members = _parse_members()
 
     assert len(members) == 26
     strayy = [m for m in members if m.name == 'Strayy'][0]
@@ -41,12 +46,11 @@ def test_advent_member_sort_day():
     """
     Tests sorting by part 1, part 2, and delta times.
     """
-    members = [Member.from_member_data(m, 2020) 
-        for m in ADVENT_TEST_DATA['members'].values()]
+    members = _parse_members()
 
     members.sort(key=Member.sort_key(SortMode.PART_1, 1))
     assert _names(members[:3]) == ['Cameron Aavik', 'rowboat1', 'kentonlam']
-    
+
     members.sort(key=Member.sort_key(SortMode.PART_2, 1))
     assert _names(members[:3]) == ['Cameron Aavik', 'rowboat1', 'bradleysigma']
 
@@ -58,8 +62,7 @@ def test_advent_leaderboard_formats():
     """
     Tests very basic formatting of the leaderboard text.
     """
-    members = [Member.from_member_data(m, 2020) 
-        for m in ADVENT_TEST_DATA['members'].values()]
+    members = _parse_members()
     jason = [m for m in members if m.name == 'Jason Hassell'][0]
 
     assert _tail(format_full_leaderboard([jason])) == \
@@ -76,8 +79,7 @@ def test_advent_day_leaderboard_filters():
     Day leaderboards should only contain users who have finished at least
     part 1.
     """
-    members = [Member.from_member_data(m, 2020) 
-        for m in ADVENT_TEST_DATA['members'].values()]
+    members = _parse_members()
 
     assert 'Jason Hassell' not in format_advent_leaderboard(
         members, 17, SortMode.PART_2)

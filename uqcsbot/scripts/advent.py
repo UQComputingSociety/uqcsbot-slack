@@ -1,12 +1,10 @@
-from types import FunctionType
 from uqcsbot import bot, Command
-from uqcsbot.api import Channel
 from uqcsbot.utils.command_utils import loading_status, UsageSyntaxException
 
-from argparse import ArgumentError, ArgumentParser, Namespace
+from argparse import ArgumentParser, Namespace
 from datetime import datetime, timedelta, timezone
 from requests.exceptions import RequestException
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 from enum import Enum
 import os
 import requests
@@ -28,7 +26,8 @@ class SortMode(Enum):
     PART_1 = 'p1'
     PART_2 = 'p2'
     DELTA = 'delta'
-    SCORE = 'score' # SORT_SCORE is not shown to users
+    SCORE = 'score'  # SORT_SCORE is not shown to users
+
 
 # Map of sorting options to friendly name.
 SORT_LABELS = {
@@ -46,9 +45,10 @@ def sort_none_last(key):
     """
     return lambda x: (key(x) is None, key(x))
 
+
 # type aliases for documentation purposes.
-Star = int # from 1 to 25
-Day = int # 1 or 2
+Star = int  # from 1 to 25
+Day = int  # 1 or 2
 Seconds = int
 DayTimes = Dict[Day, Dict[Star, Seconds]]
 DayDeltas = Dict[Day, Optional[Seconds]]
@@ -59,11 +59,11 @@ class Member:
         self.name = name
         self.score = score
         self.stars = stars
-        # maps day to 
+        # maps day to
         self.day_times: DayTimes = {d: {} for d in ADVENT_DAYS}
         self.day_deltas: DayDeltas = {d: None for d in ADVENT_DAYS}
-    
-    @classmethod 
+
+    @classmethod
     def from_member_data(cls, data: Dict, year: int):
         """Constructs a Member from the API response."""
 
@@ -87,8 +87,8 @@ class Member:
 
         return member
 
-    @staticmethod 
-    def sort_key(sort: SortMode, day: int=None) -> Callable[['Member'], Any]:
+    @staticmethod
+    def sort_key(sort: SortMode, day: int = None) -> Callable[['Member'], Any]:
         """
         Given sort mode and day, returns a key function which sorts members
         by that option on that day.
@@ -97,17 +97,18 @@ class Member:
         if sort == SortMode.SCORE:
             # sorts by score, then stars, descending.
             return lambda m: (-m.score, -m.stars)
-        
+
         # if we get here, we have a day-specific sort. require day parameter.
         assert day is not None
 
         # these key functions sort in ascending order of the specified value.
+        # E731 advises using function definitions over lambdas which is unresonable here
         if sort == SortMode.PART_1:
-            key = lambda m: m.day_times[day].get(1)
+            key = lambda m: m.day_times[day].get(1)  # noqa: E731
         elif sort == SortMode.PART_2:
-            key = lambda m: m.day_times[day].get(2)
+            key = lambda m: m.day_times[day].get(2)  # noqa: E731
         elif sort == SortMode.DELTA:
-            key = lambda m: m.day_deltas[day]
+            key = lambda m: m.day_deltas[day]  # noqa: E731
         else:
             assert False
 
@@ -117,13 +118,14 @@ class Member:
 def star_char(num_stars: int):
     """Given a number of stars (0, 1, or 2), returns its leaderboard
     representation."""
-    if num_stars == 0: 
+    if num_stars == 0:
         return ' '
     elif num_stars == 1:
         return '.'
     elif num_stars == 2:
         return '*'
     assert False
+
 
 def format_full_leaderboard(members: List[Member]) -> str:
     """
@@ -132,16 +134,18 @@ def format_full_leaderboard(members: List[Member]) -> str:
     Full leaderboard includes rank, points, stars (per day), and username.
     """
 
-    #  3     4                        25
-    #|-|  |--| |-----------------------|
-    #  1)  751 ****************          Name
+    #   3     4                        25
+    # |-|  |--| |-----------------------|
+    #   1)  751 ****************          Name
     def format_member(i: int, m: Member):
         stars = ''.join(star_char(len(m.day_times[d])) for d in ADVENT_DAYS)
         return f'{i:>3}) {m.score:>4} {stars} {m.name}'
 
-    left_pad = ' ' * (3 + 2 + 4 + 1) # chars before stars start
-    header = (left_pad + '         1111111111222222\n' 
-        + left_pad + '1234567890123456789012345\n')
+    left_pad = ' ' * (3 + 2 + 4 + 1)  # chars before stars start
+    header = (
+        left_pad + '         1111111111222222\n'
+        + left_pad + '1234567890123456789012345\n'
+    )
 
     return header + '\n'.join(
         format_member(i+1, m) for i, m in enumerate(members))
@@ -156,18 +160,18 @@ def format_day_leaderboard(members: List[Member], day: int) -> str:
     """
 
     def format_seconds(seconds: int):
-        if not seconds: 
+        if not seconds:
             return ''
         delta = timedelta(seconds=seconds)
         if delta > timedelta(hours=24):
             return '>24h'
         return str(delta)
 
-    #  3         8        8         8
-    #|-|  |------| |------|  |------|
-    #      Part 1   Part 2     Delta 
-    #  1)  0:00:00  0:00:00   0:00:00  Name 1
-    #  2)     >24h     >24h      >24h  Name 2
+    #   3         8        8         8
+    # |-|  |------| |------|  |------|
+    #       Part 1   Part 2     Delta
+    #   1)  0:00:00  0:00:00   0:00:00  Name 1
+    #   2)     >24h     >24h      >24h  Name 2
     def format_member(i: int, m: Member):
         part_1 = format_seconds(m.day_times[day].get(1))
         part_2 = format_seconds(m.day_times[day].get(2))
@@ -179,7 +183,7 @@ def format_day_leaderboard(members: List[Member], day: int) -> str:
         format_member(i+1, m) for i, m in enumerate(members))
 
 
-def format_advent_leaderboard(members: List[Member], 
+def format_advent_leaderboard(members: List[Member],
                               day: int, sort: SortMode) -> str:
     """
     Returns a leaderboard for the given members with the given options.
@@ -188,7 +192,7 @@ def format_advent_leaderboard(members: List[Member],
     """
 
     # if no day is specified, show full leaderboard of all days
-    if not day: 
+    if not day:
         members.sort(key=Member.sort_key(SortMode.SCORE))
         return format_full_leaderboard(members)
     else:
@@ -203,27 +207,28 @@ def parse_arguments(argv: List[str]) -> Namespace:
     parser = ArgumentParser('!advent', add_help=False)
 
     parser.add_argument('day', type=int, default=0, nargs='?',
-                        help='Show leaderboard for specific day ' + 
-                            '(default: all days)')
+                        help='Show leaderboard for specific day ' +
+                        '(default: all days)')
     parser.add_argument('-y', '--year', type=int, default=datetime.now().year,
                         help='Year of leaderboard (default: current year)')
     parser.add_argument('-c', '--code', type=int, default=UQCS_LEADERBOARD,
                         help='Leaderboard code (default: UQCS leaderboard)')
     parser.add_argument('-s', '--sort', default=SortMode.PART_2,
-                        choices=(SortMode.PART_1, SortMode.PART_2, 
-                            SortMode.DELTA),
-                        help='Sorting method when displaying one day ' + 
-                            '(default: part 2 completion time)')
-    parser.add_argument('-h', '--help', action='store_true', 
+                        choices=(SortMode.PART_1, SortMode.PART_2,
+                                 SortMode.DELTA),
+                        help='Sorting method when displaying one day ' +
+                        '(default: part 2 completion time)')
+    parser.add_argument('-h', '--help', action='store_true',
                         help='Prints this help message')
 
-    # used to propagate usage errors out
+    # used to propagate usage errors out.
+    # somewhat hacky. typically, this should be done by subclassing ArgumentParser
     def usage_error(message, *args, **kwargs):
         raise UsageSyntaxException(message)
-    parser.error = usage_error # type: ignore
+    parser.error = usage_error  # type: ignore
 
     args = parser.parse_args(argv)
-    
+
     if args.help:
         raise UsageSyntaxException('```\n' + parser.format_help() + '\n```')
 
@@ -238,7 +243,7 @@ def advent(command: Command) -> None:
     """
 
     channel = bot.channels.get(command.channel_id, use_cache=False)
-    
+
     def reply(message):
         bot.post_message(channel, message, thread_ts=command.thread_ts)
 
@@ -256,13 +261,13 @@ def advent(command: Command) -> None:
     try:
         leaderboard = get_leaderboard(args.year, args.code)
     except ValueError:
-        reply('Error fetching leaderboard data. ' 
-            'Check the leaderboard code, year, and day.')
+        reply('Error fetching leaderboard data. '
+              'Check the leaderboard code, year, and day.')
         raise
 
     try:
         members = [Member.from_member_data(data, args.year)
-            for data in leaderboard['members'].values()]
+                   for data in leaderboard['members'].values()]
     except Exception:
         reply('Error parsing leaderboard data.')
         raise
@@ -271,10 +276,10 @@ def advent(command: Command) -> None:
     message = f':star: *Advent of Code Leaderboard {args.code}* :trophy:'
     if args.day:
         message += (
-            f'\n:calendar: *Day {args.day}* ' 
+            f'\n:calendar: *Day {args.day}* '
             f'(sorted by {SORT_LABELS[args.sort]})'
         )
-    
+
     # reply with leaderboard as a file attachment because it gets quite large.
     bot.api.files.upload(
         initial_comment=message,
@@ -293,10 +298,10 @@ def get_leaderboard(year: int, code: int) -> Dict:
     """
     try:
         response = requests.get(
-            LEADERBOARD_URL.format(year=year, code=code), 
+            LEADERBOARD_URL.format(year=year, code=code),
             cookies={'session': SESSION_ID})
         return response.json()
-    except ValueError as exception: #  json.JSONDecodeError
+    except ValueError as exception:  # json.JSONDecodeError
         # TODO: Handle the case when the response is ok but the contents
         # are invalid (cannot be parsed as json)
         raise exception
