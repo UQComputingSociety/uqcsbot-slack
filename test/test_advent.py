@@ -1,8 +1,9 @@
 import json
 from typing import List
 from uqcsbot.utils.command_utils import UsageSyntaxException
-from uqcsbot.scripts.advent import (Member, SortMode, format_advent_leaderboard, parse_arguments,
-                                    format_day_leaderboard, format_full_leaderboard)
+from uqcsbot.scripts.advent import (Member, SortMode, format_advent_leaderboard,
+                                    format_day_leaderboard, format_full_leaderboard,
+                                    format_global_leaderboard, parse_arguments)
 
 from pytest import raises
 
@@ -88,7 +89,7 @@ def test_advent_day_leaderboard_filters():
     """
     members = _parse_members(17)
 
-    assert 'Jason Hassell' not in format_advent_leaderboard(members, False, SortMode.PART_2)
+    assert 'Jason Hassell' not in format_advent_leaderboard(members, False, False, SortMode.PART_2)
 
 def test_advent_arguments():
     """
@@ -117,12 +118,12 @@ def test_advent_member_sort():
     """
     sorted_names = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot']
 
-    members = [Member('delta', 20, 10),
-               Member('bravo', 20, 20),
-               Member('alpha', 30, 30),
-               Member('foxtrot', 10, 10),
-               Member('charlie', 20, 20),
-               Member('echo', 10, 40)]
+    members = [Member('delta', 20, 10, 3),
+               Member('bravo', 20, 20, 4),
+               Member('alpha', 30, 30, 6),
+               Member('foxtrot', 10, 10, 2),
+               Member('charlie', 20, 20, 4),
+               Member('echo', 10, 40, 5)]
     members.sort(key=Member.sort_key(SortMode.SCORE))
 
     assert [member.name for member in members] == sorted_names
