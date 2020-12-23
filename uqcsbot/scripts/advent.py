@@ -207,7 +207,7 @@ def format_day_leaderboard(members: List[Member]) -> str:
         return f'{i:>3}) {part_1:>8} {part_2:>8}  {delta:>8}  {m.name}'
 
     header = '       Part 1   Part 2     Delta\n'
-    return header + '\n'.join(format_member(i+1, m) for i, m in enumerate(members))
+    return header + '\n'.join(format_member(i, m) for i, m in enumerate(members, 1))
 
 
 def format_advent_leaderboard(members: List[Member], day: bool, globo: bool, sort: SortMode) -> str:
