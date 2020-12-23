@@ -27,8 +27,8 @@ class SortMode(Enum):
     PART_1 = 'p1'
     PART_2 = 'p2'
     DELTA = 'delta'
-    SCORE = 'score'  # SORT_SCORE is not shown to users
-    GLOBO = 'global' # SORT_GLOBO is not shown to users
+    SCORE = 'score'   # SORT_SCORE is not shown to users
+    GLOBO = 'global'  # SORT_GLOBO is not shown to users
 
     def __str__(self):
         return self.value  # needed so --help prints string values
@@ -228,11 +228,10 @@ def format_advent_leaderboard(members: List[Member], day: bool, globo: bool, sor
         # filter to users who have global points.
         members = [m for m in members if m.globo]
         members.sort(key=Member.sort_key(SortMode.GLOBO))
-        return format_global_leaderboard(members)        
-    
+        return format_global_leaderboard(members)
+
     members.sort(key=Member.sort_key(SortMode.SCORE))
     return format_full_leaderboard(members)
-        
 
 
 def parse_arguments(argv: List[str]) -> Namespace:
