@@ -1,8 +1,8 @@
 import json
 from typing import List
 from uqcsbot.utils.command_utils import UsageSyntaxException
-from uqcsbot.scripts.advent import Member, SortMode, format_advent_leaderboard, \
-    format_day_leaderboard, format_full_leaderboard, parse_arguments
+from uqcsbot.scripts.advent import (Member, SortMode, format_advent_leaderboard, parse_arguments,
+                                    format_day_leaderboard, format_full_leaderboard)
 
 from pytest import raises
 
@@ -23,8 +23,7 @@ def _tail(text: str) -> str:
 
 def _parse_members(day=None) -> List[Member]:
     """Returns a list of members from the test data."""
-    return [Member.from_member_data(m, 2020, day)
-            for m in ADVENT_TEST_DATA['members'].values()]
+    return [Member.from_member_data(m, 2020, day) for m in ADVENT_TEST_DATA['members'].values()]
 
 def _member(name: str, day=None) -> Member:
     """Returns the member with the given name and data on the given day."""
@@ -62,22 +61,25 @@ def test_advent_member_sort_day():
     assert _names(members[:3]) == ['Cameron Aavik', 'rowboat1', 'bradleysigma']
 
     members.sort(key=Member.sort_key(SortMode.DELTA))
-    assert _names(members[:3]) == \
-        ['Matthew Low', 'Cameron Aavik', 'bradleysigma']
+    assert _names(members[:3]) == ['Matthew Low', 'Cameron Aavik', 'bradleysigma']
 
 def test_advent_leaderboard_formats():
     """
     Tests very basic formatting of the leaderboard text.
     """
     jason = _member('Jason Hassell', 1)
-    assert _tail(format_full_leaderboard([jason])) == \
-        '  1)  282 ******.**..    *          Jason Hassell'
-    assert _tail(format_day_leaderboard([jason])) == \
-        '  1)  0:50:48  0:53:04   0:02:16  Jason Hassell'
+    assert (_tail(format_full_leaderboard([jason]))
+            == '  1)  282 ******.**..    *          Jason Hassell')
+    assert (_tail(format_day_leaderboard([jason]))
+            == '  1)  0:50:48  0:53:04   0:02:16  Jason Hassell')
 
     matt = _member('Matthew Low', 16)
-    assert _tail(format_day_leaderboard([matt])) == \
-        '  1)  0:45:03                     Matthew Low'
+    assert (_tail(format_day_leaderboard([matt]))
+            == '  1)  0:45:03                     Matthew Low')
+
+    hines = _member('Thomas Hines')
+    assert (_tail(format_global_leaderboard([hines]))
+            == '  4)   66 Thomas Hines')
 
 def test_advent_day_leaderboard_filters():
     """
@@ -86,8 +88,7 @@ def test_advent_day_leaderboard_filters():
     """
     members = _parse_members(17)
 
-    assert 'Jason Hassell' not in format_advent_leaderboard(
-        members, False, SortMode.PART_2)
+    assert 'Jason Hassell' not in format_advent_leaderboard(members, False, SortMode.PART_2)
 
 def test_advent_arguments():
     """
@@ -116,13 +117,12 @@ def test_advent_member_sort():
     """
     sorted_names = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot']
 
-    members = [
-            Member('delta', 20, 10),
-            Member('bravo', 20, 20),
-            Member('alpha', 30, 30),
-            Member('foxtrot', 10, 10),
-            Member('charlie', 20, 20),
-            Member('echo', 10, 40)]
+    members = [Member('delta', 20, 10),
+               Member('bravo', 20, 20),
+               Member('alpha', 30, 30),
+               Member('foxtrot', 10, 10),
+               Member('charlie', 20, 20),
+               Member('echo', 10, 40)]
     members.sort(key=Member.sort_key(SortMode.SCORE))
 
     assert [member.name for member in members] == sorted_names
