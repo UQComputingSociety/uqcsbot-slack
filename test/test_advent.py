@@ -80,7 +80,7 @@ def test_advent_leaderboard_formats():
 
     hines = _member('Thomas Hines')
     assert (_tail(format_global_leaderboard([hines]))
-            == '  4)   66 Thomas Hines')
+            == '  1)   66 Thomas Hines')
 
 def test_advent_day_leaderboard_filters():
     """
@@ -89,7 +89,7 @@ def test_advent_day_leaderboard_filters():
     """
     members = _parse_members(17)
 
-    assert 'Jason Hassell' not in format_advent_leaderboard(members, False, False, SortMode.PART_2)
+    assert 'Jason Hassell' not in format_advent_leaderboard(members, True, False, SortMode.PART_2)
 
 def test_advent_arguments():
     """
