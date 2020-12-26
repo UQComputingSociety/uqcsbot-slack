@@ -28,7 +28,8 @@ def _parse_members(day=None) -> List[Member]:
 
 def _member(name: str, day=None) -> Member:
     """Returns the member with the given name and data on the given day."""
-    return min(m for m in _parse_members(day) if m.name == name)
+    y, = (m for m in _parse_members(day) if m.name == name)
+    return y
 
 def test_advent_member_parse():
     """
