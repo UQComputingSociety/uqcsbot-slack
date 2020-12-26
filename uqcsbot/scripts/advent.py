@@ -210,7 +210,8 @@ def format_day_leaderboard(members: List[Member]) -> str:
     return header + "\n".join(format_member(i, m) for i, m in enumerate(members, 1))
 
 
-def format_advent_leaderboard(members: List[Member], is_day: bool, is_global: bool, sort: SortMode) -> str:
+def format_advent_leaderboard(members: List[Member],
+                              is_day: bool, is_global: bool, sort: SortMode) -> str:
     """
     Returns a leaderboard for the given members with the given options.
 
