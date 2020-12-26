@@ -159,7 +159,7 @@ class UQCSBot(object):
         self.channels = ChannelWrapper(self)
         self.users = UsersWrapper(self)
 
-        self.starttime = datetime.now()
+        self.start_time = datetime.now()
 
     async def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
