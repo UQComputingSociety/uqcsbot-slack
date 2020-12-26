@@ -27,8 +27,8 @@ class SortMode(Enum):
     PART_1 = 'p1'
     PART_2 = 'p2'
     DELTA = 'delta'
-    SCORE = 'score'   # SORT_SCORE is not shown to users
-    GLOBO = 'global'  # SORT_GLOBO is not shown to users
+    LOCAL = 'local'    # SORT_LOCAL is not shown to users
+    GLOBAL = 'global'  # SORT_GLOBAL is not shown to users
 
     def __str__(self):
         return self.value  # needed so --help prints string values
@@ -58,11 +58,11 @@ Delta = Optional[Seconds]
 # TODO: make these types more specific with TypedDict and Literal when possible.
 
 class Member:
-    def __init__(self, name: str, score: int, stars: int, globo: int) -> None:
+    def __init__(self, name: str, local: int, stars: int, global_: int) -> None:
         self.name = name
-        self.score = score
+        self.local = local
         self.stars = stars
-        self.globo = globo
+        self.global_ = global_
 
         self.all_times: Dict[Day, Times] = {d: {} for d in ADVENT_DAYS}
         self.all_deltas: Dict[Day, Delta] = {d: None for d in ADVENT_DAYS}
@@ -79,7 +79,7 @@ class Member:
         Times and delta are calculated for the given year and day.
         """
 
-        member = cls(data['name'], data['local_score'], data['stars'], data['global_score'])
+        member = cls(data['name'], data['local'], data['stars'], data['global'])
 
         for d, day_data in data['completion_day_level'].items():
             d = int(d)
@@ -112,12 +112,12 @@ class Member:
         by that option using the stored times and delta.
         """
 
-        if sort == SortMode.SCORE:
+        if sort == SortMode.local:
             # sorts by local score, then stars, descending.
-            return lambda m: (-m.score, -m.stars)
-        if sort == SortMode.GLOBO:
+            return lambda m: (-m.local, -m.stars)
+        if sort == SortMode.GLOBAL:
             # sorts by global score, then local score, then stars, descending.
-            return lambda m: (-m.globo, -m.score, -m.stars)
+            return lambda m: (-m.global_, -m.local, -m.stars)
 
         # these key functions sort in ascending order of the specified value.
         # E731 advises using function definitions over lambdas which is unreasonable here
@@ -153,7 +153,7 @@ def format_full_leaderboard(members: List[Member]) -> str:
     #   1)  751 ****************          Name
     def format_member(i: int, m: Member):
         stars = ''.join(star_char(len(m.all_times[d])) for d in ADVENT_DAYS)
-        return f'{i:>3}) {m.score:>4} {stars} {m.name}'
+        return f'{i:>3}) {m.local:>4} {stars} {m.name}'
 
     left = ' ' * (3 + 2 + 4 + 1)  # chars before stars start
     header = (f'{left}         1111111111222222\n'
@@ -173,7 +173,7 @@ def format_global_leaderboard(members: List[Member]) -> str:
     # |-|  |--|
     #   1)  751 Name
     def format_member(i: int, m: Member):
-        return f'{i:>3}) {m.globo:>4} {m.name}'
+        return f'{i:>3}) {m.global_:>4} {m.name}'
 
     return '\n'.join(format_member(i, m) for i, m in enumerate(members, 1))
 
@@ -210,7 +210,7 @@ def format_day_leaderboard(members: List[Member]) -> str:
     return header + '\n'.join(format_member(i, m) for i, m in enumerate(members, 1))
 
 
-def format_advent_leaderboard(members: List[Member], day: bool, globo: bool, sort: SortMode) -> str:
+def format_advent_leaderboard(members: List[Member], is_day: bool, is_global: bool, sort: SortMode) -> str:
     """
     Returns a leaderboard for the given members with the given options.
 
@@ -218,19 +218,19 @@ def format_advent_leaderboard(members: List[Member], day: bool, globo: bool, sor
     specific day is shown.
     """
 
-    if day:
+    if is_day:
         # filter to users who have at least one star on this day.
         members = [m for m in members if m.day_times]
         members.sort(key=Member.sort_key(sort))
         return format_day_leaderboard(members)
 
-    if globo:
+    if is_global:
         # filter to users who have global points.
-        members = [m for m in members if m.globo]
-        members.sort(key=Member.sort_key(SortMode.GLOBO))
+        members = [m for m in members if m.global_]
+        members.sort(key=Member.sort_key(SortMode.GLOBAL))
         return format_global_leaderboard(members)
 
-    members.sort(key=Member.sort_key(SortMode.SCORE))
+    members.sort(key=Member.sort_key(SortMode.LOCAL))
     return format_full_leaderboard(members)
 
 
@@ -247,7 +247,7 @@ def parse_arguments(argv: List[str]) -> Namespace:
     parser.add_argument('day', type=int, default=0, nargs='?',
                         help='Show leaderboard for specific day'
                         + ' (default: all days)')
-    parser.add_argument('-g', '--global', action='store_true', dest='globo',
+    parser.add_argument('-g', '--global', action='store_true', dest='global_',
                         help='Show global points')
     parser.add_argument('-y', '--year', type=int, default=datetime.now().year,
                         help='Year of leaderboard (default: current year)')
@@ -306,21 +306,21 @@ def advent(command: Command) -> None:
         raise
 
     # whether to show only one day
-    day = args.day
+    is_day = bool(args.day)
     # whether to use global points
-    globo = args.globo
+    is_global = args.global_
 
     # header message
     message = f':star: *Advent of Code Leaderboard {args.code}* :trophy:'
-    if day:
+    if is_day:
         message += f'\n:calendar: *Day {args.day}* (sorted by {SORT_LABELS[args.sort]})'
-    elif globo:
-        message += "Global Leaderboard Points"
+    elif is_global:
+        message += "\n:earth_asia: *Global Leaderboard Points*"
 
     # reply with leaderboard as a file attachment because it gets quite large.
     bot.api.files.upload(
         initial_comment=message,
-        content=format_advent_leaderboard(members, day, globo, args.sort),
+        content=format_advent_leaderboard(members, is_day, is_global, args.sort),
         title=f'advent_{args.code}_{args.year}_{args.day}.txt',
         filetype='text',
         channels=channel.id,
