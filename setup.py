@@ -20,7 +20,7 @@ install_requires = [
     'unidecode',
     'feedparser',
     'slackblocks',
-    'ago'
+    'humanize'
 ]
 
 tests_require = [
