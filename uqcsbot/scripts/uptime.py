@@ -14,5 +14,5 @@ def handle_uptime(command: Command):
     message = ("The bot has been online"
                + f" {human(t, precision=(2 if t.total_seconds() >= 60 else 1), past_tense='{}'):s}"
                + (f" (`{round(t.total_seconds()):d}` seconds)" if t.total_seconds() >= 60 else "")
-               + f", since {bot.starttime.strftime('%H:%M:%S - %b %d'):s}")
+               + f", since {bot.starttime.strftime('%H:%M:%S on %b %d'):s}.")
     command.reply_with(bot, message)
