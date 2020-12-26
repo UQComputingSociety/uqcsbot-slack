@@ -19,7 +19,8 @@ install_requires = [
     'pytest-runner',
     'unidecode',
     'feedparser',
-    'slackblocks'
+    'slackblocks',
+    'humanize'
 ]
 
 tests_require = [

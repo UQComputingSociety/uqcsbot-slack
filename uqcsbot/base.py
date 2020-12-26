@@ -12,6 +12,7 @@ from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_doc
 from unidecode import unidecode
+from datetime import datetime
 
 
 CmdT = TypeVar('CmdT', bound='Command')
@@ -157,6 +158,8 @@ class UQCSBot(object):
 
         self.channels = ChannelWrapper(self)
         self.users = UsersWrapper(self)
+
+        self.start_time = datetime.now()
 
     async def _handle_hello(self, evt):
         if evt != {"type": "hello"}:
