@@ -346,7 +346,7 @@ class ChannelWrapper(object):
 
     def _on_channel_deleted(self, evt):
         with self._lock:
-            chan = self.get(evt['channel']['id'])
+            chan = self.get(evt['channel'])
             self._channels_by_id.pop(chan.id)
             self._channels_by_name.pop(chan.name)
 
