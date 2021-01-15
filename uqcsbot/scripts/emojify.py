@@ -20,23 +20,24 @@ def handle_emojify(command: Command):
                    choice([":card-ace-clubs:", ":card-ace-diamonds:",
                            ":card-ace-hearts:", ":card-ace-spades:"])]
     master['B'] = [":bhinking:", ":bitcoin:", ":blutes:"]
-    master['C'] = [":c:", ":clang:", ":cplusplus:", ":copyright:", ":clipchamp:"]
+    master['C'] = [":c:", ":clang:", ":cplusplus:", ":copyright:", ":clipchamp:",
+                   ":clipchamp_old:"]
     master['D'] = [":d:", ":disney:", ":deloitte:"]
     master['E'] = [":ecorp:", ":emacs:", ":erlang:", ":ie10:", ":thonk_slow:", ":edge:",
                    ":expedia_group:"]
     master['F'] = [":f:", ":facebook:", ":flutter:", ":figma:"]
-    master['G'] = [":g+:", ":google:", ":nintendo_gamecube:", ":gatsbyjs:"]
+    master['G'] = [":g+:", ":google:", ":nintendo_gamecube:", ":gatsbyjs:", ":gmod:"]
     master['H'] = [":hackerrank:", ":homejoy:"]
     master['I'] = [":information_source:", ":indoorooshs:"]
-    master['J'] = [":hook:", choice([":card-jack-clubs:", ":card-jack-diamonds:",
-                                     ":card-jack-hearts:", ":card-jack-spades:"])]
+    master['J'] = [choice([":card-jack-clubs:", ":card-jack-diamonds:",
+                           ":card-jack-hearts:", ":card-jack-spades:"])]
     master['K'] = [":kickstarter:", ":kotlin:",
                    choice([":card-king-clubs:", ":card-king-diamonds:",
                            ":card-king-hearts:", ":card-king-spades:"])]
-    master['L'] = [":l:", ":lime:", ":l_plate:"]
+    master['L'] = [":l:", ":lime:", ":l_plate:", ":ti_nekro:"]
     master['M'] = [":gmail:", ":maccas:", ":mcgrathnicol:", ":melange_mining:", ":mtg:", ":mxnet:",
                    ":jmod:"]
-    master['N'] = [":nano:", ":neovim:", ":netscape_navigator:",
+    master['N'] = [":nano:", ":neovim:", ":netscape_navigator:", ":notion:",
                    ":nginx:", ":nintendo_64:", ":office_onenote:", ":netflix-n:"]
     master['O'] = [":office_outlook:", ":oracle:", ":o_:", ":tetris_o:", ":ubuntu:",
                    choice([":portal_blue:", ":portal_orange:"])]
@@ -61,7 +62,7 @@ def handle_emojify(command: Command):
     master['0'] = [":chrome:", ":suncorp:", ":disney_zero:", ":firefox:",
                    ":mars:", ":0_:", choice([":dvd:", ":cd:"])]
     master['1'] = [":techone:", ":testtube:", ":thonk_ping:", ":first_place_medal:",
-                   ":critical_fail:"]
+                   ":critical_fail:", ":slack_unread_1:"]
     master['2'] = [":second_place_medal:", choice([":card-2-clubs:", ":card-2-diamonds:",
                                                    ":card-2-hearts:", ":card-2-spades:"])]
     master['3'] = [":css:", ":third_place_medal:", choice([":card-3-clubs:", ":card-3-diamonds:",
@@ -94,10 +95,10 @@ def handle_emojify(command: Command):
     master['('] = [":lparen:"]
     master[')'] = [":rparen:"]
     master['*'] = [":day:", ":nab:", ":youtried:", ":msn_star:", ":rune_prayer:", ":wolfram:",
-                   ":shuriken:", ":mtg_s:"]
+                   ":shuriken:", ":mtg_s:", ":aoc:", ":jetstar:"]
     master['+'] = [":tf2_medic:", ":flag-ch:", ":flag-england:"]
     master['-'] = [":no_entry:"]
-    master['.'] = [":black_small_square:"]
+    master['.'] = [":full_stop_big:"]
     master[','] = [":comma:"]
     master['/'] = [":slash:"]
     master[';'] = [":semi-colon:"]
@@ -119,9 +120,12 @@ def handle_emojify(command: Command):
     # 'Δ' converts to 'D'
     master['Δ'] = [":optiver:"]
     # 'Λ' converts to 'L'
-    master['Λ'] = [":halflife:", ":haskell:", ":lambda:", ":racket:"]
+    master['Λ'] = [":halflife:", ":haskell:", ":lambda:", ":racket:",
+                   choice([":uqcs:", ":scrollinguqcs:", ":scrollinguqcs_alt:", ":uqcs_mono:"])]
     # 'Π' converts to 'P'
     master['Π'] = [":pi:"]
+    # 'Φ' converts to 'PH'
+    master['Φ'] = [":phyrexia_blue:"]
     # 'Σ' converts to 'S'
     master['Σ'] = [":polymathian:", ":sigma:"]
 
@@ -138,6 +142,8 @@ def handle_emojify(command: Command):
     master['∴'] = [":julia:"]
 
     master['人'] = [":人:"]
+
+    master[chr(127)] = [":delet_this:"]
 
     text = ""
     if command.has_arg():
