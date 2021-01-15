@@ -62,7 +62,7 @@ def handle_emojify(command: Command):
     master['0'] = [":chrome:", ":suncorp:", ":disney_zero:", ":firefox:",
                    ":mars:", ":0_:", choice([":dvd:", ":cd:"])]
     master['1'] = [":techone:", ":testtube:", ":thonk_ping:", ":first_place_medal:",
-                   ":critical_fail:", ":slack_unread_1:]
+                   ":critical_fail:", ":slack_unread_1:"]
     master['2'] = [":second_place_medal:", choice([":card-2-clubs:", ":card-2-diamonds:",
                                                    ":card-2-hearts:", ":card-2-spades:"])]
     master['3'] = [":css:", ":third_place_medal:", choice([":card-3-clubs:", ":card-3-diamonds:",
@@ -121,10 +121,10 @@ def handle_emojify(command: Command):
     master['Δ'] = [":optiver:"]
     # 'Λ' converts to 'L'
     master['Λ'] = [":halflife:", ":haskell:", ":lambda:", ":racket:",
-                   choice([":uqcs:", ":scrollinguqcs:", ":scrollinguqcs_alt:"])]
+                   choice([":uqcs:", ":scrollinguqcs:", ":scrollinguqcs_alt:", ":uqcs_mono:"])]
     # 'Π' converts to 'P'
     master['Π'] = [":pi:"]
-    # 'Φ' converts to... something
+    # 'Φ' converts to 'PH'
     master['Φ'] = [":phyrexia_blue:"]
     # 'Σ' converts to 'S'
     master['Σ'] = [":polymathian:", ":sigma:"]
