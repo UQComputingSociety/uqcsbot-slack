@@ -5,15 +5,14 @@ from typing import Tuple
 import requests
 from bs4 import BeautifulSoup
 
-URL = "https://techcrunch.com"
 
-def get_tech_crunch_data(url : str) -> Tuple[int, str]:
+def get_tech_crunch_data() -> Tuple[int, str]:
     """
     Returns HTML from tech crunch site
 
     Returns the following tuple: (status code, html text)
     """
-    page = requests.get(url)
+    page = requests.get("https://techcrunch.com")
     return (page.status_code, page.text)
 
 def get_data_from_article(article : str) -> Tuple[str, str]:
@@ -30,7 +29,7 @@ def handle_news(command: Command) -> None:
     """
     Handles the web scraping of techcrunch.com when command '!news' is used
     """
-    code, data = get_tech_crunch_data(URL)
+    code, data = get_tech_crunch_data()
     if code != 200:
         bot.post_message(command.channel_id, "Could not retrieve data from techcrunch.com :(")
         return
