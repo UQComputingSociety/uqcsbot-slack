@@ -1,5 +1,4 @@
 from time import sleep
-from typing import Mapping, TypeVar, Generator, Any, List
 from unittest.mock import patch
 
 from test.conftest import MockUQCSBot, TEST_CHANNEL_ID, TEST_USER_ID
