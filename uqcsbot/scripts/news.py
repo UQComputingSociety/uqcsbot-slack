@@ -9,7 +9,7 @@ URL = "http://feeds.feedburner.com/TechCrunch/"
 
 def get_tech_crunch_data() -> List[Dict[str, str]]:
     """
-    Returns data from TechCrunch RSS feed 
+    Returns data from TechCrunch RSS feed
     """
     return feedparser.parse(URL).entries
 
@@ -19,7 +19,7 @@ def get_data_from_article(news: List[Dict[str, str]], index: int) -> Tuple[str, 
 
     Tuple returned: (title, url)
     """
-    return (news[index]['title'], news[index]['link'])    
+    return (news[index]['title'], news[index]['link'])
 
 @bot.on_command("news")
 @loading_status
