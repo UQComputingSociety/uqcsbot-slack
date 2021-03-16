@@ -13,7 +13,7 @@ def get_tech_crunch_data() -> List[Dict[str, str]]:
     """
     return feedparser.parse(URL).entries
 
-def get_data_from_article(news : List[Dict[str, str]], index : int) -> Tuple[str, str]:
+def get_data_from_article(news: List[Dict[str, str]], index: int) -> Tuple[str, str]:
     """
     Returns the title of the article and the link
 
