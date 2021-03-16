@@ -3,7 +3,6 @@ from uqcsbot.utils.command_utils import loading_status
 from typing import Tuple, Dict, List
 
 import feedparser
-import requests
 from bs4 import BeautifulSoup
 
 ARTICLES_TO_POST = 5
@@ -36,4 +35,3 @@ def handle_news(command: Command) -> None:
         title, url = get_data_from_article(news, i)
         message += f"<{url}|{title}>\n\n"
     bot.post_message(command.channel_id, message, unfurl_links=False, unfurl_media=False)
-    
