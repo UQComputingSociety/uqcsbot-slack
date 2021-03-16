@@ -32,5 +32,6 @@ def handle_news(command: Command) -> None:
     news = get_tech_crunch_data()
     for i in range(ARTICLES_TO_POST):
         title, url = get_data_from_article(news, i)
+        # Formats message a clickable headline which links to the article
         message += f"<{url}|{title}>\n\n"
     bot.post_message(command.channel_id, message, unfurl_links=False, unfurl_media=False)
