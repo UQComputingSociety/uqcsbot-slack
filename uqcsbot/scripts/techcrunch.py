@@ -15,7 +15,7 @@ def get_tech_crunch_data() -> List[Dict[str, str]]:
     data = feedparser.parse(RSS_URL)
     if data.status != 200:
         return None
-    return feedparser.parse(RSS_URL).entries
+    return data.entries
 
 def get_data_from_article(news: List[Dict[str, str]], index: int) -> Tuple[str, str]:
     """
@@ -38,6 +38,7 @@ def handle_news(command: Command) -> None:
     if news is None:
         bot.post_message(command.channel_id, "There was an error accessing "
                                              "TechCrunch RSS feed")
+        return
     for i in range(ARTICLES_TO_POST):
         title, url = get_data_from_article(news, i)
         # Formats message a clickable headline which links to the article

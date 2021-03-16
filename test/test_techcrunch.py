@@ -9,11 +9,11 @@ def get_local_techcrunch_data() -> List[Dict[str, str]]:
     Returns the RSS data from local mock copy of techcrunch xml.
     """
     try:
-        rawdata = open("test/techcrunch.xml").read()
-        data = feedparser.parse(rawdata).entries
+        with open("test/techcrunch.xml") as rawdata:
+            data = feedparser.parse(rawdata.read()).entries
     except Exception as e:
+        print("test/techcrunch.xml does not exist or cannot be opened")
         raise e
-        return (0, "")
     return data
 
 @patch("uqcsbot.scripts.techcrunch.get_tech_crunch_data", new=get_local_techcrunch_data)
