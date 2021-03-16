@@ -1,58 +1,39 @@
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import loading_status
-from typing import Tuple
+from typing import Tuple, Dict, List
 
+import feedparser
 import requests
 from bs4 import BeautifulSoup
 
+ARTICLES_TO_POST = 5
+URL = "http://feeds.feedburner.com/TechCrunch/"
 
-def get_tech_crunch_data() -> Tuple[int, str]:
+def get_tech_crunch_data() -> List[Dict[str, str]]:
     """
-    Returns HTML from tech crunch site
-
-    Returns the following tuple: (status code, html text)
+    Returns data from TechCrunch RSS feed 
     """
-    page = requests.get("https://techcrunch.com")
-    return (page.status_code, page.text)
+    return feedparser.parse(URL).entries
 
-def get_data_from_article(article : str) -> Tuple[str, str]:
+def get_data_from_article(news : List[Dict[str, str]], index : int) -> Tuple[str, str]:
     """
     Returns the title of the article and the link
 
     Tuple returned: (title, url)
     """
-    return (article.string.lstrip(), article['href'])
+    return (news[index]['title'], news[index]['link'])    
 
 @bot.on_command("news")
 @loading_status
 def handle_news(command: Command) -> None:
     """
-    Handles the web scraping of techcrunch.com when command '!news' is used
+    Prints the 5 top-most articles in the Latest News Section of TechCrunch
+    using RSS feed
     """
-    code, data = get_tech_crunch_data()
-    if code != 200:
-        bot.post_message(command.channel_id, "Could not retrieve data from techcrunch.com :(")
-        return
-
     message = "------------------------- Latest News from TechCrunch ---------------------------\n"
-    
-    soup = BeautifulSoup(data, "html.parser")
-    headlines = soup.find_all("a")
-    # Every second <a> tag is the author, therefore this bool is used to skip
-    # those
-    author = False
-    # Used to count the number of headlines that have been reached. For loop
-    # break when 5 have been added to the message
-    headline = 0
-    for article in headlines:
-        if article.string != None:
-            if not author:
-                # Gets headline and link from the article and formats
-                # it as a clickable headline
-                title, url = get_data_from_article(article)
-                message += f"<{url}|{title}>\n\n" 
-                headline += 1
-            if headline >= 5:
-                break
-            author = True if not author else False
+    news = get_tech_crunch_data()
+    for i in range(ARTICLES_TO_POST):
+        title, url = get_data_from_article(news, i)
+        message += f"<{url}|{title}>\n\n"
     bot.post_message(command.channel_id, message, unfurl_links=False, unfurl_media=False)
+    
