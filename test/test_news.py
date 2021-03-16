@@ -23,7 +23,7 @@ def test_news(uqcsbot: MockUQCSBot):
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, "!news")
     message = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
-    assert(message[-1]['text'] ==
+    assert (message[-1]['text'] ==
             "------------------------- Latest News from TechCrunch ---------------------------\n"
             "<http://feedproxy.google.com/~r/Techcrunch/~3/99Ndo-D1yGA/|"
             "Rising encrypted app Signal is down in China>\n\n"
