@@ -6,7 +6,7 @@ from typing import List, Dict
 
 def get_local_techcrunch_data() -> List[Dict[str, str]]:
     """
-    Returns the RSS data from local mock copy of techcrunch xml
+    Returns the RSS data from local mock copy of techcrunch xml.
     """
     try:
         rawdata = open("test/techcrunch.xml").read()
