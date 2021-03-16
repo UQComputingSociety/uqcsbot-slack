@@ -34,4 +34,6 @@ def handle_news(command: Command) -> None:
         title, url = get_data_from_article(news, i)
         # Formats message a clickable headline which links to the article
         message += f"<{url}|{title}>\n\n"
+    # Additional parameters ensure that the links don't show as big articles
+    # underneath the input
     bot.post_message(command.channel_id, message, unfurl_links=False, unfurl_media=False)
