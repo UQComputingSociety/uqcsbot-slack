@@ -3,7 +3,6 @@ from uqcsbot.utils.command_utils import loading_status
 from typing import Tuple, Dict, List
 
 import feedparser
-from bs4 import BeautifulSoup
 
 ARTICLES_TO_POST = 5
 URL = "http://feeds.feedburner.com/TechCrunch/"
