@@ -16,11 +16,15 @@ def filter_valid_lowercases(msgs: List[T]) -> Generator[T, None, None]:
         if msg is None:
             continue
         if (
-                msg.startswith('WHAT IS THE MEANING OF THIS ARCANE SYMBOL')
+                msg.startswith("WHAT IS THE MEANING OF THIS ARCANE SYMBOL")
                 and msg.endswith(" I RECOGNISE IT NOT!")
         ):
             continue
-        if msg == 'OH, NO! NOT THE `a`S! NOT THE `a`S! AAAAAHHHHH!':
+        if msg.startswith("DID YOU SAY \n>>>"):
+            continue
+        if msg in ["OH, NO! NOT THE `a`S! NOT THE `a`S! AAAAAHHHHH!",
+                   ":disapproval:",
+                   ":oldmanyellsatcloud:"]:
             continue
         yield msg
 
