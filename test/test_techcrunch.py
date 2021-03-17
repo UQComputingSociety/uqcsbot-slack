@@ -24,16 +24,15 @@ def test_news(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!techcrunch")
     message = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert (message[-1]['text'] ==
-            "*------------------- Latest News from <https://techcrunch.com|_TechCrunch_> "
-            ":newspaper: ---------------------*\n"
+            "*Latest News from <https://techcrunch.com|_TechCrunch_> :techcrunch:*\n"
             "• <http://feedproxy.google.com/~r/Techcrunch/~3/99Ndo-D1yGA/|"
-            "Rising encrypted app Signal is down in China>\n\n"
+            "Rising encrypted app Signal is down in China>\n"
             "• <http://feedproxy.google.com/~r/Techcrunch/~3/CvyW_t3oxSQ/|"
-            "China wants to dismantle Alibaba’s media empire: reports>\n\n"
+            "China wants to dismantle Alibaba’s media empire: reports>\n"
             "• <http://feedproxy.google.com/~r/Techcrunch/~3/EqeGTrnZEYs/|"
-            "Bird to spend $150 million on European expansion plan>\n\n"
+            "Bird to spend $150 million on European expansion plan>\n"
             "• <http://feedproxy.google.com/~r/Techcrunch/~3/X98SDLR4A6Q/|"
             "Sherpa raises $8.5M to expand from conversational AI to B2B "
-            "privacy-first federated learning services>\n\n"
+            "privacy-first federated learning services>\n"
             "• <http://feedproxy.google.com/~r/Techcrunch/~3/SdwlDvQPZHU/|"
-            "Daily Crunch: Stripe valued at $95B>\n\n")
+            "Daily Crunch: Stripe valued at $95B>\n")
