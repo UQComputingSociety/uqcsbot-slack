@@ -32,8 +32,7 @@ def handle_news(command: Command) -> None:
     Prints the 5 top-most articles in the Latest News Section of TechCrunch
     using RSS feed
     """
-    message = f"*------------------- Latest News from <{TECHCRUNCH_URL}|_TechCrunch_> " \
-              f":newspaper: ---------------------*\n"
+    message = f"*Latest News from <{TECHCRUNCH_URL}|_TechCrunch_> :techcrunch:*\n"
     news = get_tech_crunch_data()
     if news is None:
         bot.post_message(command.channel_id, "There was an error accessing "
@@ -43,7 +42,7 @@ def handle_news(command: Command) -> None:
         title, url = get_data_from_article(news, i)
         # Formats message a clickable headline which links to the article
         # These articles are also now bullet pointed
-        message += f"- <{url}|{title}>\n\n"
+        message += f"• <{url}|{title}>\n"
     # Additional parameters ensure that the links don't show as big articles
     # underneath the input
     bot.post_message(command.channel_id, message, unfurl_links=False, unfurl_media=False)
