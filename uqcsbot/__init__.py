@@ -1,14 +1,20 @@
+import argparse
+import importlib
+import json
+import logging
 import os
 import sys
-import importlib
-import logging
-import argparse
 from base64 import b64decode
-import json
+
 import requests
+from sqlalchemy import create_engine
+
 from uqcsbot.base import bot, Command, UQCSBot  # noqa
+from uqcsbot.models import Base
 
 LOGGER = logging.getLogger("uqcsbot")
+
+DATABASE_URI = os.environ.get("UQCSBOT_DB_URI")
 
 SLACK_VERIFICATION_TOKEN = os.environ.get("SLACK_VERIFICATION_TOKEN", "")
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
@@ -157,7 +163,11 @@ def main():
         LOGGER.error("No user token found!")
         sys.exit(1)
 
-    bot.run(user_token, bot_token)
+    # Set up database
+    db_engine = create_engine('sqlite:///:memory:', echo=True)
+    Base.metadata.create_all(db_engine)
+
+    bot.run(user_token, bot_token, db_engine)
 
 
 if __name__ == "__main__":

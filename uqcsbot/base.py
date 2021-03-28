@@ -1,18 +1,22 @@
-import slack
-from uqcsbot.api import APIWrapper, ChannelWrapper, Channel, UsersWrapper
-from functools import partial, wraps
-import collections
 import asyncio
+import collections
 import concurrent.futures
-import logging
 import inspect
+import logging
 import threading
 from contextlib import contextmanager
+from datetime import datetime
+from functools import partial, wraps
 from typing import Callable, Optional, Union, TypeVar, DefaultDict, Type, Any
+
+import slack
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_doc
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import sessionmaker
 from unidecode import unidecode
 
+from uqcsbot.api import APIWrapper, ChannelWrapper, Channel, UsersWrapper
+from uqcsbot.utils.command_utils import UsageSyntaxException, get_helper_doc
 
 CmdT = TypeVar('CmdT', bound='Command')
 
@@ -321,7 +325,7 @@ class UQCSBot(object):
         ]
         return [(await future) for future in futures]
 
-    def run(self, user_token, bot_token):
+    def run(self, user_token, bot_token, engine: Engine):
         """
         Run the bot.
 
@@ -330,6 +334,9 @@ class UQCSBot(object):
         """
         self._user_token = user_token
         self._bot_token = bot_token
+        self.db_engine = engine
+        self.create_db_session = sessionmaker(bind=engine)
+
         with self._execution_context() as run_future:
             self._rtm_client = ModifiedRTMClient(
                 token=self.bot_token,
