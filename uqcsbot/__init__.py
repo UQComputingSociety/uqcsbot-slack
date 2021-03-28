@@ -164,7 +164,7 @@ def main():
         sys.exit(1)
 
     # Set up database
-    db_engine = create_engine('sqlite:///:memory:', echo=True)
+    db_engine = create_engine(DATABASE_URI, echo=True)
     Base.metadata.create_all(db_engine)
 
     bot.run(user_token, bot_token, db_engine)
