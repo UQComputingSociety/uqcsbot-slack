@@ -43,7 +43,7 @@ def set_link_value(key: str, value: str, channel: str,
         exists.value = value
         session.commit()
         session.close()
-        return SetResult.OVERRIDE_SUCCESS, exists.value
+        return SetResult.OVERRIDE_SUCCESS, value
     except NoResultFound:
         session.add(Link(key=key, channel=link_channel, value=value))
         session.commit()
