@@ -21,7 +21,7 @@ install_requires = [
     'feedparser',
     'slackblocks',
     'sqlalchemy',
-    'humanize'
+    'humanize',
 ]
 
 tests_require = [
