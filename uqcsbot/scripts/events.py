@@ -8,6 +8,7 @@ from icalendar import Calendar
 from slackblocks import Attachment, SectionBlock
 from pytz import timezone, utc
 from typing import Tuple, Optional
+from dateutil.rrule import rrulestr
 
 from uqcsbot import bot, Command
 from uqcsbot.utils.command_utils import UsageSyntaxException, loading_status
@@ -21,6 +22,8 @@ FILTER_REGEX = re.compile('full|all|[0-9]+( weeks?)?|jan.*|feb.*|mar.*'
                           + '|apr.*|may.*|jun.*|jul.*|aug.*|sep.*|oct.*|nov.*|dec.*')
 BRISBANE_TZ = timezone('Australia/Brisbane')
 MONTH_NUMBER = {month.lower(): index for index, month in enumerate(month_abbr)}
+
+MAX_RECURRING_EVENTS = 3
 
 
 class EventFilter(object):
@@ -80,11 +83,13 @@ class EventFilter(object):
 
 class Event(object):
     def __init__(self, start: datetime, end: datetime,
-                 location: str, summary: str, link: Optional[str], source: Optional[str] = None):
+            location: str, summary: str, recurring: bool,
+            link: Optional[str], source: Optional[str] = None):
         self.start = start
         self.end = end
         self.location = location
         self.summary = summary
+        self.recurring = recurring
         self.link = link
         self.source = source
 
@@ -104,19 +109,25 @@ class Event(object):
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     @classmethod
-    def from_cal_event(cls, cal_event, source: str = "UQCS"):
-        start = cal_event.get('dtstart').dt
-        end = cal_event.get('dtend').dt
-        # ical 'dt' properties are parsed as a 'DDD' (datetime, date, duration) type.
-        # The below code converts a date to a datetime, where time is set to midnight.
-        if isinstance(start, date) and not isinstance(start, datetime):
-            start = datetime.combine(start, datetime.min.time()).astimezone(utc)
-        if isinstance(end, date) and not isinstance(end, datetime):
-            end = datetime.combine(end, datetime.max.time()).astimezone(utc)
+    def from_cal_event(cls, cal_event, source: str = "UQCS", reccurance_dt=None):
+        if reccurance_dt:
+            start = reccurance_dt
+            end = reccurance_dt + (cal_event.get('DTEND').dt - cal_event.get('DTSTART').dt)
+
+        else:
+            start = cal_event.get('dtstart').dt
+            end = cal_event.get('dtend').dt
+            # ical 'dt' properties are parsed as a 'DDD' (datetime, date, duration) type.
+            # The below code converts a date to a datetime, where time is set to midnight.
+            if isinstance(start, date) and not isinstance(start, datetime):
+                start = datetime.combine(start, datetime.min.time()).astimezone(utc)
+            if isinstance(end, date) and not isinstance(end, datetime):
+                end = datetime.combine(end, datetime.max.time()).astimezone(utc)
         location = cal_event.get('location', 'TBA')
         summary = cal_event.get('summary')
         return cls(start, end, location,
-                   f"{'[External] ' if source == 'external' else ''}{summary}", None, source)
+                   f"{'[External] ' if source == 'external' else ''}{summary}",
+                   reccurance_dt is not None, None, source)
 
     @classmethod
     def from_seminar(cls, seminar_event: Tuple[str, str, datetime, str]):
@@ -124,7 +135,7 @@ class Event(object):
         # ITEE doesn't specify the length of seminars, but they are normally one hour
         end = start + timedelta(hours=1)
         # Note: this
-        return cls(start, end, location, f"[ITEE Seminar] {title}", link, "ITEE")
+        return cls(start, end, location, f"[ITEE Seminar] {title}", False, link, "ITEE")
 
     def __str__(self):
         d1 = self.start.astimezone(BRISBANE_TZ)
@@ -138,9 +149,14 @@ class Event(object):
         else:
             end_str = f"{d2.hour}:{d2.minute:02}"
 
+        if self.recurring:
+            rec_str = "[RECURRING] "
+        else:
+            rec_str = ""
+
         # Encode user-provided text to prevent certain characters
         # being interpreted as slack commands.
-        summary_str = Event.encode_text(self.summary)
+        summary_str = Event.encode_text(rec_str + self.summary)
         location_str = Event.encode_text(self.location)
 
         if self.link is None:
@@ -161,6 +177,43 @@ def get_current_time():
     return datetime.now(tz=BRISBANE_TZ).astimezone(utc)
 
 
+def handle_calendar(calendar):
+    """
+    returns a list of events from a calendar
+    """
+    events = []
+    current_time = get_current_time()
+    # subcomponents are how icalendar returns the list of things in the calendar
+    for c in calendar.subcomponents:
+        # we are only interested in ones with the name VEVENT as they
+        # are events
+        if c.name != 'VEVENT':
+            continue
+        elif c.get('RRULE') is not None:
+            # If the until date exists, update it to UTC
+            if c['RRULE'].get('UNTIL') is not None:
+                until = datetime.combine(c['RRULE']['UNTIL'][0], datetime.min.time()) \
+                            .astimezone(utc)
+                c['RRULE']['UNTIL'] = [until]
+            rule = rrulestr('\n'.join([
+                    line for line in c.content_lines()
+                    if line.startswith('RRULE')
+                    or line.startswith('EXDATE')
+                ]), dtstart=c.get('DTSTART').dt)
+            rule = [dt for dt in list(rule) if dt > current_time]
+            for dt in rule[:MAX_RECURRING_EVENTS]:
+                dt = dt.replace(tzinfo=BRISBANE_TZ)
+                event = Event.from_cal_event(c, reccurance_dt=dt)
+                events.append(event)
+        else:
+            # we convert it to our own event class
+            event = Event.from_cal_event(c)
+            # then we want to filter out any events that are not after the current time
+            if event.start > current_time:
+                events.append(event)
+
+    return events
+
 @bot.on_command('events')
 @loading_status
 def handle_events(command: Command):
@@ -172,6 +225,7 @@ def handle_events(command: Command):
     """
 
     argument = command.arg if command.has_arg() else ""
+    current_time = get_current_time()
 
     source_get = {"uqcs": False, "itee": False, "external": False}
     for k in source_get:
@@ -186,37 +240,14 @@ def handle_events(command: Command):
     if not event_filter.is_valid:
         raise UsageSyntaxException()
 
-    uqcs_calendar = Calendar.from_ical(get_calendar_file("uqcs"))
-    current_time = get_current_time()
-
     events = []
-    # subcomponents are how icalendar returns the list of things in the calendar
+
     if source_get["uqcs"]:
-        for c in uqcs_calendar.subcomponents:
-            # TODO: support recurring events
-            # we are only interested in ones with the name VEVENT as they
-            # are events we also currently filter out recurring events
-            if c.name != 'VEVENT' or c.get('RRULE') is not None:
-                continue
-
-            # we convert it to our own event class
-            event = Event.from_cal_event(c)
-            # then we want to filter out any events that are not after the current time
-            if event.start > current_time:
-                events.append(event)
-
+        uqcs_calendar = Calendar.from_ical(get_calendar_file("uqcs"))
+        events += handle_calendar(uqcs_calendar)
     if source_get["external"]:
         external_calendar = Calendar.from_ical(get_calendar_file("external"))
-        for c in external_calendar.subcomponents:
-            if c.name != 'VEVENT' or c.get('RRULE') is not None:
-                continue
-
-            # we convert it to our own event class
-            event = Event.from_cal_event(c, "external")
-            # then we want to filter out any events that are not after the current time
-            if event.start > current_time:
-                events.append(event)
-
+        events += handle_calendar(external_calendar)
     if source_get["itee"]:
         try:
             # Try to include events from the ITEE seminars page

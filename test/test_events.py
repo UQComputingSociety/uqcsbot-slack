@@ -69,6 +69,13 @@ def mocked_events_ics(source: str = "uqcs") -> bytes:
     with open("test/test_events_events.ics", "rb") as events_file:
         return events_file.read()
 
+def mocked_get_august_2018_time():
+    """
+    Returns a fixed datetime with recurring events in the future.
+    """
+    return datetime(2018, 8, 1, tzinfo=BRISBANE_TZ).astimezone(utc)
+
+
 
 def mocked_get_august_time():
     """
@@ -314,3 +321,19 @@ def test_events_filter_itee(uqcsbot: MockUQCSBot):
     assert len(messages) == 2
     expected = "_Events in the next *2 weeks*:_"
     assert messages[1].get('text') == expected
+
+
+
+@patch("uqcsbot.utils.itee_seminar_utils.get_seminar_summary_page",
+       new=mocked_html_summary_get_no_results)
+@patch("uqcsbot.scripts.events.get_calendar_file", new=mocked_events_ics)
+@patch("uqcsbot.scripts.events.get_current_time", new=mocked_get_august_2018_time)
+def test_events_recurring(uqcsbot: MockUQCSBot):
+    """
+    This test simulates the user invoking '!events', for both UQCS and Seminar calendars
+    """
+    uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
+    messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
+    assert len(messages) == 2
+    expected = "*`[RECURRING] deadbeef Binary Exploitation Bootcamp`*\n*TUE AUG 7 18:30 - 20:00* _(78-346)_"
+    assert messages[1].get('attachments')[2].get('blocks')[0].get('text').get('text') == expected
