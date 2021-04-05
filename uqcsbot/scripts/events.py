@@ -109,7 +109,7 @@ class Event(object):
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     @classmethod
-    def from_cal_event(cls, cal_event, source: str = "UQCS", recurrence_dt=None):
+    def from_cal_event(cls, cal_event, source: str = "UQCS", recurrence_dt: datetime = None):
         """
         Converts an ical event to an Event
 
@@ -174,15 +174,15 @@ class Event(object):
 
 def get_current_time():
     """
-    returns the current date and time
-    this function exists purely so it can be mocked for testing
+    Returns the current date and time
+    This function exists purely so it can be mocked for testing
     """
     return datetime.now(tz=BRISBANE_TZ).astimezone(utc)
 
 
 def handle_calendar(calendar) -> List[Event]:
     """
-    returns a list of events from a calendar
+    Returns a list of events from a calendar
     """
     events = []
     current_time = get_current_time()
