@@ -2,17 +2,24 @@
 Configuration for Pytest
 """
 
-from itertools import islice
-from functools import partial
-from collections import defaultdict
+import os
 import time
+from collections import defaultdict
+from copy import deepcopy
+from functools import partial
+from itertools import islice
 from typing import Optional
+
 import pytest
 from slack import WebClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import Session
+
 import uqcsbot as uqcsbot_module
 from uqcsbot.api import APIWrapper
 from uqcsbot.base import UQCSBot, Command
-from copy import deepcopy
+from uqcsbot.models import Base
 
 # Convenient (but arbitrary) channels and users for use in testing
 TEST_CHANNEL_ID = "C1234567890"
@@ -299,6 +306,14 @@ class MockUQCSBot(UQCSBot):
 
         return {'ok': True, 'channel': channel.id, 'ts': message['ts'],
                 'message': message}
+
+    def create_db_session(self) -> None:
+        return
+
+    def mocked_create_db_session(self) -> Session:
+        engine = create_engine(os.environ["UQCSBOT_DB_URI"], echo=True)
+        Base.metadata.create_all(engine)
+        return sessionmaker(bind=engine)()
 
     def _handle_command(self, message: dict) -> None:
         '''
