@@ -83,8 +83,8 @@ class EventFilter(object):
 
 class Event(object):
     def __init__(self, start: datetime, end: datetime,
-            location: str, summary: str, recurring: bool,
-            link: Optional[str], source: Optional[str] = None):
+                 location: str, summary: str, recurring: bool,
+                 link: Optional[str], source: Optional[str] = None):
         self.start = start
         self.end = end
         self.location = location
@@ -177,7 +177,7 @@ def get_current_time():
     return datetime.now(tz=BRISBANE_TZ).astimezone(utc)
 
 
-def handle_calendar(calendar):
+def handle_calendar(calendar) -> List[Event]:
     """
     returns a list of events from a calendar
     """
