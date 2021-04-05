@@ -109,10 +109,18 @@ class Event(object):
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     @classmethod
-    def from_cal_event(cls, cal_event, source: str = "UQCS", reccurance_dt=None):
-        if reccurance_dt:
-            start = reccurance_dt
-            end = reccurance_dt + (cal_event.get('DTEND').dt - cal_event.get('DTSTART').dt)
+    def from_cal_event(cls, cal_event, source: str = "UQCS", recurrence_dt=None):
+        """
+        Converts an ical event to an Event
+
+        :param cal_event: event to convert
+        :param source: the calendar the event was sourced from
+        :param recurrence_dt: if this is a one off event then None
+                                else the date of this instance of a recurring event
+        """
+        if recurrence_dt:
+            start = recurrence_dt
+            end = recurrence_dt + (cal_event.get('DTEND').dt - cal_event.get('DTSTART').dt)
 
         else:
             start = cal_event.get('dtstart').dt
@@ -127,7 +135,7 @@ class Event(object):
         summary = cal_event.get('summary')
         return cls(start, end, location,
                    f"{'[External] ' if source == 'external' else ''}{summary}",
-                   reccurance_dt is not None, None, source)
+                   recurrence_dt is not None, None, source)
 
     @classmethod
     def from_seminar(cls, seminar_event: Tuple[str, str, datetime, str]):
@@ -149,14 +157,9 @@ class Event(object):
         else:
             end_str = f"{d2.hour}:{d2.minute:02}"
 
-        if self.recurring:
-            rec_str = "[RECURRING] "
-        else:
-            rec_str = ""
-
         # Encode user-provided text to prevent certain characters
         # being interpreted as slack commands.
-        summary_str = Event.encode_text(rec_str + self.summary)
+        summary_str = Event.encode_text(("[RECURRING] " if self.recurring else "") + self.summary)
         location_str = Event.encode_text(self.location)
 
         if self.link is None:
@@ -184,30 +187,30 @@ def handle_calendar(calendar) -> List[Event]:
     events = []
     current_time = get_current_time()
     # subcomponents are how icalendar returns the list of things in the calendar
-    for c in calendar.subcomponents:
+    for component in calendar.subcomponents:
         # we are only interested in ones with the name VEVENT as they
         # are events
-        if c.name != 'VEVENT':
+        if component.name != 'VEVENT':
             continue
-        elif c.get('RRULE') is not None:
+        elif component.get('RRULE') is not None:
             # If the until date exists, update it to UTC
-            if c['RRULE'].get('UNTIL') is not None:
-                until = datetime.combine(c['RRULE']['UNTIL'][0], datetime.min.time()) \
+            if component['RRULE'].get('UNTIL') is not None:
+                until = datetime.combine(component['RRULE']['UNTIL'][0], datetime.min.time()) \
                             .astimezone(utc)
-                c['RRULE']['UNTIL'] = [until]
+                component['RRULE']['UNTIL'] = [until]
             rule = rrulestr('\n'.join([
-                    line for line in c.content_lines()
+                    line for line in component.content_lines()
                     if line.startswith('RRULE')
                     or line.startswith('EXDATE')
-                ]), dtstart=c.get('DTSTART').dt)
+                ]), dtstart=component.get('DTSTART').dt)
             rule = [dt for dt in list(rule) if dt > current_time]
             for dt in rule[:MAX_RECURRING_EVENTS]:
                 dt = dt.replace(tzinfo=BRISBANE_TZ)
-                event = Event.from_cal_event(c, reccurance_dt=dt)
+                event = Event.from_cal_event(component, recurrence_dt=dt)
                 events.append(event)
         else:
             # we convert it to our own event class
-            event = Event.from_cal_event(c)
+            event = Event.from_cal_event(component)
             # then we want to filter out any events that are not after the current time
             if event.start > current_time:
                 events.append(event)

@@ -71,7 +71,8 @@ def mocked_events_ics(source: str = "uqcs") -> bytes:
 
 def mocked_get_august_2018_time():
     """
-    Returns a fixed datetime with recurring events in the future.
+    Returns a fixed datetime at the start of August 2018.
+    (Unline mocked_get_august_time the week after this date has a recurring event)
     """
     return datetime(2018, 8, 1, tzinfo=BRISBANE_TZ).astimezone(utc)
 
@@ -326,7 +327,7 @@ def test_events_filter_itee(uqcsbot: MockUQCSBot):
 @patch("uqcsbot.scripts.events.get_current_time", new=mocked_get_august_2018_time)
 def test_events_recurring(uqcsbot: MockUQCSBot):
     """
-    This test simulates the user invoking '!events', for both UQCS and Seminar calendars
+    This test simulates the user invoking '!events', to test for recurring events.
     """
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
