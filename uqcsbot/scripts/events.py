@@ -159,7 +159,7 @@ class Event(object):
 
         # Encode user-provided text to prevent certain characters
         # being interpreted as slack commands.
-        summary_str = Event.encode_text(("[RECURRING] " if self.recurring else "") + self.summary)
+        summary_str = Event.encode_text(("[Recurring] " if self.recurring else "") + self.summary)
         location_str = Event.encode_text(self.location)
 
         if self.link is None:
