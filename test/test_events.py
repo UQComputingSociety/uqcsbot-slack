@@ -332,6 +332,6 @@ def test_events_recurring(uqcsbot: MockUQCSBot):
     uqcsbot.post_message(TEST_CHANNEL_ID, "!events")
     messages = uqcsbot.test_messages.get(TEST_CHANNEL_ID, [])
     assert len(messages) == 2
-    expected = "*`[RECURRING] deadbeef Binary Exploitation Bootcamp`*\n" \
+    expected = "*`[Recurring] deadbeef Binary Exploitation Bootcamp`*\n" \
         "*TUE AUG 7 18:30 - 20:00* _(78-346)_"
     assert messages[1].get('attachments')[2].get('blocks')[0].get('text').get('text') == expected
