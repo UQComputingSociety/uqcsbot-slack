@@ -91,7 +91,7 @@ def get_link_value(key: str, channel: str,
 @loading_status
 def handle_link(command: Command) -> None:
     """
-    `!link [-c | -g] [-o] key [value [value ...]]` - Set and retrieve information in a key value
+    `!link [-c | -g] [-f] key [value [value ...]]` - Set and retrieve information in a key value
     store. Links can be set to be channel specific or global. Links are set as global by default,
     and channel specific links are retrieved by default unless overridden with the respective flag.
     """
@@ -103,7 +103,7 @@ def handle_link(command: Command) -> None:
                             help="Ensure a channel link is retrieved, or none is")
     flag_group.add_argument("-g", "--global", action="store_true", dest="global_flag",
                             help="Ignore channel link and force retrieval of global")
-    parser.add_argument("-o", "--override", action="store_true")
+    parser.add_argument("-f", "--force-override", action="store_true", dest="override")
 
     try:
         args = parser.parse_args(command.arg.split() if command.has_arg() else [])

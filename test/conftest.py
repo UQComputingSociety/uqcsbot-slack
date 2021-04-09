@@ -59,6 +59,10 @@ class MockUQCSBot(UQCSBot):
         self.test_messages = defaultdict(list)
         self.test_users = deepcopy(TEST_USERS)
         self.test_channels = deepcopy(TEST_CHANNELS)
+        # Mock DB
+        self.db_engine = create_engine("sqlite:///:memory", echo=True)
+        Base.metadata.create_all(self.db_engine)
+        self._mock_session_maker = sessionmaker(bind=self.db_engine)
 
         def mocked_api_call(method, *, http_verb='POST', **kwargs):
             '''
@@ -307,13 +311,8 @@ class MockUQCSBot(UQCSBot):
         return {'ok': True, 'channel': channel.id, 'ts': message['ts'],
                 'message': message}
 
-    def create_db_session(self) -> None:
-        return
-
-    def mocked_create_db_session(self) -> Session:
-        engine = create_engine(os.environ["UQCSBOT_DB_URI"], echo=True)
-        Base.metadata.create_all(engine)
-        return sessionmaker(bind=engine)()
+    def create_db_session(self) -> Session:
+        return self._mock_session_maker()
 
     def _handle_command(self, message: dict) -> None:
         '''
