@@ -5,7 +5,7 @@ from sqlalchemy import Column, String, Integer
 Base = declarative_base()
 
 
-class Link(Base):
+class Link(Base):  # type: ignore
     __tablename__ = 'links'
 
     id = Column("id", Integer, primary_key=True, nullable=False, autoincrement=True)

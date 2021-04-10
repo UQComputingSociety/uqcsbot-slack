@@ -115,7 +115,7 @@ def handle_link(command: Command) -> None:
 
     channel = bot.channels.get(command.channel_id)
     if not channel:
-        return bot.post_message(command.channel_id, attachments=[
+        return bot.post_message(command.channel_id, "", attachments=[
             Attachment(SectionBlock("Cannot find channel name, please try again."),
                        color=Color.YELLOW)._resolve()
         ])
