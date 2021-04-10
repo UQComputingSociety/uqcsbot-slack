@@ -11,6 +11,7 @@ from itertools import islice
 from typing import Optional
 
 import pytest
+import sqlalchemy
 from slack import WebClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -361,3 +362,6 @@ def uqcsbot(_uqcsbot: MockUQCSBot):
     _uqcsbot.test_messages.clear()
     _uqcsbot.test_users = deepcopy(TEST_USERS)
     _uqcsbot.test_channels = deepcopy(TEST_CHANNELS)
+    # Reset DB
+    Base.metadata.drop_all(_uqcsbot.db_engine)
+    Base.metadata.create_all(_uqcsbot.db_engine)

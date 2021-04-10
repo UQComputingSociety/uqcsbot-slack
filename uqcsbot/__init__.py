@@ -13,6 +13,7 @@ from uqcsbot.base import bot, Command, UQCSBot  # noqa
 from uqcsbot.models import Base
 
 LOGGER = logging.getLogger("uqcsbot")
+logging.getLogger('sqlalchemy.engine').setLevel(logging.ERROR)
 
 DATABASE_URI = os.environ.get("UQCSBOT_DB_URI")
 

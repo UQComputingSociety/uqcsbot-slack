@@ -14,7 +14,7 @@ class SetResult(Enum):
     """
     Possible outcomes of the set link operation.
     """
-    NEEDS_OVERRIDE = "Link already exists, use `-o` to override"
+    NEEDS_OVERRIDE = "Link already exists, use `-f` to override"
     OVERRIDE_SUCCESS = "Successfully overrode link"
     NEW_LINK_SUCCESS = "Successfully added link"
 
@@ -40,15 +40,14 @@ def set_link_value(key: str, value: str, channel: str,
                                             Link.channel == link_channel).one()
         if exists and not override:
             return SetResult.NEEDS_OVERRIDE, exists.value
-        exists.value = value
-        session.commit()
-        session.close()
-        return SetResult.OVERRIDE_SUCCESS, value
+        session.delete(exists)
+        result = SetResult.OVERRIDE_SUCCESS
     except NoResultFound:
-        session.add(Link(key=key, channel=link_channel, value=value))
-        session.commit()
-        session.close()
-        return SetResult.NEW_LINK_SUCCESS, value
+        result = SetResult.NEW_LINK_SUCCESS
+    session.add(Link(key=key, channel=link_channel, value=value))
+    session.commit()
+    session.close()
+    return result, value
 
 
 def get_link_value(key: str, channel: str,
@@ -73,10 +72,10 @@ def get_link_value(key: str, channel: str,
     session.close()
 
     if global_flag:
-        return (global_match.value, "global") if global_match else None, None
+        return (global_match.value, "global") if global_match else (None, None)
 
     if channel_flag:
-        return (channel_match.value, "channel") if channel_match else None, None
+        return (channel_match.value, "channel") if channel_match else (None, None)
 
     if channel_match:
         return channel_match.value, "channel"
@@ -103,21 +102,23 @@ def handle_link(command: Command) -> None:
                             help="Ensure a channel link is retrieved, or none is")
     flag_group.add_argument("-g", "--global", action="store_true", dest="global_flag",
                             help="Ignore channel link and force retrieval of global")
-    parser.add_argument("-f", "--force-override", action="store_true", dest="override")
+    parser.add_argument("-f", "--force-override", action="store_true", dest="override",
+                        help="Must be passed if overriding a link")
 
     try:
         args = parser.parse_args(command.arg.split() if command.has_arg() else [])
     except SystemExit:
         # Incorrect Usage
         return bot.post_message(command.channel_id, "",
-                                attachments=[Attachment(SectionBlock(str(parser.format_usage())),
+                                attachments=[Attachment(SectionBlock(str(parser.format_help())),
                                                         color=Color.YELLOW)._resolve()])
 
     channel = bot.channels.get(command.channel_id)
     if not channel:
-        attachment = Attachment(SectionBlock("Cannot find channel name, please try again."),
-                                color=Color.YELLOW)._resolve()
-        return bot.post_message(command.channel_id, attachments=[attachment])
+        return bot.post_message(command.channel_id, attachments=[
+            Attachment(SectionBlock("Cannot find channel name, please try again."),
+                       color=Color.YELLOW)._resolve()
+        ])
     else:
         channel_name = bot.channels.get(command.channel_id).name
 
@@ -126,11 +127,13 @@ def handle_link(command: Command) -> None:
         link_value, source = get_link_value(args.key, channel_name, args.global_flag,
                                             args.channel_flag)
         if_channel_flag = f" in channel `{channel_name}`" if args.channel_flag else ""
-        response = f"{args.key} ({source}): {link_value}" if link_value else \
-            f"No link found for key: `{args.key}` {if_channel_flag}"
+        response = f"{args.key} ({source if source == 'global' else channel_name}): " \
+                   f"{link_value}" if link_value else \
+                   f"No link found for key: `{args.key}`{if_channel_flag}"
         color = Color.GREEN if link_value else Color.RED
-        attachment = Attachment(SectionBlock(response), color=color)._resolve()
-        return bot.post_message(command.channel_id, "", attachments=[attachment])
+        return bot.post_message(command.channel_id, "", attachments=[
+            Attachment(SectionBlock(response), color=color)._resolve()
+        ])
 
     # Set a link
     if args.key and args.value:
@@ -140,7 +143,7 @@ def handle_link(command: Command) -> None:
                                                channel_flag=args.channel_flag,
                                                override=args.override)
         color = Color.YELLOW if result == SetResult.NEEDS_OVERRIDE else Color.GREEN
-        response = f"{args.key} ({channel_name if args.channel_flag else 'global'}) = " \
+        response = f"{args.key} ({channel_name if args.channel_flag else 'global'}): " \
                    f"{current_value}"
         attachment = Attachment(SectionBlock(response), color=color)._resolve()
         bot.post_message(command.channel_id, f"{result.value}:", attachments=[attachment])
