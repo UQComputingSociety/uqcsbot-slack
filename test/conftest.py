@@ -2,7 +2,6 @@
 Configuration for Pytest
 """
 
-import os
 import time
 from collections import defaultdict
 from copy import deepcopy
@@ -11,7 +10,6 @@ from itertools import islice
 from typing import Optional
 
 import pytest
-import sqlalchemy
 from slack import WebClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
