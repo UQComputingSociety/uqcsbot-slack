@@ -68,7 +68,7 @@ def get_link_value(key: str, channel: str,
     channel_match = session.query(Link).filter(Link.key == key,
                                                Link.channel == channel).one_or_none()
     global_match = session.query(Link).filter(Link.key == key,
-                                              Link.channel == None).one_or_none()
+                                              Link.channel == None).one_or_none()  # noqa: E711
     session.close()
 
     if global_flag:
