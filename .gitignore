@@ -108,3 +108,4 @@ venv.bak/
 .pytest_cache
 
 test.db
+:memory
