@@ -10,6 +10,14 @@ from uqcsbot.models import Link
 from uqcsbot.utils.command_utils import loading_status
 
 
+class LinkScope(Enum):
+    """
+    Possible requested scopes for setting or retrieving a link.
+    """
+    CHANNEL = "channel"
+    GLOBAL = "global"
+
+
 class SetResult(Enum):
     """
     Possible outcomes of the set link operation.
@@ -20,7 +28,7 @@ class SetResult(Enum):
 
 
 def set_link_value(key: str, value: str, channel: str,
-                   channel_flag: bool, override: bool) -> Tuple[SetResult, str]:
+                   link_scope: LinkScope, override: bool) -> Tuple[SetResult, str]:
     """
     Sets a corresponding value for a particular key. Keys are set to global by default but this can
     be overridden by passing the channel flag. Existing links can only be overridden if the
@@ -28,11 +36,11 @@ def set_link_value(key: str, value: str, channel: str,
     :param key: the lookup key for users to search the value by
     :param value: the value to associate with the key
     :param channel: the name of the channel the set operation was initiated in
-    :param channel_flag: required to be True if the association is to be specific to the channel
+    :param link_scope: required to be True if the association is to be specific to the channel
     :param override: required to be True if an association already exists and needs to be updated
     :return: a SetResult status and the value associated with the given key/channel combination
     """
-    link_channel = channel if channel_flag else None
+    link_channel = channel if link_scope == LinkScope.CHANNEL else None
     session = bot.create_db_session()
 
     try:
@@ -50,8 +58,9 @@ def set_link_value(key: str, value: str, channel: str,
     return result, value
 
 
-def get_link_value(key: str, channel: str,
-                   global_flag: bool, channel_flag: bool) -> Tuple[Optional[str], Optional[str]]:
+def get_link_value(key: str,
+                   channel: str,
+                   link_scope: LinkScope) -> Tuple[Optional[str], Optional[str]]:
     """
     Gets the value associated with a given key (and optionally channel). If a channel association
     exists, this is returned, otherwise a global association is returned. If no association exists
@@ -59,8 +68,7 @@ def get_link_value(key: str, channel: str,
     force retrieval of a global association when a channel association exists.
     :param key: the key to look up
     :param channel: the name of the channel the lookup request was made from
-    :param global_flag: required to be True if the global association is requested
-    :param channel_flag: required to be True if the channel associate is requested
+    :param link_scope: the requested scope to retrieve the link from (if supplied)
     :return: the associated value if an association exists, else None, and the source
     (global/channel) if any else None
     """
@@ -71,10 +79,10 @@ def get_link_value(key: str, channel: str,
                                               Link.channel == None).one_or_none()  # noqa: E711
     session.close()
 
-    if global_flag:
+    if link_scope == LinkScope.GLOBAL:
         return (global_match.value, "global") if global_match else (None, None)
 
-    if channel_flag:
+    if link_scope == LinkScope.CHANNEL:
         return (channel_match.value, "channel") if channel_match else (None, None)
 
     if channel_match:
@@ -122,10 +130,14 @@ def handle_link(command: Command) -> None:
     else:
         channel_name = bot.channels.get(command.channel_id).name
 
+    link_scope = LinkScope.CHANNEL if args.channel_flag else \
+        LinkScope.GLOBAL if args.global_flag else None
+
     # Retrieve a link
     if not args.value:
-        link_value, source = get_link_value(args.key, channel_name, args.global_flag,
-                                            args.channel_flag)
+        link_value, source = get_link_value(key=args.key,
+                                            channel=channel_name,
+                                            link_scope=link_scope)
         if_channel_flag = f" in channel `{channel_name}`" if args.channel_flag else ""
         response = f"{args.key} ({source if source == 'global' else channel_name}): " \
                    f"{link_value}" if link_value else \
@@ -140,7 +152,7 @@ def handle_link(command: Command) -> None:
         result, current_value = set_link_value(key=args.key,
                                                channel=channel_name,
                                                value=" ".join(args.value),
-                                               channel_flag=args.channel_flag,
+                                               link_scope=link_scope,
                                                override=args.override)
         color = Color.YELLOW if result == SetResult.NEEDS_OVERRIDE else Color.GREEN
         response = f"{args.key} ({channel_name if args.channel_flag else 'global'}): " \
