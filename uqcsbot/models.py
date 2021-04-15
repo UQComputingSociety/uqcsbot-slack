@@ -14,4 +14,4 @@ class Link(Base):  # type: ignore
     value = Column("value", String, nullable=False)
 
     def __repr__(self):
-        return f"<Link: ({self.key}, {self.channel} = {self.value})>"
+        return f"Link({self.key}, {self.channel}, {self.value})"

@@ -28,7 +28,7 @@ class SetResult(Enum):
 
 
 def set_link_value(key: str, value: str, channel: str,
-                   link_scope: LinkScope, override: bool) -> Tuple[SetResult, str]:
+                   override: bool, link_scope: Optional[LinkScope] = None) -> Tuple[SetResult, str]:
     """
     Sets a corresponding value for a particular key. Keys are set to global by default but this can
     be overridden by passing the channel flag. Existing links can only be overridden if the
@@ -36,7 +36,7 @@ def set_link_value(key: str, value: str, channel: str,
     :param key: the lookup key for users to search the value by
     :param value: the value to associate with the key
     :param channel: the name of the channel the set operation was initiated in
-    :param link_scope: required to be True if the association is to be specific to the channel
+    :param link_scope: defines the scope to set the link in, defaults to global if not provided
     :param override: required to be True if an association already exists and needs to be updated
     :return: a SetResult status and the value associated with the given key/channel combination
     """
@@ -60,7 +60,7 @@ def set_link_value(key: str, value: str, channel: str,
 
 def get_link_value(key: str,
                    channel: str,
-                   link_scope: LinkScope) -> Tuple[Optional[str], Optional[str]]:
+                   link_scope: Optional[LinkScope] = None) -> Tuple[Optional[str], Optional[str]]:
     """
     Gets the value associated with a given key (and optionally channel). If a channel association
     exists, this is returned, otherwise a global association is returned. If no association exists
@@ -127,8 +127,8 @@ def handle_link(command: Command) -> None:
             Attachment(SectionBlock("Cannot find channel name, please try again."),
                        color=Color.YELLOW)._resolve()
         ])
-    else:
-        channel_name = bot.channels.get(command.channel_id).name
+
+    channel_name = channel.name
 
     link_scope = LinkScope.CHANNEL if args.channel_flag else \
         LinkScope.GLOBAL if args.global_flag else None
@@ -138,10 +138,12 @@ def handle_link(command: Command) -> None:
         link_value, source = get_link_value(key=args.key,
                                             channel=channel_name,
                                             link_scope=link_scope)
-        if_channel_flag = f" in channel `{channel_name}`" if args.channel_flag else ""
-        response = f"{args.key} ({source if source == 'global' else channel_name}): " \
-                   f"{link_value}" if link_value else \
-                   f"No link found for key: `{args.key}`{if_channel_flag}"
+        channel_text = f" in channel `{channel_name}`" if args.channel_flag else ""
+        if link_value:
+            source_text = source if source == 'global' else channel_name
+            response = f"{args.key} ({source_text}): {link_value}"
+        else:
+            response = f"No link found for key: `{args.key}`" + channel_text
         color = Color.GREEN if link_value else Color.RED
         return bot.post_message(command.channel_id, "", attachments=[
             Attachment(SectionBlock(response), color=color)._resolve()
@@ -152,10 +154,10 @@ def handle_link(command: Command) -> None:
         result, current_value = set_link_value(key=args.key,
                                                channel=channel_name,
                                                value=" ".join(args.value),
-                                               link_scope=link_scope,
-                                               override=args.override)
+                                               override=args.override,
+                                               link_scope=link_scope)
         color = Color.YELLOW if result == SetResult.NEEDS_OVERRIDE else Color.GREEN
-        response = f"{args.key} ({channel_name if args.channel_flag else 'global'}): " \
-                   f"{current_value}"
+        scope = channel_name if args.channel_flag else 'global'
+        response = f"{args.key} ({scope}): {current_value}"
         attachment = Attachment(SectionBlock(response), color=color)._resolve()
         bot.post_message(command.channel_id, f"{result.value}:", attachments=[attachment])
