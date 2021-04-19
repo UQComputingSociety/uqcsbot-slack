@@ -2,17 +2,23 @@
 Configuration for Pytest
 """
 
-from itertools import islice
-from functools import partial
-from collections import defaultdict
 import time
+from collections import defaultdict
+from copy import deepcopy
+from functools import partial
+from itertools import islice
 from typing import Optional
+
 import pytest
 from slack import WebClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import Session
+
 import uqcsbot as uqcsbot_module
 from uqcsbot.api import APIWrapper
 from uqcsbot.base import UQCSBot, Command
-from copy import deepcopy
+from uqcsbot.models import Base
 
 # Convenient (but arbitrary) channels and users for use in testing
 TEST_CHANNEL_ID = "C1234567890"
@@ -52,6 +58,10 @@ class MockUQCSBot(UQCSBot):
         self.test_messages = defaultdict(list)
         self.test_users = deepcopy(TEST_USERS)
         self.test_channels = deepcopy(TEST_CHANNELS)
+        # Mock DB
+        self.db_engine = create_engine("sqlite:///:memory", echo=True)
+        Base.metadata.create_all(self.db_engine)
+        self._mock_session_maker = sessionmaker(bind=self.db_engine)
 
         def mocked_api_call(method, *, http_verb='POST', **kwargs):
             '''
@@ -300,6 +310,9 @@ class MockUQCSBot(UQCSBot):
         return {'ok': True, 'channel': channel.id, 'ts': message['ts'],
                 'message': message}
 
+    def create_db_session(self) -> Session:
+        return self._mock_session_maker()
+
     def _handle_command(self, message: dict) -> None:
         '''
         Handles commands without using an executor.
@@ -347,3 +360,6 @@ def uqcsbot(_uqcsbot: MockUQCSBot):
     _uqcsbot.test_messages.clear()
     _uqcsbot.test_users = deepcopy(TEST_USERS)
     _uqcsbot.test_channels = deepcopy(TEST_CHANNELS)
+    # Reset DB
+    Base.metadata.drop_all(_uqcsbot.db_engine)
+    Base.metadata.create_all(_uqcsbot.db_engine)

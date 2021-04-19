@@ -20,7 +20,8 @@ install_requires = [
     'unidecode',
     'feedparser',
     'slackblocks',
-    'humanize'
+    'sqlalchemy',
+    'humanize',
 ]
 
 tests_require = [
