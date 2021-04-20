@@ -21,6 +21,7 @@ install_requires = [
     'feedparser',
     'slackblocks',
     'sqlalchemy',
+    'psycopg2',
     'humanize',
 ]
 
