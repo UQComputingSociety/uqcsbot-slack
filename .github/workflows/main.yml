@@ -82,9 +82,11 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+  # Only run deploy script on main.
   deploy:
-    runs-on: ubuntu-latests
+    runs-on: ubuntu-latest
     needs: build
+    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
       - run: ./deploy.sh
