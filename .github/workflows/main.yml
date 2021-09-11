@@ -11,7 +11,9 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  # Python and associated Poetry
   PYTHON_VERSION: 3.8
+  POETRY_VERSION: 1.1.8
 
 jobs:
   test:
