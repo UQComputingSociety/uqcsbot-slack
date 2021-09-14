@@ -6,6 +6,9 @@ services:
   uqcsbot:
     build: .
     restart: "unless-stopped"
+    command: python -m uqcsbot --dev
+    environment:
+      UQCSBOT_DB_URI: "postgresql://uqcsbot:uqcsbot@database:5432/uqcsbot"
     depends_on:
       - database
 

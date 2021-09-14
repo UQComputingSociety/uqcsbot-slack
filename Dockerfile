@@ -21,4 +21,4 @@ COPY pyproject.toml poetry.lock /app/
 RUN poetry install
 COPY ./uqcsbot ./uqcsbot
 
-CMD python -m uqcsbot --dev
+CMD python -m uqcsbot
