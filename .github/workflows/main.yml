@@ -95,5 +95,13 @@ jobs:
           DOCKER_KEY: ${{ secrets.DOCKER_KEY }}
           DOCKER_CERT: ${{ secrets.DOCKER_CERT }}
           DOCKER_HOST: ${{ secrets.DOCKER_HOST }}
-          BOT_TOKEN: ${{ secrets.DEPLOY_BOT_TOKEN }}
-          POSTGRES_URI: ${{ secrets.DEPLOY_POSTGRES_URI }}
+          SLACK_BOT_TOKEN: ${{ secrets.DEPLOY_SLACK_BOT_TOKEN }}
+          SLACK_USER_TOKEN: ${{ secrets.DEPLOY_SLACK_USER_TOKEN }}
+          SLACK_VERIFICATION_TOKEN: ${{ secrets.DEPLOY_SLACK_VERIFICATION_TOKEN }}
+          UQCSBOT_DB_URI: ${{ secrets.DEPLOY_UQCSBOT_DB_URI }}
+          AOC_SESSION_ID: ${{ secrets.DEPLOY_AOC_SESSION_ID }}
+          AQI_API_TOKEN: ${{ secrets.DEPLOY_AQI_API_TOKEN }}
+          GOOGLE_API_KEY: ${{ secrets.DEPLOY_GOOGLE_API_KEY }}
+          WOLFRAM_APP_ID: ${{ secrets.DEPLOY_WOLFRAM_APP_ID }}
+          YOUTUBE_API_KEY: ${{ secrets.DEPLOY_YOUTUBE_API_KEY }}
+          YOUTUBE_DETERMINISTIC_RESULTS: ${{ secrets.DEPLOY_YOUTUBE_DETERMINISTIC_RESULTS }}
