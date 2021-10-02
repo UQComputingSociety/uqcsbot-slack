@@ -3,7 +3,7 @@ from uqcsbot.utils.command_utils import loading_status
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 from datetime import datetime as DT
-from pytz import 
+from pytz import timezone
 from typing import Union, Tuple
 
 
