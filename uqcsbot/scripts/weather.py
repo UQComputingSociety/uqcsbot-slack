@@ -3,6 +3,7 @@ from uqcsbot.utils.command_utils import loading_status
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 from datetime import datetime as DT
+from pytz import timezone
 from typing import Union, Tuple
 
 
@@ -67,7 +68,7 @@ def response_header(node: ET.Element, location: str) -> str:
     """
     forecast_date = DT.strptime("".join(node.get('start-time-local')
                                         .rsplit(":", 1)), "%Y-%m-%dT%H:%M:%S%z").date()
-    today_date = DT.now().date()
+    today_date = DT.now(timezone("Australia/Brisbane")).date()
     date_delta = (forecast_date - today_date).days
     if date_delta == 0:
         date_name = "Today"
