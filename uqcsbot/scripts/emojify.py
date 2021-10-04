@@ -19,7 +19,7 @@ def handle_emojify(command: Command):
                    ":arch:", ":atlassian:", ":office_access:", ":capital_a_agile:",
                    choice([":card-ace-clubs:", ":card-ace-diamonds:",
                            ":card-ace-hearts:", ":card-ace-spades:"])]
-    master['B'] = [":bhinking:", ":bitcoin:", ":blutes:"]
+    master['B'] = [":bhinking:", ":bitcoin:", ":blutes:", ":bing:"]
     master['C'] = [":c:", ":clang:", ":cplusplus:", ":copyright:", ":clipchamp:",
                    ":clipchamp_old:"]
     master['D'] = [":d:", ":disney:", ":deloitte:"]
@@ -46,7 +46,7 @@ def handle_emojify(command: Command):
     master['Q'] = [":quora:", ":quantium:", choice([":card-queen-clubs:", ":card-queen-diamonds:",
                                                     ":card-queen-hearts:", ":card-queen-spades:"])]
     master['R'] = [":r-project:", ":rust:", ":redroom:", ":registered:"]
-    master['S'] = [":s:", ":skedulo:", ":stanford:", ":stripe_s:", ":sublime:", ":tetris_s:"]
+    master['S'] = [":s:", ":skedulo:", ":stanford:", ":stripe_s:", ":sublime:", ":tetris_s:", ":skype:"]
     master['T'] = [":tanda:", choice([":telstra:", ":telstra-pink:"]),
                    ":tesla:", ":tetris_t:", ":torchwood:", ":tumblr:", ":nyt:"]
     master['U'] = [":uber:", ":uqu:", ":the_horns:", ":proctoru:", ":ubiquiti:"]
