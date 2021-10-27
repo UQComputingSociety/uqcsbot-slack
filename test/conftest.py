@@ -59,7 +59,7 @@ class MockUQCSBot(UQCSBot):
         self.test_users = deepcopy(TEST_USERS)
         self.test_channels = deepcopy(TEST_CHANNELS)
         # Mock DB
-        self.db_engine = create_engine("sqlite:///:memory", echo=True)
+        self.db_engine = create_engine("sqlite://", echo=True)
         Base.metadata.create_all(self.db_engine)
         self._mock_session_maker = sessionmaker(bind=self.db_engine)
 
