@@ -4,7 +4,8 @@ uqcsbot is a chat bot built in python for use on our [UQCS Slack Team](https://u
 
 ## Setting up the bot
 
-Run `pip install -e .`
+Poetry is required to install the bot, install Poetry [here](https://python-poetry.org/docs/#installation)
+Run `poetry install`
 
 ## Running the bot in the communal dev Slack team
 
@@ -26,9 +27,6 @@ If a bot was available, it will now be running on uqcstesting.
 The bot will now be running on your custom Slack.
 
 ## Tests
-
-1. Ensure you have Tox installed (run `pip install -e tox`)
-2. Run `tox` from the same directory as this README
 
 The bot uses [pytest](https://docs.pytest.org/en/latest/). You can run the tests with the command `pytest` from the project's root directory. It should automatically discover the tests (which are located in the `tests` directory).
 
