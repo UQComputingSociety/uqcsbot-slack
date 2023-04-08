@@ -190,7 +190,7 @@ def handle_weather(command: Command) -> None:
     bot.post_message(command.channel_id, "\n".join([r for r in response if r]))
 
 
-@bot.on_schedule('cron', hour=6, minute=0, timezone='Australia/Brisbane')
+# @bot.on_schedule('cron', hour=6, minute=0, timezone='Australia/Brisbane')
 def daily_weather() -> None:
     """
     Posts today's Brisbane weather at 6:00am every day
