@@ -11,7 +11,7 @@ env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   # Python and associated Poetry
-  PYTHON_VERSION: 3.9
+  PYTHON_VERSION: 3.8
   POETRY_VERSION: 1.4.2
 
 jobs:
